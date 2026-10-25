@@ -10,7 +10,14 @@ import { createFadeLayer } from '../ui/fade';
 import { WORLD_IDS } from '../worlds/worldSelection';
 import { LoopDirector } from './loopDirector';
 import type { Player } from './player';
-import { browserStore, clearSave, loadSave, saveProgress, SAVE_VERSION } from './save';
+import {
+  browserStore,
+  clearSave,
+  isSaveErased,
+  loadSave,
+  saveProgress,
+  SAVE_VERSION,
+} from './save';
 import {
   cycleLengthFromQuery,
   parseChronology,
@@ -93,6 +100,14 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
   const effects = createLoopEffects(scene, sun, skyDirection);
 
   const abort = new AbortController();
+  // Si otra pestaña elige "Empezar de cero", esta recarga: si no, volvería a escribir lo que tiene en memoria.
+  window.addEventListener(
+    'storage',
+    (event) => {
+      if (isSaveErased(event)) window.location.reload();
+    },
+    { signal: abort.signal },
+  );
   if (new URLSearchParams(window.location.search).has('debug')) {
     const step = chronology.duration * DEBUG_SKIP_FRACTION;
     window.addEventListener(

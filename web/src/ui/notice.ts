@@ -12,17 +12,18 @@ export function createNotice(): Notice {
   element.className = 'notice';
   element.setAttribute('role', 'status');
   element.setAttribute('aria-live', 'polite');
-  element.hidden = true;
   document.body.append(element);
   let timer: number | undefined;
 
   return {
     show(message) {
+      // La región existe siempre (vacía): así los lectores de pantalla anuncian el cambio de texto.
       element.textContent = message;
-      element.hidden = false;
+      element.classList.add('notice-visible');
       window.clearTimeout(timer);
       timer = window.setTimeout(() => {
-        element.hidden = true;
+        element.classList.remove('notice-visible');
+        element.textContent = '';
       }, VISIBLE_MS);
     },
     dispose() {

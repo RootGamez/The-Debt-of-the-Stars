@@ -275,8 +275,8 @@ body {
   pointer-events: none;
 }
 
-.notice[hidden] {
-  display: none;
+.notice:not(.notice-visible) {
+  opacity: 0;
 }
 
 .reader,

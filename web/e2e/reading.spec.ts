@@ -143,3 +143,20 @@ test('there is no prompt when nothing is near or the source is behind', async ({
 
   await expect(page.locator('.prompt')).toBeHidden();
 });
+
+test('the cycle stays stopped while the Registro is open and cannot be resumed behind it', async ({
+  page,
+}) => {
+  await startPlaying(page);
+  await page.keyboard.press('KeyR');
+  await expect(page.locator('.registry')).toBeVisible();
+  const stopped = await loopValue(page, 'umbral');
+
+  await page.keyboard.press('Tab'); // el foco no puede escapar hacia la pausa de detrás
+  await page.waitForTimeout(1000);
+
+  expect(await loopValue(page, 'umbral')).toBe(stopped);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.registry')).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Seguir', exact: true })).toBeFocused();
+});

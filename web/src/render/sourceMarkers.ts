@@ -32,6 +32,7 @@ export function createSourceMarkers(
     return { id: source.id, mesh, up, base: mesh.position.clone() };
   });
   scene.add(group);
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   return {
     update(time, viewer, wanted) {
@@ -39,6 +40,7 @@ export function createSourceMarkers(
         const near = entry.base.distanceTo(viewer) < VISIBLE_DISTANCE;
         entry.mesh.visible = near && wanted(entry.id);
         if (!entry.mesh.visible) continue;
+        if (still) continue; // "reducir movimiento": el rombo se queda quieto
         entry.mesh.position
           .copy(entry.base)
           .addScaledVector(entry.up, Math.sin(time * 2) * BOB_METERS);

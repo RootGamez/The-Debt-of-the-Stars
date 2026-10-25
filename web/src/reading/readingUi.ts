@@ -16,6 +16,7 @@ import {
   type Interactable,
 } from '../registry/interaction';
 import { canGiveNew } from '../registry/knowledge';
+import { keyAction } from './keyActions';
 import { buildRegistryView } from '../registry/registryView';
 import { createInteractPrompt } from '../ui/interactPrompt';
 import { createNotice } from '../ui/notice';
@@ -52,6 +53,8 @@ export interface RegistrySnapshot {
 export interface ReadingUi {
   /** Una vez por fotograma, con el tiempo en segundos. */
   update(timeSeconds: number): void;
+  /** Hay una lectura o el Registro abiertos: el ciclo y el movimiento deben esperar. */
+  readonly blocking: boolean;
   openRegistry(): void;
   /** Herramienta de depuración (`?debug`): coloca al jugador frente a una fuente. */
   teleportTo(clueId: string): boolean;
@@ -91,6 +94,11 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   });
 
   const seen = new Set<string>();
+  /** ¿Aún puede dar algo la fuente? Se calcula una vez y se invalida al aprender (no cada fotograma). */
+  const givesNew = new Map<string, boolean>();
+  reading.onLearn(() => {
+    givesNew.clear();
+  });
   const available: Interactable[] = [];
   const forward = new Vector3();
   let target: Interactable | undefined;
@@ -98,7 +106,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   const notice = createNotice();
   const markers = createSourceMarkers(scene, interactables, planetCenter);
   const registryPanel = createRegistryPanel(() => {
-    registryPanel.close();
+    closeRegistry();
   });
   const readingPanel = createReadingPanel(() => {
     closeReading();
@@ -111,14 +119,32 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     return (
       overlay.playing &&
       loop.director.phase === 'playing' &&
+      player.state.grounded && // no se esquiva una caída abriendo una lectura en el aire
       !reading.frozen &&
       !registryPanel.isOpen
     );
   }
 
+  function canGive(id: string): boolean {
+    let value = givesNew.get(id);
+    if (value === undefined) {
+      const source = clues.sourceById.get(id);
+      value = source !== undefined && canGiveNew(source, reading.known);
+      givesNew.set(id, value);
+    }
+    return value;
+  }
+
   function closeReading(): void {
     reading.close();
     readingPanel.hide();
+    if (!overlay.playing) overlay.focus(); // si se cerró al pausar, el foco vuelve a la pausa
+  }
+
+  function closeRegistry(): void {
+    registryPanel.close();
+    overlay.setInert(false);
+    if (!overlay.playing) overlay.focus();
   }
 
   function openReading(id: string): void {
@@ -136,20 +162,26 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   function openRegistry(): void {
     if (reading.frozen) closeReading();
     if (overlay.playing) overlay.pause();
+    overlay.setInert(true); // detrás del Registro no se puede reanudar con el teclado
     registryPanel.open(buildRegistryView(clues, reading.known));
   }
 
   function onKey(event: KeyboardEvent): void {
-    if (event.repeat) return;
-    if (event.code === 'KeyE') activate();
-    else if (event.code === 'Escape') {
-      if (registryPanel.isOpen) registryPanel.close();
-      else if (reading.frozen) closeReading();
-    } else if (event.code === 'KeyR') {
-      if (registryPanel.isOpen) registryPanel.close();
-      else openRegistry();
-    } else if (event.code === 'Tab' && overlay.playing) {
-      event.preventDefault(); // en pausa, Tab sigue moviendo el foco entre botones
+    const action = keyAction(
+      {
+        playing: overlay.playing,
+        readingOpen: reading.frozen,
+        registryOpen: registryPanel.isOpen,
+        canInteract: canInteract(),
+        hasTarget: target !== undefined,
+      },
+      event,
+    );
+    if (action === 'interact') activate();
+    else if (action === 'close-registry') closeRegistry();
+    else if (action === 'close-reading') closeReading();
+    else if (action === 'open-registry') {
+      if (event.code === 'Tab') event.preventDefault();
       openRegistry();
     }
   }
@@ -157,6 +189,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
 
   function witnessEvents(): void {
     for (const event of eventSources) {
+      if (!canGive(event.sourceId)) continue;
       if (!insideRadius(camera.position, event.position, event.radius)) continue;
       const learned = reading.witness(event.sourceId, loop.activeEventIds);
       if (learned.length > 0)
@@ -174,9 +207,8 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   }
 
   function wantsMarker(id: string): boolean {
-    const source = clues.sourceById.get(id);
-    if (!source || !reading.isAvailable(id, loop.activeEventIds)) return false;
-    return canGiveNew(source, reading.known) || !seen.has(id);
+    if (!reading.isAvailable(id, loop.activeEventIds)) return false;
+    return canGive(id) || !seen.has(id);
   }
 
   return {
@@ -190,6 +222,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       markers.update(timeSeconds, camera.position, wantsMarker);
     },
     openRegistry,
+    get blocking() {
+      return reading.frozen || registryPanel.isOpen;
+    },
     teleportTo(clueId) {
       const item = interactables.find((i) => i.id === clueId);
       if (!item) return false;

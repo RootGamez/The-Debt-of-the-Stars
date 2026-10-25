@@ -164,7 +164,7 @@ async function start(): Promise<void> {
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
     (dt) => {
-      const moving = overlay.playing && session.acceptsInput && !reading.frozen;
+      const moving = overlay.playing && session.acceptsInput && !ui.blocking;
       player.step(moving ? input.intent() : IDLE_INTENT, dt);
     },
   );
@@ -179,7 +179,7 @@ async function start(): Promise<void> {
     },
     (dt) => {
       const look = input.consumeLook();
-      const timeRuns = overlay.playing && !reading.frozen; // leer o abrir el Registro detiene el ciclo
+      const timeRuns = overlay.playing && !ui.blocking; // leer o abrir el Registro detiene el ciclo
       if (timeRuns && session.acceptsInput) {
         player.look(-look.x * MOUSE_LOOK_SENSITIVITY, -look.y * MOUSE_LOOK_SENSITIVITY);
       }

@@ -7,6 +7,10 @@ export interface PauseOverlay {
   readonly dragLook: boolean;
   /** Pausa el juego (botón de pausa táctil, Esc). */
   pause(): void;
+  /** Inhabilita la pantalla (otro diálogo está encima): sin foco ni clics, para que no se pueda reanudar detrás. */
+  setInert(inert: boolean): void;
+  /** Devuelve el foco al botón principal de la pantalla de pausa (al cerrar otro diálogo). */
+  focus(): void;
   dispose(): void;
 }
 
@@ -140,12 +144,12 @@ export function createPauseOverlay(
 
   /** Al mostrarse (o redibujarse), el foco va al botón principal o a "Cancelar" al confirmar,
    * para que con teclado no se pierda en el fondo de la página. */
-  function focusDefault(): void {
+  function focusDefault(force = false): void {
     if (playing) return;
     // No quitarle el foco a otro diálogo abierto encima (el Registro): solo se coloca si el foco
     // está ya en esta pantalla o en ninguna parte.
     const focused = document.activeElement;
-    if (focused && focused !== document.body && !overlay.contains(focused)) return;
+    if (!force && focused && focused !== document.body && !overlay.contains(focused)) return;
     const buttons = overlay.querySelectorAll<HTMLButtonElement>('button');
     const target = confirmingReset
       ? [...buttons].find((b) => b.textContent === 'Cancelar')
@@ -228,6 +232,12 @@ export function createPauseOverlay(
       return dragLook;
     },
     pause,
+    setInert(inert) {
+      overlay.inert = inert;
+    },
+    focus() {
+      focusDefault(true);
+    },
     dispose() {
       abort.abort();
       overlay.remove();
