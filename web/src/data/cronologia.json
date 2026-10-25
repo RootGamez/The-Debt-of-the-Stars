@@ -1,0 +1,26 @@
+{
+  "_fuente": "CONTEXTO_HISTORIA.md §8 y CONTEXTO_PLANETAS.md §1 (🟡/❓ hasta probarlo). Tiempos en segundos del reloj de Umbral.",
+  "duracion": 900,
+  "eventos": [
+    { "id": "senales", "t": 300, "duracion": 510 },
+    { "id": "pulso_cicatriz", "t": 540, "duracion": 6 },
+    { "id": "cielo_rojo", "t": 540, "duracion": 360 },
+    { "id": "agujero_negro", "t": 810, "duracion": 90 },
+    { "id": "ranura_luz", "t": 240, "duracion": 90, "mundo": "archivo" },
+    { "id": "alineacion", "t": 390, "duracion": 60, "mundo": "observatorio" },
+    { "id": "secuencia_fabrica", "t": 420, "duracion": 120, "mundo": "taller" }
+  ],
+  "absorcion": {
+    "cicatriz": [810, 825],
+    "taller": [825, 840],
+    "archivo": [840, 860],
+    "umbral": [860, 885],
+    "observatorio": [885, 900]
+  },
+  "relojes": {
+    "cicatriz": [
+      [0, 0.6],
+      [810, 0.35]
+    ]
+  }
+}

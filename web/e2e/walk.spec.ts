@@ -1,32 +1,8 @@
 // Prueba de humo de la Fase 2: el juego carga, el jugador aparece sobre el suelo, camina, salta,
 // pausa y la gravedad cambia según el mundo. Usa `?debug` para leer window.__juego.
 // En headless WebGL va por software (lento): las pruebas esperan condiciones, no tiempos fijos.
-import { expect, test, type Page } from '@playwright/test';
-import type { DebugSnapshot } from '../src/ui/debugOverlay';
-
-async function snapshot(page: Page): Promise<DebugSnapshot | null> {
-  return page.evaluate(() => window.__juego?.snapshot() ?? null);
-}
-
-async function value<K extends keyof DebugSnapshot>(
-  page: Page,
-  key: K,
-): Promise<DebugSnapshot[K] | null> {
-  return (await snapshot(page))?.[key] ?? null;
-}
-
-async function ready(page: Page, query = ''): Promise<void> {
-  await page.goto(`/?debug${query}`);
-  await expect(page.locator('.overlay')).toBeVisible();
-  await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
-}
-
-async function startPlaying(page: Page, query = ''): Promise<void> {
-  await ready(page, query);
-  await page.locator('.overlay').click();
-  await expect(page.locator('.overlay')).toBeHidden();
-  await expect.poll(() => value(page, 'playing')).toBe(true);
-}
+import { expect, test } from '@playwright/test';
+import { ready, startPlaying, value } from './helpers';
 
 test('loads Umbral without errors and shows the start screen', async ({ page }) => {
   const errors: string[] = [];

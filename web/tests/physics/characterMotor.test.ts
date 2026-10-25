@@ -184,6 +184,32 @@ describe('jumping', () => {
   });
 });
 
+describe('impact speed', () => {
+  function landAt(speed: number): CharacterState {
+    const state = createCharacter(new Vector3(0, R + 0.3, 0), new Quaternion());
+    state.velocity.set(0, -speed, 0);
+    simulate(state, planet(), IDLE, 0.1);
+    return state;
+  }
+
+  it('records how hard the player hit the ground when landing', () => {
+    expect(landAt(25).lastLandingSpeed).toBeGreaterThan(24);
+    expect(landAt(10).lastLandingSpeed).toBeLessThan(11);
+    expect(landAt(10).lastLandingSpeed).toBeGreaterThan(9);
+  });
+
+  it('counts each landing once', () => {
+    expect(landAt(25).landings).toBe(1);
+  });
+
+  it('lands softly when walking normally', () => {
+    const state = standingOnPlanet();
+    simulate(state, planet(), WALK, 1);
+
+    expect(state.lastLandingSpeed).toBeLessThan(0.5);
+  });
+});
+
 describe('staying on uneven ground', () => {
   it('runs over a bump without being launched into the air', () => {
     // Joroba de 1 m: esfera enterrada en el suelo plano

@@ -87,3 +87,17 @@ describe('Player interpolation', () => {
     expect(halfway.distanceTo(previous.clone().lerp(current, 0.5))).toBeLessThan(1e-6);
   });
 });
+
+describe('Player reset for a new loop', () => {
+  it('goes back to the spawn without counting as a safety respawn', () => {
+    const player = newPlayer();
+    player.state.position.set(5, R, 5);
+    player.look(0, 0.4);
+
+    player.reset();
+
+    expect(player.state.position.distanceTo(spawn.feet)).toBeLessThan(1e-9);
+    expect(player.pitch).toBe(0);
+    expect(player.respawnCount).toBe(0);
+  });
+});

@@ -42,6 +42,10 @@ export interface CharacterState {
   coyote: number;
   /** Veces que ha dejado el suelo (saltos o caídas); útil para depurar. */
   takeoffs: number;
+  /** Veces que ha aterrizado; con `lastLandingSpeed` permite leer cada impacto una sola vez. */
+  landings: number;
+  /** Velocidad contra el suelo en el último aterrizaje (m/s), para la muerte por caída. */
+  lastLandingSpeed: number;
 }
 
 export interface MotorEnvironment {
@@ -71,6 +75,9 @@ const pushDirection = new Vector3();
 const probe = new Vector3();
 const capsule = createCapsule(PLAYER_RADIUS);
 const contact = createContact();
+const incoming = new Vector3();
+/** Mayor velocidad contra el suelo en el paso actual. */
+let stepImpact = 0;
 
 export function createCharacter(feet: Vector3, body: Quaternion): CharacterState {
   return {
@@ -83,6 +90,8 @@ export function createCharacter(feet: Vector3, body: Quaternion): CharacterState
     jumpBuffer: 0,
     coyote: 0,
     takeoffs: 0,
+    landings: 0,
+    lastLandingSpeed: 0,
   };
 }
 
@@ -165,11 +174,13 @@ function applyJumpAndGravity(state: CharacterState, intent: MoveIntent, dt: numb
 function resolveContacts(state: CharacterState, env: MotorEnvironment): boolean {
   placeCapsule(capsule, state.position, up, PLAYER_HEIGHT);
   if (!env.world.resolve(capsule, up, contact)) return false;
+  incoming.copy(state.velocity); // velocidad antes de chocar, para medir el impacto
   state.position.add(contact.correction);
   if (contact.correction.lengthSq() > 1e-12) {
     removeInto(state.velocity, pushDirection.copy(contact.correction).normalize());
   }
   if (contact.floorDot < MIN_WALKABLE_DOT) return false;
+  stepImpact = Math.max(stepImpact, -incoming.dot(contact.floorNormal));
   removeInto(state.velocity, contact.floorNormal);
   state.groundNormal.copy(contact.floorNormal);
   return true;
@@ -223,10 +234,15 @@ export function stepCharacter(
   steer(state, intent, dt);
   const wasGrounded = state.grounded;
   const jumped = applyJumpAndGravity(state, intent, dt);
+  stepImpact = 0;
   let grounded = moveAndCollide(state, env, dt);
   if (!grounded && wasGrounded && !jumped) grounded = snapToGround(state, env);
 
   if (wasGrounded && !grounded) state.takeoffs++;
+  if (!wasGrounded && grounded) {
+    state.landings++;
+    state.lastLandingSpeed = Math.max(0, stepImpact);
+  }
   if (grounded) state.coyote = COYOTE_SECONDS;
   else if (!jumped) state.coyote = Math.max(0, state.coyote - dt);
   state.grounded = grounded;

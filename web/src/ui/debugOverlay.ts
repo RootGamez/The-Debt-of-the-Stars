@@ -19,6 +19,21 @@ export interface DebugSnapshot {
   fps: number;
   drawCalls: number;
   triangles: number;
+  /** Ciclo: tiempo de Umbral, tiempo del jugador, fase, ciclos vividos, ritmo y eventos en curso. */
+  loop: LoopSnapshot;
+}
+
+export interface LoopSnapshot {
+  umbral: number;
+  player: number;
+  phase: string;
+  loops: number;
+  rate: number;
+  events: string[];
+  /** Últimos eventos que empezaron (incluidos los instantáneos, como un TRIG_ sin duración). */
+  fired: string[];
+  /** El progreso se guarda. */
+  saving: boolean;
 }
 
 declare global {
@@ -41,6 +56,7 @@ export function createDebugOverlay(
   wells: readonly GravityWell[],
   player: Player,
   renderer: WebGLRenderer,
+  loopInfo: () => LoopSnapshot,
 ): DebugOverlay {
   const exposed = new URLSearchParams(window.location.search).has('debug');
   const panel = document.createElement('pre');
@@ -77,6 +93,7 @@ export function createDebugOverlay(
       fps,
       drawCalls: renderer.info.render.calls,
       triangles: renderer.info.render.triangles,
+      loop: loopInfo(),
     };
   };
 
@@ -92,6 +109,8 @@ export function createDebugOverlay(
       `reapariciones ${s.respawns}`,
       `fps       ${fps.toFixed(0)}`,
       `draw calls ${s.drawCalls} · triángulos ${s.triangles}`,
+      `ciclo ${s.loop.loops} · ${s.loop.phase} · Umbral ${s.loop.umbral.toFixed(1)} s · tú ${s.loop.player.toFixed(1)} s`,
+      `ritmo ${s.loop.rate.toFixed(2)} · eventos ${s.loop.events.join(', ') || '—'}`,
     ].join('\n');
   };
 

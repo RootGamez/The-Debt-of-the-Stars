@@ -1,8 +1,8 @@
 # CONTEXTO DE HISTORIA — Juego de bucle de tiempo
 
 **Título provisional:** por definir (ver preguntas abiertas)
-**Versión:** v1.4 (viajero, agujero de gusano, objetos de los Ausentes en casa, esperanza del Instituto, mecanismo del fenómeno y Laboratorio Oculto)
-**Última actualización:** 2026-10-24 · Sesión 1
+**Versión:** v1.5 (reloj del jugador en el bucle; viajero, agujero de gusano, objetos de los Ausentes en casa, esperanza del Instituto, mecanismo del fenómeno y Laboratorio Oculto)
+**Última actualización:** 2026-10-25 · Sesión 2
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo)
 
 > Documento vivo. Es la fuente de verdad de la historia del juego: léelo entero antes de continuar el trabajo en cualquier sesión (con Claude o sin él) y actualízalo al final.
@@ -242,7 +242,9 @@ Evitar el recurso de texto en espiral con traductor. Propuesta: los Ausentes dej
 ## 8. El bucle (🟡)
 
 - **Causa:** la Cámara de los Ausentes, que sigue activa. Es a la vez natural (el colapso es un fenómeno físico) y deliberado (la Cámara fue una decisión de los Ausentes). Cuadra con la decisión original de combinar ambos.
-- **Duración:** 15 minutos reales (ajustable entre 10 y 15 al probar).
+- **Duración:** 15 minutos en el reloj de Umbral (ajustable entre 10 y 15 al probar).
+- ✅ **Qué reloj vive el jugador (modo B, Anthony 2026-10-25):** el tiempo real es el tiempo propio del jugador; su reloj siempre le parece normal. Lo que cambia es el tiempo de fuera: en un mundo lento, el reloj de Umbral (y el colapso) avanza más rápido. Un minuto real en el Laboratorio Oculto (ritmo 0,20) son cinco minutos de ciclo, así que entrar allí cuesta casi todo el ciclo. Por eso el ciclo dura 15 minutos reales solo si se pasa entero en Umbral. 🟡 El "todo va más lento" del Laboratorio se mantiene como estilo visual (llama, polvo), aunque físicamente no sea lo que se vería.
+- 🟡 **Cómo se muere (Fase 3):** fin del ciclo, absorción del mundo en el que se está (tabla de `CONTEXTO_PLANETAS.md`) y caídas a más de 20 m/s. Al morir: fundido breve a blanco cálido y despertar frente a La Boca, sin texto.
 - **Qué persiste:** solo el conocimiento (el Registro).
 - **Qué se reinicia:** el mundo y la posición del jugador, que reaparece en Umbral.
 - **Boceto de cronología** (❓ hasta probarlo):
@@ -252,7 +254,7 @@ Evitar el recurso de texto en espiral con traductor. Propuesta: los Ausentes dej
   - ~13:30 · Nace el agujero negro.
   - 13:30 a 15:00 · Absorción en orden de cercanía.
   - 15:00 · Fin del ciclo.
-- **Interfaz:** reloj doble en pantalla (el del jugador y el del punto de referencia). Es HUD, narrativa y puzzle a la vez.
+- **Interfaz:** reloj doble en pantalla (el del jugador y el del punto de referencia). Es HUD, narrativa y puzzle a la vez. 🟡 Discreto, abajo en el centro ("tú 03:12 · Umbral 03:54"), contando desde 0:00; la pausa detiene ambos.
 
 ---
 
@@ -334,3 +336,4 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-24 · Sesión 1 (cómo murieron los Ausentes).** Anthony detecta que no está definido cómo murieron los Ausentes. Claude señala el problema de coherencia (el mundo está intacto y atrapado en el bucle, así que no pudieron morir aquí) y propone "La Gran Partida": murieron huyendo por las Puertas que causaban el colapso. Pendiente de confirmar.
 - **2026-10-24 · Sesión 1 (La Gran Partida).** Anthony aprueba La Gran Partida como explicación de cómo murieron los Ausentes. El destino de los tres que se quedaron (investigadora, escéptico y constructor de la Cámara) queda para más adelante.
 - **2026-10-24 · Sesión 1 (laboratorio).** Anthony decide: el laboratorio está en un sitio aparte, escondido por lente gravitacional, y fue el Consejo quien ocultó el problema.
+- **2026-10-25 · Sesión 2 (bucle).** Al planificar la Fase 3 aparece una contradicción entre "15 minutos reales" y el tiempo lento del Laboratorio. Anthony elige el modo B: el tiempo real es el del jugador y fuera corre más rápido en los mundos lentos. Se fijan como propuesta las formas de morir y el reloj doble.
