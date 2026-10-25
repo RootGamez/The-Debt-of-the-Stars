@@ -57,6 +57,9 @@ export function createBvhWorld(colliders: readonly Mesh[]): BvhWorld {
 
       bvh.shapecast({
         intersectsBounds: (box) => box.intersectsBox(bounds),
+        // El aviso de obsoleto viene de los tipos genéricos de BVH; en MeshBVH este callback es el
+        // previsto (ver la sobrecarga de MeshBVH.shapecast en three-mesh-bvh/src/index.d.ts).
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         intersectsTriangle: (triangle: ExtendedTriangle) => {
           const distance = triangle.closestPointToSegment(segment, trianglePoint, capsulePoint);
           if (distance >= capsule.radius) return false;
