@@ -6,7 +6,7 @@
 export const SAVE_KEY = 'bucle-tiempo:partida';
 export const SAVE_VERSION = 1;
 export const MAX_LOOPS = 1_000_000;
-const MAX_FACTS = 5000;
+export const MAX_FACTS = 5000;
 /** Ids de hechos: "mundo.nombre" con letras, números, guiones y puntos. */
 const FACT_ID = /^[a-z0-9_.-]{1,64}$/i;
 
@@ -111,4 +111,18 @@ export function clearSave(store: KeyValueStore | null): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Guarda el progreso fusionándolo con lo que ya hay guardado: unión de hechos y el mayor número de
+ * ciclos. Así dos pestañas abiertas a la vez no se pisan, y el director del ciclo (que solo conoce los
+ * ciclos) no borra los hechos que escribió la lectura. Una partida de una versión más nueva no se toca.
+ */
+export function saveProgress(store: KeyValueStore | null, data: SaveData): boolean {
+  if (!store) return false;
+  const stored = loadSave(store);
+  if (stored.readOnly) return false;
+  const facts = [...new Set([...stored.data.facts, ...data.facts])].slice(0, MAX_FACTS);
+  const loopsCompleted = Math.max(stored.data.loopsCompleted, data.loopsCompleted);
+  return writeSave(store, { ...data, loopsCompleted, facts });
 }

@@ -3,11 +3,14 @@ import {
   clearSave,
   freshSave,
   loadSave,
+  MAX_FACTS,
   MAX_LOOPS,
   SAVE_KEY,
   SAVE_VERSION,
+  saveProgress,
   writeSave,
   type KeyValueStore,
+  type SaveData,
 } from '../../src/core/save';
 
 function memoryStore(
@@ -142,5 +145,80 @@ describe('save safety (review fixes)', () => {
     expect(clearSave(memoryStore())).toBe(true);
     expect(clearSave(brokenStore())).toBe(false);
     expect(clearSave(null)).toBe(true); // sin almacenamiento no hay nada guardado
+  });
+});
+
+describe('saveProgress (two tabs never lose facts)', () => {
+  const progress = (loops: number, facts: string[]): SaveData => ({
+    version: SAVE_VERSION,
+    loopsCompleted: loops,
+    facts,
+  });
+
+  it('keeps the facts another tab saved and adds the new ones', () => {
+    const store = memoryStore();
+    writeSave(store, progress(2, ['a.uno']));
+
+    expect(saveProgress(store, progress(1, ['b.dos']))).toBe(true);
+
+    expect([...loadSave(store).data.facts].sort()).toEqual(['a.uno', 'b.dos']);
+  });
+
+  it('keeps the highest loop count', () => {
+    const store = memoryStore();
+    writeSave(store, progress(5, []));
+
+    saveProgress(store, progress(3, []));
+
+    expect(loadSave(store).data.loopsCompleted).toBe(5);
+  });
+
+  it('does not duplicate facts', () => {
+    const store = memoryStore();
+    writeSave(store, progress(0, ['a.uno']));
+
+    saveProgress(store, progress(0, ['a.uno', 'a.uno']));
+
+    expect(loadSave(store).data.facts).toEqual(['a.uno']);
+  });
+
+  it('never overwrites a save from a newer version of the game', () => {
+    const newer = JSON.stringify({ version: SAVE_VERSION + 1, loopsCompleted: 9, facts: [] });
+    const store = memoryStore({ [SAVE_KEY]: newer });
+
+    expect(saveProgress(store, progress(1, ['a.uno']))).toBe(false);
+
+    expect(store.data.get(SAVE_KEY)).toBe(newer);
+  });
+
+  it('replaces a damaged save with the new progress', () => {
+    const store = memoryStore({ [SAVE_KEY]: '{roto' });
+
+    expect(saveProgress(store, progress(1, ['a.uno']))).toBe(true);
+
+    expect(loadSave(store).data.facts).toEqual(['a.uno']);
+  });
+
+  it('keeps stored fact ids it does not know about (a newer data file may use them)', () => {
+    const store = memoryStore();
+    writeSave(store, progress(0, ['futuro.hecho']));
+
+    saveProgress(store, progress(0, ['a.uno']));
+
+    expect(loadSave(store).data.facts).toContain('futuro.hecho');
+  });
+
+  it('reports failure without throwing when storage is unavailable', () => {
+    expect(saveProgress(null, progress(0, []))).toBe(false);
+    expect(saveProgress(brokenStore(), progress(0, []))).toBe(false);
+  });
+
+  it('never stores more facts than it accepts when reading', () => {
+    const store = memoryStore();
+    const many = Array.from({ length: MAX_FACTS + 10 }, (_, i) => `f.n${i}`);
+
+    saveProgress(store, progress(0, many));
+
+    expect(loadSave(store).data.facts).toHaveLength(MAX_FACTS);
   });
 });
