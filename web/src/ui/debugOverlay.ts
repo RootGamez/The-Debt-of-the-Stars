@@ -19,8 +19,18 @@ export interface DebugSnapshot {
   fps: number;
   drawCalls: number;
   triangles: number;
+  /** Registro: hechos, conclusiones, rumores y lectura abierta. */
+  registry: RegistrySnapshot;
   /** Ciclo: tiempo de Umbral, tiempo del jugador, fase, ciclos vividos, ritmo y eventos en curso. */
   loop: LoopSnapshot;
+}
+
+export interface RegistrySnapshot {
+  facts: string[];
+  conclusions: string[];
+  rumors: string[];
+  reading: string | null;
+  registryOpen: boolean;
 }
 
 export interface LoopSnapshot {
@@ -39,7 +49,11 @@ export interface LoopSnapshot {
 declare global {
   interface Window {
     /** Solo con `?debug`. `snapshot()` es null hasta el primer fotograma. */
-    __juego?: { snapshot(): DebugSnapshot | null };
+    __juego?: {
+      snapshot(): DebugSnapshot | null;
+      /** Coloca al jugador frente a una fuente (`clue_id`). false si no existe. */
+      teleportTo?(clueId: string): boolean;
+    };
   }
 }
 
@@ -57,6 +71,7 @@ export function createDebugOverlay(
   player: Player,
   renderer: WebGLRenderer,
   loopInfo: () => LoopSnapshot,
+  registryInfo: () => RegistrySnapshot,
 ): DebugOverlay {
   const exposed = new URLSearchParams(window.location.search).has('debug');
   const panel = document.createElement('pre');
@@ -94,6 +109,7 @@ export function createDebugOverlay(
       drawCalls: renderer.info.render.calls,
       triangles: renderer.info.render.triangles,
       loop: loopInfo(),
+      registry: registryInfo(),
     };
   };
 
@@ -111,6 +127,7 @@ export function createDebugOverlay(
       `draw calls ${s.drawCalls} · triángulos ${s.triangles}`,
       `ciclo ${s.loop.loops} · ${s.loop.phase} · Umbral ${s.loop.umbral.toFixed(1)} s · tú ${s.loop.player.toFixed(1)} s`,
       `ritmo ${s.loop.rate.toFixed(2)} · eventos ${s.loop.events.join(', ') || '—'}`,
+      `registro ${s.registry.facts.length} hechos · ${s.registry.conclusions.join(' ') || '—'}`,
     ].join('\n');
   };
 

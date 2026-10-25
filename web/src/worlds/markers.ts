@@ -3,7 +3,7 @@
 // Las propiedades personalizadas de Blender llegan como userData (export_extras).
 import type { Mesh, Object3D } from 'three';
 
-export const INTERACTION_KINDS = ['texto', 'grabacion', 'objeto'] as const;
+export const INTERACTION_KINDS = ['texto', 'grabacion', 'objeto', 'observacion'] as const;
 export type InteractionKind = (typeof INTERACTION_KINDS)[number];
 
 // Mismo valor que el tamaño por defecto de los TRIG_ en blender/scripts/marcas.py.

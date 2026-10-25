@@ -101,3 +101,26 @@ describe('Player reset for a new loop', () => {
     expect(player.respawnCount).toBe(0);
   });
 });
+
+describe('Player moveTo', () => {
+  it('places the player somewhere else without counting as a respawn and clears the velocity', () => {
+    const player = newPlayer();
+    player.state.velocity.set(3, 0, 0);
+    player.look(0, 0.3);
+
+    player.moveTo(new Vector3(5, R, 0), new Quaternion());
+
+    expect(player.state.position.toArray()).toEqual([5, R, 0]);
+    expect(player.state.velocity.length()).toBe(0);
+    expect(player.pitch).toBe(0);
+    expect(player.respawnCount).toBe(0);
+  });
+
+  it('does not interpolate from the old position', () => {
+    const player = newPlayer();
+
+    player.moveTo(new Vector3(0, 0, R), new Quaternion());
+
+    expect(player.interpolatedFeet(0, new Vector3()).toArray()).toEqual([0, 0, R]);
+  });
+});

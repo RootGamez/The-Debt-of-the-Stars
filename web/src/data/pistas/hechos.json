@@ -1,0 +1,355 @@
+[
+  {
+    "id": "bucle.llegada",
+    "hilos": ["H1"],
+    "frase": "Despierto siempre frente a La Boca; una grieta de luz se cierra a mi espalda.",
+    "menciona": ["bucle.orden_camara"],
+    "enlaces": ["bucle.camara"]
+  },
+  {
+    "id": "bucle.orden_camara",
+    "hilos": ["H1"],
+    "frase": "El Consejo ordenó construir un aparato que sostuviera el último cuarto de hora.",
+    "rumor": "¿Quién sostiene este ciclo, y por qué?",
+    "enlaces": ["silencio.acta"]
+  },
+  {
+    "id": "bucle.camara",
+    "hilos": ["H1"],
+    "frase": "Un aparato, la Cámara, repite los últimos quince minutos desde que ellos se fueron.",
+    "enlaces": ["bucle.orden_camara", "bucle.culpa"]
+  },
+  {
+    "id": "bucle.culpa",
+    "hilos": ["H1"],
+    "frase": "Quien construyó la Cámara cargaba con la culpa de haberla dejado encendida.",
+    "enlaces": ["bucle.camara"]
+  },
+  {
+    "id": "deuda.palabra",
+    "hilos": ["H2"],
+    "frase": "La placa de La Boca habla de «la cuenta» que «empieza hoy»: desde el primer día se debía algo.",
+    "menciona": ["deuda.es_de_tiempo"],
+    "enlaces": ["deuda.relojes_se_separan"]
+  },
+  {
+    "id": "deuda.relojes_se_separan",
+    "hilos": ["H2", "H7"],
+    "frase": "Los relojes de dos mundos se separan poco a poco: hay que compararlos.",
+    "enlaces": ["bocas.relojes_distintos", "deuda.es_de_tiempo"]
+  },
+  {
+    "id": "deuda.cancion",
+    "hilos": ["H2"],
+    "frase": "Una canción de cuna: «no cruces dos veces la misma Puerta en el mismo día».",
+    "enlaces": ["deuda.uso_diario"]
+  },
+  {
+    "id": "deuda.puertas_se_buscan",
+    "hilos": ["H2", "H7"],
+    "frase": "Las Puertas se buscan: La Boca responde a una llamada lejana.",
+    "enlaces": ["casa.prueba_llama"]
+  },
+  {
+    "id": "deuda.es_de_tiempo",
+    "hilos": ["H2"],
+    "frase": "La deuda es de tiempo, no de energía: cada paso separa un poco más los dos relojes de una Puerta.",
+    "rumor": "¿Qué se debía exactamente?",
+    "enlaces": ["deuda.relojes_se_separan", "deuda.coste_energia"]
+  },
+  {
+    "id": "deuda.uso_diario",
+    "hilos": ["H2", "H3"],
+    "frase": "Cruzaban las Puertas a diario, y cada viaje sumaba deuda.",
+    "enlaces": ["deuda.cancion", "partida.vida_normal"]
+  },
+  {
+    "id": "deuda.coste_energia",
+    "hilos": ["H2"],
+    "frase": "El Instituto cree que cada paso por una Puerta cuesta energía.",
+    "enlaces": ["deuda.es_de_tiempo"]
+  },
+  {
+    "id": "deuda.filtraciones",
+    "hilos": ["H2"],
+    "frase": "Los micro gusanos «muerden» el espacio alrededor de las Puertas y dejan bordes curvos.",
+    "enlaces": ["casa.bordes_son_mordidas", "casa.fragmentos_de_aqui"]
+  },
+  {
+    "id": "lectura.horas",
+    "hilos": ["H2"],
+    "frase": "Sé leer cómo escribían las horas los Ausentes."
+  },
+  {
+    "id": "partida.vida_normal",
+    "hilos": ["H3"],
+    "frase": "Los Ausentes vivían con calma: turnos de riego, mesas puestas y las Puertas como quien toma un tren.",
+    "enlaces": ["deuda.uso_diario"]
+  },
+  {
+    "id": "partida.evacuacion",
+    "hilos": ["H3"],
+    "frase": "Hubo un aviso de evacuación: cuarenta minutos, Puertas 2 a 6.",
+    "menciona": ["partida.cascada"],
+    "enlaces": ["partida.cascada"]
+  },
+  {
+    "id": "partida.cascada",
+    "hilos": ["H3"],
+    "frase": "Los picos de deuda se dispararon durante la evacuación: huir aceleró el colapso.",
+    "rumor": "¿Qué pasó con quienes cruzaron las Puertas?",
+    "enlaces": ["partida.evacuacion"]
+  },
+  {
+    "id": "silencio.consejo_existe",
+    "hilos": ["H4"],
+    "frase": "Un Consejo de Tránsito autorizaba el uso de las Puertas.",
+    "menciona": ["silencio.orden"],
+    "enlaces": ["silencio.version_oficial", "silencio.acta"]
+  },
+  {
+    "id": "silencio.investigadora",
+    "hilos": ["H4"],
+    "frase": "Alguien esperaba a una investigadora que no regresó.",
+    "menciona": ["silencio.advertencia"],
+    "enlaces": ["silencio.dos_investigadores"]
+  },
+  {
+    "id": "silencio.version_oficial",
+    "hilos": ["H3", "H4"],
+    "frase": "El Consejo declaró que los incidentes eran aislados y sin riesgo.",
+    "enlaces": ["silencio.consejo_existe", "silencio.calma_aparente"]
+  },
+  {
+    "id": "silencio.censura",
+    "hilos": ["H4"],
+    "frase": "Tres columnas del Índice están vacías y remiten a una «Sala Cerrada».",
+    "menciona": ["silencio.acta"],
+    "enlaces": ["silencio.borrado"]
+  },
+  {
+    "id": "silencio.borrado",
+    "hilos": ["H4"],
+    "frase": "El informe de la investigadora se archivó tres veces y algo se borró cada vez.",
+    "enlaces": ["silencio.censura", "silencio.investigadora"]
+  },
+  {
+    "id": "silencio.acta",
+    "hilos": ["H4"],
+    "frase": "El Consejo votó no comunicar el peligro.",
+    "rumor": "¿Qué decía lo que borraron?",
+    "enlaces": ["bucle.orden_camara", "silencio.orden"]
+  },
+  {
+    "id": "silencio.economia",
+    "hilos": ["H4"],
+    "frase": "Las Puertas eran la economía y el orgullo de los Ausentes: nadie quería detenerlas.",
+    "enlaces": ["silencio.consejo_existe"]
+  },
+  {
+    "id": "silencio.dos_investigadores",
+    "hilos": ["H4", "H5"],
+    "frase": "La investigadora y el escéptico se fueron al sitio lento y no volvieron a escribir.",
+    "enlaces": ["silencio.investigadora", "lab.existe_lugar_lento"]
+  },
+  {
+    "id": "silencio.advertencia",
+    "hilos": ["H4"],
+    "frase": "El escéptico advirtió del Límite y nadie lo escuchó.",
+    "rumor": "¿Alguien advirtió del peligro?",
+    "enlaces": ["silencio.dos_investigadores"]
+  },
+  {
+    "id": "silencio.calma_aparente",
+    "hilos": ["H4"],
+    "frase": "Desde fuera todo parecía en calma mientras los colapsos ya habían empezado.",
+    "enlaces": ["silencio.version_oficial"]
+  },
+  {
+    "id": "silencio.orden",
+    "hilos": ["H4"],
+    "frase": "El Consejo firmó la orden de callar.",
+    "rumor": "¿Quién ordenó callar?",
+    "enlaces": ["silencio.acta"]
+  },
+  {
+    "id": "silencio.uno_se_quedo",
+    "hilos": ["H3", "H4"],
+    "frase": "Alguien se quedó en el laboratorio.",
+    "enlaces": ["silencio.dos_investigadores"]
+  },
+  {
+    "id": "lab.existe_lugar_lento",
+    "hilos": ["H5"],
+    "frase": "Hubo un destino secreto donde el tiempo casi no avanzaba.",
+    "menciona": ["lab.imagen_desplazada"],
+    "enlaces": ["silencio.dos_investigadores", "contrapeso.trasladado"]
+  },
+  {
+    "id": "lab.imagen_desplazada",
+    "hilos": ["H5"],
+    "frase": "Cerca del Nudo las estrellas se ven donde no están: lo que se ve no está donde parece.",
+    "rumor": "¿Dónde está ese sitio, si lo que se ve no está donde parece?",
+    "menciona": ["lab.correccion"],
+    "enlaces": ["nudo.existe"]
+  },
+  {
+    "id": "lab.correccion",
+    "hilos": ["H5"],
+    "frase": "Para hallar el sitio lento hay que corregir el desplazamiento de su imagen.",
+    "rumor": "¿Cuánto hay que corregir lo que se ve?",
+    "enlaces": ["lab.imagen_desplazada"]
+  },
+  {
+    "id": "nudo.existe",
+    "hilos": ["H2", "H5"],
+    "frase": "Existe un punto oscuro y pesadísimo, el Nudo, que dobla la luz.",
+    "enlaces": ["lab.imagen_desplazada", "nudo.origen"]
+  },
+  {
+    "id": "nudo.origen",
+    "hilos": ["H2", "H5"],
+    "frase": "La primera Puerta se cerró mal: de ahí nació el Nudo.",
+    "enlaces": ["nudo.existe"]
+  },
+  {
+    "id": "contrapeso.trasladado",
+    "hilos": ["H5", "H6"],
+    "frase": "El Contrapeso se llevó a un sitio de pruebas finales.",
+    "menciona": ["contrapeso.cuenta_sincronia"],
+    "enlaces": ["lab.existe_lugar_lento", "contrapeso.reloj"]
+  },
+  {
+    "id": "contrapeso.reloj",
+    "hilos": ["H6"],
+    "frase": "El reloj interno del Contrapeso importa: no debe moverse sin ajustarlo.",
+    "enlaces": ["contrapeso.medir_desfase", "contrapeso.metodo_sincronia"]
+  },
+  {
+    "id": "contrapeso.que_es",
+    "hilos": ["H6"],
+    "frase": "El Contrapeso es un motor de reemplazo que «paga» la deuda.",
+    "enlaces": ["contrapeso.sustituye_motor", "deuda.es_de_tiempo"]
+  },
+  {
+    "id": "contrapeso.sustituye_motor",
+    "hilos": ["H6"],
+    "frase": "Se instala en lugar del motor de la máquina de Cicatriz.",
+    "enlaces": ["contrapeso.que_es", "contrapeso.lugar"]
+  },
+  {
+    "id": "contrapeso.metodo_sincronia",
+    "hilos": ["H2", "H6"],
+    "frase": "Un reloj que viaja se desfasa; los diarios de los gemelos enseñan a calcular cuánto.",
+    "enlaces": ["contrapeso.reloj", "contrapeso.cuenta_sincronia"]
+  },
+  {
+    "id": "contrapeso.medir_desfase",
+    "hilos": ["H6"],
+    "frase": "Se puede medir un desfase comparando relojes calibrados en sitios distintos.",
+    "enlaces": ["contrapeso.reloj", "deuda.relojes_se_separan"]
+  },
+  {
+    "id": "contrapeso.cuenta_sincronia",
+    "hilos": ["H6"],
+    "frase": "La cuenta para corregir el reloj del Contrapeso según la ruta que siga.",
+    "rumor": "¿Cómo se corrige el reloj del Contrapeso?",
+    "enlaces": ["contrapeso.metodo_sincronia"]
+  },
+  {
+    "id": "contrapeso.lugar",
+    "hilos": ["H6"],
+    "frase": "El Contrapeso se instala en la Sala del Motor de Cicatriz.",
+    "enlaces": ["contrapeso.ventana_pulso", "contrapeso.sustituye_motor"]
+  },
+  {
+    "id": "contrapeso.ventana_pulso",
+    "hilos": ["H6"],
+    "frase": "El núcleo de la máquina solo se abre durante el pulso.",
+    "enlaces": ["contrapeso.lugar"]
+  },
+  {
+    "id": "contrapeso.terminado",
+    "hilos": ["H6"],
+    "frase": "El Contrapeso está terminado, pero sin probar.",
+    "enlaces": ["contrapeso.que_es"]
+  },
+  {
+    "id": "bocas.relojes_distintos",
+    "hilos": ["H7"],
+    "frase": "Cada boca de una Puerta lleva su propio tiempo; por eso las cosas llegan de épocas distintas.",
+    "enlaces": ["deuda.relojes_se_separan", "casa.fragmento_antiguo"]
+  },
+  {
+    "id": "casa.prueba_llama",
+    "hilos": ["H7"],
+    "frase": "Una boca nueva llama desde un sistema joven.",
+    "enlaces": ["deuda.puertas_se_buscan", "casa.prueba_plazo"]
+  },
+  {
+    "id": "casa.prueba_plazo",
+    "hilos": ["H7"],
+    "frase": "La prueba mayor del Instituto es dentro de pocos días.",
+    "enlaces": ["casa.prueba_llama", "casa.pruebas_menores"]
+  },
+  {
+    "id": "casa.pruebas_menores",
+    "hilos": ["H7"],
+    "frase": "En casa construyen una Puerta pequeña y hacen «pruebas menores».",
+    "enlaces": ["casa.prueba_plazo"]
+  },
+  {
+    "id": "casa.mision_luna",
+    "hilos": ["H7"],
+    "frase": "La directora me envía a la Luna a estudiar el fragmento más grande.",
+    "enlaces": ["casa.fragmento_antiguo"]
+  },
+  {
+    "id": "casa.directora_dirige",
+    "hilos": ["H7"],
+    "frase": "La directora dirige la prueba mayor, y es a quien tendré que convencer.",
+    "enlaces": ["casa.prueba_plazo"]
+  },
+  {
+    "id": "casa.fragmentos_curvos",
+    "hilos": ["H2", "H7"],
+    "frase": "Los fragmentos de casa tienen bordes lisos y curvos.",
+    "enlaces": ["casa.bordes_son_mordidas"]
+  },
+  {
+    "id": "casa.bordes_son_mordidas",
+    "hilos": ["H2", "H7"],
+    "frase": "Esos bordes curvos son mordidas de micro gusanos.",
+    "enlaces": ["deuda.filtraciones", "casa.fragmentos_curvos"]
+  },
+  {
+    "id": "casa.simbolo_partido",
+    "hilos": ["H7"],
+    "frase": "Un fragmento de casa lleva medio símbolo sin significado conocido.",
+    "enlaces": ["casa.simbolo_encaja"]
+  },
+  {
+    "id": "casa.fragmentos_de_aqui",
+    "hilos": ["H2", "H7"],
+    "frase": "Los fragmentos de casa salieron de las «mordidas» de Cicatriz.",
+    "enlaces": ["casa.simbolo_partido", "deuda.filtraciones"]
+  },
+  {
+    "id": "casa.simbolo_encaja",
+    "hilos": ["H7"],
+    "frase": "El otro medio símbolo sigue en una pared de Cicatriz: aquel fragmento salió de allí.",
+    "enlaces": ["casa.simbolo_partido", "casa.fragmentos_de_aqui"]
+  },
+  {
+    "id": "casa.fragmento_antiguo",
+    "hilos": ["H7"],
+    "frase": "El fragmento de la Luna es más antiguo que los anteriores, pero llegó después.",
+    "enlaces": ["bocas.relojes_distintos"]
+  },
+  {
+    "id": "casa.en_la_red",
+    "hilos": ["H7"],
+    "frase": "El sistema de casa ya figura en la red de las Puertas.",
+    "enlaces": ["casa.prueba_llama", "bocas.relojes_distintos"]
+  }
+]

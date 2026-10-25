@@ -1,0 +1,161 @@
+[
+  {
+    "id": "umbral.boca",
+    "mundo": "umbral",
+    "tipo": "observacion",
+    "titulo": "La Boca",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Un anillo de piedra y metal, apagado. Sobre el arco corre una grieta de luz que se cierra, despacio, a tu espalda.",
+        "Cada vez que despiertas, estás aquí."
+      ],
+      "hechos": ["bucle.llegada"]
+    },
+    "profunda": {
+      "requiere": ["bucle.orden_camara"],
+      "texto": [
+        "Ahora ves la grieta de otra manera: no se cierra, la cosen.",
+        "Algo, en algún lugar, mantiene abierto este cuarto de hora."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "umbral.placa",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "titulo": "Placa de inauguración",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "INAUGURACIÓN DE LA BOCA",
+        "Por la venia del Consejo de Tránsito, y para orgullo de todas y todos, se abre hoy el primer paso hacia los mundos hermanos."
+      ],
+      "hechos": ["silencio.consejo_existe"]
+    },
+    "profunda": {
+      "requiere": ["deuda.relojes_se_separan"],
+      "texto": [
+        "Debajo, en letra pequeña y con otra mano, alguien grabó: «La cuenta empieza hoy».",
+        "Ahora sabes que los relojes se separan. Una cuenta, entonces: ¿de qué?"
+      ],
+      "hechos": ["deuda.palabra"]
+    }
+  },
+  {
+    "id": "umbral.cuaderno",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "titulo": "Cuaderno del turno",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Dos columnas escritas con la misma letra: «Umbral» y «Archivo».",
+        "Al principio las horas coinciden. Página tras página, la segunda se queda atrás, un poco más cada día.",
+        "Nadie anotó por qué."
+      ],
+      "hechos": ["deuda.relojes_se_separan"]
+    }
+  },
+  {
+    "id": "umbral.envios",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "titulo": "Registro de envíos",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Cajas, barriles, cartas. Destino de todas: —.",
+        "Sin nombre, sin mapa, sin coordenadas."
+      ],
+      "hechos": []
+    },
+    "profunda": {
+      "requiere": ["deuda.relojes_se_separan"],
+      "texto": [
+        "Los acuses de recibo de ese destino llegan con fechas que casi no avanzan: por cada día de aquí, un parpadeo allá.",
+        "Ahora sabes cómo leerlo: es un lugar donde el tiempo casi no corre."
+      ],
+      "hechos": ["lab.existe_lugar_lento"]
+    }
+  },
+  {
+    "id": "umbral.carta",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "titulo": "Carta sin enviar",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«Querida: cada tarde vengo al banco de piedra y pongo dos tazas. Dime que has comido, que duermes, que no trabajas hasta tarde…»",
+        "No hay firma. La segunda taza está limpia."
+      ],
+      "hechos": ["silencio.investigadora"]
+    },
+    "profunda": {
+      "requiere": ["deuda.relojes_se_separan"],
+      "texto": [
+        "Al pie, con otra tinta: «Me escribes que para ti ha pasado una semana. Aquí han pasado meses».",
+        "Quien esperaba sabía que el tiempo de quien se fue corría de otra manera."
+      ],
+      "hechos": ["lab.existe_lugar_lento"]
+    }
+  },
+  {
+    "id": "umbral.aula",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "titulo": "El Aula",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Inscripciones de niñas y niños, hechas con carbón: números, y debajo la forma de escribir las horas.",
+        "Aprendes a leer el reloj de los Ausentes."
+      ],
+      "hechos": ["lectura.horas"]
+    },
+    "profunda": {
+      "requiere": ["deuda.relojes_se_separan"],
+      "texto": [
+        "En el rincón, una canción de cuna escrita para aprender el ritmo:",
+        "«Duerme, duerme, no cruces dos veces la misma Puerta en el mismo día»."
+      ],
+      "hechos": ["deuda.cancion"]
+    }
+  },
+  {
+    "id": "umbral.casas",
+    "mundo": "umbral",
+    "tipo": "objeto",
+    "titulo": "Las casas",
+    "borrador": true,
+    "superficial": {
+      "texto": ["Seis casas. Las mesas siguen puestas. No hay señales de violencia."],
+      "hechos": []
+    },
+    "profunda": {
+      "requiere": ["lectura.horas"],
+      "texto": [
+        "Un aviso clavado en una puerta. Ahora sabes leer la hora: «Evacuación. Cuarenta minutos. Puertas 2 a 6».",
+        "Las mesas siguen puestas porque nadie tuvo tiempo."
+      ],
+      "hechos": ["partida.evacuacion"]
+    }
+  },
+  {
+    "id": "umbral.destello",
+    "mundo": "umbral",
+    "tipo": "evento",
+    "evento": "boca_destello",
+    "titulo": "El destello de La Boca",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "La Boca se abre un instante. Su luz llega a otros mundos.",
+        "Algo, muy lejos, la llamó; y ella contestó."
+      ],
+      "hechos": ["deuda.puertas_se_buscan"]
+    }
+  }
+]

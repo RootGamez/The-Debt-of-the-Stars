@@ -19,6 +19,9 @@ import { forwardOf, upOf } from './physics/surfaceFrame';
 import { cameraPose } from './render/firstPersonCamera';
 import { createStarfield } from './render/sky';
 import { createStage } from './render/stage';
+import { loadClues } from './data/pistas';
+import { ReadingSession } from './reading/readingSession';
+import { createReadingUi, type ReadingUi } from './reading/readingUi';
 import { createDebugOverlay } from './ui/debugOverlay';
 import { createPauseOverlay, isTouchDevice, type PauseOverlay } from './ui/pauseOverlay';
 import { createTouchControls, type TouchControls } from './ui/touchControls';
@@ -51,13 +54,14 @@ function createPlayer(world: LoadedWorld) {
   if (!spawnMarker) throw new WorldDataError(`${world.info.id} no tiene ningún SPAWN_`);
   const spawn = spawnOnGround(spawnMarker[1], collision, home.center);
   const wells = [home];
-  return { home, wells, player: new Player(spawn, { wells, world: collision }, home) };
+  return { home, wells, collision, player: new Player(spawn, { wells, world: collision }, home) };
 }
 
 function createControls(
   canvas: HTMLCanvasElement,
   title: string,
   session: LoopSession,
+  openRegistry: () => void,
 ): { input: InputController; overlay: PauseOverlay } {
   const input = new InputController(canvas);
   let touch: TouchControls | undefined;
@@ -72,6 +76,7 @@ function createControls(
       loops: () => session.director.loopsCompleted,
       savingWorks: () => session.savingWorks,
       onResetProgress: () => session.resetProgress(),
+      onOpenRegistry: openRegistry,
     },
   );
   input.dragLookEnabled = () => overlay.dragLook;
@@ -110,7 +115,8 @@ async function start(): Promise<void> {
 
   const world = await loadWorld(worldFromQuery(window.location.search));
   scene.add(world.scene, createStarfield());
-  const { home, wells, player } = createPlayer(world);
+  const { home, wells, collision, player } = createPlayer(world);
+  const clues = loadClues();
 
   const session = createLoopSession({
     scene,
@@ -124,14 +130,41 @@ async function start(): Promise<void> {
       player.reset();
     },
   });
-  const { input, overlay } = createControls(canvas, worldTitle(world.info.id), session);
-  const debug = createDebugOverlay(world.info.id, home, wells, player, renderer, () =>
-    session.snapshot(),
+  const reading = new ReadingSession(clues, session.savedFacts, (facts) =>
+    session.saveFacts(facts),
   );
+  const uiHolder: { current?: ReadingUi } = {};
+  const { input, overlay } = createControls(canvas, worldTitle(world.info.id), session, () => {
+    uiHolder.current?.openRegistry();
+  });
+  const ui = createReadingUi({
+    scene,
+    camera,
+    world,
+    clues,
+    reading,
+    loop: session,
+    overlay,
+    player,
+    collision,
+    planetCenter: home.center,
+    touch: isTouchDevice(),
+  });
+  uiHolder.current = ui;
+  const debug = createDebugOverlay(
+    world.info.id,
+    home,
+    wells,
+    player,
+    renderer,
+    () => session.snapshot(),
+    () => ui.snapshot(),
+  );
+  if (window.__juego) window.__juego.teleportTo = (clueId) => ui.teleportTo(clueId);
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
     (dt) => {
-      const moving = overlay.playing && session.acceptsInput;
+      const moving = overlay.playing && session.acceptsInput && !ui.blocking;
       player.step(moving ? input.intent() : IDLE_INTENT, dt);
     },
   );
@@ -146,16 +179,18 @@ async function start(): Promise<void> {
     },
     (dt) => {
       const look = input.consumeLook();
-      if (overlay.playing && session.acceptsInput) {
+      const timeRuns = overlay.playing && !ui.blocking; // leer o abrir el Registro detiene el ciclo
+      if (timeRuns && session.acceptsInput) {
         player.look(-look.x * MOUSE_LOOK_SENSITIVITY, -look.y * MOUSE_LOOK_SENSITIVITY);
       }
-      session.update(dt, overlay.playing);
+      session.update(dt, timeRuns);
       // En pausa la física sigue (jugador quieto, se asienta en el suelo); el ciclo sí se detiene.
       const alpha = physics.advance(dt);
       player.interpolatedFeet(alpha, feet);
       player.interpolatedBody(alpha, body);
       cameraPose(body, player.pitch, feet, camera.position, camera.quaternion);
       camera.position.add(session.shake);
+      ui.update(performance.now() / 1000);
       debug.update(dt, overlay.playing);
     },
   );

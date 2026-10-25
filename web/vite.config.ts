@@ -24,6 +24,8 @@ export default defineConfig({
         'src/core/inputController.ts',
         'src/core/loopSession.ts',
         'src/render/loopEffects.ts',
+        'src/render/sourceMarkers.ts',
+        'src/reading/readingUi.ts',
         'src/ui/**',
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

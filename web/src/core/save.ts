@@ -6,7 +6,7 @@
 export const SAVE_KEY = 'bucle-tiempo:partida';
 export const SAVE_VERSION = 1;
 export const MAX_LOOPS = 1_000_000;
-const MAX_FACTS = 5000;
+export const MAX_FACTS = 5000;
 /** Ids de hechos: "mundo.nombre" con letras, números, guiones y puntos. */
 const FACT_ID = /^[a-z0-9_.-]{1,64}$/i;
 
@@ -111,4 +111,28 @@ export function clearSave(store: KeyValueStore | null): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Guarda el progreso fusionándolo con lo que ya hay guardado: unión de hechos y el mayor número de
+ * ciclos. Así dos pestañas abiertas a la vez no se pisan, y el director del ciclo (que solo conoce los
+ * ciclos) no borra los hechos que escribió la lectura. Una partida de una versión más nueva no se toca.
+ */
+export function saveProgress(store: KeyValueStore | null, data: SaveData): boolean {
+  if (!store) return false;
+  const stored = loadSave(store);
+  if (stored.readOnly) return false;
+  // Los hechos nuevos van primero: si lo guardado estuviera lleno (de ids desconocidos), recortar
+  // el final sacrifica lo viejo y no el progreso de ahora.
+  const facts = [...new Set([...data.facts, ...stored.data.facts])].slice(0, MAX_FACTS);
+  const loopsCompleted = Math.max(stored.data.loopsCompleted, data.loopsCompleted);
+  return writeSave(store, { ...data, loopsCompleted, facts });
+}
+
+/**
+ * ¿Otra pestaña ha borrado la partida? (evento `storage`). Hay que recargar: si no, esta pestaña
+ * volvería a escribir lo que tiene en memoria y "Empezar de cero" no serviría de nada.
+ */
+export function isSaveErased(event: { key: string | null; newValue: string | null }): boolean {
+  return (event.key === null || event.key === SAVE_KEY) && event.newValue === null;
 }

@@ -24,7 +24,11 @@ describe('parseWorld with the real exported Umbral', () => {
     expect(world.info).toEqual({ id: 'umbral', radius: 90, gravity: 1, clockRate: 1 });
     expect([...world.markers.spawns.keys()]).toEqual(['SPAWN_LaBoca']);
     expect(world.markers.interactions.map((i) => i.clueId).sort()).toEqual([
+      'umbral.aula',
+      'umbral.boca',
       'umbral.carta',
+      'umbral.casas',
+      'umbral.cuaderno',
       'umbral.envios',
       'umbral.placa',
     ]);

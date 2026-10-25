@@ -3,6 +3,7 @@ import { Quaternion, Vector3 } from 'three';
 import {
   alignUp,
   forwardOf,
+  lookAlong,
   rightOf,
   smoothingFactor,
   upOf,
@@ -112,5 +113,51 @@ describe('smoothingFactor', () => {
   it('is between 0 and 1', () => {
     expect(smoothingFactor(8, 1 / 60)).toBeGreaterThan(0);
     expect(smoothingFactor(8, 1 / 60)).toBeLessThan(1);
+  });
+});
+
+describe('lookAlong', () => {
+  it('builds the identity orientation for up +Y and forward -Z', () => {
+    const body = lookAlong(new Vector3(0, 1, 0), new Vector3(0, 0, -1));
+
+    expectVector(upOf(body), new Vector3(0, 1, 0));
+    expectVector(forwardOf(body), new Vector3(0, 0, -1));
+    expectVector(rightOf(body), new Vector3(1, 0, 0));
+  });
+
+  it('keeps the given up and the closest forward on the ground plane', () => {
+    const up = new Vector3(1, 1, 0).normalize();
+    const body = lookAlong(up, new Vector3(1, 0, 0)); // no es perpendicular a up
+
+    expectVector(upOf(body), up);
+    expect(forwardOf(body).dot(up)).toBeCloseTo(0);
+    expect(forwardOf(body).x).toBeGreaterThan(0);
+  });
+
+  it('works for any direction of up, including the poles', () => {
+    for (const up of [new Vector3(0, -1, 0), new Vector3(0, 0, 1), new Vector3(-1, 0, 0)]) {
+      const body = lookAlong(up, new Vector3(0.3, 0.2, 0.9));
+
+      expectVector(upOf(body), up);
+      expect(body.length()).toBeCloseTo(1);
+    }
+  });
+
+  it('copes with a forward that is parallel to up by picking any heading', () => {
+    const body = lookAlong(new Vector3(0, 1, 0), new Vector3(0, 1, 0));
+
+    expectVector(upOf(body), new Vector3(0, 1, 0));
+    expect(Number.isFinite(forwardOf(body).x)).toBe(true);
+    expect(forwardOf(body).length()).toBeCloseTo(1);
+  });
+
+  it('does not modify its arguments', () => {
+    const up = new Vector3(0, 1, 0);
+    const forward = new Vector3(0, 0.5, -1);
+
+    lookAlong(up, forward);
+
+    expect(up.toArray()).toEqual([0, 1, 0]);
+    expect(forward.toArray()).toEqual([0, 0.5, -1]);
   });
 });

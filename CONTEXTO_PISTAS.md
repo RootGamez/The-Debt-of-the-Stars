@@ -1,6 +1,6 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.2
+**Versión:** v0.4
 **Última actualización:** 2026-10-25 · Sesión 2
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
@@ -273,7 +273,26 @@ textos de ambiente sin peso en el grafo.
 | 6 | ¿Existe el Observatorio? | Sí, como extra opcional; el grafo no depende de él | ✅ Anthony |
 | 7 | El hueco con el símbolo de casa en `cicatriz.lista_mundos` | La red ya incluye el sistema del protagonista | 🟡 |
 
-## 10. Bitácora
+## 10. Cómo se lee (✅ Anthony, 2026-10-25)
+
+- **El tiempo del ciclo se detiene** mientras se lee un texto y mientras el Registro está abierto.
+- 🟡 Interacción: E (o clic) con la fuente a menos de 2,5 m y mirándola; en móvil, botón "Leer". El Registro: Tab o R.
+- 🟡 Se guardan solo los hechos descubiertos; los rumores y las conclusiones se calculan.
+- 🟡 Al leer se muestra la lectura más profunda que permitan los hechos que ya se saben.
+- 🟡 Un evento da su hecho si el jugador está dentro de su radio mientras ocurre.
+
+## 11. Cómo quedó implementado (Fase 4)
+
+- Los hilos, hechos, conclusiones y las 47 fuentes están transcritos en `web/src/data/pistas/` (58 hechos).
+- **Cada hecho se asigna a la lectura superficial o a la profunda** de su fuente en los datos (la tabla de §5 no lo distinguía siempre). Criterio: la profunda da lo que explica lo oculto. Los datos son la referencia; corrígelos ahí.
+- **Conclusiones con alternativas:** K5 (reloj) y K8 (prueba mayor) se desbloquean con *cualquiera* de varios hechos por grupo; K3 requiere K1, K2 y KC.
+- El Registro muestra cada hecho bajo su **primer hilo**, con su frase y enlaces "ver también", pero **no el lugar** donde se aprendió (no se guarda; solo se guardan los hechos).
+- Los rumores y las conclusiones se **calculan** a partir de los hechos; la partida guardada solo tiene hechos y ciclos.
+- Reglas del grafo comprobadas por código: 1 (≥ 2 fuentes por hecho esencial y ≥ 2 mundos por conclusión), 2 (sin depender solo del Observatorio ni del prólogo), 3 (cada mundo da un "dónde" y un "por qué"), 4 (todo alcanzable, sin esperas circulares), 5 (marcas y fuentes se corresponden; hoy solo Umbral), 6 (cada fuente da algo; el prólogo tiene lectura profunda) y 7 (K3 se logra sin entrar al Laboratorio).
+
+## 12. Bitácora
 
 - **2026-10-25 · Sesión 2.** Primer grafo: 7 hilos, 8 conclusiones esenciales, 47 fuentes en 7 lugares, lecturas dobles del prólogo y 7 reglas comprobables. Se propone el Nudo como masa que frena el tiempo y dobla la luz del Laboratorio.
 - **2026-10-25 · Sesión 2 (decisiones).** Anthony confirma: el Nudo como masa del Laboratorio; el Contrapeso solo se instala durante el pulso de las 9:00; la Cámara está en el Laboratorio; el Observatorio existe como extra opcional.
+- **2026-10-25 · Sesión 2 (lectura).** Anthony decide que el tiempo del ciclo se detiene al leer y con el Registro abierto, y aprueba las demás propuestas de la Fase 4 (ver `docs/plan-fase-4-leer-registro.md`).
+- **2026-10-25 · Sesión 2 (Fase 4).** Se implementa el Registro: datos del grafo, lectura, hechos persistentes y reglas comprobadas por código. Textos de Umbral en borrador; el resto, esqueleto.

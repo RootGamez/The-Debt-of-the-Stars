@@ -1,0 +1,88 @@
+[
+  {
+    "id": "taller.montaje",
+    "mundo": "taller",
+    "tipo": "observacion",
+    "titulo": "La Nave de Montaje",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.economia"] }
+  },
+  {
+    "id": "taller.cuna",
+    "mundo": "taller",
+    "tipo": "objeto",
+    "titulo": "La Cuna vacía",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.trasladado"] }
+  },
+  {
+    "id": "taller.nota_cuna",
+    "mundo": "taller",
+    "tipo": "texto",
+    "titulo": "La nota pegada en la Cuna",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.reloj"] }
+  },
+  {
+    "id": "taller.manual",
+    "mundo": "taller",
+    "tipo": "texto",
+    "titulo": "El manual de instalación",
+    "borrador": true,
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["contrapeso.que_es", "contrapeso.sustituye_motor"]
+    }
+  },
+  {
+    "id": "taller.gemelos",
+    "mundo": "taller",
+    "tipo": "texto",
+    "titulo": "Los diarios de los gemelos",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "profunda": {
+      "requiere": ["deuda.relojes_se_separan"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["contrapeso.metodo_sincronia"]
+    }
+  },
+  {
+    "id": "taller.cabina",
+    "mundo": "taller",
+    "tipo": "observacion",
+    "titulo": "La Cabina de Control",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.medir_desfase"] },
+    "profunda": {
+      "requiere": ["deuda.relojes_se_separan"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["lab.existe_lugar_lento", "lab.correccion"]
+    }
+  },
+  {
+    "id": "taller.secuencia",
+    "mundo": "taller",
+    "tipo": "observacion",
+    "cuando": "secuencia_fabrica",
+    "titulo": "La secuencia de la fábrica",
+    "borrador": true,
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": [
+        "contrapeso.que_es",
+        "contrapeso.sustituye_motor",
+        "contrapeso.lugar",
+        "contrapeso.ventana_pulso"
+      ]
+    }
+  },
+  {
+    "id": "taller.dormitorios",
+    "mundo": "taller",
+    "tipo": "texto",
+    "titulo": "Los Dormitorios",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.dos_investigadores"] }
+  }
+]
