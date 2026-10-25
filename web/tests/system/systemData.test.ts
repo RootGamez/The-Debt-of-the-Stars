@@ -1,10 +1,8 @@
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import systemData from '../../src/data/sistema.json';
 import { parseSystem } from '../../src/system/systemData';
-import { parseWorld } from '../../src/worlds/loadWorld';
 import { WORLD_IDS } from '../../src/worlds/worldSelection';
+import { loadBuiltWorld } from '../helpers/builtWorlds';
 
 const valid = {
   estrella: { radio: 100 },
@@ -75,14 +73,7 @@ describe('parseSystem', () => {
 });
 
 async function radiusOf(world: string): Promise<number> {
-  const bytes = readFileSync(
-    fileURLToPath(new URL(`../../public/models/${world}.glb`, import.meta.url)),
-  );
-  const loaded = await parseWorld(
-    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
-    world,
-  );
-  return loaded.info.radius;
+  return (await loadBuiltWorld(world)).info.radius;
 }
 
 describe('the real system (sistema.json)', () => {
