@@ -1,0 +1,29 @@
+# Planes de desarrollo (locales, no se versionan)
+docs/
+
+# Dependencias y builds
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.vite/
+
+# Blender
+*.blend1
+*.blend2
+*.blend@
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Entorno y registros
+.env
+.env.*
+!.env.example
+*.log
+npm-debug.log*
