@@ -36,7 +36,12 @@ web/                  proyecto Vite + TypeScript + Three.js
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript sin emitir |
 | `npm run format` | Prettier |
-| `npm run modelos` | Exporta cada `blender/*.blend` a `public/models/*.glb` y lo comprime |
+| `npm run check` | Todo lo anterior (tipos, lint, formato, cobertura, build) |
+| `npm run e2e` | Pruebas de extremo a extremo con Playwright (Chromium) |
+| `npm run modelos` | Exporta cada `blender/*.blend` a `public/models/*.glb` y lo comprime (`-- <mundo>` para uno) |
+
+En el navegador: `?mundo=<id>` carga otro mundo base y `?debug` muestra el panel F3 y expone
+`window.__juego.snapshot()` (lo usan las pruebas de Playwright).
 
 ## Blender
 - Blender 5.2: `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` (o variable `BLENDER_PATH`).

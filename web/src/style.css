@@ -35,3 +35,124 @@ body {
   color: var(--muted);
   pointer-events: none;
 }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgb(7 7 12 / 55%);
+  color: var(--text);
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.overlay[hidden] {
+  display: none;
+}
+
+.overlay strong {
+  font-size: clamp(28px, 6vw, 48px);
+  font-weight: 300;
+  letter-spacing: 0.08em;
+}
+
+.overlay span {
+  font-size: 18px;
+}
+
+.overlay small {
+  max-width: 560px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.debug {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  margin: 0;
+  padding: 8px 10px;
+  background: rgb(0 0 0 / 55%);
+  color: #cfe8d0;
+  font:
+    12px/1.5 ui-monospace,
+    monospace;
+  pointer-events: none;
+  white-space: pre;
+}
+
+.debug[hidden] {
+  display: none;
+}
+
+.touch {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.touch-stick {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 112px;
+  height: 112px;
+  border: 2px solid rgb(232 220 196 / 40%);
+  border-radius: 50%;
+}
+
+.touch-stick[hidden] {
+  display: none;
+}
+
+.touch-knob {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgb(232 220 196 / 45%);
+}
+
+.touch-jump {
+  position: absolute;
+  right: 24px;
+  bottom: 32px;
+  width: 76px;
+  height: 76px;
+  border: 2px solid rgb(232 220 196 / 50%);
+  border-radius: 50%;
+  background: rgb(7 7 12 / 35%);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.touch[hidden] {
+  display: none;
+}
+
+.touch-pause {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  min-width: 64px;
+  height: 44px;
+  border: 2px solid rgb(232 220 196 / 50%);
+  border-radius: 22px;
+  background: rgb(7 7 12 / 35%);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  pointer-events: auto;
+}
