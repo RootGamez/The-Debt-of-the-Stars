@@ -1,0 +1,31 @@
+[
+  { "nombre": "SPAWN_LaBoca", "lat": 8, "lon": 20, "alto": 1.0, "props": {} },
+  {
+    "nombre": "INT_placa_inauguracion",
+    "lat": 9,
+    "lon": 23,
+    "alto": 1.2,
+    "props": { "clue_id": "umbral.placa", "kind": "texto" }
+  },
+  {
+    "nombre": "INT_registro_envios",
+    "lat": -5,
+    "lon": 40,
+    "alto": 1.0,
+    "props": { "clue_id": "umbral.envios", "kind": "texto" }
+  },
+  {
+    "nombre": "INT_carta_mirador",
+    "lat": 25,
+    "lon": -60,
+    "alto": 1.0,
+    "props": { "clue_id": "umbral.carta", "kind": "texto" }
+  },
+  {
+    "nombre": "TRIG_LaBoca_Destello",
+    "lat": 8,
+    "lon": 20,
+    "alto": 0.0,
+    "props": { "event": "boca_destello", "loop_time": 600, "duration": 3, "radius": 12 }
+  }
+]
