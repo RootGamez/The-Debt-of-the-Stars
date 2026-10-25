@@ -2,7 +2,7 @@
 
 **Versión:** v0.1
 **Última actualización:** 2026-10-24 · Sesión 1
-**Documento hermano:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero)
+**Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
 >

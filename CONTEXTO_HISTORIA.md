@@ -3,7 +3,7 @@
 **Título provisional:** por definir (ver preguntas abiertas)
 **Versión:** v1.5 (reloj del jugador en el bucle; viajero, agujero de gusano, objetos de los Ausentes en casa, esperanza del Instituto, mecanismo del fenómeno y Laboratorio Oculto)
 **Última actualización:** 2026-10-25 · Sesión 2
-**Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo)
+**Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)
 
 > Documento vivo. Es la fuente de verdad de la historia del juego: léelo entero antes de continuar el trabajo en cualquier sesión (con Claude o sin él) y actualízalo al final.
 >
@@ -268,12 +268,12 @@ Evitar el recurso de texto en espiral con traductor. Propuesta: los Ausentes dej
 
 ---
 
-## 10. Cómo se descubre la historia (siguiente paso)
+## 10. Cómo se descubre la historia
 
 - Todo se descubre **leyendo, escuchando y hablando**: grabaciones, notas, diarios, inscripciones y diálogos.
 - Cada hallazgo se anota en un **Registro** con enlaces entre pistas.
 - Cada pista tendrá: `id`, `dónde se encuentra`, `qué requiere saber antes`, `qué revela`.
-- El **grafo de pistas** es el próximo documento. Debe cumplir: varias rutas, ninguna pista esencial detrás de una sola ruta, y cada planeta aportando una pieza del misterio.
+- El **grafo de pistas** está en `CONTEXTO_PISTAS.md` (🟡 v0.1). Cumple: varias rutas, ninguna pista esencial detrás de una sola ruta, y cada planeta aportando una pieza del misterio.
 
 ---
 
@@ -337,3 +337,4 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-24 · Sesión 1 (La Gran Partida).** Anthony aprueba La Gran Partida como explicación de cómo murieron los Ausentes. El destino de los tres que se quedaron (investigadora, escéptico y constructor de la Cámara) queda para más adelante.
 - **2026-10-24 · Sesión 1 (laboratorio).** Anthony decide: el laboratorio está en un sitio aparte, escondido por lente gravitacional, y fue el Consejo quien ocultó el problema.
 - **2026-10-25 · Sesión 2 (bucle).** Al planificar la Fase 3 aparece una contradicción entre "15 minutos reales" y el tiempo lento del Laboratorio. Anthony elige el modo B: el tiempo real es el del jugador y fuera corre más rápido en los mundos lentos. Se fijan como propuesta las formas de morir y el reloj doble.
+- **2026-10-25 · Sesión 2 (grafo de pistas).** Se crea `CONTEXTO_PISTAS.md`: 7 hilos, 8 conclusiones esenciales y 47 fuentes. Claude propone el Nudo (la garganta de la primera Puerta) como masa que dobla la luz y frena el tiempo del Laboratorio, y que el Contrapeso solo pueda instalarse durante el pulso. Pendiente de confirmar.

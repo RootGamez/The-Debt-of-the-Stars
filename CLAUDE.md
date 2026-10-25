@@ -4,7 +4,7 @@ Juego 3D low poly que corre gratis en el navegador (Three.js + TypeScript + Vite
 
 ## Antes de trabajar
 1. Carga la skill `juego-bucle-tiempo` (y `tiny-planets-blender` si se modela).
-2. Lee enteros `CONTEXTO_HISTORIA.md` y `CONTEXTO_PLANETAS.md`: son la fuente de verdad del juego.
+2. Lee enteros `CONTEXTO_HISTORIA.md`, `CONTEXTO_PLANETAS.md` y `CONTEXTO_PISTAS.md`: son la fuente de verdad del juego.
 3. Lee el plan maestro `docs/PLAN_DESARROLLO.md` y el plan de la fase en curso.
 
 ## Reglas
@@ -18,7 +18,7 @@ Juego 3D low poly que corre gratis en el navegador (Three.js + TypeScript + Vite
 
 ## Estructura
 ```
-CONTEXTO_HISTORIA.md, CONTEXTO_PLANETAS.md   fuente de verdad (versionada)
+CONTEXTO_*.md         historia, planetas y grafo de pistas: fuente de verdad (versionada)
 docs/                 planes (local, ignorada)
 blender/              <mundo>.blend, marcas/<mundo>.json, scripts/
 web/                  proyecto Vite + TypeScript + Three.js
