@@ -17,6 +17,11 @@ export interface CollisionWorld {
   resolve(capsule: Capsule, correction: Vector3): boolean;
 }
 
+export interface RaycastWorld {
+  /** Distancia al primer impacto desde `origin` en la dirección unitaria `direction`, o null. */
+  raycast(origin: Vector3, direction: Vector3, maxDistance: number): number | null;
+}
+
 export function createCapsule(radius: number): Capsule {
   return { start: new Vector3(), end: new Vector3(), radius };
 }
