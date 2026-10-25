@@ -10,7 +10,7 @@ import { createFadeLayer } from '../ui/fade';
 import { WORLD_IDS } from '../worlds/worldSelection';
 import { LoopDirector } from './loopDirector';
 import type { Player } from './player';
-import { browserStore, clearSave, loadSave, writeSave } from './save';
+import { browserStore, clearSave, loadSave, saveProgress, SAVE_VERSION } from './save';
 import {
   cycleLengthFromQuery,
   parseChronology,
@@ -47,6 +47,12 @@ export interface LoopSession {
   readonly shake: Vector3;
   update(dt: number, playing: boolean): void;
   snapshot(): LoopSnapshot;
+  /** Hechos guardados (sin filtrar: la sesión de lectura descarta los que ya no existen). */
+  readonly savedFacts: readonly string[];
+  /** Guarda los hechos (fusionados con lo guardado); false si no se pudo. */
+  saveFacts(facts: readonly string[]): boolean;
+  /** Ids de los eventos en curso, recalculados una vez por fotograma. */
+  readonly activeEventIds: readonly string[];
   /** El progreso se está guardando (falso en modo privado o con una partida más nueva). */
   readonly savingWorks: boolean;
   /** Borra la partida guardada y recarga la página; false si no se pudo borrar. */
@@ -76,9 +82,12 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
     extraEvents,
     save: loaded.data,
     // Partida de una versión más nueva: se juega sin guardar para no estropearla.
-    persist: (data) => !loaded.readOnly && writeSave(store, data),
+    persist: (data) => !loaded.readOnly && saveProgress(store, data),
   });
-  const savingWorks = (): boolean => store !== null && !loaded.readOnly && !director.saveFailed;
+  let factsFailed = false;
+  let activeEventIds: readonly string[] = [];
+  const savingWorks = (): boolean =>
+    store !== null && !loaded.readOnly && !director.saveFailed && !factsFailed;
   const hud = createClockHud();
   const fade = createFadeLayer();
   const effects = createLoopEffects(scene, sun, skyDirection);
@@ -109,7 +118,9 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
       } else {
         director.observe(player.state); // la física sigue en pausa: no juzgar esos aterrizajes
       }
-      effects.update(director.clock.t, director.active(), director.absorption, playing ? dt : 0);
+      const active = director.active();
+      activeEventIds = active.map((e) => e.id);
+      effects.update(director.clock.t, active, director.absorption, playing ? dt : 0);
       fade.set(director.fade);
       hud.update(director.clock.tau, director.clock.t, playing && director.phase !== 'dying');
     },
@@ -120,13 +131,28 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
         phase: director.phase,
         loops: director.loopsCompleted,
         rate: director.rate,
-        events: director.active().map((e) => e.id),
+        events: [...activeEventIds],
         fired: [...director.recentEvents],
         saving: savingWorks(),
       };
     },
     get savingWorks() {
       return savingWorks();
+    },
+    savedFacts: loaded.data.facts,
+    saveFacts(facts) {
+      const ok =
+        !loaded.readOnly &&
+        saveProgress(store, {
+          version: SAVE_VERSION,
+          loopsCompleted: director.loopsCompleted,
+          facts,
+        });
+      factsFailed = !ok;
+      return ok;
+    },
+    get activeEventIds() {
+      return activeEventIds;
     },
     resetProgress() {
       if (!clearSave(store)) {

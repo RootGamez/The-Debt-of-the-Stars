@@ -31,6 +31,8 @@ export interface PauseOptions {
   savingWorks: () => boolean;
   /** Borra la partida guardada (tras confirmar); false si no se pudo. */
   onResetProgress: () => boolean;
+  /** Abre el panel del Registro. */
+  onOpenRegistry: () => void;
 }
 
 /** Botón dentro de la pantalla: su clic no debe contar como "clic para jugar". */
@@ -44,7 +46,9 @@ function actionButton(text: string, onClick: () => void, className = ''): HTMLBu
     onClick();
   });
   button.addEventListener('keydown', (event) => {
-    event.stopPropagation(); // Enter en el botón no reanuda el juego
+    // Intro sobre un botón no debe reanudar el juego (lo haría el manejador del diálogo); el resto
+    // de teclas (Esc, R…) sí deben llegar a la ventana.
+    if (event.key === 'Enter') event.stopPropagation();
   });
   return button;
 }
@@ -114,7 +118,10 @@ export function createPauseOverlay(
       : [line('strong', title), line('span', `${action} para empezar`)];
     const play = document.createElement('div');
     play.className = 'overlay-actions';
-    play.append(actionButton(started ? 'Seguir' : 'Jugar', start, 'primary'));
+    play.append(
+      actionButton(started ? 'Seguir' : 'Jugar', start, 'primary'),
+      actionButton('Registro', options.onOpenRegistry),
+    );
     lines.push(play);
     const loops = options.loops();
     if (loops > 0) {
@@ -135,6 +142,10 @@ export function createPauseOverlay(
    * para que con teclado no se pierda en el fondo de la página. */
   function focusDefault(): void {
     if (playing) return;
+    // No quitarle el foco a otro diálogo abierto encima (el Registro): solo se coloca si el foco
+    // está ya en esta pantalla o en ninguna parte.
+    const focused = document.activeElement;
+    if (focused && focused !== document.body && !overlay.contains(focused)) return;
     const buttons = overlay.querySelectorAll<HTMLButtonElement>('button');
     const target = confirmingReset
       ? [...buttons].find((b) => b.textContent === 'Cancelar')

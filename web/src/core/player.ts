@@ -52,6 +52,13 @@ export class Player {
     this.respawnCount++;
   }
 
+  /** Coloca al jugador en otro sitio (herramienta de depuración): sin velocidad, sin cuenta de fallos. */
+  moveTo(feet: Vector3, body: Quaternion): void {
+    this.state = createCharacter(feet, body);
+    this.pitch = 0;
+    this.savePrevious();
+  }
+
   /** Vuelve al punto de aparición sin contar como fallo (inicio de un ciclo nuevo). */
   reset(): void {
     this.state = createCharacter(this.spawn.feet, this.spawn.body);

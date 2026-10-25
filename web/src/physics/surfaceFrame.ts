@@ -2,7 +2,7 @@
 // su -Z local es hacia donde mira y su +X local la derecha. Se usan cuaterniones (no ángulos de Euler)
 // para que no haya saltos al pasar por los polos ni al dar la vuelta al mundo.
 // Las funciones que reciben `body` lo modifican en el sitio (se llaman en cada paso de física).
-import { Quaternion, Vector3 } from 'three';
+import { Matrix4, Quaternion, Vector3 } from 'three';
 
 const LOCAL_UP = new Vector3(0, 1, 0);
 const LOCAL_FORWARD = new Vector3(0, 0, -1);
@@ -45,4 +45,27 @@ export function alignUp(body: Quaternion, targetUp: Vector3, t: number): Quatern
 /** Fracción de suavizado independiente de la tasa de fotogramas: 1 - e^(-rate·dt). */
 export function smoothingFactor(rate: number, dt: number): number {
   return 1 - Math.exp(-rate * dt);
+}
+
+const basis = new Matrix4();
+const axisX = new Vector3();
+const axisZ = new Vector3();
+const FALLBACK_HEADINGS = [new Vector3(0, 0, -1), new Vector3(1, 0, 0)];
+
+/**
+ * Orientación de pie sobre el suelo: `up` hacia arriba y mirando lo más cerca posible de `forward`
+ * (proyectado sobre el plano del suelo). Si `forward` es paralelo a `up`, elige un rumbo cualquiera.
+ */
+export function lookAlong(up: Vector3, forward: Vector3, target = new Quaternion()): Quaternion {
+  const upUnit = new Vector3().copy(up).normalize();
+  const heading = new Vector3().copy(forward).addScaledVector(upUnit, -forward.dot(upUnit));
+  for (const fallback of FALLBACK_HEADINGS) {
+    if (heading.lengthSq() > 1e-12) break;
+    heading.copy(fallback).addScaledVector(upUnit, -fallback.dot(upUnit));
+  }
+  heading.normalize();
+  axisX.crossVectors(heading, upUnit).normalize();
+  axisZ.copy(heading).negate();
+  basis.makeBasis(axisX, upUnit, axisZ);
+  return target.setFromRotationMatrix(basis).normalize();
 }
