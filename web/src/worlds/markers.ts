@@ -6,6 +6,7 @@ import type { Mesh, Object3D } from 'three';
 export const INTERACTION_KINDS = ['texto', 'grabacion', 'objeto'] as const;
 export type InteractionKind = (typeof INTERACTION_KINDS)[number];
 
+// Mismo valor que el tamaño por defecto de los TRIG_ en blender/scripts/marcas.py.
 const DEFAULT_TRIGGER_RADIUS = 5;
 
 export interface WorldInfo {
@@ -43,18 +44,25 @@ export class WorldDataError extends Error {
   override name = 'WorldDataError';
 }
 
-function requireNumber(object: Object3D, key: string): number {
+type Range = 'positive' | 'nonNegative';
+
+function requireNumber(object: Object3D, key: string, range: Range): number {
   const value: unknown = object.userData[key];
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     throw new WorldDataError(
       `${object.name}: "${key}" debe ser un número (recibido ${String(value)})`,
     );
   }
+  const valid = range === 'positive' ? value > 0 : value >= 0;
+  if (!valid) {
+    const rule = range === 'positive' ? 'mayor que 0' : 'mayor o igual que 0';
+    throw new WorldDataError(`${object.name}: "${key}" debe ser ${rule} (recibido ${value})`);
+  }
   return value;
 }
 
-function optionalNumber(object: Object3D, key: string): number | undefined {
-  return object.userData[key] === undefined ? undefined : requireNumber(object, key);
+function optionalNumber(object: Object3D, key: string, range: Range): number | undefined {
+  return object.userData[key] === undefined ? undefined : requireNumber(object, key, range);
 }
 
 function requireString(object: Object3D, key: string): string {
@@ -69,8 +77,8 @@ function isInteractionKind(value: string): value is InteractionKind {
   return (INTERACTION_KINDS as readonly string[]).includes(value);
 }
 
-function isMesh(object: Object3D): object is Mesh {
-  return (object as Partial<Mesh>).isMesh === true;
+export function isMesh(object: Object3D): object is Mesh {
+  return 'isMesh' in object && object.isMesh === true;
 }
 
 export function readWorldInfo(scene: Object3D, worldId: string): WorldInfo {
@@ -80,9 +88,9 @@ export function readWorldInfo(scene: Object3D, worldId: string): WorldInfo {
   }
   return {
     id: worldId,
-    radius: requireNumber(root, 'radius'),
-    gravity: requireNumber(root, 'gravity'),
-    clockRate: requireNumber(root, 'clock_rate'),
+    radius: requireNumber(root, 'radius', 'positive'),
+    gravity: requireNumber(root, 'gravity', 'positive'),
+    clockRate: requireNumber(root, 'clock_rate', 'positive'),
   };
 }
 
@@ -101,16 +109,18 @@ function readTrigger(object: Object3D): TriggerMarker {
     name: object.name,
     object,
     event: requireString(object, 'event'),
-    radius: optionalNumber(object, 'radius') ?? DEFAULT_TRIGGER_RADIUS,
-    loopTime: optionalNumber(object, 'loop_time'),
-    duration: optionalNumber(object, 'duration'),
+    radius: optionalNumber(object, 'radius', 'positive') ?? DEFAULT_TRIGGER_RADIUS,
+    loopTime: optionalNumber(object, 'loop_time', 'nonNegative'),
+    duration: optionalNumber(object, 'duration', 'positive'),
   };
 }
 
 function collectColliders(object: Object3D, colliders: Mesh[]): void {
   object.visible = false;
   object.traverse((child) => {
-    if (isMesh(child)) colliders.push(child);
+    if (!isMesh(child)) return;
+    child.visible = false;
+    colliders.push(child);
   });
 }
 
@@ -132,9 +142,7 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
     } else if (name.startsWith('TRIG_')) {
       markers.triggers.push(readTrigger(object));
     } else if (name.startsWith('SPAWN_')) {
-      if (markers.spawns.has(name)) {
-        throw new WorldDataError(`Punto de aparición repetido: ${name}`);
-      }
+      // Los nombres son únicos: Blender no permite repetirlos y GLTFLoader los desambigua.
       markers.spawns.set(name, object);
     }
   });

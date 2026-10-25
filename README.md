@@ -16,7 +16,7 @@ el fenómeno. **Aprender de los muertos para no ser el siguiente.**
 - [`CONTEXTO_PLANETAS.md`](CONTEXTO_PLANETAS.md): diseño de cada mundo.
 
 ## Empezar
-Requisitos: Node 20 o superior, Blender 5.2 (solo para regenerar modelos).
+Requisitos: Node 20.19 o superior, Blender 5.2 (solo para regenerar modelos).
 
 ```bash
 cd web

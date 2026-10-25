@@ -46,7 +46,9 @@ def informe(objs):
 
 
 def main():
-    col = bpy.data.collections[WORLD]
+    col = bpy.data.collections.get(WORLD)
+    if col is None:
+        raise SystemExit(f"No existe la colección '{WORLD}' en este .blend")
     objs = list(col.all_objects)
     informe(objs)
     for o in bpy.context.view_layer.objects:
@@ -62,7 +64,8 @@ def main():
         export_cameras=False, export_lights=False,
     )
     print(f"Exportado {ruta} ({os.path.getsize(ruta) / 1024:.0f} KB)")
-    print("Siguiente: npx @gltf-transform/cli optimize <glb> <glb> --compress meshopt")
+    # No usar "gltf-transform optimize": borra los nodos vacíos (las marcas SPAWN_/INT_/TRIG_).
+    print("Para comprimir: npm run modelos (desde web/), que usa gltf-transform meshopt")
 
 
 main()

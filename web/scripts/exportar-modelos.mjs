@@ -1,9 +1,11 @@
 // Exporta cada blender/<mundo>.blend a public/models/<mundo>.glb y lo comprime con meshopt.
 // Uso: npm run modelos            (todos los .blend)
 //      npm run modelos -- umbral  (solo los indicados)
-// Blender: variable BLENDER_PATH o la ruta por defecto de Blender 5.2 en Windows.
+// Blender: variable BLENDER_PATH, la ruta por defecto de Blender 5.2 en Windows o `blender` en el PATH.
+// Trabaja en una carpeta temporal: si algo falla, el .glb anterior queda intacto.
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, statSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdtempSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -16,10 +18,15 @@ const DEFAULT_BLENDER = 'C:\\Program Files\\Blender Foundation\\Blender 5.2\\ble
 
 function run(command, args) {
   const result = spawnSync(command, args, { stdio: 'inherit' });
-  if (result.error) throw result.error;
+  if (result.error) throw new Error(`No se pudo ejecutar ${command}: ${result.error.message}`);
   if (result.status !== 0) {
     throw new Error(`Falló: ${command} ${args.join(' ')} (código ${result.status})`);
   }
+}
+
+function findBlender() {
+  if (process.env.BLENDER_PATH) return process.env.BLENDER_PATH;
+  return existsSync(DEFAULT_BLENDER) ? DEFAULT_BLENDER : 'blender';
 }
 
 function worldsToExport(requested) {
@@ -34,30 +41,40 @@ function worldsToExport(requested) {
   return requested;
 }
 
+function exportWorld(blender, world, workDir) {
+  const raw = join(workDir, `${world}.glb`);
+  const compressed = join(workDir, `${world}.meshopt.glb`);
+  run(blender, [
+    '-b',
+    join(BLENDER_DIR, `${world}.blend`),
+    '--python-exit-code', // Blender en -b sale con 0 aunque el script falle si no se indica
+    '1',
+    '--python',
+    EXPORT_SCRIPT,
+    '--',
+    world,
+    workDir,
+  ]);
+  if (!existsSync(raw)) throw new Error(`Blender no generó ${raw}`);
+  // Solo comprimir: "optimize" aplana la escena y borra los nodos vacíos (las marcas).
+  run(process.execPath, [GLTF_TRANSFORM, 'meshopt', raw, compressed]);
+  const target = join(OUT_DIR, `${world}.glb`);
+  copyFileSync(compressed, target);
+  const kb = (file) => (statSync(file).size / 1024).toFixed(0);
+  console.log(`${world}.glb: ${kb(raw)} KB -> ${kb(target)} KB`);
+}
+
 function main() {
-  const blender = process.env.BLENDER_PATH ?? DEFAULT_BLENDER;
-  if (!existsSync(blender)) {
-    throw new Error(`No encuentro Blender en ${blender}. Define BLENDER_PATH.`);
-  }
-  for (const world of worldsToExport(process.argv.slice(2))) {
-    const glb = join(OUT_DIR, `${world}.glb`);
-    console.log(`\n== ${world} ==`);
-    run(blender, [
-      '-b',
-      join(BLENDER_DIR, `${world}.blend`),
-      '--python',
-      EXPORT_SCRIPT,
-      '--',
-      world,
-      OUT_DIR,
-    ]);
-    const before = statSync(glb).size;
-    // Solo comprimir: "optimize" aplana la escena y borra los nodos vacíos (las marcas SPAWN_/INT_/TRIG_).
-    run(process.execPath, [GLTF_TRANSFORM, 'meshopt', glb, glb]);
-    const after = statSync(glb).size;
-    console.log(
-      `${world}.glb: ${(before / 1024).toFixed(0)} KB -> ${(after / 1024).toFixed(0)} KB`,
-    );
+  const blender = findBlender();
+  const worlds = worldsToExport(process.argv.slice(2));
+  const workDir = mkdtempSync(join(tmpdir(), 'modelos-'));
+  try {
+    for (const world of worlds) {
+      console.log(`\n== ${world} ==`);
+      exportWorld(blender, world, workDir);
+    }
+  } finally {
+    rmSync(workDir, { recursive: true, force: true });
   }
 }
 

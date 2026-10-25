@@ -71,7 +71,9 @@ describe('collectMarkers', () => {
 
     const markers = collectMarkers(scene);
 
-    expect(markers.colliders.map((m) => m.name)).toContain('COL_Casa_1');
+    const nested = markers.colliders.filter((m) => m.name.startsWith('COL_Casa_'));
+    expect(nested.map((m) => m.name)).toEqual(['COL_Casa_0', 'COL_Casa_1']);
+    expect(nested.every((m) => !m.visible)).toBe(true);
     expect(group.visible).toBe(false);
   });
 
@@ -133,10 +135,35 @@ describe('collectMarkers', () => {
     expect(() => collectMarkers(scene)).toThrow(/TRIG_vacio.*event/);
   });
 
-  it('rejects duplicated spawn names', () => {
+  it.each([
+    ['radius', 0],
+    ['radius', -3],
+    ['loop_time', -1],
+    ['duration', 0],
+  ])('rejects a trigger with invalid %s = %d', (key, value) => {
     const scene = umbralScene();
-    scene.add(node('SPAWN_LaBoca'));
+    scene.add(node('TRIG_malo', { event: 'x', [key]: value }));
 
-    expect(() => collectMarkers(scene)).toThrow(/SPAWN_LaBoca/);
+    expect(() => collectMarkers(scene)).toThrow(new RegExp(`TRIG_malo.*${key}`));
+  });
+
+  it('accepts a trigger at the very start of the loop', () => {
+    const scene = umbralScene();
+    scene.add(node('TRIG_inicio', { event: 'x', loop_time: 0 }));
+
+    const trigger = collectMarkers(scene).triggers.find((t) => t.name === 'TRIG_inicio');
+
+    expect(trigger?.loopTime).toBe(0);
+  });
+});
+
+describe('readWorldInfo ranges', () => {
+  it.each(['radius', 'gravity', 'clock_rate'])('rejects %s <= 0', (key) => {
+    const scene = umbralScene();
+    const root = scene.getObjectByName('umbral');
+    if (!root) throw new Error('test setup');
+    root.userData[key] = 0;
+
+    expect(() => readWorldInfo(scene, 'umbral')).toThrow(new RegExp(key));
   });
 });

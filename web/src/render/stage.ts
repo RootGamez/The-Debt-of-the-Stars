@@ -21,6 +21,8 @@ export interface Stage {
   scene: Scene;
   camera: PerspectiveCamera;
   sun: DirectionalLight;
+  /** Deja de observar el tamaño y libera el contexto WebGL. */
+  dispose(): void;
 }
 
 export function createStage(canvas: HTMLCanvasElement): Stage {
@@ -44,8 +46,16 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     camera.aspect = w / Math.max(h, 1);
     camera.updateProjectionMatrix();
   };
-  window.addEventListener('resize', resize);
+  // ResizeObserver también detecta cambios de tamaño por el layout, no solo de la ventana.
+  const observer = new ResizeObserver(resize);
+  observer.observe(canvas);
   resize();
 
-  return { renderer, scene, camera, sun };
+  const dispose = (): void => {
+    observer.disconnect();
+    renderer.setAnimationLoop(null);
+    renderer.dispose();
+  };
+
+  return { renderer, scene, camera, sun, dispose };
 }

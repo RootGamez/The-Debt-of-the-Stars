@@ -19,6 +19,14 @@ async function start(): Promise<void> {
   const status = requireElement('status', HTMLParagraphElement);
   const { renderer, scene, camera } = createStage(canvas);
 
+  canvas.addEventListener('webglcontextlost', (event) => {
+    event.preventDefault(); // permite que el navegador restaure el contexto
+    status.textContent = 'Se perdió el contexto gráfico; intentando recuperarlo…';
+  });
+  canvas.addEventListener('webglcontextrestored', () => {
+    status.textContent = '';
+  });
+
   const world = await loadWorld(START_WORLD);
   scene.add(world.scene);
 

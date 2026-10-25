@@ -13,7 +13,9 @@ from mathutils import Vector, noise
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 WORLD = ARGS[0] if ARGS else "umbral"  # umbral, archivo, taller, cicatriz, observatorio, laboratorio, hogar, luna
 SUBDIV = 5            # 5 ≈ 5.120 triángulos (presupuesto 3k–8k)
-COL_SUBDIV = 3        # colisión ≈ 320 triángulos
+# Colisión con la misma resolución que el suelo visible: con menos, el jugador se hundiría o
+# flotaría entre vértices. Se puede bajar en la Fase 2 si la física lo necesita.
+COL_SUBDIV = SUBDIV
 SEED = 1
 REPLACE = True
 
@@ -169,6 +171,8 @@ def material(world):
 
 
 def main():
+    if WORLD not in PRESETS:
+        raise SystemExit(f"Mundo desconocido '{WORLD}'. Opciones: {', '.join(PRESETS)}")
     cfg = PRESETS[WORLD]
     noise.seed_set(SEED)
     col = bpy.data.collections.get(WORLD) or bpy.data.collections.new(WORLD)
