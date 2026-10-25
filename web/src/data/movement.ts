@@ -35,3 +35,7 @@ export const MAX_PHYSICS_STEPS_PER_FRAME = 5;
 
 /** Más allá de este número de radios del centro, el jugador reaparece. */
 export const RESPAWN_DISTANCE_RADII = 3;
+
+/** Radianes de giro por píxel de ratón y por píxel de arrastre táctil. */
+export const MOUSE_LOOK_SENSITIVITY = 0.0022;
+export const TOUCH_LOOK_SENSITIVITY = 0.005;

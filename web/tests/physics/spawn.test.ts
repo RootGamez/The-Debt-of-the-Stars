@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Object3D, Vector3 } from 'three';
-import { spawnOnGround } from '../../src/physics/spawn';
+import { chooseSpawn, spawnOnGround } from '../../src/physics/spawn';
 import { upOf } from '../../src/physics/surfaceFrame';
 import type { CollisionWorld } from '../../src/physics/collisionWorld';
 
@@ -45,5 +45,23 @@ describe('spawnOnGround', () => {
     const start = spawnOnGround(marker(new Vector3(0, 0, 500)), sphere, new Vector3(0, 0, 1000));
 
     expect(start.feet.toArray()).toEqual(new Vector3(0, 0, 500).toArray());
+  });
+});
+
+describe('chooseSpawn', () => {
+  function spawns(...names: string[]): Map<string, Object3D> {
+    return new Map(names.map((n) => [n, marker(new Vector3())]));
+  }
+
+  it('prefers the arrival point at La Boca', () => {
+    expect(chooseSpawn(spawns('SPAWN_Aula', 'SPAWN_LaBoca'))?.[0]).toBe('SPAWN_LaBoca');
+  });
+
+  it('falls back to the first spawn in name order', () => {
+    expect(chooseSpawn(spawns('SPAWN_Zeta', 'SPAWN_Alfa'))?.[0]).toBe('SPAWN_Alfa');
+  });
+
+  it('returns undefined when the world has no spawn', () => {
+    expect(chooseSpawn(new Map())).toBeUndefined();
   });
 });

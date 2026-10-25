@@ -15,7 +15,15 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
-      exclude: ['src/main.ts', 'src/render/**'],
+      // Código que solo existe en el navegador (DOM, WebGL): lo cubre la prueba de Playwright (e2e/).
+      // La lógica pura de render (firstPersonCamera) sí cuenta.
+      exclude: [
+        'src/main.ts',
+        'src/render/stage.ts',
+        'src/render/sky.ts',
+        'src/core/inputController.ts',
+        'src/ui/**',
+      ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

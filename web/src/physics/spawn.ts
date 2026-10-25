@@ -8,6 +8,18 @@ import { alignUp } from './surfaceFrame';
 const PROBE_ABOVE = 2;
 const PROBE_DEPTH = 50;
 
+/** Punto de llegada de cada ciclo (CONTEXTO_PLANETAS.md, Umbral: La Boca). */
+export const ARRIVAL_SPAWN = 'SPAWN_LaBoca';
+
+/** Elige el punto de aparición: La Boca si existe; si no, el primero por nombre. */
+export function chooseSpawn(spawns: ReadonlyMap<string, Object3D>): [string, Object3D] | undefined {
+  const arrival = spawns.get(ARRIVAL_SPAWN);
+  if (arrival) return [ARRIVAL_SPAWN, arrival];
+  const [first] = [...spawns.keys()].sort();
+  const marker = first === undefined ? undefined : spawns.get(first);
+  return first === undefined || !marker ? undefined : [first, marker];
+}
+
 export interface SpawnPoint {
   feet: Vector3;
   body: Quaternion;
