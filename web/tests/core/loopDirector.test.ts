@@ -196,3 +196,18 @@ describe('debug time skips', () => {
     expect(d.clock.t).toBe(0);
   });
 });
+
+describe('active events', () => {
+  it('lists the events happening now, including the extra ones of the world', () => {
+    const { d } = director({ extraEvents: [{ id: 'trig', t: 49, duration: 5, world: 'hogar' }] });
+
+    d.skip(51);
+
+    expect(
+      d
+        .active()
+        .map((e) => e.id)
+        .sort(),
+    ).toEqual(['pulso', 'trig']);
+  });
+});

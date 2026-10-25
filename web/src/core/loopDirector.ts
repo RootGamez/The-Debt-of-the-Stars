@@ -7,6 +7,7 @@ import { advanceClock, createLoopClock, type LoopClock, type TimeMode } from './
 import type { SaveData } from './save';
 import {
   absorptionWindow,
+  activeAt,
   eventsBetween,
   type Chronology,
   type EventChange,
@@ -110,6 +111,11 @@ export class LoopDirector {
       this.enter('dying');
     }
     return { changes, restart: false };
+  }
+
+  /** Eventos en curso ahora mismo (para que los efectos se pongan al día tras un salto). */
+  active(): TimelineEvent[] {
+    return activeAt(this.events, this.clock.t, this.options.worldId);
   }
 
   /** Salto de tiempo para depurar (`?debug`). Hacia delante informa de los eventos saltados. */

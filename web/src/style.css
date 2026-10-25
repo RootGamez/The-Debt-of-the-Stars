@@ -156,3 +156,72 @@ body {
   font-size: 13px;
   pointer-events: auto;
 }
+
+.clock-hud {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 14px;
+  background: rgb(7 7 12 / 35%);
+  color: var(--text);
+  font:
+    14px/1.2 ui-monospace,
+    monospace;
+  letter-spacing: 0.04em;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.clock-hud[hidden] {
+  display: none;
+}
+
+.clock-hud-sep {
+  color: var(--muted);
+}
+
+.fade {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.overlay-actions button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid rgb(232 220 196 / 45%);
+  border-radius: 8px;
+  background: rgb(7 7 12 / 50%);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.overlay-actions button.danger {
+  border-color: #d97a5a;
+  color: #f2b8a2;
+}
+
+.overlay-loops {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.overlay-actions button.primary {
+  min-width: 140px;
+  border-color: rgb(232 220 196 / 80%);
+  font-size: 16px;
+}

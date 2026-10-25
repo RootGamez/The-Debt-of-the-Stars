@@ -5,6 +5,8 @@ import {
   eventsBetween,
   parseChronology,
   triggersAsEvents,
+  scaleChronology,
+  cycleLengthFromQuery,
   type Chronology,
 } from '../../src/core/timeline';
 import { WorldDataError } from '../../src/worlds/markers';
@@ -159,5 +161,42 @@ describe('absorptionWindow', () => {
   it('returns the window for worlds that are absorbed and nothing for the others', () => {
     expect(absorptionWindow(chronology(), 'cicatriz')).toEqual([810, 825]);
     expect(absorptionWindow(chronology(), 'hogar')).toBeUndefined();
+  });
+});
+
+describe('scaleChronology', () => {
+  it('shrinks the whole loop proportionally for quick tests', () => {
+    const short = scaleChronology(chronology(), 90); // 900 → 90: todo a la décima parte
+
+    expect(short.duration).toBe(90);
+    const pulse = short.events.find((e) => e.id === 'pulso');
+    expect(pulse?.t).toBeCloseTo(54);
+    expect(pulse?.duration).toBeCloseTo(0.6);
+    expect(short.absorption.umbral).toEqual([86, 88.5]);
+    expect(short.clocks.cicatriz).toEqual([
+      [0, 0.6],
+      [81, 0.35],
+    ]);
+  });
+
+  it('does not change the original', () => {
+    const original = chronology();
+
+    scaleChronology(original, 90);
+
+    expect(original.duration).toBe(900);
+  });
+});
+
+describe('cycleLengthFromQuery', () => {
+  it('reads ?ciclo= only together with ?debug', () => {
+    expect(cycleLengthFromQuery('?debug&ciclo=60')).toBe(60);
+    expect(cycleLengthFromQuery('?ciclo=60')).toBeUndefined();
+  });
+
+  it('ignores values that are not a sensible number of seconds', () => {
+    expect(cycleLengthFromQuery('?debug&ciclo=abc')).toBeUndefined();
+    expect(cycleLengthFromQuery('?debug&ciclo=-5')).toBeUndefined();
+    expect(cycleLengthFromQuery('?debug&ciclo=999999')).toBeUndefined();
   });
 });

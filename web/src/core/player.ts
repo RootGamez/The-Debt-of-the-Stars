@@ -46,10 +46,16 @@ export class Player {
     if (this.isLost()) this.respawn();
   }
 
+  /** Reaparición de seguridad (el jugador se perdió): cuenta para depurar. */
   respawn(): void {
+    this.reset();
+    this.respawnCount++;
+  }
+
+  /** Vuelve al punto de aparición sin contar como fallo (inicio de un ciclo nuevo). */
+  reset(): void {
     this.state = createCharacter(this.spawn.feet, this.spawn.body);
     this.pitch = 0;
-    this.respawnCount++;
     this.savePrevious();
   }
 

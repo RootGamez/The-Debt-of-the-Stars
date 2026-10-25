@@ -164,3 +164,30 @@ export function absorptionWindow(
 ): readonly [number, number] | undefined {
   return chronology.absorption[worldId];
 }
+
+/** Copia de la cronología con todos los tiempos escalados a una duración nueva (pruebas rápidas). */
+export function scaleChronology(chronology: Chronology, duration: number): Chronology {
+  const k = duration / chronology.duration;
+  const absorption: Record<string, readonly [number, number]> = {};
+  for (const [world, [start, end]] of Object.entries(chronology.absorption)) {
+    absorption[world] = [start * k, end * k];
+  }
+  const clocks: Record<string, RateCurve> = {};
+  for (const [world, curve] of Object.entries(chronology.clocks)) {
+    clocks[world] = curve.map(([t, rate]) => [t * k, rate] as const);
+  }
+  return {
+    duration,
+    events: chronology.events.map((e) => ({ ...e, t: e.t * k, duration: e.duration * k })),
+    absorption,
+    clocks,
+  };
+}
+
+/** Duración de prueba `?ciclo=<s>`; solo con `?debug` y entre 10 s y 1 h. */
+export function cycleLengthFromQuery(search: string): number | undefined {
+  const params = new URLSearchParams(search);
+  if (!params.has('debug')) return undefined;
+  const seconds = Number(params.get('ciclo'));
+  return Number.isFinite(seconds) && seconds >= 10 && seconds <= 3600 ? seconds : undefined;
+}
