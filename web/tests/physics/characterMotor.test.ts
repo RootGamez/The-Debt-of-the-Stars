@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { Quaternion, Vector3 } from 'three';
+import {
+  BufferGeometry,
+  Float32BufferAttribute,
+  Mesh,
+  MeshBasicMaterial,
+  Quaternion,
+  Vector3,
+} from 'three';
+import { createBvhWorld } from '../../src/physics/bvhWorld';
 import {
   createCharacter,
   stepCharacter,
@@ -176,6 +184,72 @@ describe('jumping', () => {
   });
 });
 
+describe('staying on uneven ground', () => {
+  it('runs over a bump without being launched into the air', () => {
+    // Joroba de 1 m: esfera enterrada en el suelo plano
+    const bump = sphereWorld(new Vector3(6, -8, 0), 9);
+    const env = flatGround();
+    const world = compositeWorld(env.world, bump);
+    const state = createCharacter(new Vector3(0, 0, 0), yaw(new Quaternion(), -Math.PI / 2));
+    simulate(state, { ...env, world }, IDLE, 0.2);
+    let airborne = 0;
+
+    simulate(state, { ...env, world }, RUN, 2.5, (s) => {
+      if (!s.grounded) airborne++;
+    });
+
+    expect(state.position.x).toBeGreaterThan(12); // cruzó la joroba
+    expect(airborne).toBeLessThanOrEqual(2);
+  });
+
+  it('does not hop when going over the edge between two flat faces (like the real terrain)', () => {
+    // Rampa de 20° que termina en una meseta: arista convexa entre dos caras planas.
+    const rise = Math.tan((20 * Math.PI) / 180) * 10;
+    const geometry = new BufferGeometry();
+    geometry.setAttribute(
+      'position',
+      new Float32BufferAttribute(
+        [
+          ...[-10, 0, -10, 0, rise, -10, 0, rise, 10, -10, 0, -10, 0, rise, 10, -10, 0, 10],
+          ...[0, rise, -10, 20, rise, -10, 20, rise, 10, 0, rise, -10, 20, rise, 10, 0, rise, 10],
+        ],
+        3,
+      ),
+    );
+    geometry.computeVertexNormals();
+    const ground = createBvhWorld([new Mesh(geometry, new MeshBasicMaterial())]);
+    const env = { wells: flatGround().wells, world: ground };
+    const state = createCharacter(
+      new Vector3(-8, rise * 0.2, 0),
+      yaw(new Quaternion(), -Math.PI / 2),
+    );
+    simulate(state, env, IDLE, 0.3);
+    let airborne = 0;
+
+    simulate(state, env, RUN, 2.5, (s) => {
+      if (!s.grounded) airborne++;
+    });
+
+    expect(state.position.x).toBeGreaterThan(5); // subió la rampa y cruzó la arista
+    expect(airborne).toBeLessThanOrEqual(1);
+  });
+
+  it('stays grounded while walking into a wall', () => {
+    const wall = halfSpaceWorld(new Vector3(1, 0, 0), new Vector3(-1, 0, 0));
+    const env = flatGround(wall);
+    const state = createCharacter(new Vector3(0, 0, 0), yaw(new Quaternion(), -Math.PI / 2));
+    simulate(state, env, IDLE, 0.2);
+    let airborne = 0;
+
+    simulate(state, env, WALK, 2, (s) => {
+      if (!s.grounded) airborne++;
+    });
+
+    expect(airborne).toBe(0);
+    expect(state.position.x).toBeLessThan(1); // no atraviesa la pared
+  });
+});
+
 describe('slopes', () => {
   function rampAt(degrees: number) {
     const angle = (degrees * Math.PI) / 180;
@@ -206,5 +280,67 @@ describe('slopes', () => {
     simulate(state, env, IDLE, 2);
 
     expect(state.position.distanceTo(settled)).toBeLessThan(0.05);
+  });
+});
+
+describe('forgiving jumps', () => {
+  /** Meseta a 2 m de altura que termina en x = 0 (borde) sobre suelo plano. */
+  function ledge(): MotorEnvironment {
+    const geometry = new BufferGeometry();
+    const h = 2;
+    geometry.setAttribute(
+      'position',
+      new Float32BufferAttribute(
+        [
+          ...[-20, h, -10, 0, h, -10, 0, h, 10, -20, h, -10, 0, h, 10, -20, h, 10],
+          ...[0, 0, -10, 20, 0, -10, 20, 0, 10, 0, 0, -10, 20, 0, 10, 0, 0, 10],
+        ],
+        3,
+      ),
+    );
+    return {
+      wells: flatGround().wells,
+      world: createBvhWorld([new Mesh(geometry, new MeshBasicMaterial())]),
+    };
+  }
+
+  it('remembers a jump pressed just before landing', () => {
+    const env = planet();
+    const state = createCharacter(new Vector3(0, R + 0.6, 0), new Quaternion());
+    // Cae ~0,6 m (≈ 0,35 s); se pulsa salto 0,05 s antes de tocar el suelo y se mantiene.
+    simulate(state, env, IDLE, 0.3);
+    simulate(state, env, JUMP, 0.5);
+
+    expect(state.takeoffs).toBeGreaterThanOrEqual(1);
+    expect(state.position.length() - R).toBeGreaterThan(0.3); // está saltando, no quieto
+  });
+
+  it('still allows jumping for a moment after walking off a ledge', () => {
+    const env = ledge();
+    const state = createCharacter(new Vector3(-1, 2, 0), yaw(new Quaternion(), -Math.PI / 2));
+    simulate(state, env, IDLE, 0.2);
+    // Camina hasta pasar el borde y pulsa salto 0,05 s después (3 pasos), aún en el aire.
+    for (let i = 0; i < 120 && state.grounded; i++) stepCharacter(state, WALK, env, PHYSICS_STEP);
+    expect(state.grounded).toBe(false);
+    simulate(state, env, WALK, 3 * PHYSICS_STEP);
+    expect(state.grounded).toBe(false);
+    expect(state.velocity.y).toBeLessThan(0); // ya está cayendo
+
+    stepCharacter(state, JUMP, env, PHYSICS_STEP);
+
+    expect(state.velocity.y).toBeGreaterThan(3);
+  });
+
+  it('does not allow jumping once the coyote time has passed', () => {
+    const env = ledge();
+    const state = createCharacter(new Vector3(-1, 2, 0), yaw(new Quaternion(), -Math.PI / 2));
+    simulate(state, env, IDLE, 0.2);
+    for (let i = 0; i < 120 && state.grounded; i++) stepCharacter(state, WALK, env, PHYSICS_STEP);
+    simulate(state, env, WALK, 0.2); // más que COYOTE_SECONDS, aún sin llegar abajo
+
+    stepCharacter(state, JUMP, env, PHYSICS_STEP);
+
+    expect(state.grounded).toBe(false);
+    expect(state.velocity.y).toBeLessThan(0);
   });
 });

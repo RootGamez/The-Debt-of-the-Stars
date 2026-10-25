@@ -137,3 +137,22 @@ body {
   pointer-events: auto;
   touch-action: none;
 }
+
+.touch[hidden] {
+  display: none;
+}
+
+.touch-pause {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  min-width: 64px;
+  height: 44px;
+  border: 2px solid rgb(232 220 196 / 50%);
+  border-radius: 22px;
+  background: rgb(7 7 12 / 35%);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  pointer-events: auto;
+}

@@ -1,11 +1,19 @@
 // Mundos de colisión analíticos para probar el motor sin mallas: una esfera sólida y semiespacios
 // (planos). Implementan la misma interfaz que el mundo real con three-mesh-bvh.
 import { Vector3 } from 'three';
-import type { Capsule, CollisionWorld } from '../../src/physics/collisionWorld';
+import {
+  clearContact,
+  considerFloor,
+  createContact,
+  type Capsule,
+  type CollisionWorld,
+  type Contact,
+} from '../../src/physics/collisionWorld';
 
 const closest = new Vector3();
 const segment = new Vector3();
 const offset = new Vector3();
+const normal = new Vector3();
 
 function closestPointOnSegment(start: Vector3, end: Vector3, point: Vector3, target: Vector3) {
   segment.subVectors(end, start);
@@ -19,33 +27,32 @@ function closestPointOnSegment(start: Vector3, end: Vector3, point: Vector3, tar
 
 export function sphereWorld(center: Vector3, radius: number): CollisionWorld {
   return {
-    resolve(capsule: Capsule, correction: Vector3): boolean {
+    resolve(capsule: Capsule, up: Vector3, contact: Contact): boolean {
+      clearContact(contact);
       closestPointOnSegment(capsule.start, capsule.end, center, closest);
       const away = offset.subVectors(closest, center);
       const distance = away.length();
       const penetration = radius + capsule.radius - distance;
-      if (penetration <= 0 || distance === 0) {
-        correction.set(0, 0, 0);
-        return false;
-      }
-      correction.copy(away).multiplyScalar(penetration / distance);
+      if (penetration <= 0 || distance === 0) return false;
+      normal.copy(away).divideScalar(distance);
+      contact.correction.copy(normal).multiplyScalar(penetration);
+      considerFloor(contact, normal, up);
       return true;
     },
   };
 }
 
-/** Semiespacio sólido bajo el plano que pasa por `point` con normal `normal` (unitaria). */
-export function halfSpaceWorld(point: Vector3, normal: Vector3): CollisionWorld {
+/** Semiespacio sólido bajo el plano que pasa por `point` con normal `planeNormal` (unitaria). */
+export function halfSpaceWorld(point: Vector3, planeNormal: Vector3): CollisionWorld {
   return {
-    resolve(capsule: Capsule, correction: Vector3): boolean {
-      const dStart = offset.subVectors(capsule.start, point).dot(normal);
-      const dEnd = offset.subVectors(capsule.end, point).dot(normal);
+    resolve(capsule: Capsule, up: Vector3, contact: Contact): boolean {
+      clearContact(contact);
+      const dStart = offset.subVectors(capsule.start, point).dot(planeNormal);
+      const dEnd = offset.subVectors(capsule.end, point).dot(planeNormal);
       const penetration = capsule.radius - Math.min(dStart, dEnd);
-      if (penetration <= 0) {
-        correction.set(0, 0, 0);
-        return false;
-      }
-      correction.copy(normal).multiplyScalar(penetration);
+      if (penetration <= 0) return false;
+      contact.correction.copy(planeNormal).multiplyScalar(penetration);
+      considerFloor(contact, planeNormal, up);
       return true;
     },
   };
@@ -53,20 +60,21 @@ export function halfSpaceWorld(point: Vector3, normal: Vector3): CollisionWorld 
 
 /** Resuelve varios mundos en secuencia acumulando la corrección total. */
 export function compositeWorld(...worlds: CollisionWorld[]): CollisionWorld {
-  const partial = new Vector3();
+  const partial = createContact();
   return {
-    resolve(capsule: Capsule, correction: Vector3): boolean {
-      correction.set(0, 0, 0);
+    resolve(capsule: Capsule, up: Vector3, contact: Contact): boolean {
+      clearContact(contact);
       let hit = false;
       for (const world of worlds) {
-        if (!world.resolve(capsule, partial)) continue;
+        if (!world.resolve(capsule, up, partial)) continue;
         hit = true;
-        correction.add(partial);
-        capsule.start.add(partial);
-        capsule.end.add(partial);
+        contact.correction.add(partial.correction);
+        considerFloor(contact, partial.floorNormal, up);
+        capsule.start.add(partial.correction);
+        capsule.end.add(partial.correction);
       }
-      capsule.start.sub(correction);
-      capsule.end.sub(correction);
+      capsule.start.sub(contact.correction);
+      capsule.end.sub(contact.correction);
       return hit;
     },
   };

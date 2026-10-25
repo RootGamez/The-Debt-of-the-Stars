@@ -12,14 +12,14 @@ import {
   PHYSICS_STEP,
 } from './data/movement';
 import { createBvhWorld } from './physics/bvhWorld';
-import { gravityAt, wellForWorld } from './physics/gravity';
+import { wellForWorld } from './physics/gravity';
 import { chooseSpawn, spawnOnGround } from './physics/spawn';
 import { cameraPose } from './render/firstPersonCamera';
 import { createStarfield } from './render/sky';
 import { createStage } from './render/stage';
 import { createDebugOverlay } from './ui/debugOverlay';
 import { createPauseOverlay, isTouchDevice } from './ui/pauseOverlay';
-import { createTouchControls } from './ui/touchControls';
+import { createTouchControls, type TouchControls } from './ui/touchControls';
 import { loadWorld } from './worlds/loadWorld';
 import { WorldDataError } from './worlds/markers';
 import { worldFromQuery, worldTitle } from './worlds/worldSelection';
@@ -56,16 +56,26 @@ async function start(): Promise<void> {
   const spawnMarker = chooseSpawn(world.markers.spawns);
   if (!spawnMarker) throw new WorldDataError(`${world.info.id} no tiene ningún SPAWN_`);
   const spawn = spawnOnGround(spawnMarker[1], collision, home.center);
-  const player = new Player(spawn, { wells: [home], world: collision }, home);
+  const wells = [home];
+  const player = new Player(spawn, { wells, world: collision }, home);
 
   const input = new InputController(canvas);
+  let touch: TouchControls | undefined;
   const overlay = createPauseOverlay(canvas, worldTitle(world.info.id), () => {
     input.reset();
+    touch?.setVisible(overlay.playing);
   });
   input.dragLookEnabled = () => overlay.dragLook;
-  if (isTouchDevice()) createTouchControls(canvas, input, () => overlay.playing);
-  const debug = createDebugOverlay(world.info.id, world.info.radius, player, renderer);
-  const gravity = new Vector3();
+  if (isTouchDevice()) {
+    touch = createTouchControls(canvas, input, {
+      isPlaying: () => overlay.playing,
+      onPause: () => {
+        overlay.pause();
+      },
+    });
+    touch.setVisible(false);
+  }
+  const debug = createDebugOverlay(world.info.id, home, wells, player, renderer);
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
     (dt) => {
@@ -90,8 +100,7 @@ async function start(): Promise<void> {
     player.interpolatedBody(alpha, body);
     cameraPose(body, player.pitch, feet, camera.position, camera.quaternion);
     renderer.render(scene, camera);
-    const g = gravityAt(player.state.position, [home], gravity).length();
-    debug.update(dt, g, overlay.playing);
+    debug.update(dt, overlay.playing);
   });
 }
 

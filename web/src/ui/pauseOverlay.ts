@@ -5,6 +5,8 @@ export interface PauseOverlay {
   readonly playing: boolean;
   /** Jugando sin pointer lock (el navegador no lo concedió): mirar arrastrando el ratón. */
   readonly dragLook: boolean;
+  /** Pausa el juego (botón de pausa táctil, Esc). */
+  pause(): void;
   dispose(): void;
 }
 
@@ -57,29 +59,43 @@ export function createPauseOverlay(
     onChange();
   };
 
+  // Si el navegador no concede el pointer lock (iframe sin permiso, automatización, o Chrome
+  // justo después de Esc), se juega igual mirando con arrastre del ratón.
+  const playWithDragLook = (): void => {
+    if (playing) return;
+    dragLook = true;
+    setPlaying(true);
+  };
+
   const start = (): void => {
     if (touch) {
       setPlaying(true);
       return;
     }
-    // Si el navegador no concede el pointer lock (iframe sin permiso, automatización, o Chrome
-    // justo después de Esc), se juega igual mirando con arrastre del ratón.
-    canvas.requestPointerLock().catch(() => {
-      dragLook = true;
-      setPlaying(true);
-    });
+    try {
+      // Navegadores antiguos devuelven undefined en vez de una promesa y avisan con
+      // "pointerlockerror"; Promise.resolve cubre ambos casos.
+      const request: unknown = canvas.requestPointerLock();
+      Promise.resolve(request).catch(playWithDragLook);
+    } catch {
+      playWithDragLook();
+    }
   };
 
-  const pauseWithEscape = (event: KeyboardEvent): void => {
-    if (event.code !== 'Escape' || !playing) return;
-    if (dragLook) {
-      dragLook = false;
-      setPlaying(false);
-    } else {
-      // Normalmente el navegador ya libera el ratón con Esc; si no (p. ej. teclas sintéticas),
-      // se libera aquí y "pointerlockchange" muestra la pausa.
-      document.exitPointerLock();
+  const pause = (): void => {
+    if (!playing) return;
+    if (document.pointerLockElement === canvas) {
+      document.exitPointerLock(); // "pointerlockchange" mostrará la pausa
+      return;
     }
+    dragLook = false;
+    setPlaying(false);
+  };
+
+  // Normalmente el navegador ya libera el ratón con Esc; si no (p. ej. teclas sintéticas o juego
+  // con arrastre), se pausa aquí.
+  const pauseWithEscape = (event: KeyboardEvent): void => {
+    if (event.code === 'Escape') pause();
   };
 
   overlay.addEventListener('click', start, { signal });
@@ -98,6 +114,7 @@ export function createPauseOverlay(
     },
     { signal },
   );
+  document.addEventListener('pointerlockerror', playWithDragLook, { signal });
   window.addEventListener('keydown', pauseWithEscape, { signal });
   render();
 
@@ -108,6 +125,7 @@ export function createPauseOverlay(
     get dragLook() {
       return dragLook;
     },
+    pause,
     dispose() {
       abort.abort();
       overlay.remove();

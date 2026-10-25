@@ -41,10 +41,11 @@ describe('spawnOnGround', () => {
     expect(up.x).toBeCloseTo(1);
   });
 
-  it('keeps the marker position when there is no ground below', () => {
-    const start = spawnOnGround(marker(new Vector3(0, 0, 500)), sphere, new Vector3(0, 0, 1000));
+  it('fails with a clear message when there is no ground below the marker', () => {
+    const lost = marker(new Vector3(0, 0, 500));
+    lost.name = 'SPAWN_Perdido';
 
-    expect(start.feet.toArray()).toEqual(new Vector3(0, 0, 500).toArray());
+    expect(() => spawnOnGround(lost, sphere, new Vector3(0, 0, 1000))).toThrow(/SPAWN_Perdido/);
   });
 });
 

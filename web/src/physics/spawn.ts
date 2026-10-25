@@ -2,6 +2,7 @@
 // marca, de pie respecto al planeta y mirando hacia donde mira la marca.
 import { Quaternion, Vector3, type Object3D } from 'three';
 import type { RaycastWorld } from './collisionWorld';
+import { WorldDataError } from '../worlds/markers';
 import { alignUp } from './surfaceFrame';
 
 /** Desde cuánto por encima de la marca se busca el suelo y hasta qué profundidad. */
@@ -38,6 +39,10 @@ export function spawnOnGround(
   const origin = position.clone().addScaledVector(up, PROBE_ABOVE);
   const down = up.clone().negate();
   const distance = world.raycast(origin, down, PROBE_DEPTH);
-  const feet = distance === null ? position : origin.addScaledVector(down, distance);
-  return { feet, body };
+  if (distance === null) {
+    throw new WorldDataError(
+      `${marker.name}: no hay suelo en ${PROBE_DEPTH} m bajo la marca (revisa blender/marcas)`,
+    );
+  }
+  return { feet: origin.addScaledVector(down, distance), body };
 }

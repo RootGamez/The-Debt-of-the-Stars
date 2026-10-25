@@ -18,6 +18,12 @@ export const AIR_ACCELERATION = 8; // m/s²: control reducido en el aire
 export const MAX_SLOPE_DEGREES = 45;
 /** Distancia máxima a la que se "pega" al suelo al bajar cuestas o pasar bordes pequeños. */
 export const GROUND_SNAP_DISTANCE = 0.4;
+/** Un salto pulsado justo antes de aterrizar se recuerda este tiempo (s). */
+export const JUMP_BUFFER_SECONDS = 0.1;
+/** Tras dejar el suelo sin saltar (borde), aún se puede saltar durante este tiempo (s). */
+export const COYOTE_SECONDS = 0.1;
+/** Velocidad máxima absoluta (m/s): protege los subpasos de colisión ante valores absurdos. */
+export const MAX_SPEED = 60;
 
 // Cuerpo del jugador (cápsula) y cámara.
 export const PLAYER_RADIUS = 0.35;

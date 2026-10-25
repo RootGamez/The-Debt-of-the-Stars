@@ -1,5 +1,5 @@
 // Controles táctiles: joystick que aparece donde se toca en la mitad izquierda, arrastre en la mitad
-// derecha para mirar y botón de salto. Solo se crean en pantallas táctiles.
+// derecha para mirar, botón de salto y botón de pausa. Solo se crean en pantallas táctiles.
 import { intentFromStick, type MoveIntent } from '../core/input';
 import type { InputController } from '../core/inputController';
 import { MOUSE_LOOK_SENSITIVITY, TOUCH_LOOK_SENSITIVITY } from '../data/movement';
@@ -10,7 +10,16 @@ const DEAD_ZONE = 0.15;
 const LOOK_SCALE = TOUCH_LOOK_SENSITIVITY / MOUSE_LOOK_SENSITIVITY;
 
 export interface TouchControls {
+  /** Suelta el joystick, la mirada y el salto (al pausar o perder el foco). */
+  reset(): void;
+  /** Muestra u oculta los botones (se ocultan en la pausa). */
+  setVisible(visible: boolean): void;
   dispose(): void;
+}
+
+export interface TouchOptions {
+  isPlaying: () => boolean;
+  onPause: () => void;
 }
 
 function div(className: string, parent: HTMLElement): HTMLDivElement {
@@ -20,19 +29,26 @@ function div(className: string, parent: HTMLElement): HTMLDivElement {
   return element;
 }
 
+function button(className: string, label: string, parent: HTMLElement): HTMLButtonElement {
+  const element = document.createElement('button');
+  element.className = className;
+  element.type = 'button';
+  element.textContent = label;
+  parent.append(element);
+  return element;
+}
+
 export function createTouchControls(
   canvas: HTMLCanvasElement,
   input: InputController,
-  isPlaying: () => boolean,
+  { isPlaying, onPause }: TouchOptions,
 ): TouchControls {
   const layer = div('touch', document.body);
   const base = div('touch-stick', layer);
   const knob = div('touch-knob', base);
-  const jump = document.createElement('button');
-  jump.className = 'touch-jump';
-  jump.type = 'button';
-  jump.textContent = 'Saltar';
-  layer.append(jump);
+  const jump = button('touch-jump', 'Saltar', layer);
+  const pause = button('touch-pause', 'Pausa', layer);
+  pause.setAttribute('aria-label', 'Pausar el juego');
   base.hidden = true;
 
   let stickId: number | null = null;
@@ -47,16 +63,26 @@ export function createTouchControls(
     input.setTouchIntent(intent);
   };
 
+  const reset = (): void => {
+    stickId = null;
+    lookId = null;
+    stick = { x: 0, z: 0 };
+    jumping = false;
+    base.hidden = true;
+    publish();
+  };
+
   const onDown = (e: PointerEvent): void => {
     if (e.pointerType === 'mouse' || !isPlaying()) return;
-    if (e.clientX < window.innerWidth / 2 && stickId === null) {
+    const leftHalf = e.clientX < window.innerWidth / 2;
+    if (leftHalf && stickId === null) {
       stickId = e.pointerId;
       origin.x = e.clientX;
       origin.y = e.clientY;
       base.style.transform = `translate(${origin.x - STICK_RADIUS}px, ${origin.y - STICK_RADIUS}px)`;
       knob.style.transform = '';
       base.hidden = false;
-    } else if (lookId === null) {
+    } else if (!leftHalf && lookId === null) {
       lookId = e.pointerId;
       lastLook.x = e.clientX;
       lastLook.y = e.clientY;
@@ -98,6 +124,14 @@ export function createTouchControls(
   const abort = new AbortController();
   const { signal } = abort;
   canvas.addEventListener('pointerdown', onDown, { signal });
+  // Una pulsación larga no debe abrir el menú contextual del navegador.
+  canvas.addEventListener(
+    'contextmenu',
+    (e) => {
+      e.preventDefault();
+    },
+    { signal },
+  );
   window.addEventListener('pointermove', onMove, { signal });
   window.addEventListener('pointerup', onUp, { signal });
   window.addEventListener('pointercancel', onUp, { signal });
@@ -118,8 +152,14 @@ export function createTouchControls(
       { signal },
     );
   }
+  pause.addEventListener('click', onPause, { signal });
 
   return {
+    reset,
+    setVisible(visible) {
+      layer.hidden = !visible;
+      if (!visible) reset();
+    },
     dispose() {
       abort.abort();
       layer.remove();
