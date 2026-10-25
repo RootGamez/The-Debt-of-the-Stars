@@ -41,7 +41,13 @@ web/                  proyecto Vite + TypeScript + Three.js
 | `npm run modelos` | Exporta cada `blender/*.blend` a `public/models/*.glb` y lo comprime (`-- <mundo>` para uno) |
 
 En el navegador: `?mundo=<id>` carga otro mundo base y `?debug` muestra el panel F3 y expone
-`window.__juego.snapshot()` (lo usan las pruebas de Playwright).
+`window.__juego.snapshot()` (lo usan las pruebas de Playwright). Solo con `?debug`: `&ciclo=<s>`
+acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` saltan ∓1/15 del ciclo.
+
+## El ciclo (Fase 3)
+- Modo B (✅ Anthony): el tiempo real es el del jugador; en mundos lentos el reloj de Umbral corre más rápido (`src/data/loop.ts`, `TIME_MODE`).
+- La cronología (eventos, absorción, curvas de reloj) está en `web/src/data/cronologia.json`: se ajusta ahí, sin tocar código.
+- El guardado (`bucle-tiempo:partida` en localStorage) solo guarda ciclos y hechos; se valida al leerlo.
 
 ## Blender
 - Blender 5.2: `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` (o variable `BLENDER_PATH`).

@@ -70,9 +70,8 @@ function createControls(
     },
     {
       loops: () => session.director.loopsCompleted,
-      onResetProgress: () => {
-        session.resetProgress();
-      },
+      savingWorks: () => session.savingWorks,
+      onResetProgress: () => session.resetProgress(),
     },
   );
   input.dragLookEnabled = () => overlay.dragLook;

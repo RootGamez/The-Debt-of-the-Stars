@@ -49,9 +49,11 @@ export function createLoopEffects(
   sun: DirectionalLight,
   skyDirection: Vector3,
 ): LoopEffects {
+  const previousBackground = scene.background;
   const background = new Color().copy(SKY);
   scene.background = background;
   const sunIntensity = sun.intensity;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const rings: Mesh[] = [];
   for (let i = 0; i < RING_COUNT; i++) {
@@ -82,7 +84,7 @@ export function createLoopEffects(
       opacity: 0.35,
       blending: AdditiveBlending,
       depthWrite: false,
-      side: BackSide, // solo el borde, detrás de la esfera negra,
+      side: BackSide, // solo el borde, detrás de la esfera negra
     }),
   );
   for (const m of [hole, halo]) {
@@ -112,14 +114,16 @@ export function createLoopEffects(
       const red = progressOf(active, 'cielo_rojo', t);
       if (red !== undefined) background.lerp(RED_SKY, Math.min(1, red * 4));
       const pulse = progressOf(active, 'pulso_cicatriz', t);
+      shake.set(0, 0, 0);
       if (pulse !== undefined) {
         const strength = Math.sin(pulse * Math.PI);
-        background.lerp(PULSE, strength);
-        shake
-          .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
-          .multiplyScalar(SHAKE_METERS * 2 * strength);
-      } else {
-        shake.set(0, 0, 0);
+        background.lerp(PULSE, reducedMotion ? strength * 0.4 : strength);
+        // Sin temblor en pausa (dt = 0) ni con "reducir movimiento" activado en el sistema.
+        if (dt > 0 && !reducedMotion) {
+          shake
+            .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+            .multiplyScalar(SHAKE_METERS * 2 * strength);
+        }
       }
 
       const growth = progressOf(active, 'agujero_negro', t);
@@ -138,6 +142,7 @@ export function createLoopEffects(
         (m.material as MeshBasicMaterial).dispose();
       }
       sun.intensity = sunIntensity;
+      scene.background = previousBackground;
     },
   };
 }

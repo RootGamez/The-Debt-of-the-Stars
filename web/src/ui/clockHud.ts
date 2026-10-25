@@ -8,12 +8,15 @@ export interface ClockHud {
 }
 
 export function createClockHud(): ClockHud {
-  const hud = document.createElement('p');
+  // role="timer": los lectores de pantalla lo anuncian como reloj sin leer cada segundo.
+  const hud = document.createElement('div');
   hud.className = 'clock-hud';
+  hud.setAttribute('role', 'timer');
   hud.setAttribute('aria-label', 'Reloj doble: tu tiempo y el de Umbral');
   const mine = document.createElement('span');
   const separator = document.createElement('span');
   separator.className = 'clock-hud-sep';
+  separator.setAttribute('aria-hidden', 'true');
   separator.textContent = '·';
   const umbral = document.createElement('span');
   hud.append(mine, separator, umbral);

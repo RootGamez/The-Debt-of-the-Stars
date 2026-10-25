@@ -47,8 +47,10 @@ export interface LoopSession {
   readonly shake: Vector3;
   update(dt: number, playing: boolean): void;
   snapshot(): LoopSnapshot;
-  /** Borra la partida guardada y recarga la página. */
-  resetProgress(): void;
+  /** El progreso se está guardando (falso en modo privado o con una partida más nueva). */
+  readonly savingWorks: boolean;
+  /** Borra la partida guardada y recarga la página; false si no se pudo borrar. */
+  resetProgress(): boolean;
   dispose(): void;
 }
 
@@ -73,8 +75,10 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
     mode: TIME_MODE,
     extraEvents,
     save: loaded.data,
-    persist: (data) => writeSave(store, data),
+    // Partida de una versión más nueva: se juega sin guardar para no estropearla.
+    persist: (data) => !loaded.readOnly && writeSave(store, data),
   });
+  const savingWorks = (): boolean => store !== null && !loaded.readOnly && !director.saveFailed;
   const hud = createClockHud();
   const fade = createFadeLayer();
   const effects = createLoopEffects(scene, sun, skyDirection);
@@ -102,6 +106,8 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
       if (playing) {
         const result = director.update(dt, player.state);
         if (result.restart) onRestart();
+      } else {
+        director.observe(player.state); // la física sigue en pausa: no juzgar esos aterrizajes
       }
       effects.update(director.clock.t, director.active(), director.absorption, playing ? dt : 0);
       fade.set(director.fade);
@@ -115,11 +121,20 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
         loops: director.loopsCompleted,
         rate: director.rate,
         events: director.active().map((e) => e.id),
+        fired: [...director.recentEvents],
+        saving: savingWorks(),
       };
     },
+    get savingWorks() {
+      return savingWorks();
+    },
     resetProgress() {
-      clearSave(store);
+      if (!clearSave(store)) {
+        console.error('No se pudo borrar la partida: el navegador bloquea el almacenamiento.');
+        return false;
+      }
       window.location.reload();
+      return true;
     },
     dispose() {
       abort.abort();

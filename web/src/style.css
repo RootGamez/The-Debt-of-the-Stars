@@ -225,3 +225,7 @@ body {
   border-color: rgb(232 220 196 / 80%);
   font-size: 16px;
 }
+
+.overlay-warning {
+  color: #f2b8a2;
+}

@@ -27,8 +27,10 @@ function line(tag: 'strong' | 'span' | 'small', text: string, className?: string
 export interface PauseOptions {
   /** Ciclos vividos (se muestran en la pausa si hay al menos uno). */
   loops: () => number;
-  /** Borra la partida guardada (tras confirmar). */
-  onResetProgress: () => void;
+  /** El progreso se guarda (falso en modo privado o con una partida más nueva). */
+  savingWorks: () => boolean;
+  /** Borra la partida guardada (tras confirmar); false si no se pudo. */
+  onResetProgress: () => boolean;
 }
 
 /** Botón dentro de la pantalla: su clic no debe contar como "clic para jugar". */
@@ -58,6 +60,7 @@ export function createPauseOverlay(
   overlay.className = 'overlay';
   // Diálogo (no botón): dentro hay botones propios; hacer clic en el fondo también empieza a jugar.
   overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', title);
   overlay.tabIndex = 0;
   document.body.append(overlay);
@@ -70,6 +73,7 @@ export function createPauseOverlay(
   const { signal } = abort;
 
   let confirmingReset = false;
+  let resetFailed = false;
 
   const resetActions = (): HTMLElement => {
     const actions = document.createElement('div');
@@ -77,7 +81,15 @@ export function createPauseOverlay(
     if (confirmingReset) {
       actions.append(
         line('span', '¿Borrar todo lo aprendido? No se puede deshacer.'),
-        actionButton('Borrar', options.onResetProgress, 'danger'),
+        actionButton(
+          'Borrar',
+          () => {
+            resetFailed = !options.onResetProgress();
+            confirmingReset = false;
+            render();
+          },
+          'danger',
+        ),
         actionButton('Cancelar', () => {
           confirmingReset = false;
           render();
@@ -108,8 +120,26 @@ export function createPauseOverlay(
     if (loops > 0) {
       lines.push(line('span', `Ciclos vividos: ${loops}`, 'overlay-loops'), resetActions());
     }
+    if (!options.savingWorks()) {
+      lines.push(line('small', 'Este navegador no está guardando la partida.', 'overlay-warning'));
+    }
+    if (resetFailed) {
+      lines.push(line('small', 'No se pudo borrar la partida.', 'overlay-warning'));
+    }
     if (!touch) lines.push(line('small', DESKTOP_HELP));
     overlay.replaceChildren(...lines);
+    focusDefault();
+  }
+
+  /** Al mostrarse (o redibujarse), el foco va al botón principal o a "Cancelar" al confirmar,
+   * para que con teclado no se pierda en el fondo de la página. */
+  function focusDefault(): void {
+    if (playing) return;
+    const buttons = overlay.querySelectorAll<HTMLButtonElement>('button');
+    const target = confirmingReset
+      ? [...buttons].find((b) => b.textContent === 'Cancelar')
+      : buttons[0];
+    target?.focus({ preventScroll: true });
   }
 
   const setPlaying = (value: boolean): void => {

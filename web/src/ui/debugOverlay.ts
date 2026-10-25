@@ -30,6 +30,10 @@ export interface LoopSnapshot {
   loops: number;
   rate: number;
   events: string[];
+  /** Últimos eventos que empezaron (incluidos los instantáneos, como un TRIG_ sin duración). */
+  fired: string[];
+  /** El progreso se guarda. */
+  saving: boolean;
 }
 
 declare global {
