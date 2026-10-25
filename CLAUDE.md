@@ -44,6 +44,14 @@ En el navegador: `?mundo=<id>` carga otro mundo base y `?debug` muestra el panel
 `window.__juego.snapshot()` (lo usan las pruebas de Playwright). Solo con `?debug`: `&ciclo=<s>`
 acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` saltan ∓1/15 del ciclo.
 
+## Leer y el Registro (Fase 4)
+- Las pistas están en `web/src/data/pistas/` (un archivo por mundo + `hilos.json`, `hechos.json`, `conclusiones.json`); se validan al cargar y las 7 reglas de `CONTEXTO_PISTAS.md` se comprueban en `npm test`.
+- Los textos de Umbral son **borradores provisionales** (`"borrador": true`); el resto son esqueleto ("[texto pendiente]").
+- Una fuente = marca `INT_` en Blender con `clue_id` y `kind` (texto, grabacion, objeto, observacion) que coincide con el `id` de la fuente; los eventos son marcas `TRIG_` con `event`.
+- Controles: **E** lee (o botón Leer), **R** o **Tab** abren el Registro, **Esc** cierra. Mientras se lee, el tiempo del ciclo se detiene.
+- Con `?debug`: `window.__juego.teleportTo('umbral.placa')` coloca al jugador frente a una fuente.
+- Al añadir un mundo con fuentes: añade su `.glb` a `BUILT_WORLDS` en `web/tests/registry/umbralMarkers.test.ts` (regla 5).
+
 ## El ciclo (Fase 3)
 - Modo B (✅ Anthony): el tiempo real es el del jugador; en mundos lentos el reloj de Umbral corre más rápido (`src/data/loop.ts`, `TIME_MODE`).
 - La cronología (eventos, absorción, curvas de reloj) está en `web/src/data/cronologia.json`: se ajusta ahí, sin tocar código.
