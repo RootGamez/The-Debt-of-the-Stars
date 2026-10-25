@@ -1,6 +1,6 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.1
+**Versión:** v0.2
 **Última actualización:** 2026-10-25 · Sesión 2
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
@@ -47,7 +47,7 @@ El Registro se organiza por **hilos** (preguntas), no por mundos. Cada hilo term
 
 ---
 
-## 3. Una propuesta que el grafo necesita: el Nudo (🟡)
+## 3. El Nudo (✅ Anthony, 2026-10-25)
 
 La lente gravitacional (✅) y el tiempo lentísimo del Laboratorio (ritmo 0,20) necesitan **una masa enorme y
 compacta** cerca del Laboratorio. Antes del minuto 13:30 todavía no hay agujero negro, así que propongo:
@@ -60,7 +60,6 @@ compacta** cerca del Laboratorio. Antes del minuto 13:30 todavía no hay agujero
 - Une piezas que ya existen: la Primera Puerta en ruinas de Cicatriz, el "primer colapso" que el Consejo
   encubrió, y por qué la investigación estaba justo allí.
 
-Si no te convence, el grafo funciona igual con otra masa; solo cambian los nombres de tres fuentes.
 
 ---
 
@@ -109,7 +108,7 @@ flowchart LR
 | **K7 · Las bocas tienen relojes distintos** [4] | Que cada boca de una Puerta lleva su propio tiempo, y por eso las cosas llegan "de épocas distintas" | `instituto.fragmento_luna` (prólogo, lectura profunda) · `archivo.cartas` (Archivo) · `cicatriz.lista_mundos` (Cicatriz) · `umbral.cuaderno` (Umbral) |
 | **K8 · Cuándo es la prueba mayor** [3] | Cuánto falta, en el reloj de casa, para la prueba que lo condena todo | `instituto.mesa_puerta` (prólogo) · `cicatriz.bitacora` (Cicatriz: una boca nueva "llama") · `lab.notas_investigadora` (Laboratorio: "un sistema joven ha empezado a llamar") |
 
-**Sin el Observatorio** (❓ si existe): K2 sigue teniendo dos fuentes (Archivo y Cicatriz). El grafo no depende
+**El Observatorio** (✅ existe, opcional): K2 tiene dos fuentes sin él (Archivo y Cicatriz). El grafo no depende
 de él.
 
 ---
@@ -185,7 +184,7 @@ final se entiende como aviso.
 | `cicatriz.primera_puerta` | Observación | Siempre | Ruina del primer anillo | Su garganta se cerró mal: ahí empezó el Nudo (sección 3) | `nudo.origen` · H2, H5 |
 | `cicatriz.borde` | Observación | Siempre; más fuerte cerca de 13:30 | Un acantilado frente al cielo | Las estrellas se deforman alrededor de un punto oscuro: el Nudo dobla la luz (K2); a las 13:30 nace el agujero negro | `lab.imagen_desplazada`, `nudo.existe` · H2, H5 |
 
-### 5.6 Observatorio — el cielo limpio (reloj 1,15; ❓ opcional)
+### 5.6 Observatorio — el cielo limpio (reloj 1,15; ✅ existe, opcional)
 
 | id | Tipo | Cuándo | Superficial | Profunda | Hechos · Hilos |
 |---|---|---|---|---|---|
@@ -206,7 +205,7 @@ Llegar aquí cuesta casi un ciclo entero (modo B ✅): cada minuto real son cinc
 | `lab.orden_silencio` | Texto | La orden de callar | Firmada por el Consejo de Tránsito (❓ quién firma) | `silencio.orden` · H4 |
 | `lab.dormitorio` | Objeto | Dos camas, una sola usada | ❓ Destino de los tres que se quedaron (CONTEXTO_HISTORIA §4) | `silencio.uno_se_quedo` · H3, H4 |
 | `lab.contrapeso` | Objeto (se coge) | El Contrapeso | Se lleva a Cicatriz **en el mismo ciclo** (los objetos no persisten) | — · H6 |
-| `lab.camara` | Objeto + texto | ❓ ¿Está aquí la Cámara? | Notas de quien la construyó, con su culpa (H1) | `bucle.camara`, `bucle.culpa` · H1 |
+| `lab.camara` | Objeto + texto | La Cámara (✅ está aquí) | Notas de quien la construyó, con su culpa (H1) | `bucle.camara`, `bucle.culpa` · H1 |
 
 ### 5.8 Epílogo — el Archivo de las Puertas
 
@@ -231,7 +230,7 @@ boca de salida (puzzle final). Ver `CONTEXTO_HISTORIA.md` §9.
 ## 7. Reglas del grafo (las comprobará el código en la Fase 4)
 
 1. Cada **conclusión esencial** (K1–K8 y "cuánto corregir") tiene **al menos 2 fuentes** y en **al menos 2 mundos distintos**.
-2. Ninguna conclusión esencial depende **solo** del Observatorio (❓ opcional) ni **solo** del prólogo.
+2. Ninguna conclusión esencial depende **solo** del Observatorio (opcional) ni **solo** del prólogo.
 3. Cada mundo del sistema ajeno aporta **al menos una pieza de "dónde"** (H5) **y una de "por qué"** (H3 o H4).
 4. Los requisitos no forman **ciclos** (nada requiere algo que lo requiere a él).
 5. Todo `clue_id` de una marca `INT_` existe en el grafo, y toda fuente del grafo existe como marca o evento.
@@ -266,14 +265,15 @@ textos de ambiente sin peso en el grafo.
 
 | # | Pregunta | Propuesta | Estado |
 |---|---|---|---|
-| 1 | ¿Qué masa dobla la luz y frena el tiempo del Laboratorio? | **El Nudo**: la garganta de la primera Puerta, semilla del agujero negro (sección 3) | 🟡 |
-| 2 | ¿Cuándo se puede instalar el Contrapeso? (pregunta 7 de la historia) | Solo durante el **pulso de las 9:00**, cuando el núcleo se abre; antes hay que sacar el motor viejo | 🟡 |
-| 3 | ¿Dónde está la Cámara? (H1) | En el Laboratorio, con las notas de quien la construyó | ❓ |
+| 1 | ¿Qué masa dobla la luz y frena el tiempo del Laboratorio? | **El Nudo**: la garganta de la primera Puerta, semilla del agujero negro (sección 3) | ✅ Anthony |
+| 2 | ¿Cuándo se puede instalar el Contrapeso? (pregunta 7 de la historia) | Solo durante el **pulso de las 9:00**, cuando el núcleo se abre; antes hay que sacar el motor viejo | ✅ Anthony (durante el pulso) · 🟡 sacar el motor viejo |
+| 3 | ¿Dónde está la Cámara? (H1) | En el Laboratorio, con las notas de quien la construyó | ✅ Anthony |
 | 4 | ¿Quién firma la orden de silencio? (pregunta 18) | "El Consejo de Tránsito" (los que gestionaban las Puertas) | 🟡 · ❓ quién en concreto |
 | 5 | ¿Las grabaciones suenan al ritmo del reloj donde se grabaron? | Sí, es la mecánica de lectura de `cicatriz.grabacion_esceptico` (ya propuesta en la historia §6) | 🟡 |
-| 6 | ¿Existe el Observatorio? | El grafo funciona sin él | ❓ |
+| 6 | ¿Existe el Observatorio? | Sí, como extra opcional; el grafo no depende de él | ✅ Anthony |
 | 7 | El hueco con el símbolo de casa en `cicatriz.lista_mundos` | La red ya incluye el sistema del protagonista | 🟡 |
 
 ## 10. Bitácora
 
 - **2026-10-25 · Sesión 2.** Primer grafo: 7 hilos, 8 conclusiones esenciales, 47 fuentes en 7 lugares, lecturas dobles del prólogo y 7 reglas comprobables. Se propone el Nudo como masa que frena el tiempo y dobla la luz del Laboratorio.
+- **2026-10-25 · Sesión 2 (decisiones).** Anthony confirma: el Nudo como masa del Laboratorio; el Contrapeso solo se instala durante el pulso de las 9:00; la Cámara está en el Laboratorio; el Observatorio existe como extra opcional.

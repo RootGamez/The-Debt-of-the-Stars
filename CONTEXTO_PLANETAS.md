@@ -1,6 +1,6 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.1
+**Versión:** v0.2
 **Última actualización:** 2026-10-24 · Sesión 1
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
@@ -257,7 +257,7 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 ## 11. Preguntas abiertas de planetas
 
 1. ❓ **Nombres definitivos** de los mundos, la estrella, la luna y el sistema de origen.
-2. ❓ **Observatorio:** ¿sí o no? Sin él hay 4 mundos más el laboratorio; con él, 5 más el laboratorio.
+2. ✅ **Observatorio:** sí, como extra opcional (Anthony, 2026-10-25). El grafo de pistas no depende de él.
 3. ❓ **Clima y fauna:** ¿hay seres vivos o plantas en los mundos, o están completamente vacíos?
 4. ❓ **Cantidad de textos por mundo:** ¿unos 10 por mundo, o más?
 5. ❓ **Prólogo:** ¿una sola ubicación (el Instituto) o también la aldea?
@@ -270,3 +270,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 
 - **2026-10-24 · Sesión 1.** Primer diseño de los mundos: Umbral, Archivo, Taller, Cicatriz, Observatorio, Laboratorio Oculto y el sistema de origen con los beats del prólogo.
 - **2026-10-24 · Sesión 1 (laboratorio).** Se confirma que el laboratorio es un sitio aparte, escondido por lente gravitacional.
+- **2026-10-25 · Sesión 2.** Anthony confirma el Observatorio como extra opcional y el Nudo como masa junto al Laboratorio Oculto (ver `CONTEXTO_PISTAS.md`).

@@ -1,7 +1,7 @@
 # CONTEXTO DE HISTORIA — Juego de bucle de tiempo
 
 **Título provisional:** por definir (ver preguntas abiertas)
-**Versión:** v1.5 (reloj del jugador en el bucle; viajero, agujero de gusano, objetos de los Ausentes en casa, esperanza del Instituto, mecanismo del fenómeno y Laboratorio Oculto)
+**Versión:** v1.6 (el Nudo, la Cámara y la instalación del Contrapeso; reloj del jugador en el bucle; viajero, agujero de gusano, objetos de los Ausentes en casa, esperanza del Instituto, mecanismo del fenómeno y Laboratorio Oculto)
 **Última actualización:** 2026-10-25 · Sesión 2
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)
 
@@ -55,6 +55,9 @@ Su único camino a casa pasa por las ruinas de esa civilización extinta, que ya
 | El laboratorio | Era **ultra secreto**. Las **pistas dejadas en cada planeta** deben ayudar al jugador a llegar a él y a **entender todo el contexto de manera sutil** |
 | Cómo murieron los Ausentes | **La Gran Partida:** murieron huyendo por las Puertas durante la evacuación. El destino de los tres que se quedaron se decide más adelante |
 | Laboratorio Oculto | Está en **un sitio aparte** (quinto lugar, fuera de los cuatro mundos), **escondido por lente gravitacional**: lo que se ve en el cielo es una imagen desplazada y hay que deducir su posición real. Lo ocultó **el Consejo** |
+| El Nudo | La **garganta de la primera Puerta**, que se cerró mal: deuda comprimida en un punto oscuro, diminuto y pesadísimo. Es la **semilla del agujero negro** de las 13:30. El Laboratorio orbita a su lado: por eso su tiempo va 5 veces más lento y su imagen llega desplazada (ver `CONTEXTO_PISTAS.md` §3) |
+| La Cámara | Está **en el Laboratorio Oculto**, con las notas y la culpa de quien la construyó |
+| Instalar el Contrapeso | Solo durante el **pulso de las 9:00**, cuando el núcleo de la máquina de Cicatriz se abre |
 | Finales | Mínimo **dos**: uno en que logra evitarlo y otro en que **no puede evitarlo** |
 | Epílogo | Entrar al agujero negro: mucha tensión y un descubrimiento impactante y desconcertante (tono: Interstellar, el Ojo del Universo de Outer Wilds) |
 | Relatividad | Parte de las soluciones requiere entender la relatividad de Einstein y otras teorías reales, simplificadas |
@@ -299,7 +302,7 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 4. ✅ **Cómo murieron los Ausentes:** resuelto, La Gran Partida. ❓ **Pendiente (más adelante):** destino de los tres que se quedaron (congelados en el horizonte, ecos en la Cámara o muertos en el laboratorio).
 5. ❓ **Final B:** ¿llega tarde, nadie le cree, o profecía autocumplida?
 6. ❓ **Qué decide el final:** Registro completo, una elección final, o ambos.
-7. ❓ **Pasos para instalar el Contrapeso:** ya sabemos que se coloca en lugar del motor de la maquinaria. Falta decidir los pasos exactos (¿extraer el motor viejo?, ¿hace falta alguna llave o sincronización?) y de qué piezas está hecho.
+7. ✅ **Cuándo se instala el Contrapeso:** durante el pulso de las 9:00. ❓ Falta: los pasos exactos (🟡 sacar primero el motor viejo; sincronizar su reloj) y de qué piezas está hecho.
 8. ❓ **Justificación física** de que el agujero negro se trague el sistema.
 9. ❓ **Sabor cultural:** nombres, música e identidad de ambos pueblos (el del protagonista y los Ausentes).
 10. ❓ **Aspecto de los Ausentes:** humanos, parecidos a humanos o algo muy distinto.
@@ -338,3 +341,4 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-24 · Sesión 1 (laboratorio).** Anthony decide: el laboratorio está en un sitio aparte, escondido por lente gravitacional, y fue el Consejo quien ocultó el problema.
 - **2026-10-25 · Sesión 2 (bucle).** Al planificar la Fase 3 aparece una contradicción entre "15 minutos reales" y el tiempo lento del Laboratorio. Anthony elige el modo B: el tiempo real es el del jugador y fuera corre más rápido en los mundos lentos. Se fijan como propuesta las formas de morir y el reloj doble.
 - **2026-10-25 · Sesión 2 (grafo de pistas).** Se crea `CONTEXTO_PISTAS.md`: 7 hilos, 8 conclusiones esenciales y 47 fuentes. Claude propone el Nudo (la garganta de la primera Puerta) como masa que dobla la luz y frena el tiempo del Laboratorio, y que el Contrapeso solo pueda instalarse durante el pulso. Pendiente de confirmar.
+- **2026-10-25 · Sesión 2 (decisiones del grafo).** Anthony confirma el Nudo (garganta de la primera Puerta, semilla del agujero negro) como masa del Laboratorio, que el Contrapeso solo se instala durante el pulso de las 9:00 y que la Cámara está en el Laboratorio.
