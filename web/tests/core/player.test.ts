@@ -124,3 +124,56 @@ describe('Player moveTo', () => {
     expect(player.interpolatedFeet(0, new Vector3()).toArray()).toEqual([0, 0, R]);
   });
 });
+
+describe('Player switching world (Phase 5)', () => {
+  const smallR = 30;
+  const smallWell: GravityWell = {
+    center: new Vector3(),
+    radius: smallR,
+    strength: 2,
+    range: 2 * smallR,
+  };
+  const smallEnv = { wells: [smallWell], world: sphereWorld(new Vector3(), smallR) };
+  const smallSpawn = { feet: new Vector3(0, smallR, 0), body: new Quaternion() };
+
+  it('appears at the spawn point of the new world, still and looking level', () => {
+    const player = newPlayer();
+    player.look(1, 0.4);
+    player.state.velocity.set(3, 0, 0);
+
+    player.switchWorld(smallSpawn, smallEnv, smallWell);
+
+    expect(player.state.position.distanceTo(smallSpawn.feet)).toBeLessThan(1e-9);
+    expect(player.state.velocity.length()).toBe(0);
+    expect(player.pitch).toBe(0);
+  });
+
+  it('feels the gravity and the ground of the new world', () => {
+    const player = newPlayer();
+    player.switchWorld(smallSpawn, smallEnv, smallWell);
+
+    for (let i = 0; i < 120; i++) player.step(IDLE, PHYSICS_STEP);
+
+    expect(player.state.grounded).toBe(true);
+    expect(player.state.position.length()).toBeCloseTo(smallR, 1);
+  });
+
+  it('uses the new world for the safety respawn and comes back to its spawn point', () => {
+    const player = newPlayer();
+    player.switchWorld(smallSpawn, smallEnv, smallWell);
+    player.state.position.set(0, smallR * 10, 0);
+
+    player.step(IDLE, PHYSICS_STEP);
+
+    expect(player.respawnCount).toBe(1);
+    expect(player.state.position.distanceTo(smallSpawn.feet)).toBeLessThan(1);
+  });
+
+  it('does not count the switch as a respawn', () => {
+    const player = newPlayer();
+
+    player.switchWorld(smallSpawn, smallEnv, smallWell);
+
+    expect(player.respawnCount).toBe(0);
+  });
+});

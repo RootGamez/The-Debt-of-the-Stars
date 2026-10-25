@@ -13,7 +13,7 @@ import {
   SphereGeometry,
   TorusGeometry,
   Vector3,
-  type DirectionalLight,
+  type Light,
   type Scene,
 } from 'three';
 import type { TimelineEvent } from '../core/timeline';
@@ -44,11 +44,7 @@ function progressOf(active: readonly TimelineEvent[], id: string, t: number): nu
  * @param skyDirection Dirección (unitaria) donde aparecen los anillos y el agujero negro. Provisional:
  * delante y por encima del horizonte de la llegada, para que se vea crecer desde La Boca.
  */
-export function createLoopEffects(
-  scene: Scene,
-  sun: DirectionalLight,
-  skyDirection: Vector3,
-): LoopEffects {
+export function createLoopEffects(scene: Scene, sun: Light, skyDirection: Vector3): LoopEffects {
   const previousBackground = scene.background;
   const background = new Color().copy(SKY);
   scene.background = background;

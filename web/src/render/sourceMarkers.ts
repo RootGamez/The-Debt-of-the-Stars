@@ -1,7 +1,7 @@
 // Rombos suaves sobre las fuentes que aún tienen algo que dar (provisional hasta el arte de la Fase 6).
 // Se ven a menos de VISIBLE_DISTANCE metros y se apagan cuando ya no hay nada nuevo que aprender
 // allí (ni se abrió en esta sesión).
-import { Group, Mesh, MeshBasicMaterial, OctahedronGeometry, Vector3, type Scene } from 'three';
+import { Group, Mesh, MeshBasicMaterial, OctahedronGeometry, Vector3, type Object3D } from 'three';
 import type { Interactable } from '../registry/interaction';
 
 const VISIBLE_DISTANCE = 30;
@@ -11,11 +11,13 @@ const BOB_METERS = 0.06;
 export interface SourceMarkers {
   /** `wanted(id)` dice si esa fuente aún merece un rombo. */
   update(timeSeconds: number, viewer: Vector3, wanted: (id: string) => boolean): void;
+  /** Esconde todos los rombos (el jugador está en otro mundo). */
+  hide(): void;
   dispose(): void;
 }
 
 export function createSourceMarkers(
-  scene: Scene,
+  scene: Object3D,
   sources: readonly Interactable[],
   planetCenter: Vector3,
 ): SourceMarkers {
@@ -46,6 +48,9 @@ export function createSourceMarkers(
           .addScaledVector(entry.up, Math.sin(time * 2) * BOB_METERS);
         entry.mesh.rotation.y = time;
       }
+    },
+    hide() {
+      for (const entry of entries) entry.mesh.visible = false;
     },
     dispose() {
       scene.remove(group);

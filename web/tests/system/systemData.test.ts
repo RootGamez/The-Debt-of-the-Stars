@@ -111,7 +111,14 @@ describe('the real system (sistema.json)', () => {
     expect([...periods].sort((a, b) => a - b)).toEqual(periods);
   });
 
-  it('makes Taller turn on its own every three minutes (CONTEXTO_PLANETAS.md)', () => {
-    expect(system.bodyOf('taller')?.spin).toBe(180);
+  it('gives Taller a day of three minutes (CONTEXTO_PLANETAS.md)', () => {
+    const taller = system.bodyOf('taller');
+    if (!taller || typeof taller.spin !== 'number')
+      throw new Error('Taller debe girar por su cuenta');
+
+    // Día solar = tiempo entre dos amaneceres = 1 / |1/giro − 1/órbita|.
+    const day = 1 / Math.abs(1 / taller.spin - 1 / taller.period);
+
+    expect(day).toBeCloseTo(180, 6);
   });
 });

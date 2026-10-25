@@ -2,7 +2,6 @@
 // muere (fin del ciclo, absorción del mundo o caída) y encadena fundido → reinicio → guardado.
 // Lógica pura: main.ts aplica los efectos (fundidos, reaparecer al jugador, cielo).
 import { FADE_IN_SECONDS, FADE_OUT_SECONDS, FALL_DEATH_SPEED } from '../data/loop';
-import { rateAt } from './clockRates';
 import {
   advanceClock,
   createLoopClock,
@@ -19,6 +18,16 @@ import {
   type EventChange,
   type TimelineEvent,
 } from './timeline';
+
+/** Dónde está el jugador según el sistema: lo único que el director necesita saber del lugar. */
+export interface Locale {
+  /** Mundo en cuyo marco estás; `undefined` = espacio abierto. */
+  worldId: string | undefined;
+  /** Ritmo del reloj aquí (ya con la mezcla por cercanía y las curvas del ciclo). */
+  rate: number;
+  /** En el espacio abierto: el frente de absorción te ha alcanzado. Se ignora dentro de un mundo. */
+  engulfed: boolean;
+}
 
 export type LoopPhase = 'playing' | 'dying' | 'waking';
 export type DeathCause = 'fin' | 'absorcion' | 'caida';
@@ -37,9 +46,8 @@ export interface LandingInfo {
 
 export interface DirectorOptions {
   chronology: Chronology;
-  worldId: string;
-  /** `clock_rate` del glTF del mundo. */
-  baseRate: number;
+  /** Dónde está el jugador en el instante `t` del reloj de Umbral. */
+  locate: (t: number) => Locale;
   mode: TimeMode;
   /** Eventos propios del mundo (marcas TRIG_ con loop_time). */
   extraEvents: readonly TimelineEvent[];
@@ -83,13 +91,14 @@ export class LoopDirector {
 
   /** Ritmo del reloj del mundo en este momento del ciclo. */
   get rate(): number {
-    const { baseRate, chronology, worldId } = this.options;
-    return Math.max(MIN_RATE, rateAt(baseRate, chronology.clocks[worldId], this.clock.t));
+    return Math.max(MIN_RATE, this.locale().rate);
   }
 
   /** Avance de la absorción del mundo (0 antes de empezar, 1 al terminar). */
   get absorption(): number {
-    const window = absorptionWindow(this.options.chronology, this.options.worldId);
+    const { worldId, engulfed } = this.locale();
+    if (worldId === undefined) return engulfed ? 1 : 0;
+    const window = absorptionWindow(this.options.chronology, worldId);
     if (!window) return 0;
     const [start, end] = window;
     if (end <= start) return this.clock.t >= start ? 1 : 0;
@@ -111,8 +120,9 @@ export class LoopDirector {
     const hardLanding = this.readLanding(landing);
     if (this.phase === 'dying') return this.fadeOut(realDt);
 
-    const span = advanceClock(this.clock, realDt, this.rate, this.options.mode);
-    const changes = eventsBetween(this.events, span.from, span.to, this.options.worldId);
+    const here = this.locale();
+    const span = advanceClock(this.clock, realDt, Math.max(MIN_RATE, here.rate), this.options.mode);
+    const changes = eventsBetween(this.events, span.from, span.to, here.worldId);
     this.remember(changes);
     if (this.phase === 'waking') {
       this.phaseTime += realDt;
@@ -128,7 +138,7 @@ export class LoopDirector {
 
   /** Eventos en curso ahora mismo (para que los efectos se pongan al día tras un salto). */
   active(): TimelineEvent[] {
-    return activeAt(this.events, this.clock.t, this.options.worldId);
+    return activeAt(this.events, this.clock.t, this.locale().worldId);
   }
 
   /**
@@ -148,9 +158,13 @@ export class LoopDirector {
     const from = this.clock.t;
     this.clock.t = Math.max(0, Math.min(this.clock.duration, from + seconds));
     if (this.clock.t <= from) return [];
-    const changes = eventsBetween(this.events, from, this.clock.t, this.options.worldId);
+    const changes = eventsBetween(this.events, from, this.clock.t, this.locale().worldId);
     this.remember(changes);
     return changes;
+  }
+
+  private locale(): Locale {
+    return this.options.locate(this.clock.t);
   }
 
   private remember(changes: readonly EventChange[]): void {
@@ -170,7 +184,10 @@ export class LoopDirector {
 
   private causeOfDeath(hardLanding: boolean): DeathCause | undefined {
     if (hardLanding) return 'caida';
-    const window = absorptionWindow(this.options.chronology, this.options.worldId);
+    const { worldId, engulfed } = this.locale();
+    if (worldId === undefined && engulfed) return 'absorcion';
+    const window =
+      worldId === undefined ? undefined : absorptionWindow(this.options.chronology, worldId);
     if (window && this.clock.t >= window[1]) return 'absorcion';
     if (this.clock.ended) return 'fin';
     return undefined;

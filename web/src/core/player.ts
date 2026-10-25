@@ -25,9 +25,9 @@ export class Player {
   private readonly previousBody = new Quaternion();
 
   constructor(
-    private readonly spawn: SpawnPoint,
-    private readonly env: MotorEnvironment,
-    private readonly home: GravityWell,
+    private spawn: SpawnPoint,
+    private env: MotorEnvironment,
+    private home: GravityWell,
   ) {
     this.state = createCharacter(spawn.feet, spawn.body);
     this.savePrevious();
@@ -57,6 +57,14 @@ export class Player {
     this.state = createCharacter(feet, body);
     this.pitch = 0;
     this.savePrevious();
+  }
+
+  /** Pasa a otro mundo (otro marco de referencia): aparece en su punto de aparición, sin contar como fallo. */
+  switchWorld(spawn: SpawnPoint, env: MotorEnvironment, home: GravityWell): void {
+    this.spawn = spawn;
+    this.env = env;
+    this.home = home;
+    this.reset();
   }
 
   /** Vuelve al punto de aparición sin contar como fallo (inicio de un ciclo nuevo). */

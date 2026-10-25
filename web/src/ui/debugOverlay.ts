@@ -23,6 +23,15 @@ export interface DebugSnapshot {
   registry: RegistrySnapshot;
   /** Ciclo: tiempo de Umbral, tiempo del jugador, fase, ciclos vividos, ritmo y eventos en curso. */
   loop: LoopSnapshot;
+  /** El sistema: en qué marco estás y dónde está cada mundo en el marco del sistema. */
+  system: SystemSnapshot;
+}
+
+export interface SystemSnapshot {
+  /** Mundo de referencia; null = espacio abierto. */
+  reference: string | null;
+  /** Posición de cada mundo en el marco del sistema (origen = la Brasa), en metros. */
+  bodies: Record<string, [number, number, number]>;
 }
 
 export interface RegistrySnapshot {
@@ -53,6 +62,8 @@ declare global {
       snapshot(): DebugSnapshot | null;
       /** Coloca al jugador frente a una fuente (`clue_id`). false si no existe. */
       teleportTo?(clueId: string): boolean;
+      /** Pasa a pie a otro mundo del sistema (sin volar). false si no existe. */
+      warpTo?(world: string): boolean;
     };
   }
 }
@@ -64,15 +75,18 @@ export interface DebugOverlay {
   dispose(): void;
 }
 
-export function createDebugOverlay(
-  worldId: string,
-  home: GravityWell,
-  wells: readonly GravityWell[],
-  player: Player,
-  renderer: WebGLRenderer,
-  loopInfo: () => LoopSnapshot,
-  registryInfo: () => RegistrySnapshot,
-): DebugOverlay {
+/** De dónde saca el panel lo que muestra (todo cambia al pasar de un mundo a otro). */
+export interface DebugSources {
+  where: () => { world: string; home: GravityWell; wells: readonly GravityWell[] };
+  player: Player;
+  renderer: WebGLRenderer;
+  loop: () => LoopSnapshot;
+  registry: () => RegistrySnapshot;
+  system: () => SystemSnapshot;
+}
+
+export function createDebugOverlay(sources: DebugSources): DebugOverlay {
+  const { where, player, renderer } = sources;
   const exposed = new URLSearchParams(window.location.search).has('debug');
   const panel = document.createElement('pre');
   panel.className = 'debug';
@@ -96,8 +110,9 @@ export function createDebugOverlay(
 
   const takeSnapshot = (playing: boolean): DebugSnapshot => {
     const { state } = player;
+    const { world, home, wells } = where();
     return {
-      world: worldId,
+      world,
       altitude: state.position.distanceTo(home.center) - home.radius,
       grounded: state.grounded,
       speed: state.velocity.length(),
@@ -108,8 +123,9 @@ export function createDebugOverlay(
       fps,
       drawCalls: renderer.info.render.calls,
       triangles: renderer.info.render.triangles,
-      loop: loopInfo(),
-      registry: registryInfo(),
+      loop: sources.loop(),
+      registry: sources.registry(),
+      system: sources.system(),
     };
   };
 

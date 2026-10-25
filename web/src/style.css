@@ -412,3 +412,18 @@ body {
   list-style: none;
   margin-left: -18px;
 }
+
+/* Mapa de órbitas de depuración (?debug, F4). */
+.orbit-map {
+  position: fixed;
+  right: 8px;
+  bottom: 8px;
+  width: 220px;
+  height: 220px;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 5;
+}
+.orbit-map[hidden] {
+  display: none;
+}
