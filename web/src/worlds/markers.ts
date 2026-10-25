@@ -1,0 +1,155 @@
+// Lee las marcas de juego que vienen de Blender dentro del glTF de un mundo.
+// Convención (ver CLAUDE.md): COL_ colisión, INT_ interacción, SPAWN_ aparición, TRIG_ evento.
+// Las propiedades personalizadas de Blender llegan como userData (export_extras).
+import type { Mesh, Object3D } from 'three';
+
+export const INTERACTION_KINDS = ['texto', 'grabacion', 'objeto'] as const;
+export type InteractionKind = (typeof INTERACTION_KINDS)[number];
+
+const DEFAULT_TRIGGER_RADIUS = 5;
+
+export interface WorldInfo {
+  id: string;
+  radius: number;
+  gravity: number;
+  clockRate: number;
+}
+
+export interface InteractionMarker {
+  name: string;
+  object: Object3D;
+  clueId: string;
+  kind: InteractionKind;
+}
+
+export interface TriggerMarker {
+  name: string;
+  object: Object3D;
+  event: string;
+  radius: number;
+  loopTime: number | undefined;
+  duration: number | undefined;
+}
+
+export interface WorldMarkers {
+  colliders: Mesh[];
+  interactions: InteractionMarker[];
+  spawns: Map<string, Object3D>;
+  triggers: TriggerMarker[];
+}
+
+/** Datos del mundo mal formados (error del contenido exportado, no del código). */
+export class WorldDataError extends Error {
+  override name = 'WorldDataError';
+}
+
+function requireNumber(object: Object3D, key: string): number {
+  const value: unknown = object.userData[key];
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new WorldDataError(
+      `${object.name}: "${key}" debe ser un número (recibido ${String(value)})`,
+    );
+  }
+  return value;
+}
+
+function optionalNumber(object: Object3D, key: string): number | undefined {
+  return object.userData[key] === undefined ? undefined : requireNumber(object, key);
+}
+
+function requireString(object: Object3D, key: string): string {
+  const value: unknown = object.userData[key];
+  if (typeof value !== 'string' || value.length === 0) {
+    throw new WorldDataError(`${object.name}: falta "${key}" (texto)`);
+  }
+  return value;
+}
+
+function isInteractionKind(value: string): value is InteractionKind {
+  return (INTERACTION_KINDS as readonly string[]).includes(value);
+}
+
+function isMesh(object: Object3D): object is Mesh {
+  return (object as Partial<Mesh>).isMesh === true;
+}
+
+export function readWorldInfo(scene: Object3D, worldId: string): WorldInfo {
+  const root = scene.getObjectByName(worldId);
+  if (!root) {
+    throw new WorldDataError(`No existe el objeto raíz del mundo "${worldId}"`);
+  }
+  return {
+    id: worldId,
+    radius: requireNumber(root, 'radius'),
+    gravity: requireNumber(root, 'gravity'),
+    clockRate: requireNumber(root, 'clock_rate'),
+  };
+}
+
+function readInteraction(object: Object3D): InteractionMarker {
+  const kind = requireString(object, 'kind');
+  if (!isInteractionKind(kind)) {
+    throw new WorldDataError(
+      `${object.name}: "kind" debe ser ${INTERACTION_KINDS.join(', ')} (recibido ${kind})`,
+    );
+  }
+  return { name: object.name, object, clueId: requireString(object, 'clue_id'), kind };
+}
+
+function readTrigger(object: Object3D): TriggerMarker {
+  return {
+    name: object.name,
+    object,
+    event: requireString(object, 'event'),
+    radius: optionalNumber(object, 'radius') ?? DEFAULT_TRIGGER_RADIUS,
+    loopTime: optionalNumber(object, 'loop_time'),
+    duration: optionalNumber(object, 'duration'),
+  };
+}
+
+function collectColliders(object: Object3D, colliders: Mesh[]): void {
+  object.visible = false;
+  object.traverse((child) => {
+    if (isMesh(child)) colliders.push(child);
+  });
+}
+
+export function collectMarkers(scene: Object3D): WorldMarkers {
+  const markers: WorldMarkers = {
+    colliders: [],
+    interactions: [],
+    spawns: new Map(),
+    triggers: [],
+  };
+  const colliderRoots: Object3D[] = [];
+
+  scene.traverse((object) => {
+    const { name } = object;
+    if (name.startsWith('COL_')) {
+      colliderRoots.push(object);
+    } else if (name.startsWith('INT_')) {
+      markers.interactions.push(readInteraction(object));
+    } else if (name.startsWith('TRIG_')) {
+      markers.triggers.push(readTrigger(object));
+    } else if (name.startsWith('SPAWN_')) {
+      if (markers.spawns.has(name)) {
+        throw new WorldDataError(`Punto de aparición repetido: ${name}`);
+      }
+      markers.spawns.set(name, object);
+    }
+  });
+
+  // Solo las raíces COL_ (un grupo COL_ incluye a sus hijos COL_).
+  for (const root of colliderRoots) {
+    const nestedInOther = colliderRoots.some((other) => other !== root && isAncestor(other, root));
+    if (!nestedInOther) collectColliders(root, markers.colliders);
+  }
+  return markers;
+}
+
+function isAncestor(ancestor: Object3D, object: Object3D): boolean {
+  for (let p = object.parent; p; p = p.parent) {
+    if (p === ancestor) return true;
+  }
+  return false;
+}
