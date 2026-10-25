@@ -6,6 +6,7 @@
 //   absorción      el cielo y la Brasa se apagan mientras el mundo es absorbido
 import {
   AdditiveBlending,
+  BackSide,
   Color,
   Mesh,
   MeshBasicMaterial,
@@ -18,9 +19,8 @@ import {
 import type { TimelineEvent } from '../core/timeline';
 
 const SKY = new Color(0x07070c);
-const RED_SKY = new Color(0x2a0907);
-const PULSE = new Color(0x6a1408);
-const BLACK_HOLE_DIRECTION = new Vector3(-0.6, 0.35, -0.72).normalize();
+const RED_SKY = new Color(0x5a1a10);
+const PULSE = new Color(0xa0301a);
 const SKY_DISTANCE = 2600;
 const BLACK_HOLE_MAX_RADIUS = 420;
 const RING_COUNT = 4;
@@ -40,7 +40,15 @@ function progressOf(active: readonly TimelineEvent[], id: string, t: number): nu
   return event.duration > 0 ? Math.min(1, Math.max(0, (t - event.t) / event.duration)) : 1;
 }
 
-export function createLoopEffects(scene: Scene, sun: DirectionalLight): LoopEffects {
+/**
+ * @param skyDirection Dirección (unitaria) donde aparecen los anillos y el agujero negro. Provisional:
+ * delante y por encima del horizonte de la llegada, para que se vea crecer desde La Boca.
+ */
+export function createLoopEffects(
+  scene: Scene,
+  sun: DirectionalLight,
+  skyDirection: Vector3,
+): LoopEffects {
   const background = new Color().copy(SKY);
   scene.background = background;
   const sunIntensity = sun.intensity;
@@ -57,7 +65,7 @@ export function createLoopEffects(scene: Scene, sun: DirectionalLight): LoopEffe
         depthWrite: false,
       }),
     );
-    ring.position.copy(BLACK_HOLE_DIRECTION).multiplyScalar(SKY_DISTANCE);
+    ring.position.copy(skyDirection).multiplyScalar(SKY_DISTANCE);
     ring.lookAt(0, 0, 0);
     ring.rotateX(0.35 * i);
     ring.visible = false;
@@ -74,10 +82,11 @@ export function createLoopEffects(scene: Scene, sun: DirectionalLight): LoopEffe
       opacity: 0.35,
       blending: AdditiveBlending,
       depthWrite: false,
+      side: BackSide, // solo el borde, detrás de la esfera negra,
     }),
   );
   for (const m of [hole, halo]) {
-    m.position.copy(BLACK_HOLE_DIRECTION).multiplyScalar(SKY_DISTANCE);
+    m.position.copy(skyDirection).multiplyScalar(SKY_DISTANCE);
     m.visible = false;
     scene.add(m);
   }

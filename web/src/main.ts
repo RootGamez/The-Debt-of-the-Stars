@@ -15,6 +15,7 @@ import {
 import { createBvhWorld } from './physics/bvhWorld';
 import { wellForWorld } from './physics/gravity';
 import { chooseSpawn, spawnOnGround } from './physics/spawn';
+import { forwardOf, upOf } from './physics/surfaceFrame';
 import { cameraPose } from './render/firstPersonCamera';
 import { createStarfield } from './render/sky';
 import { createStage } from './render/stage';
@@ -119,6 +120,7 @@ async function start(): Promise<void> {
     baseRate: world.info.clockRate,
     triggers: world.markers.triggers,
     player,
+    skyDirection: arrivalSkyDirection(player),
     onRestart: () => {
       player.reset();
     },
@@ -158,6 +160,12 @@ async function start(): Promise<void> {
       debug.update(dt, overlay.playing);
     },
   );
+}
+
+/** Delante y unos 25° por encima del horizonte del punto de llegada (provisional, Fase 3). */
+function arrivalSkyDirection(player: Player): Vector3 {
+  const { body } = player.state;
+  return forwardOf(body).addScaledVector(upOf(body), 0.45).normalize();
 }
 
 function setupCamera(camera: PerspectiveCamera): void {

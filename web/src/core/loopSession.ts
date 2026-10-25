@@ -32,6 +32,8 @@ export interface LoopSessionOptions {
     duration: number | undefined;
   }[];
   player: Player;
+  /** Dónde se ve el agujero negro en el cielo (provisional). */
+  skyDirection: Vector3;
   /** Al empezar un ciclo nuevo: reaparecer y reiniciar lo que haga falta. */
   onRestart: () => void;
 }
@@ -56,7 +58,7 @@ function loadChronology() {
 }
 
 export function createLoopSession(options: LoopSessionOptions): LoopSession {
-  const { scene, sun, worldId, baseRate, triggers, player, onRestart } = options;
+  const { scene, sun, worldId, baseRate, triggers, player, onRestart, skyDirection } = options;
   const chronology = loadChronology();
   const store = browserStore();
   const loaded = loadSave(store);
@@ -74,7 +76,7 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
   });
   const hud = createClockHud();
   const fade = createFadeLayer();
-  const effects = createLoopEffects(scene, sun);
+  const effects = createLoopEffects(scene, sun, skyDirection);
 
   const abort = new AbortController();
   if (new URLSearchParams(window.location.search).has('debug')) {
