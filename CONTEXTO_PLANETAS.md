@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.2
-**Última actualización:** 2026-10-24 · Sesión 1
+**Versión:** v0.3
+**Última actualización:** 2026-10-25 · Sesión 3
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -261,7 +261,7 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 3. ❓ **Clima y fauna:** ¿hay seres vivos o plantas en los mundos, o están completamente vacíos?
 4. ❓ **Cantidad de textos por mundo:** ¿unos 10 por mundo, o más?
 5. ❓ **Prólogo:** ¿una sola ubicación (el Instituto) o también la aldea?
-6. ❓ **Cuerpos que se mueven:** ¿los mundos orbitan en tiempo real (más vivo, más difícil) o están en posiciones fijas con eventos cronometrados (más simple)?
+6. ✅ **Cuerpos que se mueven:** los mundos orbitan **en rieles y en tiempo real** (Anthony, 2026-10-25): su posición es una fórmula del reloj del ciclo, sin simular gravedad entre ellos. Un periodo `0` en los datos deja un mundo quieto. Valores de partida 🟡 en `web/src/data/sistema.json`.
 7. ✅ Laboratorio Oculto: sitio aparte, lente gravitacional y ocultado por el Consejo (resuelto).
 
 ---
@@ -271,3 +271,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-10-24 · Sesión 1.** Primer diseño de los mundos: Umbral, Archivo, Taller, Cicatriz, Observatorio, Laboratorio Oculto y el sistema de origen con los beats del prólogo.
 - **2026-10-24 · Sesión 1 (laboratorio).** Se confirma que el laboratorio es un sitio aparte, escondido por lente gravitacional.
 - **2026-10-25 · Sesión 2.** Anthony confirma el Observatorio como extra opcional y el Nudo como masa junto al Laboratorio Oculto (ver `CONTEXTO_PISTAS.md`).
+- **2026-10-25 · Sesión 3.** Anthony decide que los mundos orbitan en rieles y en tiempo real (pregunta 6) y aprueba el plan de la Fase 5 (sistema solar y nave): nave en cabina que llega contigo en cada ciclo, choque letal a más de 30 m/s, la Brasa mortal y el reloj que se mezcla según la cercanía a cada masa.
