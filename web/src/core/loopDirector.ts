@@ -3,7 +3,13 @@
 // Lógica pura: main.ts aplica los efectos (fundidos, reaparecer al jugador, cielo).
 import { FADE_IN_SECONDS, FADE_OUT_SECONDS, FALL_DEATH_SPEED } from '../data/loop';
 import { rateAt } from './clockRates';
-import { advanceClock, createLoopClock, type LoopClock, type TimeMode } from './loopClock';
+import {
+  advanceClock,
+  createLoopClock,
+  MIN_RATE,
+  type LoopClock,
+  type TimeMode,
+} from './loopClock';
 import type { SaveData } from './save';
 import {
   absorptionWindow,
@@ -49,11 +55,17 @@ export interface DirectorUpdate {
 }
 
 const NOTHING: DirectorUpdate = Object.freeze({ changes: [], restart: false });
+/** Cuántos eventos recientes se recuerdan (panel F3 y pruebas). */
+const RECENT_EVENTS = 10;
 
 export class LoopDirector {
   clock: LoopClock;
   phase: LoopPhase = 'playing';
   deathCause: DeathCause | undefined;
+  /** El último guardado falló (modo privado, almacenamiento lleno…): el progreso no sobrevivirá. */
+  saveFailed = false;
+  /** Ids de los últimos eventos que empezaron, del más antiguo al más reciente. */
+  readonly recentEvents: string[] = [];
   private phaseTime = 0;
   private seenLandings = 0;
   private progress: SaveData;
@@ -72,7 +84,7 @@ export class LoopDirector {
   /** Ritmo del reloj del mundo en este momento del ciclo. */
   get rate(): number {
     const { baseRate, chronology, worldId } = this.options;
-    return rateAt(baseRate, chronology.clocks[worldId], this.clock.t);
+    return Math.max(MIN_RATE, rateAt(baseRate, chronology.clocks[worldId], this.clock.t));
   }
 
   /** Avance de la absorción del mundo (0 antes de empezar, 1 al terminar). */
@@ -101,6 +113,7 @@ export class LoopDirector {
 
     const span = advanceClock(this.clock, realDt, this.rate, this.options.mode);
     const changes = eventsBetween(this.events, span.from, span.to, this.options.worldId);
+    this.remember(changes);
     if (this.phase === 'waking') {
       this.phaseTime += realDt;
       if (this.phaseTime >= FADE_IN_SECONDS) this.enter('playing');
@@ -118,12 +131,34 @@ export class LoopDirector {
     return activeAt(this.events, this.clock.t, this.options.worldId);
   }
 
-  /** Salto de tiempo para depurar (`?debug`). Hacia delante informa de los eventos saltados. */
+  /**
+   * Mientras el juego está en pausa: anota los aterrizajes sin juzgarlos, para no morir al
+   * reanudar por una caída que la física resolvió durante la pausa.
+   */
+  observe({ landings }: LandingInfo): void {
+    this.seenLandings = landings;
+  }
+
+  /**
+   * Salto de tiempo para depurar (`?debug`), solo mientras se juega. Hacia delante informa de los
+   * eventos saltados. Mueve el reloj de Umbral, no el del jugador (los dos dejan de cuadrar).
+   */
   skip(seconds: number): EventChange[] {
+    if (this.phase !== 'playing') return [];
     const from = this.clock.t;
     this.clock.t = Math.max(0, Math.min(this.clock.duration, from + seconds));
     if (this.clock.t <= from) return [];
-    return eventsBetween(this.events, from, this.clock.t, this.options.worldId);
+    const changes = eventsBetween(this.events, from, this.clock.t, this.options.worldId);
+    this.remember(changes);
+    return changes;
+  }
+
+  private remember(changes: readonly EventChange[]): void {
+    for (const change of changes) {
+      if (change.kind !== 'start') continue;
+      this.recentEvents.push(change.event.id);
+      if (this.recentEvents.length > RECENT_EVENTS) this.recentEvents.shift();
+    }
   }
 
   /** Devuelve si hubo un aterrizaje nuevo lo bastante fuerte para morir. */
@@ -145,7 +180,7 @@ export class LoopDirector {
     this.phaseTime += realDt;
     if (this.phaseTime < FADE_OUT_SECONDS) return NOTHING;
     this.progress = { ...this.progress, loopsCompleted: this.progress.loopsCompleted + 1 };
-    this.options.persist(this.progress);
+    this.saveFailed = !this.options.persist(this.progress);
     this.clock = createLoopClock(this.options.chronology.duration);
     this.seenLandings = 0;
     this.deathCause = undefined;

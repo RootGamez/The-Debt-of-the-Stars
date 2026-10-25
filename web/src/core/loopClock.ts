@@ -6,7 +6,7 @@
 export type TimeMode = 'player' | 'reference';
 
 /** Ritmo mínimo: evita dividir por cero si un mundo tuviera ritmo 0 o negativo por error. */
-const MIN_RATE = 0.05;
+export const MIN_RATE = 0.05;
 
 export interface LoopClock {
   /** Tiempo de Umbral desde el inicio del ciclo (s). */

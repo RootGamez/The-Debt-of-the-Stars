@@ -54,12 +54,18 @@ function parseEvent(raw: unknown, duration: number): TimelineEvent {
     : { id, t, duration: length, world: raw.mundo };
 }
 
-function parseWindow(world: string, raw: unknown): readonly [number, number] {
+function parseWindow(world: string, raw: unknown, duration: number): readonly [number, number] {
   if (!Array.isArray(raw) || raw.length !== 2) fail(`absorcion.${world} debe ser [inicio, fin]`);
   const start = finiteNumber(raw[0], `absorcion.${world}`);
   const end = finiteNumber(raw[1], `absorcion.${world}`);
   if (end < start) fail(`absorcion.${world} termina antes de empezar`);
+  if (start < 0 || end > duration) fail(`absorcion.${world} está fuera del ciclo (0..${duration})`);
   return [start, end];
+}
+
+/** Con la lista de mundos conocidos, un nombre mal escrito es un error y no un efecto que falta. */
+function checkWorld(world: string, where: string, knownWorlds?: readonly string[]): void {
+  if (knownWorlds && !knownWorlds.includes(world)) fail(`${where}: mundo desconocido "${world}"`);
 }
 
 function parseCurve(world: string, raw: unknown): RateCurve {
@@ -77,27 +83,31 @@ function parseCurve(world: string, raw: unknown): RateCurve {
   });
 }
 
-export function parseChronology(raw: unknown): Chronology {
+export function parseChronology(raw: unknown, knownWorlds?: readonly string[]): Chronology {
   if (!isRecord(raw)) fail('el archivo no es un objeto');
   const duration = finiteNumber(raw.duracion, 'duracion');
   if (duration <= 0) fail('duracion debe ser mayor que 0');
   if (!Array.isArray(raw.eventos)) fail('"eventos" debe ser una lista');
   const events = raw.eventos.map((e: unknown) => parseEvent(e, duration));
   const ids = new Set<string>();
-  for (const { id } of events) {
+  for (const { id, world } of events) {
     if (ids.has(id)) fail(`evento repetido: ${id}`);
     ids.add(id);
+    if (world !== undefined) checkWorld(world, id, knownWorlds);
   }
   const absorption: Record<string, readonly [number, number]> = {};
   if (isRecord(raw.absorcion)) {
     for (const [world, window] of Object.entries(raw.absorcion)) {
-      absorption[world] = parseWindow(world, window);
+      checkWorld(world, 'absorcion', knownWorlds);
+      absorption[world] = parseWindow(world, window, duration);
     }
   }
   const clocks: Record<string, RateCurve> = {};
   if (isRecord(raw.relojes)) {
-    for (const [world, curve] of Object.entries(raw.relojes))
+    for (const [world, curve] of Object.entries(raw.relojes)) {
+      checkWorld(world, 'relojes', knownWorlds);
       clocks[world] = parseCurve(world, curve);
+    }
   }
   return { duration, events, absorption, clocks };
 }

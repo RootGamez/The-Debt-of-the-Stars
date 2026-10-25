@@ -3,6 +3,7 @@ import {
   clearSave,
   freshSave,
   loadSave,
+  MAX_LOOPS,
   SAVE_KEY,
   SAVE_VERSION,
   writeSave,
@@ -110,5 +111,36 @@ describe('writeSave and clearSave', () => {
     const data = Object.freeze({ ...freshSave(), facts: Object.freeze(['x.y']) });
 
     expect(() => writeSave(memoryStore(), data as never)).not.toThrow();
+  });
+});
+
+describe('save safety (review fixes)', () => {
+  it('keeps a save from a newer version of the game and marks it as read-only', () => {
+    const newer = JSON.stringify({ version: SAVE_VERSION + 1, loopsCompleted: 40, facts: [] });
+    const store = memoryStore({ [SAVE_KEY]: newer });
+
+    const result = loadSave(store);
+
+    expect(result.readOnly).toBe(true);
+    expect(result.warning).toMatch(/versión más nueva/);
+    expect(store.data.get(SAVE_KEY)).toBe(newer); // no se toca
+  });
+
+  it('is writable for current and fresh saves', () => {
+    expect(loadSave(memoryStore()).readOnly).toBe(false);
+  });
+
+  it('never writes more loops than it accepts when reading', () => {
+    const store = memoryStore();
+
+    writeSave(store, { ...freshSave(), loopsCompleted: MAX_LOOPS + 1 });
+
+    expect(loadSave(store).data.loopsCompleted).toBe(MAX_LOOPS);
+  });
+
+  it('tells whether clearing worked', () => {
+    expect(clearSave(memoryStore())).toBe(true);
+    expect(clearSave(brokenStore())).toBe(false);
+    expect(clearSave(null)).toBe(true); // sin almacenamiento no hay nada guardado
   });
 });

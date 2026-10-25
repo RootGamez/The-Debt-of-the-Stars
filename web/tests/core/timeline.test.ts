@@ -11,6 +11,7 @@ import {
 } from '../../src/core/timeline';
 import { WorldDataError } from '../../src/worlds/markers';
 import chronologyJson from '../../src/data/cronologia.json';
+import { WORLD_IDS } from '../../src/worlds/worldSelection';
 
 const valid = {
   duracion: 900,
@@ -198,5 +199,31 @@ describe('cycleLengthFromQuery', () => {
     expect(cycleLengthFromQuery('?debug&ciclo=abc')).toBeUndefined();
     expect(cycleLengthFromQuery('?debug&ciclo=-5')).toBeUndefined();
     expect(cycleLengthFromQuery('?debug&ciclo=999999')).toBeUndefined();
+  });
+});
+
+describe('stricter chronology validation (review fixes)', () => {
+  it('rejects an absorption window outside the loop', () => {
+    expect(() => parseChronology({ ...valid, absorcion: { umbral: [860, 950] } })).toThrow(
+      /umbral/,
+    );
+  });
+
+  it('rejects world names it does not know when given the list of worlds (typos)', () => {
+    const typo = { ...valid, absorcion: { umbrall: [860, 885] } };
+
+    expect(() => parseChronology(typo, ['umbral', 'cicatriz'])).toThrow(/umbrall/);
+    expect(() =>
+      parseChronology({ ...valid, relojes: { cicatrix: [[0, 1]] } }, ['umbral', 'cicatriz']),
+    ).toThrow(/cicatrix/);
+    expect(() =>
+      parseChronology({ ...valid, eventos: [{ id: 'x', t: 1, duracion: 1, mundo: 'luns' }] }, [
+        'luna',
+      ]),
+    ).toThrow(/luns/);
+  });
+
+  it('accepts the real chronology with the eight known worlds', () => {
+    expect(() => parseChronology(chronologyJson, WORLD_IDS)).not.toThrow();
   });
 });

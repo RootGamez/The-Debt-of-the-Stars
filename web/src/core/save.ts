@@ -5,7 +5,7 @@
 
 export const SAVE_KEY = 'bucle-tiempo:partida';
 export const SAVE_VERSION = 1;
-const MAX_LOOPS = 1_000_000;
+export const MAX_LOOPS = 1_000_000;
 const MAX_FACTS = 5000;
 /** Ids de hechos: "mundo.nombre" con letras, números, guiones y puntos. */
 const FACT_ID = /^[a-z0-9_.-]{1,64}$/i;
@@ -26,6 +26,8 @@ export interface KeyValueStore {
 export interface LoadResult {
   data: SaveData;
   warning?: string;
+  /** El guardado es de una versión más nueva del juego: no se debe sobrescribir. */
+  readOnly: boolean;
 }
 
 export function freshSave(): SaveData {
@@ -53,43 +55,60 @@ function validate(raw: unknown): SaveData | null {
   return { version: SAVE_VERSION, loopsCompleted: loops, facts: [...new Set(facts)] };
 }
 
+function fresh(warning?: string, readOnly = false): LoadResult {
+  return warning === undefined
+    ? { data: freshSave(), readOnly }
+    : { data: freshSave(), warning, readOnly };
+}
+
+function isNewerVersion(raw: unknown): boolean {
+  if (typeof raw !== 'object' || raw === null) return false;
+  const { version } = raw as Record<string, unknown>;
+  return typeof version === 'number' && Number.isInteger(version) && version > SAVE_VERSION;
+}
+
 export function loadSave(store: KeyValueStore | null): LoadResult {
-  if (!store)
-    return { data: freshSave(), warning: 'Almacenamiento no disponible: se juega sin guardar.' };
+  if (!store) return fresh('Almacenamiento no disponible: se juega sin guardar.');
   let text: string | null;
   try {
     text = store.getItem(SAVE_KEY);
   } catch (error) {
-    return { data: freshSave(), warning: `No se pudo leer el guardado: ${String(error)}` };
+    return fresh(`No se pudo leer el guardado: ${String(error)}`);
   }
-  if (text === null) return { data: freshSave() };
+  if (text === null) return fresh();
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
   } catch {
-    return { data: freshSave(), warning: 'El guardado estaba dañado; se empieza de cero.' };
+    return fresh('El guardado estaba dañado; se empieza de cero.');
+  }
+  if (isNewerVersion(parsed)) {
+    // Abrir una versión antigua del juego no debe destruir la partida de una más nueva.
+    return fresh('El guardado es de una versión más nueva del juego: se juega sin guardar.', true);
   }
   const data = validate(parsed);
-  return data
-    ? { data }
-    : { data: freshSave(), warning: 'El guardado no es válido; se empieza de cero.' };
+  return data ? { data, readOnly: false } : fresh('El guardado no es válido; se empieza de cero.');
 }
 
 /** Guarda; devuelve false (sin lanzar) si no se pudo. */
 export function writeSave(store: KeyValueStore | null, data: SaveData): boolean {
   if (!store) return false;
   try {
-    store.setItem(SAVE_KEY, JSON.stringify({ ...data, facts: [...data.facts] }));
+    const loopsCompleted = Math.min(MAX_LOOPS, Math.max(0, Math.floor(data.loopsCompleted)));
+    store.setItem(SAVE_KEY, JSON.stringify({ ...data, loopsCompleted, facts: [...data.facts] }));
     return true;
   } catch {
     return false;
   }
 }
 
-export function clearSave(store: KeyValueStore | null): void {
+/** Borra la partida; devuelve false si el almacenamiento no lo permitió. */
+export function clearSave(store: KeyValueStore | null): boolean {
+  if (!store) return true; // sin almacenamiento no hay nada guardado
   try {
-    store?.removeItem(SAVE_KEY);
+    store.removeItem(SAVE_KEY);
+    return true;
   } catch {
-    // Sin almacenamiento no hay nada que borrar.
+    return false;
   }
 }

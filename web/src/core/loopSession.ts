@@ -7,6 +7,7 @@ import { createLoopEffects } from '../render/loopEffects';
 import { createClockHud } from '../ui/clockHud';
 import type { LoopSnapshot } from '../ui/debugOverlay';
 import { createFadeLayer } from '../ui/fade';
+import { WORLD_IDS } from '../worlds/worldSelection';
 import { LoopDirector } from './loopDirector';
 import type { Player } from './player';
 import { browserStore, clearSave, loadSave, writeSave } from './save';
@@ -52,7 +53,7 @@ export interface LoopSession {
 }
 
 function loadChronology() {
-  const chronology = parseChronology(chronologyData);
+  const chronology = parseChronology(chronologyData, WORLD_IDS);
   const testLength = cycleLengthFromQuery(window.location.search);
   return testLength === undefined ? chronology : scaleChronology(chronology, testLength);
 }

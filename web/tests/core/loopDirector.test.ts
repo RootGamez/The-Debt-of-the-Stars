@@ -211,3 +211,88 @@ describe('active events', () => {
     ).toEqual(['pulso', 'trig']);
   });
 });
+
+describe('landings while not playing (review fixes)', () => {
+  it('does not kill the player on resume for a landing that happened during the pause', () => {
+    const { d } = director();
+    d.observe({ landings: 1, lastLandingSpeed: FALL_DEATH_SPEED + 5 }); // en pausa
+
+    d.update(0.1, { landings: 1, lastLandingSpeed: FALL_DEATH_SPEED + 5 });
+
+    expect(d.phase).toBe('playing');
+  });
+
+  it('re-syncs when the landing counter goes down after a respawn and still detects the next fall', () => {
+    const { d } = director();
+    d.update(0.1, { landings: 3, lastLandingSpeed: 2 });
+    d.observe({ landings: 0, lastLandingSpeed: 0 }); // el jugador reapareció
+
+    d.update(0.1, { landings: 1, lastLandingSpeed: FALL_DEATH_SPEED + 1 });
+
+    expect(d.deathCause).toBe('caida');
+  });
+
+  it('can die from a fall while waking up', () => {
+    const { d } = director();
+    run(d, 100.1);
+    run(d, FADE_OUT_SECONDS + 0.1);
+    expect(d.phase).toBe('waking');
+
+    d.update(0.1, { landings: 1, lastLandingSpeed: FALL_DEATH_SPEED + 1 });
+
+    expect(d.phase).toBe('dying');
+  });
+
+  it('ignores landings while already dying', () => {
+    const { d } = director();
+    run(d, 100.1);
+
+    d.update(0.1, { landings: 1, lastLandingSpeed: FALL_DEATH_SPEED + 1 });
+
+    expect(d.deathCause).toBe('fin');
+  });
+});
+
+describe('director details (review fixes)', () => {
+  it('uses the reference mode when asked (A: loop clock on real time)', () => {
+    const { d } = director({ baseRate: 0.5, mode: 'reference' });
+
+    run(d, 10);
+
+    expect(d.clock.t).toBeCloseTo(10);
+    expect(d.clock.tau).toBeCloseTo(5);
+  });
+
+  it('reports the same clamped rate it applies', () => {
+    const { d } = director({ baseRate: 0 });
+
+    expect(d.rate).toBeGreaterThan(0);
+  });
+
+  it('does nothing when skipping time while dying', () => {
+    const { d } = director();
+    run(d, 100.1);
+    const t = d.clock.t;
+
+    expect(d.skip(30)).toEqual([]);
+    expect(d.clock.t).toBe(t);
+  });
+
+  it('remembers when the progress could not be saved', () => {
+    const { d } = director({ persist: () => false });
+    expect(d.saveFailed).toBe(false);
+
+    run(d, 100.1);
+    run(d, FADE_OUT_SECONDS + 0.1);
+
+    expect(d.saveFailed).toBe(true);
+  });
+
+  it('remembers the last events that started, for the debug panel and the tests', () => {
+    const { d } = director();
+
+    run(d, 60);
+
+    expect(d.recentEvents).toEqual(['inicio', 'pulso']);
+  });
+});
