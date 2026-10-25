@@ -11,6 +11,8 @@ export interface DebugSnapshot {
   gravity: number;
   playing: boolean;
   respawns: number;
+  /** Veces que el jugador ha despegado del suelo (saltos o caídas). */
+  takeoffs: number;
   fps: number;
   drawCalls: number;
   triangles: number;
@@ -18,7 +20,8 @@ export interface DebugSnapshot {
 
 declare global {
   interface Window {
-    __juego?: { snapshot(): DebugSnapshot };
+    /** Solo con `?debug`. `snapshot()` es null hasta que se han medido los primeros fotogramas. */
+    __juego?: { snapshot(): DebugSnapshot | null };
   }
 }
 
@@ -46,6 +49,8 @@ export function createDebugOverlay(
   let elapsed = 0;
   let frames = 0;
   let fps = 0;
+  let takeoffs = 0;
+  let wasGrounded = false;
 
   const onKey = (event: KeyboardEvent): void => {
     if (event.code !== 'F3') return;
@@ -54,23 +59,15 @@ export function createDebugOverlay(
   };
   window.addEventListener('keydown', onKey);
   if (params.has('debug')) {
-    window.__juego = {
-      snapshot: () => {
-        if (!snapshot) throw new Error('El juego aún no ha dibujado ningún fotograma');
-        return snapshot;
-      },
-    };
+    window.__juego = { snapshot: () => snapshot ?? null };
   }
 
   return {
     update(dt, gravity, playing) {
-      frames++;
-      elapsed += dt;
-      if (elapsed < REFRESH_SECONDS) return;
-      fps = frames / elapsed;
-      frames = 0;
-      elapsed = 0;
       const { state } = player;
+      if (wasGrounded && !state.grounded) takeoffs++;
+      wasGrounded = state.grounded;
+      // Los datos se toman en cada fotograma; el texto y los fps se refrescan cada 0,25 s.
       snapshot = {
         world: worldId,
         altitude: state.position.length() - radius,
@@ -79,10 +76,17 @@ export function createDebugOverlay(
         gravity,
         playing,
         respawns: player.respawnCount,
+        takeoffs,
         fps,
         drawCalls: renderer.info.render.calls,
         triangles: renderer.info.render.triangles,
       };
+      frames++;
+      elapsed += dt;
+      if (elapsed < REFRESH_SECONDS) return;
+      fps = frames / elapsed;
+      frames = 0;
+      elapsed = 0;
       if (panel.hidden) return;
       const p = state.position;
       panel.textContent = [

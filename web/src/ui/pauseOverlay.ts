@@ -71,9 +71,14 @@ export function createPauseOverlay(
   };
 
   const pauseWithEscape = (event: KeyboardEvent): void => {
-    if (event.code === 'Escape' && playing && dragLook) {
+    if (event.code !== 'Escape' || !playing) return;
+    if (dragLook) {
       dragLook = false;
       setPlaying(false);
+    } else {
+      // Normalmente el navegador ya libera el ratón con Esc; si no (p. ej. teclas sintéticas),
+      // se libera aquí y "pointerlockchange" muestra la pausa.
+      document.exitPointerLock();
     }
   };
 

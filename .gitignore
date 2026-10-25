@@ -27,3 +27,7 @@ desktop.ini
 !.env.example
 *.log
 npm-debug.log*
+
+# Playwright
+playwright-report/
+test-results/
