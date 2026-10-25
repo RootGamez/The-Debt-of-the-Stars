@@ -91,3 +91,49 @@ body {
 .debug[hidden] {
   display: none;
 }
+
+.touch {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.touch-stick {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 112px;
+  height: 112px;
+  border: 2px solid rgb(232 220 196 / 40%);
+  border-radius: 50%;
+}
+
+.touch-stick[hidden] {
+  display: none;
+}
+
+.touch-knob {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgb(232 220 196 / 45%);
+}
+
+.touch-jump {
+  position: absolute;
+  right: 24px;
+  bottom: 32px;
+  width: 76px;
+  height: 76px;
+  border: 2px solid rgb(232 220 196 / 50%);
+  border-radius: 50%;
+  background: rgb(7 7 12 / 35%);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  pointer-events: auto;
+  touch-action: none;
+}

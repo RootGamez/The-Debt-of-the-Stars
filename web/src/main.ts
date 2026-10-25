@@ -18,17 +18,13 @@ import { cameraPose } from './render/firstPersonCamera';
 import { createStarfield } from './render/sky';
 import { createStage } from './render/stage';
 import { createDebugOverlay } from './ui/debugOverlay';
-import { createPauseOverlay } from './ui/pauseOverlay';
+import { createPauseOverlay, isTouchDevice } from './ui/pauseOverlay';
+import { createTouchControls } from './ui/touchControls';
 import { loadWorld } from './worlds/loadWorld';
 import { WorldDataError } from './worlds/markers';
+import { worldFromQuery, worldTitle } from './worlds/worldSelection';
 
-const START_WORLD = 'umbral';
 const NEAR_PLANE = 0.05;
-
-/** "umbral" → "Umbral" (nombres provisionales de CONTEXTO_PLANETAS.md). */
-function worldTitle(id: string): string {
-  return id.charAt(0).toUpperCase() + id.slice(1);
-}
 
 function requireElement<T extends HTMLElement>(id: string, type: new () => T): T {
   const element = document.getElementById(id);
@@ -52,7 +48,7 @@ async function start(): Promise<void> {
     status.textContent = '';
   });
 
-  const world = await loadWorld(START_WORLD);
+  const world = await loadWorld(worldFromQuery(window.location.search));
   scene.add(world.scene, createStarfield());
 
   const home = wellForWorld(world.info);
@@ -67,6 +63,7 @@ async function start(): Promise<void> {
     input.reset();
   });
   input.dragLookEnabled = () => overlay.dragLook;
+  if (isTouchDevice()) createTouchControls(canvas, input, () => overlay.playing);
   const debug = createDebugOverlay(world.info.id, world.info.radius, player, renderer);
   const gravity = new Vector3();
   const physics = createFixedStep(
