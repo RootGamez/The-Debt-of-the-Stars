@@ -230,6 +230,15 @@ describe('rule 5: the sources and the Blender markers match', () => {
     expect(failures.join(' ')).toMatch(/archivo\.a/);
   });
 
+  it('fails for an INT marker that points at an event source (nothing could be read there)', () => {
+    const failures = checkMarkers(clues, 'umbral', {
+      clueIds: ['umbral.a', 'umbral.evento'],
+      events: ['boca_destello'],
+    });
+
+    expect(failures.join(' ')).toMatch(/umbral\.evento.*evento/);
+  });
+
   it('fails for a source without marker', () => {
     expect(
       checkMarkers(clues, 'umbral', { clueIds: [], events: ['boca_destello'] }).join(' '),

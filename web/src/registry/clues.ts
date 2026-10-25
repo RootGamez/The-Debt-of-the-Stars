@@ -281,9 +281,15 @@ function parseSource(item: unknown, facts: Map<string, Fact>, context: ClueConte
 
 function parseSources(raw: unknown, facts: Map<string, Fact>, context: ClueContext): Source[] {
   const seen = new Set<string>();
+  const events = new Map<string, string>();
   return list(raw, 'fuentes').map((item) => {
     const source = parseSource(item, facts, context);
     uniqueId(seen, source.id, 'fuente');
+    if (source.kind === 'evento' && source.eventName !== undefined) {
+      const other = events.get(source.eventName);
+      if (other) fail(`${source.id} y ${other} usan el mismo evento "${source.eventName}"`);
+      events.set(source.eventName, source.id);
+    }
     return source;
   });
 }

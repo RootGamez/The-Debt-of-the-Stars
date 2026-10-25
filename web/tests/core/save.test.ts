@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   clearSave,
   freshSave,
+  isSaveErased,
   loadSave,
   MAX_FACTS,
   MAX_LOOPS,
@@ -220,5 +221,31 @@ describe('saveProgress (two tabs never lose facts)', () => {
     saveProgress(store, progress(0, many));
 
     expect(loadSave(store).data.facts).toHaveLength(MAX_FACTS);
+  });
+});
+
+describe('saveProgress with a full store (review fixes)', () => {
+  it('keeps the new facts even when the stored list is already at the limit', () => {
+    const store = memoryStore();
+    const junk = Array.from({ length: MAX_FACTS }, (_, i) => `junk.n${i}`);
+    writeSave(store, { version: SAVE_VERSION, loopsCompleted: 0, facts: junk });
+
+    saveProgress(store, { version: SAVE_VERSION, loopsCompleted: 0, facts: ['a.uno'] });
+
+    const saved = loadSave(store).data.facts;
+    expect(saved).toContain('a.uno');
+    expect(saved).toHaveLength(MAX_FACTS);
+  });
+});
+
+describe('isSaveErased', () => {
+  it('is true when another tab removes the save or clears the storage', () => {
+    expect(isSaveErased({ key: SAVE_KEY, newValue: null })).toBe(true);
+    expect(isSaveErased({ key: null, newValue: null })).toBe(true);
+  });
+
+  it('is false for changes of the save and for other keys', () => {
+    expect(isSaveErased({ key: SAVE_KEY, newValue: '{}' })).toBe(false);
+    expect(isSaveErased({ key: 'otra-cosa', newValue: null })).toBe(false);
   });
 });

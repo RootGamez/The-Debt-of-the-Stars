@@ -82,6 +82,11 @@ describe('parseClues rejects malformed data', () => {
       (d) => (at(d.fuentes, 0).id = 'Umbral Placa'),
       /Umbral Placa/,
     ],
+    [
+      'two sources for the same event',
+      (d) => d.fuentes.push({ ...at(d.fuentes, 2), id: 'umbral.destello_bis' }),
+      /boca_destello/,
+    ],
     ['a repeated source id', (d) => d.fuentes.push({ ...at(d.fuentes, 0) }), /umbral\.placa/],
     ['a source in an unknown world', (d) => (at(d.fuentes, 0).mundo = 'marte'), /marte/],
     ['an unknown source type', (d) => (at(d.fuentes, 0).tipo = 'video'), /video/],

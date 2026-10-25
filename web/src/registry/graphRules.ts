@@ -111,6 +111,11 @@ export function checkMarkers(clues: Clues, world: string, markers: WorldMarkers)
     if (!source) failures.push(`la marca INT con clue_id "${id}" no existe en el grafo`);
     else if (source.world !== world)
       failures.push(`la marca "${id}" está en ${world} pero la fuente es de ${source.world}`);
+    else if (source.kind === 'evento') {
+      failures.push(
+        `la marca INT "${id}" apunta a una fuente de tipo evento (se presencia con TRIG, no se lee)`,
+      );
+    }
   }
   for (const source of clues.sources.filter((s) => s.world === world)) {
     if (source.kind === 'evento') {

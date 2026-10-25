@@ -122,7 +122,17 @@ export function saveProgress(store: KeyValueStore | null, data: SaveData): boole
   if (!store) return false;
   const stored = loadSave(store);
   if (stored.readOnly) return false;
-  const facts = [...new Set([...stored.data.facts, ...data.facts])].slice(0, MAX_FACTS);
+  // Los hechos nuevos van primero: si lo guardado estuviera lleno (de ids desconocidos), recortar
+  // el final sacrifica lo viejo y no el progreso de ahora.
+  const facts = [...new Set([...data.facts, ...stored.data.facts])].slice(0, MAX_FACTS);
   const loopsCompleted = Math.max(stored.data.loopsCompleted, data.loopsCompleted);
   return writeSave(store, { ...data, loopsCompleted, facts });
+}
+
+/**
+ * ¿Otra pestaña ha borrado la partida? (evento `storage`). Hay que recargar: si no, esta pestaña
+ * volvería a escribir lo que tiene en memoria y "Empezar de cero" no serviría de nada.
+ */
+export function isSaveErased(event: { key: string | null; newValue: string | null }): boolean {
+  return (event.key === null || event.key === SAVE_KEY) && event.newValue === null;
 }
