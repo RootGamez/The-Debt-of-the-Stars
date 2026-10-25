@@ -1,0 +1,37 @@
+[
+  {
+    "id": "observatorio.libro",
+    "mundo": "observatorio",
+    "tipo": "texto",
+    "titulo": "El libro de turnos",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "profunda": {
+      "requiere": ["lab.existe_lugar_lento"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["lab.imagen_desplazada"]
+    }
+  },
+  {
+    "id": "observatorio.telescopio",
+    "mundo": "observatorio",
+    "tipo": "observacion",
+    "cuando": "alineacion",
+    "titulo": "El telescopio",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "profunda": {
+      "requiere": ["lab.existe_lugar_lento"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["lab.imagen_desplazada"]
+    }
+  },
+  {
+    "id": "observatorio.informe",
+    "mundo": "observatorio",
+    "tipo": "texto",
+    "titulo": "El informe del observatorio",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.calma_aparente"] }
+  }
+]

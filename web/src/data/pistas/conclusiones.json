@@ -1,0 +1,59 @@
+[
+  {
+    "id": "K1",
+    "titulo": "Existe un sitio lento",
+    "hilo": "H5",
+    "requiere": ["lab.existe_lugar_lento"]
+  },
+  {
+    "id": "K2",
+    "titulo": "Lo que se ve en el cielo está desplazado",
+    "hilo": "H5",
+    "requiere": ["lab.imagen_desplazada"]
+  },
+  {
+    "id": "KC",
+    "titulo": "Cuánto hay que corregir lo que se ve",
+    "hilo": "H5",
+    "requiere": ["lab.correccion"]
+  },
+  {
+    "id": "K3",
+    "titulo": "Sé dónde está de verdad el Laboratorio",
+    "hilo": "H5",
+    "requiere": ["K1", "K2", "KC"]
+  },
+  {
+    "id": "K4",
+    "titulo": "Qué es el Contrapeso y qué sustituye",
+    "hilo": "H6",
+    "requiere": ["contrapeso.que_es", "contrapeso.sustituye_motor"]
+  },
+  {
+    "id": "K5",
+    "titulo": "Hay que sincronizar el reloj del Contrapeso",
+    "hilo": "H6",
+    "requiere": [
+      ["contrapeso.reloj", "contrapeso.medir_desfase"],
+      ["contrapeso.metodo_sincronia", "contrapeso.cuenta_sincronia"]
+    ]
+  },
+  {
+    "id": "K6",
+    "titulo": "Dónde y cuándo se instala",
+    "hilo": "H6",
+    "requiere": ["contrapeso.lugar", "contrapeso.ventana_pulso"]
+  },
+  {
+    "id": "K7",
+    "titulo": "Las bocas de una Puerta tienen relojes distintos",
+    "hilo": "H7",
+    "requiere": ["bocas.relojes_distintos"]
+  },
+  {
+    "id": "K8",
+    "titulo": "Cuándo es la prueba mayor",
+    "hilo": "H7",
+    "requiere": [["casa.prueba_llama", "casa.prueba_plazo"]]
+  }
+]

@@ -1,0 +1,15 @@
+[
+  {
+    "id": "instituto.fragmento_luna",
+    "mundo": "luna",
+    "tipo": "objeto",
+    "titulo": "El fragmento de la Luna",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["casa.fragmento_antiguo"] },
+    "profunda": {
+      "requiere": ["deuda.relojes_se_separan"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["bocas.relojes_distintos"]
+    }
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "id": "instituto.ficha",
+    "mundo": "hogar",
+    "tipo": "texto",
+    "titulo": "Ficha de turnos de riego",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["partida.vida_normal"] },
+    "profunda": {
+      "requiere": ["deuda.relojes_se_separan"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["deuda.uso_diario"]
+    }
+  },
+  {
+    "id": "instituto.vitrina_bordes",
+    "mundo": "hogar",
+    "tipo": "objeto",
+    "titulo": "Fragmentos de bordes curvos",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["casa.fragmentos_curvos"] },
+    "profunda": {
+      "requiere": ["deuda.filtraciones"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["casa.bordes_son_mordidas"]
+    }
+  },
+  {
+    "id": "instituto.simbolo_partido",
+    "mundo": "hogar",
+    "tipo": "objeto",
+    "titulo": "El símbolo partido",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["casa.simbolo_partido"] },
+    "profunda": {
+      "requiere": ["casa.fragmentos_de_aqui"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["casa.simbolo_encaja"]
+    }
+  },
+  {
+    "id": "instituto.informe_deuda",
+    "mundo": "hogar",
+    "tipo": "texto",
+    "titulo": "Informe incompleto sobre la deuda",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["deuda.coste_energia"] },
+    "profunda": {
+      "requiere": ["deuda.relojes_se_separan"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["deuda.es_de_tiempo"]
+    }
+  },
+  {
+    "id": "instituto.mesa_puerta",
+    "mundo": "hogar",
+    "tipo": "objeto",
+    "titulo": "La mesa de la Puerta pequeña",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["casa.pruebas_menores"] },
+    "profunda": {
+      "requiere": ["deuda.es_de_tiempo"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["casa.prueba_plazo"]
+    }
+  },
+  {
+    "id": "instituto.directora",
+    "mundo": "hogar",
+    "tipo": "texto",
+    "titulo": "La directora del Instituto",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["casa.mision_luna"] },
+    "profunda": {
+      "requiere": ["casa.prueba_plazo"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["casa.directora_dirige"]
+    }
+  }
+]
