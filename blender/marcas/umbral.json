@@ -1,11 +1,25 @@
 [
   { "nombre": "SPAWN_LaBoca", "lat": 8, "lon": 20, "alto": 1.0, "props": {} },
   {
+    "nombre": "INT_boca",
+    "lat": 8,
+    "lon": 25,
+    "alto": 1.2,
+    "props": { "clue_id": "umbral.boca", "kind": "observacion" }
+  },
+  {
     "nombre": "INT_placa_inauguracion",
     "lat": 9,
     "lon": 23,
     "alto": 1.2,
     "props": { "clue_id": "umbral.placa", "kind": "texto" }
+  },
+  {
+    "nombre": "INT_cuaderno_turno",
+    "lat": 3,
+    "lon": 60,
+    "alto": 1.0,
+    "props": { "clue_id": "umbral.cuaderno", "kind": "texto" }
   },
   {
     "nombre": "INT_registro_envios",
@@ -20,6 +34,20 @@
     "lon": -60,
     "alto": 1.0,
     "props": { "clue_id": "umbral.carta", "kind": "texto" }
+  },
+  {
+    "nombre": "INT_aula",
+    "lat": -15,
+    "lon": 110,
+    "alto": 1.0,
+    "props": { "clue_id": "umbral.aula", "kind": "texto" }
+  },
+  {
+    "nombre": "INT_casas",
+    "lat": 5,
+    "lon": 150,
+    "alto": 1.0,
+    "props": { "clue_id": "umbral.casas", "kind": "objeto" }
   },
   {
     "nombre": "TRIG_LaBoca_Destello",

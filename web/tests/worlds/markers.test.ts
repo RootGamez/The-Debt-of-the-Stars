@@ -167,3 +167,14 @@ describe('readWorldInfo ranges', () => {
     expect(() => readWorldInfo(scene, 'umbral')).toThrow(new RegExp(key));
   });
 });
+
+describe('interaction kinds', () => {
+  it.each(['texto', 'grabacion', 'objeto', 'observacion'])('accepts the kind %s', (kind) => {
+    const scene = umbralScene();
+    scene.add(node('INT_nueva', { clue_id: 'umbral.nueva', kind }));
+
+    const found = collectMarkers(scene).interactions.find((i) => i.name === 'INT_nueva');
+
+    expect(found?.kind).toBe(kind);
+  });
+});
