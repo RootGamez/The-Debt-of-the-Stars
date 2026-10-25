@@ -1,6 +1,6 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.2
+**Versión:** v0.3
 **Última actualización:** 2026-10-25 · Sesión 2
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
@@ -273,7 +273,16 @@ textos de ambiente sin peso en el grafo.
 | 6 | ¿Existe el Observatorio? | Sí, como extra opcional; el grafo no depende de él | ✅ Anthony |
 | 7 | El hueco con el símbolo de casa en `cicatriz.lista_mundos` | La red ya incluye el sistema del protagonista | 🟡 |
 
-## 10. Bitácora
+## 10. Cómo se lee (✅ Anthony, 2026-10-25)
+
+- **El tiempo del ciclo se detiene** mientras se lee un texto y mientras el Registro está abierto.
+- 🟡 Interacción: E (o clic) con la fuente a menos de 2,5 m y mirándola; en móvil, botón "Leer". El Registro: Tab o R.
+- 🟡 Se guardan solo los hechos descubiertos; los rumores y las conclusiones se calculan.
+- 🟡 Al leer se muestra la lectura más profunda que permitan los hechos que ya se saben.
+- 🟡 Un evento da su hecho si el jugador está dentro de su radio mientras ocurre.
+
+## 11. Bitácora
 
 - **2026-10-25 · Sesión 2.** Primer grafo: 7 hilos, 8 conclusiones esenciales, 47 fuentes en 7 lugares, lecturas dobles del prólogo y 7 reglas comprobables. Se propone el Nudo como masa que frena el tiempo y dobla la luz del Laboratorio.
 - **2026-10-25 · Sesión 2 (decisiones).** Anthony confirma: el Nudo como masa del Laboratorio; el Contrapeso solo se instala durante el pulso de las 9:00; la Cámara está en el Laboratorio; el Observatorio existe como extra opcional.
+- **2026-10-25 · Sesión 2 (lectura).** Anthony decide que el tiempo del ciclo se detiene al leer y con el Registro abierto, y aprueba las demás propuestas de la Fase 4 (ver `docs/plan-fase-4-leer-registro.md`).
