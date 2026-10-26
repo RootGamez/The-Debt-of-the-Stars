@@ -17,6 +17,11 @@ export interface WorldRuntime {
 }
 
 export function createWorldRuntime(world: LoadedWorld): WorldRuntime {
+  if (world.scene.parent) {
+    throw new WorldDataError(
+      `${world.info.id}: ya está colgado de un pivote; prepara el mundo antes de añadirlo a la escena`,
+    );
+  }
   const well = wellForWorld(world.info);
   const collision = createBvhWorld(world.markers.colliders);
   const spawnMarker = chooseSpawn(world.markers.spawns);

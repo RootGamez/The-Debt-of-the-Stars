@@ -57,7 +57,7 @@ describe('rate of the clock', () => {
     const surface = feetOn('archivo', t);
     const center = bodyPose(specOf('archivo'), t).position;
     const outward = surface.clone().sub(center).normalize();
-    const halfway = center.clone().addScaledVector(outward, 70 + 105); // 1,5 radios sobre la superficie
+    const halfway = center.clone().addScaledVector(outward, 70 * 1.1 + 105); // 1,5 radios sobre el terreno
 
     const rate = locator.locate(t, undefined, halfway).rate;
 

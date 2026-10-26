@@ -200,6 +200,10 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     },
     setWorld(sources) {
       if (sources === current) return;
+      // Nada de lo abierto en el mundo anterior debe quedarse abierto (ni el tiempo congelado).
+      if (reading.frozen) closeReading();
+      if (registryPanel.isOpen) closeRegistry();
+      notice.hide();
       current.markers.hide();
       current = sources;
       target = undefined;

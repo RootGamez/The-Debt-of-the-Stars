@@ -29,9 +29,18 @@ export function createStarfield(seed = 7): Points {
   }
   const geometry = new BufferGeometry();
   geometry.setAttribute('position', new BufferAttribute(positions, 3));
-  const material = new PointsMaterial({ color: STAR_COLOR, size: 1.6, sizeAttenuation: false });
+  // Sin prueba de profundidad y dibujadas primero: el cielo queda siempre detrás, aunque un mundo
+  // lejano esté más allá de su radio.
+  const material = new PointsMaterial({
+    color: STAR_COLOR,
+    size: 1.6,
+    sizeAttenuation: false,
+    depthTest: false,
+    depthWrite: false,
+  });
   const stars = new Points(geometry, material);
   stars.name = 'Estrellas';
   stars.frustumCulled = false;
+  stars.renderOrder = -1;
   return stars;
 }

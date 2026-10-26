@@ -7,6 +7,7 @@ import {
   isEngulfed,
   overallAbsorptionWindow,
   pickReference,
+  SURFACE_MARGIN,
   type ClockBody,
   type Sphere,
 } from '../../src/system/influence';
@@ -67,8 +68,15 @@ describe('clockRateAt', () => {
   });
 
   it('blends gradually while approaching a mass', () => {
-    // A 1,5 radios de la superficie (mitad del alcance de 3): peso 0,5.
-    expect(clockRateAt(at(25 + 37.5), [slow, fast])).toBeCloseTo(1 + 0.5 * (0.2 - 1));
+    // A 1,5 radios por encima del margen del terreno (mitad del alcance de 3): peso 0,5.
+    expect(clockRateAt(at(25 * SURFACE_MARGIN + 37.5), [slow, fast])).toBeCloseTo(
+      1 + 0.5 * (0.2 - 1),
+    );
+  });
+
+  it('gives the exact rate over the whole rough terrain, not only at the nominal radius', () => {
+    expect(clockRateAt(at(25 * 0.95), [slow])).toBeCloseTo(0.2);
+    expect(clockRateAt(at(25 * SURFACE_MARGIN), [slow])).toBeCloseTo(0.2);
   });
 
   it('is monotonic on the way down', () => {

@@ -1,3 +1,4 @@
+import { Group } from 'three';
 import { describe, expect, it } from 'vitest';
 import { createWorldRuntime, environmentOf } from '../../src/worlds/worldRuntime';
 import { loadBuiltWorld } from '../helpers/builtWorlds';
@@ -24,5 +25,12 @@ describe('createWorldRuntime', () => {
 
     expect(env.wells).toEqual([runtime.well]);
     expect(env.world).toBe(runtime.collision);
+  });
+
+  it('refuses a world already hung from a pivot (its positions must come from the model)', async () => {
+    const world = await loadBuiltWorld('umbral');
+    new Group().add(world.scene);
+
+    expect(() => createWorldRuntime(world)).toThrow(/pivote|colgado/);
   });
 });

@@ -143,6 +143,7 @@ export function createDebugOverlay(sources: DebugSources): DebugOverlay {
       `draw calls ${s.drawCalls} · triángulos ${s.triangles}`,
       `ciclo ${s.loop.loops} · ${s.loop.phase} · Umbral ${s.loop.umbral.toFixed(1)} s · tú ${s.loop.player.toFixed(1)} s`,
       `ritmo ${s.loop.rate.toFixed(2)} · eventos ${s.loop.events.join(', ') || '—'}`,
+      `marco     ${s.system.reference ?? 'espacio abierto'}`,
       `registro ${s.registry.facts.length} hechos · ${s.registry.conclusions.join(' ') || '—'}`,
     ].join('\n');
   };

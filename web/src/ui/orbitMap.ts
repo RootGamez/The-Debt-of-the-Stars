@@ -22,7 +22,11 @@ export function createOrbitMap(
   canvas.width = SIZE;
   canvas.height = SIZE;
   canvas.hidden = true;
-  canvas.setAttribute('aria-hidden', 'true');
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute(
+    'aria-label',
+    'Mapa de órbitas de depuración (F4); los datos están en el panel F3',
+  );
   document.body.append(canvas);
   const context = canvas.getContext('2d');
   const reach = Math.max(...system.bodies.map((b) => b.orbitRadius)) * 1.08;

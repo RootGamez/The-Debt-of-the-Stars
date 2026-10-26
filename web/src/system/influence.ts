@@ -6,6 +6,11 @@ import type { Vector3 } from 'three';
 
 /** Esfera de influencia de un mundo: hasta donde llega su gravedad (radio + alcance), en radios. */
 export const SPHERE_RADII = 1 + GRAVITY_RANGE_RADII;
+/**
+ * El terreno de los mundos es una esfera con relieve: el ritmo del reloj es exactamente el del mundo
+ * hasta este múltiplo del radio y solo después empieza la mezcla.
+ */
+export const SURFACE_MARGIN = 1.1;
 /** El ritmo del reloj se mezcla hasta este número de radios por encima de la superficie. */
 export const CLOCK_RANGE_RADII = 3;
 /** Se conserva el marco actual hasta este margen por fuera de su esfera (sin parpadeos en el borde). */
@@ -61,7 +66,7 @@ export interface ClockBody {
 export function clockRateAt(position: Vector3, bodies: readonly ClockBody[]): number {
   let rate = 1;
   for (const body of bodies) {
-    const above = position.distanceTo(body.center) - body.radius;
+    const above = Math.max(0, position.distanceTo(body.center) - body.radius * SURFACE_MARGIN);
     const weight = Math.min(1, Math.max(0, 1 - above / (body.radius * CLOCK_RANGE_RADII)));
     rate += weight * (body.rate - 1);
   }

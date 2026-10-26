@@ -31,6 +31,8 @@ function worldPosition(object: { getWorldPosition(target: Vector3): Vector3 }): 
 
 export function createWorldSources(runtime: WorldRuntime, clues: Clues): WorldSources {
   const { world, well, collision } = runtime;
+  if (world.scene.parent)
+    throw new Error(`${runtime.id}: las fuentes se crean antes de colgar el mundo`);
   const interactables: Interactable[] = world.markers.interactions
     .filter((m) => clues.sourceById.has(m.clueId))
     .map((m) => ({ id: m.clueId, position: worldPosition(m.object) }));

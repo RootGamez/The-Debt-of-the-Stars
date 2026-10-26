@@ -35,7 +35,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   const scene = new Scene();
   scene.background = new Color(SKY_COLOR);
 
-  const camera = new PerspectiveCamera(50, 1, 0.1, 5000);
+  const camera = new PerspectiveCamera(50, 1, 0.1, 8000);
 
   // Sin caída (decay 0): todos los mundos reciben la misma luz y solo cambia la dirección. Si el mundo
   // no pertenece a un sistema, queda lejos y arriba, como una luz direccional.
