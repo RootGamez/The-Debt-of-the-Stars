@@ -1,5 +1,6 @@
 // Lee las marcas de juego que vienen de Blender dentro del glTF de un mundo.
-// Convención (ver CLAUDE.md): COL_ colisión, INT_ interacción, SPAWN_ aparición, TRIG_ evento.
+// Convención (ver CLAUDE.md): COL_ colisión, INT_ interacción, SPAWN_ aparición del jugador,
+// PARK_ dónde espera la nave al empezar cada ciclo, TRIG_ evento.
 // Las propiedades personalizadas de Blender llegan como userData (export_extras).
 import type { Mesh, Object3D } from 'three';
 
@@ -36,6 +37,8 @@ export interface WorldMarkers {
   colliders: Mesh[];
   interactions: InteractionMarker[];
   spawns: Map<string, Object3D>;
+  /** Dónde espera la nave al empezar cada ciclo (PARK_). */
+  parks: Map<string, Object3D>;
   triggers: TriggerMarker[];
 }
 
@@ -129,6 +132,7 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
     colliders: [],
     interactions: [],
     spawns: new Map(),
+    parks: new Map(),
     triggers: [],
   };
   const colliderRoots: Object3D[] = [];
@@ -144,6 +148,8 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
     } else if (name.startsWith('SPAWN_')) {
       // Los nombres son únicos: Blender no permite repetirlos y GLTFLoader los desambigua.
       markers.spawns.set(name, object);
+    } else if (name.startsWith('PARK_')) {
+      markers.parks.set(name, object);
     }
   });
 

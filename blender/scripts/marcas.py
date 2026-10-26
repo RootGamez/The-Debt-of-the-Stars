@@ -1,4 +1,4 @@
-# Coloca marcas de juego (SPAWN_, INT_, TRIG_) sobre la superficie de un mundo, alineadas
+# Coloca marcas de juego (SPAWN_, PARK_, INT_, TRIG_) sobre la superficie de un mundo, alineadas
 # a la normal. Las propiedades personalizadas viajan a Three.js como userData.
 # Las marcas de cada mundo se leen de blender/marcas/<mundo>.json:
 #   [{"nombre": "SPAWN_LaBoca", "lat": 8, "lon": 20, "alto": 1.0, "props": {}}, ...]
@@ -20,7 +20,7 @@ else:  # ejecutado desde el MCP de Blender, sin archivo
 WORLD = ARGS[0] if ARGS else "umbral"
 REPLACE = True
 # Mismas reglas que web/src/worlds/markers.ts, para fallar aquí y no en el navegador.
-NOMBRE_VALIDO = re.compile(r"^(SPAWN|INT|TRIG|COL)_[A-Za-z0-9_]+$")
+NOMBRE_VALIDO = re.compile(r"^(SPAWN|PARK|INT|TRIG|COL)_[A-Za-z0-9_]+$")
 KINDS = ("texto", "grabacion", "objeto", "observacion")
 TRIGGER_RADIUS_DEFECTO = 5  # igual que DEFAULT_TRIGGER_RADIUS en markers.ts
 
@@ -32,7 +32,7 @@ class MarcaInvalida(Exception):
 def validar(m):
     nombre, props = m["nombre"], m.get("props", {})
     if not NOMBRE_VALIDO.match(nombre):
-        raise MarcaInvalida(f"{nombre}: nombre inválido (prefijo SPAWN_/INT_/TRIG_/COL_ y solo letras, números y _)")
+        raise MarcaInvalida(f"{nombre}: nombre inválido (prefijo SPAWN_/PARK_/INT_/TRIG_/COL_ y solo letras, números y _)")
     if nombre.startswith("INT_"):
         if not props.get("clue_id"):
             raise MarcaInvalida(f"{nombre}: falta clue_id")
@@ -69,7 +69,7 @@ def direccion(lat, lon):
 
 
 def estilo(nombre, props):
-    if nombre.startswith("SPAWN_"):
+    if nombre.startswith(("SPAWN_", "PARK_")):
         return "SINGLE_ARROW", 2.0
     if nombre.startswith("TRIG_"):
         return "SPHERE", float(props.get("radius", TRIGGER_RADIUS_DEFECTO))

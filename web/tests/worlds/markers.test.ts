@@ -22,6 +22,7 @@ function umbralScene(): Group {
     mesh('umbral_Terreno'),
     mesh('COL_umbral_Terreno'),
     node('SPAWN_LaBoca'),
+    node('PARK_Nave'),
     node('INT_placa_inauguracion', { clue_id: 'umbral.placa', kind: 'texto' }),
     node('TRIG_LaBoca_Destello', {
       event: 'boca_destello',
@@ -176,5 +177,18 @@ describe('interaction kinds', () => {
     const found = collectMarkers(scene).interactions.find((i) => i.name === 'INT_nueva');
 
     expect(found?.kind).toBe(kind);
+  });
+});
+
+describe('parking marks (PARK_)', () => {
+  it('collects where the ship waits, apart from the player spawn points', () => {
+    const markers = collectMarkers(umbralScene());
+
+    expect([...markers.parks.keys()]).toEqual(['PARK_Nave']);
+    expect([...markers.spawns.keys()]).toEqual(['SPAWN_LaBoca']);
+  });
+
+  it('is empty in a world without a parking spot', () => {
+    expect(collectMarkers(new Group()).parks.size).toBe(0);
   });
 });
