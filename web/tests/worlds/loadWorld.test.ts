@@ -33,7 +33,11 @@ describe('parseWorld with the real exported Umbral', () => {
       'umbral.placa',
     ]);
     expect(world.markers.triggers.map((t) => t.event)).toEqual(['boca_destello']);
-    expect(world.markers.colliders.map((c) => c.name)).toEqual(['COL_umbral_Terreno']);
+    // El terreno y los lugares de arte_umbral.py (Fase 6).
+    expect(world.markers.colliders.map((c) => c.name).sort()).toEqual([
+      'COL_umbral_Lugares',
+      'COL_umbral_Terreno',
+    ]);
   });
 
   it('computes world matrices so markers can be used before the first render', async () => {

@@ -2,7 +2,7 @@
 import {
   ACESFilmicToneMapping,
   Color,
-  HemisphereLight,
+  AmbientLight,
   PerspectiveCamera,
   PointLight,
   Scene,
@@ -14,6 +14,13 @@ import {
 const BRASA_COLOR = 0xffb070;
 const BRASA_INTENSITY = 2.2;
 const SKY_COLOR = 0x07070c;
+/**
+ * Luz ambiente: en planetas esféricos no hay un "arriba" común (una luz hemisférica iluminaría según
+ * el eje Y del mundo), así que es uniforme. Lo justo para que la cara de noche y lo que está a
+ * contraluz se lean, sin quitarle protagonismo a la Brasa.
+ */
+const AMBIENT_COLOR = 0x7a6a8c;
+const AMBIENT_INTENSITY = 1.0;
 const MAX_PIXEL_RATIO = 1.5;
 
 export interface Stage {
@@ -41,7 +48,7 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   // no pertenece a un sistema, queda lejos y arriba, como una luz direccional.
   const sun = new PointLight(BRASA_COLOR, BRASA_INTENSITY, 0, 0);
   sun.position.set(3000, 1500, 2000);
-  scene.add(sun, new HemisphereLight(0x8a7aa0, 0x1a1418, 0.35));
+  scene.add(sun, new AmbientLight(AMBIENT_COLOR, AMBIENT_INTENSITY));
 
   const resize = (): void => {
     const { clientWidth: w, clientHeight: h } = canvas;

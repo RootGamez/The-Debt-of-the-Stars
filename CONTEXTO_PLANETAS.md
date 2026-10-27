@@ -1,6 +1,6 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.4
+**Versión:** v0.5
 **Última actualización:** 2026-10-25 · Sesión 3
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
@@ -51,6 +51,7 @@
 - **Plantilla de un mundo:** 1 entrada memorable, de 3 a 5 puntos de interés, 1 evento cronometrado, 1 puzzle principal, de 2 a 3 textos clave.
 - **Tiempo de exploración:** un mundo se explora en 5 a 10 minutos, menos de un ciclo, y se vuelve a visitar con preguntas nuevas.
 - **Sonido:** cada mundo tiene su propio silencio. El silencio es parte del tono, no una carencia.
+- **Lenguaje visual de los Ausentes (🟡):** *anillos y estratos*. Arcos y anillos concéntricos (las Puertas lo impregnan todo), muros en capas horizontales como estratos de tiempo y **marcas de reloj** (rayas en círculo) como ornamento. Arenisca clara y metal pizarra; luz ámbar. Sin espirales, hexágonos ni cristal turquesa.
 
 ---
 
@@ -65,7 +66,7 @@
 **Lugares clave:**
 1. **La Boca.** Un anillo de piedra y metal en una meseta baja. El protagonista aparece frente a él en cada ciclo. No es un portal brillante: es un anillo apagado con una grieta de luz que se cierra a su espalda.
 2. **El Muelle de Envíos.** Plataforma donde preparaban cargas. Aquí está el registro de envíos con un destino que no figura en ningún mapa (pista de *dónde*).
-3. **El Mirador del Ocaso.** Un banco de piedra frente a la estrella, con dos tazas talladas. Alguien esperaba a alguien. Pura melancolía.
+3. **El Mirador del Ocaso.** Un banco de piedra frente a la estrella, con dos tazas talladas. Alguien esperaba a alguien. Pura melancolía. (🟡 Está en el terminador: como Umbral siempre muestra la misma cara a la Brasa, desde el Mirador la estrella toca el horizonte en un ocaso que no termina.)
 4. **El Aula.** Una sala con inscripciones infantiles que refuerzan lo aprendido de la lengua.
 5. **Las Casas.** Seis casas con las mesas servidas, abandonadas sin señal de violencia.
 
@@ -275,3 +276,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-10-25 · Sesión 2.** Anthony confirma el Observatorio como extra opcional y el Nudo como masa junto al Laboratorio Oculto (ver `CONTEXTO_PISTAS.md`).
 - **2026-10-25 · Sesión 3.** Anthony decide que los mundos orbitan en rieles y en tiempo real (pregunta 6) y aprueba el plan de la Fase 5 (sistema solar y nave): nave en cabina que llega contigo en cada ciclo, choque letal a más de 30 m/s, la Brasa mortal y el reloj que se mezcla según la cercanía a cada masa.
 - **2026-10-27 · Sesión 4.** Se propone el aspecto de la nave (🟡): la lanzadera del Instituto, con el reloj doble en el tablero. La primera versión copiaba la nave de Outer Wilds y se descartó.
+- **2026-10-27 · Sesión 4 (Fase 6).** Se propone el lenguaje visual de los Ausentes (🟡 anillos y estratos) y Umbral se viste con sus siete lugares; el Mirador queda en el terminador, con la Brasa en el horizonte.

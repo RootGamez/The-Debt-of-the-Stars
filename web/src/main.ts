@@ -262,6 +262,10 @@ async function start(): Promise<void> {
     };
     window.__juego.shipTo = (world, altitude) => flight?.warpTo(world, altitude) ?? false;
     window.__juego.toShip = () => flight?.standAtHatch(currentWorld.id) ?? false;
+    window.__juego.skipTo = (seconds) => {
+      session.director.skip(seconds - session.director.clock.t);
+      return session.director.clock.t;
+    };
   }
 
   let shipDeath: DeathCause | undefined;
