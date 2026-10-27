@@ -1,3 +1,79 @@
 [
-  { "nombre": "SPAWN_Prueba", "lat": 35, "lon": 10, "alto": 1.0, "props": {} }
+  {
+    "nombre": "SPAWN_Motor",
+    "lat": 35.8,
+    "lon": 40.0,
+    "alto": 3.909,
+    "props": {}
+  },
+  {
+    "nombre": "INT_sala_motor",
+    "lat": 30.203,
+    "lon": 40.0,
+    "alto": 2.456,
+    "props": {
+      "clue_id": "cicatriz.sala_motor",
+      "kind": "objeto"
+    }
+  },
+  {
+    "nombre": "INT_bitacora",
+    "lat": 31.869,
+    "lon": 35.058,
+    "alto": 3.833,
+    "props": {
+      "clue_id": "cicatriz.bitacora",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_lista_mundos",
+    "lat": 31.848,
+    "lon": 44.923,
+    "alto": 2.807,
+    "props": {
+      "clue_id": "cicatriz.lista_mundos",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_mordidas",
+    "lat": -2.474,
+    "lon": -54.924,
+    "alto": 1.492,
+    "props": {
+      "clue_id": "cicatriz.mordidas",
+      "kind": "observacion"
+    }
+  },
+  {
+    "nombre": "INT_grabacion_esceptico",
+    "lat": 45.0,
+    "lon": 100.0,
+    "alto": 0.653,
+    "props": {
+      "clue_id": "cicatriz.grabacion_esceptico",
+      "kind": "grabacion"
+    }
+  },
+  {
+    "nombre": "INT_primera_puerta",
+    "lat": 4.984,
+    "lon": 67.352,
+    "alto": 2.592,
+    "props": {
+      "clue_id": "cicatriz.primera_puerta",
+      "kind": "observacion"
+    }
+  },
+  {
+    "nombre": "INT_borde",
+    "lat": 53.203,
+    "lon": -50.129,
+    "alto": 1.431,
+    "props": {
+      "clue_id": "cicatriz.borde",
+      "kind": "observacion"
+    }
+  }
 ]
