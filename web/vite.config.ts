@@ -26,6 +26,8 @@ export default defineConfig({
         'src/render/loopEffects.ts',
         'src/render/sourceMarkers.ts',
         'src/reading/readingUi.ts',
+        'src/reading/worldSources.ts',
+        'src/game/**',
         'src/ui/**',
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

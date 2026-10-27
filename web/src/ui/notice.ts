@@ -4,6 +4,7 @@ const VISIBLE_MS = 4500;
 
 export interface Notice {
   show(message: string): void;
+  hide(): void;
   dispose(): void;
 }
 
@@ -15,16 +16,20 @@ export function createNotice(): Notice {
   document.body.append(element);
   let timer: number | undefined;
 
+  function hide(): void {
+    window.clearTimeout(timer);
+    element.classList.remove('notice-visible');
+    element.textContent = '';
+  }
+
   return {
+    hide,
     show(message) {
       // La región existe siempre (vacía): así los lectores de pantalla anuncian el cambio de texto.
       element.textContent = message;
       element.classList.add('notice-visible');
       window.clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        element.classList.remove('notice-visible');
-        element.textContent = '';
-      }, VISIBLE_MS);
+      timer = window.setTimeout(hide, VISIBLE_MS);
     },
     dispose() {
       window.clearTimeout(timer);

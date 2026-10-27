@@ -3,6 +3,7 @@
 // Sin `?debug` y con el panel oculto no calcula nada.
 import { Vector3, type WebGLRenderer } from 'three';
 import type { Player } from '../core/player';
+import type { ShipSnapshot } from '../game/shipFlight';
 import { gravityAt, type GravityWell } from '../physics/gravity';
 
 export interface DebugSnapshot {
@@ -23,6 +24,17 @@ export interface DebugSnapshot {
   registry: RegistrySnapshot;
   /** Ciclo: tiempo de Umbral, tiempo del jugador, fase, ciclos vividos, ritmo y eventos en curso. */
   loop: LoopSnapshot;
+  /** El sistema: en qué marco estás y dónde está cada mundo en el marco del sistema. */
+  system: SystemSnapshot;
+  /** La nave (null si el mundo no está en el sistema). */
+  ship: ShipSnapshot | null;
+}
+
+export interface SystemSnapshot {
+  /** Mundo de referencia; null = espacio abierto. */
+  reference: string | null;
+  /** Posición de cada mundo en el marco del sistema (origen = la Brasa), en metros. */
+  bodies: Record<string, [number, number, number]>;
 }
 
 export interface RegistrySnapshot {
@@ -53,6 +65,12 @@ declare global {
       snapshot(): DebugSnapshot | null;
       /** Coloca al jugador frente a una fuente (`clue_id`). false si no existe. */
       teleportTo?(clueId: string): boolean;
+      /** Pasa a pie a otro mundo del sistema (sin volar). false si no existe. */
+      warpTo?(world: string): boolean;
+      /** Pilotando: la nave aparece quieta a esa altura sobre un mundo. false si no se puede. */
+      shipTo?(world: string, altitude: number): boolean;
+      /** A pie: el jugador aparece junto a la escotilla de la nave. */
+      toShip?(): boolean;
     };
   }
 }
@@ -64,15 +82,19 @@ export interface DebugOverlay {
   dispose(): void;
 }
 
-export function createDebugOverlay(
-  worldId: string,
-  home: GravityWell,
-  wells: readonly GravityWell[],
-  player: Player,
-  renderer: WebGLRenderer,
-  loopInfo: () => LoopSnapshot,
-  registryInfo: () => RegistrySnapshot,
-): DebugOverlay {
+/** De dónde saca el panel lo que muestra (todo cambia al pasar de un mundo a otro). */
+export interface DebugSources {
+  where: () => { world: string; home: GravityWell; wells: readonly GravityWell[] };
+  player: Player;
+  renderer: WebGLRenderer;
+  loop: () => LoopSnapshot;
+  registry: () => RegistrySnapshot;
+  system: () => SystemSnapshot;
+  ship: () => ShipSnapshot | null;
+}
+
+export function createDebugOverlay(sources: DebugSources): DebugOverlay {
+  const { where, player, renderer } = sources;
   const exposed = new URLSearchParams(window.location.search).has('debug');
   const panel = document.createElement('pre');
   panel.className = 'debug';
@@ -96,8 +118,9 @@ export function createDebugOverlay(
 
   const takeSnapshot = (playing: boolean): DebugSnapshot => {
     const { state } = player;
+    const { world, home, wells } = where();
     return {
-      world: worldId,
+      world,
       altitude: state.position.distanceTo(home.center) - home.radius,
       grounded: state.grounded,
       speed: state.velocity.length(),
@@ -108,8 +131,10 @@ export function createDebugOverlay(
       fps,
       drawCalls: renderer.info.render.calls,
       triangles: renderer.info.render.triangles,
-      loop: loopInfo(),
-      registry: registryInfo(),
+      loop: sources.loop(),
+      registry: sources.registry(),
+      system: sources.system(),
+      ship: sources.ship(),
     };
   };
 
@@ -127,6 +152,7 @@ export function createDebugOverlay(
       `draw calls ${s.drawCalls} · triángulos ${s.triangles}`,
       `ciclo ${s.loop.loops} · ${s.loop.phase} · Umbral ${s.loop.umbral.toFixed(1)} s · tú ${s.loop.player.toFixed(1)} s`,
       `ritmo ${s.loop.rate.toFixed(2)} · eventos ${s.loop.events.join(', ') || '—'}`,
+      `marco     ${s.system.reference ?? 'espacio abierto'}`,
       `registro ${s.registry.facts.length} hechos · ${s.registry.conclusions.join(' ') || '—'}`,
     ].join('\n');
   };

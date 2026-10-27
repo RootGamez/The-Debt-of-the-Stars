@@ -2,9 +2,9 @@
 import {
   ACESFilmicToneMapping,
   Color,
-  DirectionalLight,
   HemisphereLight,
   PerspectiveCamera,
+  PointLight,
   Scene,
   SRGBColorSpace,
   WebGLRenderer,
@@ -20,7 +20,8 @@ export interface Stage {
   renderer: WebGLRenderer;
   scene: Scene;
   camera: PerspectiveCamera;
-  sun: DirectionalLight;
+  /** La Brasa: luz puntual sin caída con la distancia, para que cada mundo se ilumine desde donde está. */
+  sun: PointLight;
   /** Deja de observar el tamaño y libera el contexto WebGL. */
   dispose(): void;
 }
@@ -34,10 +35,12 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
   const scene = new Scene();
   scene.background = new Color(SKY_COLOR);
 
-  const camera = new PerspectiveCamera(50, 1, 0.1, 5000);
+  const camera = new PerspectiveCamera(50, 1, 0.1, 8000);
 
-  const sun = new DirectionalLight(BRASA_COLOR, BRASA_INTENSITY);
-  sun.position.set(300, 150, 200);
+  // Sin caída (decay 0): todos los mundos reciben la misma luz y solo cambia la dirección. Si el mundo
+  // no pertenece a un sistema, queda lejos y arriba, como una luz direccional.
+  const sun = new PointLight(BRASA_COLOR, BRASA_INTENSITY, 0, 0);
+  sun.position.set(3000, 1500, 2000);
   scene.add(sun, new HemisphereLight(0x8a7aa0, 0x1a1418, 0.35));
 
   const resize = (): void => {

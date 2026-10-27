@@ -19,7 +19,7 @@ export function isTouchDevice(): boolean {
 }
 
 const DESKTOP_HELP =
-  'WASD moverse · ratón mirar · Espacio saltar · Shift correr · Esc pausa · F3 datos';
+  'WASD moverse · ratón mirar · Espacio saltar · Shift correr · F nave · Esc pausa · F3 datos';
 
 function line(tag: 'strong' | 'span' | 'small', text: string, className?: string): HTMLElement {
   const element = document.createElement(tag);

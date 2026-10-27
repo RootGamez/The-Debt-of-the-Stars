@@ -2,12 +2,10 @@
 // Tab el Registro, Esc cerrar), el panel de lectura, el Registro, los rombos del mundo y los eventos
 // que se presencian. La lógica está en readingSession.ts, interaction.ts y registryView.ts (con
 // tests); esto lo cubren las pruebas de Playwright (e2e/reading.spec.ts).
-import { Vector3, type PerspectiveCamera, type Scene } from 'three';
+import { Vector3, type PerspectiveCamera } from 'three';
 import type { Player } from '../core/player';
 import type { LoopSession } from '../core/loopSession';
-import type { RaycastWorld } from '../physics/collisionWorld';
 import { lookAlong } from '../physics/surfaceFrame';
-import { createSourceMarkers } from '../render/sourceMarkers';
 import type { Clues } from '../registry/clues';
 import {
   insideRadius,
@@ -23,21 +21,19 @@ import { createNotice } from '../ui/notice';
 import type { PauseOverlay } from '../ui/pauseOverlay';
 import { createReadingPanel } from '../ui/readingPanel';
 import { createRegistryPanel } from '../ui/registryPanel';
-import type { LoadedWorld } from '../worlds/loadWorld';
 import { WorldDataError } from '../worlds/markers';
 import type { ReadingSession } from './readingSession';
+import type { WorldSources } from './worldSources';
 
 export interface ReadingUiOptions {
-  scene: Scene;
   camera: PerspectiveCamera;
-  world: LoadedWorld;
+  /** Fuentes del mundo donde empieza el jugador. */
+  sources: WorldSources;
   clues: Clues;
   reading: ReadingSession;
   loop: LoopSession;
   overlay: PauseOverlay;
   player: Player;
-  collision: RaycastWorld;
-  planetCenter: Vector3;
   touch: boolean;
 }
 
@@ -53,6 +49,10 @@ export interface RegistrySnapshot {
 export interface ReadingUi {
   /** Una vez por fotograma, con el tiempo en segundos. */
   update(timeSeconds: number): void;
+  /** El jugador pasa a otro mundo: sus fuentes sustituyen a las del anterior. */
+  setWorld(sources: WorldSources): void;
+  /** Oculta y desactiva las interacciones mientras se pilota. */
+  setEnabled(enabled: boolean): void;
   /** Hay una lectura o el Registro abiertos: el ciclo y el movimiento deben esperar. */
   readonly blocking: boolean;
   openRegistry(): void;
@@ -62,36 +62,16 @@ export interface ReadingUi {
   dispose(): void;
 }
 
-interface EventSource {
-  sourceId: string;
-  position: Vector3;
-  radius: number;
-}
-
 /** Distancia a la que se deja al jugador de una fuente al teletransportarlo (m). */
 const TELEPORT_DISTANCE = 1.4;
 const GROUND_PROBE = 3;
 const GROUND_PROBE_DEPTH = 40;
 
-function worldPosition(object: { getWorldPosition(target: Vector3): Vector3 }): Vector3 {
-  return object.getWorldPosition(new Vector3());
-}
-
 export function createReadingUi(options: ReadingUiOptions): ReadingUi {
-  const { scene, camera, world, clues, reading, loop, overlay, player, planetCenter, touch } =
-    options;
+  const { camera, clues, reading, loop, overlay, player, touch } = options;
+  let current = options.sources;
   const abort = new AbortController();
   const lineOf = (id: string): string => clues.facts.get(id)?.line ?? id;
-
-  const interactables: Interactable[] = world.markers.interactions
-    .filter((m) => clues.sourceById.has(m.clueId))
-    .map((m) => ({ id: m.clueId, position: worldPosition(m.object) }));
-  const eventSources: EventSource[] = world.markers.triggers.flatMap((trigger) => {
-    const source = clues.sources.find((s) => s.kind === 'evento' && s.eventName === trigger.event);
-    return source
-      ? [{ sourceId: source.id, position: worldPosition(trigger.object), radius: trigger.radius }]
-      : [];
-  });
 
   const seen = new Set<string>();
   /** ¿Aún puede dar algo la fuente? Se calcula una vez y se invalida al aprender (no cada fotograma). */
@@ -102,9 +82,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   const available: Interactable[] = [];
   const forward = new Vector3();
   let target: Interactable | undefined;
+  let enabled = true;
 
   const notice = createNotice();
-  const markers = createSourceMarkers(scene, interactables, planetCenter);
   const registryPanel = createRegistryPanel(() => {
     closeRegistry();
   });
@@ -118,6 +98,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   function canInteract(): boolean {
     return (
       overlay.playing &&
+      enabled &&
       loop.director.phase === 'playing' &&
       player.state.grounded && // no se esquiva una caída abriendo una lectura en el aire
       !reading.frozen &&
@@ -188,7 +169,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   window.addEventListener('keydown', onKey, { signal: abort.signal });
 
   function witnessEvents(): void {
-    for (const event of eventSources) {
+    for (const event of current.eventSources) {
       if (!canGive(event.sourceId)) continue;
       if (!insideRadius(camera.position, event.position, event.radius)) continue;
       const learned = reading.witness(event.sourceId, loop.activeEventIds);
@@ -199,7 +180,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
 
   function findTarget(): Interactable | undefined {
     available.length = 0;
-    for (const item of interactables) {
+    for (const item of current.interactables) {
       if (reading.isAvailable(item.id, loop.activeEventIds)) available.push(item);
     }
     camera.getWorldDirection(forward);
@@ -214,27 +195,52 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   return {
     update(timeSeconds) {
       if (!overlay.playing && reading.frozen) closeReading(); // al pausar se cierra la lectura
+      if (!enabled) {
+        prompt.hide();
+        current.markers.hide();
+        target = undefined;
+        return;
+      }
       if (overlay.playing && loop.director.phase === 'playing' && !reading.frozen) witnessEvents();
       target = findTarget();
       const kind = target ? clues.sourceById.get(target.id)?.kind : undefined;
       if (target && kind) prompt.show(promptLabel(kind, touch));
       else prompt.hide();
-      markers.update(timeSeconds, camera.position, wantsMarker);
+      current.markers.update(timeSeconds, camera.position, wantsMarker);
+    },
+    setWorld(sources) {
+      if (sources === current) return;
+      // Nada de lo abierto en el mundo anterior debe quedarse abierto (ni el tiempo congelado).
+      if (reading.frozen) closeReading();
+      if (registryPanel.isOpen) closeRegistry();
+      notice.hide();
+      current.markers.hide();
+      current = sources;
+      target = undefined;
+      prompt.hide();
+    },
+    setEnabled(value) {
+      enabled = value;
+      if (!enabled) {
+        target = undefined;
+        prompt.hide();
+        current.markers.hide();
+      }
     },
     openRegistry,
     get blocking() {
       return reading.frozen || registryPanel.isOpen;
     },
     teleportTo(clueId) {
-      const item = interactables.find((i) => i.id === clueId);
+      const item = current.interactables.find((i) => i.id === clueId);
       if (!item) return false;
-      const up = item.position.clone().sub(planetCenter).normalize();
+      const up = item.position.clone().sub(current.center).normalize();
       const side = new Vector3()
         .crossVectors(up, Math.abs(up.y) > 0.9 ? new Vector3(1, 0, 0) : new Vector3(0, 1, 0))
         .normalize();
       const spot = item.position.clone().addScaledVector(side, TELEPORT_DISTANCE);
       const above = spot.clone().addScaledVector(up, GROUND_PROBE);
-      const distance = options.collision.raycast(above, up.clone().negate(), GROUND_PROBE_DEPTH);
+      const distance = current.collision.raycast(above, up.clone().negate(), GROUND_PROBE_DEPTH);
       if (distance === null) throw new WorldDataError(`No hay suelo junto a ${clueId}`);
       const feet = above.addScaledVector(up, -distance);
       player.moveTo(feet, lookAlong(up, item.position.clone().sub(feet)));
@@ -252,7 +258,6 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     dispose() {
       abort.abort();
       notice.dispose();
-      markers.dispose();
       registryPanel.dispose();
       readingPanel.dispose();
       prompt.dispose();

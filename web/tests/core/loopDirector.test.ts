@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { LoopDirector, type DirectorOptions } from '../../src/core/loopDirector';
+import { LoopDirector, type DirectorOptions, type Locale } from '../../src/core/loopDirector';
 import { parseChronology } from '../../src/core/timeline';
 import { freshSave, type SaveData } from '../../src/core/save';
 import { FADE_IN_SECONDS, FADE_OUT_SECONDS, FALL_DEATH_SPEED } from '../../src/data/loop';
@@ -9,17 +9,25 @@ const chronology = parseChronology({
   eventos: [
     { id: 'inicio', t: 0, duracion: 1 },
     { id: 'pulso', t: 50, duracion: 2 },
+    { id: 'ranura', t: 20, duracion: 10, mundo: 'archivo' },
   ],
   absorcion: { umbral: [80, 90] },
   relojes: {},
 });
 
-function director(overrides: Partial<DirectorOptions> = {}) {
+/** Opciones del director más el lugar donde está el jugador, que los tests pueden cambiar sobre la marcha. */
+function director(overrides: Partial<DirectorOptions> & Partial<Locale> = {}) {
+  const { worldId, rate, engulfed, ...options } = overrides;
+  // `worldId: undefined` es el espacio abierto: no se puede sustituir por el valor por defecto.
+  const place: Locale = {
+    worldId: 'worldId' in overrides ? worldId : 'hogar',
+    rate: rate ?? 1,
+    engulfed: engulfed ?? false,
+  };
   const saved: SaveData[] = [];
   const d = new LoopDirector({
     chronology,
-    worldId: 'hogar',
-    baseRate: 1,
+    locate: () => place,
     mode: 'player',
     extraEvents: [],
     save: freshSave(),
@@ -27,9 +35,9 @@ function director(overrides: Partial<DirectorOptions> = {}) {
       saved.push(data);
       return true;
     },
-    ...overrides,
+    ...options,
   });
-  return { d, saved };
+  return { d, saved, place };
 }
 
 const QUIET = { landings: 0, lastLandingSpeed: 0 };
@@ -58,7 +66,7 @@ describe('LoopDirector while playing', () => {
   });
 
   it('runs the outside clock faster on a slow world (mode B)', () => {
-    const { d } = director({ baseRate: 0.5 });
+    const { d } = director({ rate: 0.5 });
 
     run(d, 10);
 
@@ -66,23 +74,16 @@ describe('LoopDirector while playing', () => {
     expect(d.clock.t).toBeCloseTo(20);
   });
 
-  it('follows the clock curve of the world when it has one', () => {
-    const curved = parseChronology({
-      duracion: 100,
-      eventos: [],
-      relojes: {
-        hogar: [
-          [0, 1],
-          [100, 0.5],
-        ],
-      },
-    });
-    const { d } = director({ chronology: curved });
+  it('follows the rate of the place as it changes', () => {
+    const { d, place } = director({ rate: 1 });
+    run(d, 10);
 
-    run(d, 50);
+    place.rate = 0.5;
+    run(d, 10);
 
-    expect(d.rate).toBeLessThan(1);
-    expect(d.clock.t).toBeGreaterThan(50);
+    expect(d.rate).toBe(0.5);
+    expect(d.clock.tau).toBeCloseTo(20);
+    expect(d.clock.t).toBeCloseTo(30);
   });
 });
 
@@ -118,6 +119,15 @@ describe('dying', () => {
     expect(soft.phase).toBe('playing');
     expect(hard.phase).toBe('dying');
     expect(hard.deathCause).toBe('caida');
+  });
+
+  it.each(['choque', 'calor'] as const)('accepts ship death cause %s', (cause) => {
+    const { d } = director();
+
+    d.update(0.1, QUIET, cause);
+
+    expect(d.phase).toBe('dying');
+    expect(d.deathCause).toBe(cause);
   });
 
   it('reads each landing only once', () => {
@@ -255,7 +265,7 @@ describe('landings while not playing (review fixes)', () => {
 
 describe('director details (review fixes)', () => {
   it('uses the reference mode when asked (A: loop clock on real time)', () => {
-    const { d } = director({ baseRate: 0.5, mode: 'reference' });
+    const { d } = director({ rate: 0.5, mode: 'reference' });
 
     run(d, 10);
 
@@ -264,7 +274,7 @@ describe('director details (review fixes)', () => {
   });
 
   it('reports the same clamped rate it applies', () => {
-    const { d } = director({ baseRate: 0 });
+    const { d } = director({ rate: 0 });
 
     expect(d.rate).toBeGreaterThan(0);
   });
@@ -294,5 +304,95 @@ describe('director details (review fixes)', () => {
     run(d, 60);
 
     expect(d.recentEvents).toEqual(['inicio', 'pulso']);
+  });
+});
+
+describe('following the player from place to place (Phase 5)', () => {
+  it('reports the events of the world where the player is and not the others', () => {
+    const elsewhere = director({ worldId: 'hogar' });
+    const there = director({ worldId: 'archivo' });
+
+    expect(run(elsewhere.d, 40).started).not.toContain('ranura');
+    expect(run(there.d, 40).started).toContain('ranura');
+  });
+
+  it('reports no world event in open space', () => {
+    const { d } = director({ worldId: undefined });
+
+    expect(run(d, 40).started).not.toContain('ranura');
+    expect(d.active().map((e) => e.id)).not.toContain('ranura');
+  });
+
+  it('does not lose or repeat events when changing world in the middle of a run', () => {
+    const { d, place } = director({ worldId: 'hogar' });
+    const started: string[] = [];
+
+    started.push(...run(d, 10).started);
+    place.worldId = 'archivo';
+    started.push(...run(d, 15).started); // la ranura empieza en 20 s: la ve
+    place.worldId = 'hogar';
+    started.push(...run(d, 5).started);
+    place.worldId = 'archivo';
+    started.push(...run(d, 5).started); // ya empezó: no se repite
+
+    expect(started.filter((id) => id === 'ranura')).toHaveLength(1);
+    expect(started.filter((id) => id === 'inicio')).toHaveLength(1);
+  });
+
+  it('shows an event that is already under way when arriving at its world', () => {
+    const { d, place } = director({ worldId: 'hogar' });
+    run(d, 25);
+
+    expect(d.active().map((e) => e.id)).not.toContain('ranura');
+    place.worldId = 'archivo';
+
+    expect(d.active().map((e) => e.id)).toContain('ranura');
+  });
+
+  it('is absorbed only when the world it is on is absorbed', () => {
+    const safe = director({ worldId: 'hogar' });
+    const doomed = director({ worldId: 'umbral' });
+    safe.d.skip(85);
+    doomed.d.skip(85);
+
+    run(safe.d, 6);
+    run(doomed.d, 6);
+
+    expect(safe.d.phase).toBe('playing');
+    expect(doomed.d.deathCause).toBe('absorcion');
+  });
+
+  it('escapes the absorption of a world by leaving it in time', () => {
+    const { d, place } = director({ worldId: 'umbral' });
+    d.skip(85);
+    run(d, 2);
+
+    place.worldId = undefined;
+    run(d, 8);
+
+    expect(d.phase).toBe('playing');
+  });
+
+  it('is absorbed in open space when the front reaches the player', () => {
+    const { d, place } = director({ worldId: undefined });
+    d.skip(60);
+    run(d, 1);
+    expect(d.phase).toBe('playing');
+    expect(d.absorption).toBe(0);
+
+    place.engulfed = true;
+    run(d, 0.2);
+
+    expect(d.absorption).toBe(1);
+    expect(d.phase).toBe('dying');
+    expect(d.deathCause).toBe('absorcion');
+  });
+
+  it('ignores the front while the player is inside the influence of a world', () => {
+    const { d } = director({ worldId: 'hogar', engulfed: true });
+
+    run(d, 5);
+
+    expect(d.phase).toBe('playing');
   });
 });

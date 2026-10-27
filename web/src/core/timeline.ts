@@ -112,7 +112,7 @@ export function parseChronology(raw: unknown, knownWorlds?: readonly string[]): 
   return { duration, events, absorption, clocks };
 }
 
-function appliesTo(event: TimelineEvent, worldId: string): boolean {
+function appliesTo(event: TimelineEvent, worldId: string | undefined): boolean {
   return event.world === undefined || event.world === worldId;
 }
 
@@ -124,7 +124,7 @@ export function eventsBetween(
   events: readonly TimelineEvent[],
   from: number,
   to: number,
-  worldId: string,
+  worldId: string | undefined,
 ): EventChange[] {
   const changes: EventChange[] = [];
   for (const event of events) {
@@ -136,11 +136,14 @@ export function eventsBetween(
   return changes.sort((a, b) => a.at - b.at || (a.kind === 'start' ? -1 : 1));
 }
 
-/** Eventos en curso en el instante `t` (para restaurar el estado visual tras un salto de tiempo). */
+/**
+ * Eventos en curso en el instante `t` (para restaurar el estado visual tras un salto de tiempo).
+ * En el espacio abierto (`worldId` indefinido) solo cuentan los eventos que no son de un mundo.
+ */
 export function activeAt(
   events: readonly TimelineEvent[],
   t: number,
-  worldId: string,
+  worldId: string | undefined,
 ): TimelineEvent[] {
   return events.filter((e) => appliesTo(e, worldId) && t >= e.t && t < e.t + e.duration);
 }

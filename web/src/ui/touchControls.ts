@@ -3,6 +3,7 @@
 import { intentFromStick, type MoveIntent } from '../core/input';
 import type { InputController } from '../core/inputController';
 import { MOUSE_LOOK_SENSITIVITY, TOUCH_LOOK_SENSITIVITY } from '../data/movement';
+import { EMPTY_FLIGHT_KEYS, type FlightKeys } from '../ship/shipInput';
 
 const STICK_RADIUS = 56; // px
 const DEAD_ZONE = 0.15;
@@ -14,11 +15,15 @@ export interface TouchControls {
   reset(): void;
   /** Muestra u oculta los botones (se ocultan en la pausa). */
   setVisible(visible: boolean): void;
+  /** Actualiza qué controles de nave están disponibles. */
+  update(): void;
   dispose(): void;
 }
 
 export interface TouchOptions {
   isPlaying: () => boolean;
+  isPiloting: () => boolean;
+  onShipAction: (action: 'board' | 'target' | 'stabilize') => void;
   onPause: () => void;
 }
 
@@ -41,14 +46,25 @@ function button(className: string, label: string, parent: HTMLElement): HTMLButt
 export function createTouchControls(
   canvas: HTMLCanvasElement,
   input: InputController,
-  { isPlaying, onPause }: TouchOptions,
+  { isPlaying, isPiloting, onShipAction, onPause }: TouchOptions,
 ): TouchControls {
   const layer = div('touch', document.body);
   const base = div('touch-stick', layer);
   const knob = div('touch-knob', base);
   const jump = button('touch-jump', 'Saltar', layer);
   const pause = button('touch-pause', 'Pausa', layer);
+  const shipPanel = div('touch-ship-controls', layer);
+  const board = button('touch-ship-action', 'Nave', shipPanel);
+  const target = button('touch-ship-action', 'Objetivo', shipPanel);
+  const stabilize = button('touch-ship-action', 'Estab.', shipPanel);
+  const up = button('touch-ship-action', '↑', shipPanel);
+  const down = button('touch-ship-action', '↓', shipPanel);
+  const match = button('touch-ship-action', 'Frenar', shipPanel);
+  up.classList.add('touch-ship-flight');
+  down.classList.add('touch-ship-flight');
+  match.classList.add('touch-ship-flight');
   pause.setAttribute('aria-label', 'Pausar el juego');
+  shipPanel.setAttribute('aria-label', 'Controles de la nave');
   base.hidden = true;
 
   let stickId: number | null = null;
@@ -57,10 +73,22 @@ export function createTouchControls(
   const lastLook = { x: 0, y: 0 };
   let jumping = false;
   let stick = { x: 0, z: 0 };
+  let flightTouch: FlightKeys = EMPTY_FLIGHT_KEYS;
+
+  const publishFlight = (): void => {
+    input.setTouchFlightKeys({
+      ...flightTouch,
+      forward: flightTouch.forward || (isPiloting() && stick.z > 0.2),
+      back: flightTouch.back || (isPiloting() && stick.z < -0.2),
+      left: flightTouch.left || (isPiloting() && stick.x < -0.2),
+      right: flightTouch.right || (isPiloting() && stick.x > 0.2),
+    });
+  };
 
   const publish = (): void => {
     const intent: MoveIntent = { ...stick, run: false, jump: jumping };
     input.setTouchIntent(intent);
+    publishFlight();
   };
 
   const reset = (): void => {
@@ -68,6 +96,7 @@ export function createTouchControls(
     lookId = null;
     stick = { x: 0, z: 0 };
     jumping = false;
+    flightTouch = EMPTY_FLIGHT_KEYS;
     base.hidden = true;
     publish();
   };
@@ -121,6 +150,11 @@ export function createTouchControls(
     publish();
   };
 
+  const setFlightKey = (key: keyof FlightKeys, value: boolean): void => {
+    flightTouch = { ...flightTouch, [key]: value };
+    publishFlight();
+  };
+
   const abort = new AbortController();
   const { signal } = abort;
   canvas.addEventListener('pointerdown', onDown, { signal });
@@ -152,14 +186,74 @@ export function createTouchControls(
       { signal },
     );
   }
+  board.addEventListener(
+    'pointerdown',
+    (e) => {
+      e.preventDefault();
+      onShipAction('board');
+    },
+    { signal },
+  );
+  target.addEventListener(
+    'pointerdown',
+    (e) => {
+      e.preventDefault();
+      onShipAction('target');
+    },
+    { signal },
+  );
+  stabilize.addEventListener(
+    'pointerdown',
+    (e) => {
+      e.preventDefault();
+      onShipAction('stabilize');
+    },
+    { signal },
+  );
+  for (const [element, key] of [
+    [up, 'up'],
+    [down, 'down'],
+    [match, 'match'],
+  ] as const) {
+    element.addEventListener(
+      'pointerdown',
+      (e) => {
+        e.preventDefault();
+        setFlightKey(key, true);
+      },
+      { signal },
+    );
+    for (const type of ['pointerup', 'pointercancel', 'pointerleave'] as const) {
+      element.addEventListener(
+        type,
+        () => {
+          setFlightKey(key, false);
+        },
+        { signal },
+      );
+    }
+  }
   pause.addEventListener('click', onPause, { signal });
+
+  let shownPiloting: boolean | undefined;
+  /** Solo toca el DOM cuando cambia el modo (se llama cada fotograma). */
+  const syncShipControls = (): void => {
+    const piloting = isPiloting();
+    if (piloting === shownPiloting) return;
+    shownPiloting = piloting;
+    shipPanel.classList.toggle('piloting', piloting);
+    jump.hidden = piloting;
+    board.textContent = piloting ? 'Bajar' : 'Nave';
+  };
 
   return {
     reset,
     setVisible(visible) {
       layer.hidden = !visible;
       if (!visible) reset();
+      else syncShipControls();
     },
+    update: syncShipControls,
     dispose() {
       abort.abort();
       layer.remove();
