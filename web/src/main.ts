@@ -27,7 +27,7 @@ import { createReadingUi, type ReadingUi } from './reading/readingUi';
 import { createWorldSources, type WorldSources } from './reading/worldSources';
 import { cameraPose } from './render/firstPersonCamera';
 import { createStarfield } from './render/sky';
-import { createStage } from './render/stage';
+import { AMBIENT_COLOR, AMBIENT_INTENSITY, createStage } from './render/stage';
 import { createSystemScene } from './render/systemScene';
 import { loadShipModel } from './ship/loadShip';
 import { createLocator, createStandaloneLocator, type WorldBody } from './system/locator';
@@ -81,7 +81,7 @@ function runtimeOf(runtimes: ReadonlyMap<string, WorldRuntime>, id: string): Wor
 async function start(): Promise<void> {
   const canvas = requireElement('game', HTMLCanvasElement);
   const status = requireElement('status', HTMLParagraphElement);
-  const { renderer, scene, camera, sun } = createStage(canvas);
+  const { renderer, scene, camera, sun, ambient } = createStage(canvas);
   setupCamera(camera);
   watchGraphicsContext(canvas, status);
 
@@ -268,6 +268,17 @@ async function start(): Promise<void> {
     };
   }
 
+  // Lo que solo se ve durante un evento (EVT_): el haz de la ranura del Archivo…
+  const eventProps = [...runtimes.values()].flatMap((r) => r.world.markers.eventProps);
+  /** La luz ambiente es la del mundo donde estás (o la general en el espacio abierto). */
+  let litWorld: string | null = null;
+  function lightFor(world: string | undefined): void {
+    if ((world ?? '') === litWorld) return;
+    litWorld = world ?? '';
+    const own = world ? runtimes.get(world)?.world.info.ambient : undefined;
+    ambient.color.setHex(own?.color ?? AMBIENT_COLOR);
+    ambient.intensity = own?.intensity ?? AMBIENT_INTENSITY;
+  }
   let shipDeath: DeathCause | undefined;
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
@@ -299,6 +310,9 @@ async function start(): Promise<void> {
       }
       session.update(dt, timeRuns, shipDeath);
       if (timeRuns) shipDeath = undefined; // si el ciclo no corrió, la muerte espera
+      for (const prop of eventProps) {
+        prop.object.visible = session.activeEventIds.includes(prop.event);
+      }
       // En pausa la física sigue (jugador quieto, se asienta en el suelo); el ciclo sí se detiene.
       const alpha = physics.advance(dt);
       if (flight?.piloting) {
@@ -311,6 +325,7 @@ async function start(): Promise<void> {
       camera.position.add(session.shake);
       const t = session.director.clock.t;
       systemScene.update(t);
+      lightFor(systemScene.referenceWorld);
       camera.updateMatrixWorld();
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);

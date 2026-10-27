@@ -228,3 +228,104 @@ def colisiones(planeta, nombre, col):
     obj.display_type = "WIRE"
     obj.hide_render = True
     return obj
+
+
+# ---- Base para vestir un mundo ---------------------------------------------------------------------
+
+class Vestido:
+    """Reúne lo visible, las luces, las colisiones y las marcas de un mundo. Cada arte_<mundo>.py hereda,
+    escribe sus lugares en `lugares()` y llama a `ejecutar()`."""
+
+    def __init__(self, mundo, color_luz, scripts, ambiente=None):
+        """`ambiente`: (intensidad, "#rrggbb") de la luz ambiente propia del mundo, o None para la general."""
+        self.mundo = mundo
+        self.ambiente = ambiente
+        self.color_luz = color_luz
+        self.scripts = scripts
+        self.planeta = Planeta(mundo)
+        self.vista = Malla()
+        self.luces = Malla()
+        self.col = Colisiones()
+        self.marcas = {}
+        self.extra = []  # objetos sueltos (EVT_…), además de las tres mallas
+
+    def lugares(self):
+        raise NotImplementedError
+
+    def solido(self, color, crear, m, crear_col=None):
+        """Pieza que se ve y además se pisa o choca."""
+        self.vista.pieza(color, crear, m)
+        self.col.pieza(crear_col or crear, m)
+
+    def marca(self, nombre, lugar, pos):
+        self.marcas[nombre] = lugar.base @ Vector(pos)
+
+    def marca_en(self, nombre, punto):
+        self.marcas[nombre] = Vector(punto)
+
+    def construir(self):
+        borrar([f"{self.mundo}_Lugares", f"{self.mundo}_Luces", f"COL_{self.mundo}_Lugares"]
+               + [o.name for o in bpy.data.objects if o.name.startswith("EVT_")])
+        self.lugares()
+        raiz = self.planeta.raiz
+        for clave in ("ambient", "ambient_color"):
+            if clave in raiz:
+                del raiz[clave]
+        if self.ambiente:
+            raiz["ambient"], raiz["ambient_color"] = float(self.ambiente[0]), self.ambiente[1]
+        paleta = bpy.data.materials.get(f"M_Paleta_{self.mundo}")
+        _, tris = objeto(self.planeta, f"{self.mundo}_Lugares", self.vista, paleta)
+        _, tris_luz = objeto(self.planeta, f"{self.mundo}_Luces", self.luces,
+                             material_luces(f"M_Luces_{self.mundo}", self.color_luz))
+        colisiones(self.planeta, f"COL_{self.mundo}_Lugares", self.col)
+        print(f"{self.mundo}: lugares {tris} triángulos, luces {tris_luz}")
+
+    def escribir_marcas(self):
+        """Lleva las marcas a sus objetos: latitud, longitud y altura sobre el terreno."""
+        import json
+        import os
+        ruta = os.path.join(os.path.dirname(self.scripts), "marcas", f"{self.mundo}.json")
+        with open(ruta, encoding="utf-8") as f:
+            datos = json.load(f)
+        for marca in datos:
+            punto = self.marcas.get(marca["nombre"])
+            if punto is None:
+                continue
+            d = punto.normalized()
+            lat = math.degrees(math.asin(max(-1.0, min(1.0, d.z))))
+            lon = math.degrees(math.atan2(d.y, d.x))
+            suelo = self.planeta.suelo(lat, lon).length
+            marca["lat"], marca["lon"] = round(lat, 3), round(lon, 3)
+            marca["alto"] = round(punto.length - suelo, 3)
+        with open(ruta, "w", encoding="utf-8", newline="\n") as f:
+            json.dump(datos, f, ensure_ascii=False, indent=2)
+            f.write("\n")
+
+    def ejecutar(self):
+        import os
+        import runpy
+        import sys
+        self.construir()
+        self.escribir_marcas()
+        sys.argv = [sys.argv[0], "--", self.mundo]
+        runpy.run_path(os.path.join(self.scripts, "marcas.py"), run_name="__main__")
+        bpy.ops.wm.save_mainfile()
+        print("Guardado", bpy.data.filepath)
+
+
+def caja_entre(a, b, ancho, grueso):
+    """Matriz de una caja de 1 m que va de `a` a `b` (largo), con `ancho` de lado y `grueso` hacia arriba
+    (el "arriba" es la dirección radial en el punto medio). Para rampas, puentes y vigas."""
+    a, b = Vector(a), Vector(b)
+    largo = b - a
+    eje_y = largo.normalized()
+    arriba = ((a + b) / 2).normalized()
+    eje_x = eje_y.cross(arriba).normalized()
+    eje_z = eje_x.cross(eje_y).normalized()
+    centro = (a + b) / 2
+    return Matrix((
+        (eje_x.x * ancho, eje_y.x * largo.length, eje_z.x * grueso, centro.x),
+        (eje_x.y * ancho, eje_y.y * largo.length, eje_z.y * grueso, centro.y),
+        (eje_x.z * ancho, eje_y.z * largo.length, eje_z.z * grueso, centro.z),
+        (0, 0, 0, 1),
+    ))

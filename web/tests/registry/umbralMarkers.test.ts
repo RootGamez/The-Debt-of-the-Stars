@@ -8,7 +8,7 @@ import { checkMarkers } from '../../src/registry/graphRules';
 import { parseWorld } from '../../src/worlds/loadWorld';
 
 /** Mundos con modelo y marcas de lectura ya construidos. */
-const BUILT_WORLDS = ['umbral'];
+const BUILT_WORLDS = ['umbral', 'archivo'];
 
 async function load(world: string) {
   const bytes = readFileSync(
@@ -47,9 +47,11 @@ describe.each(BUILT_WORLDS)('the markers of %s', (world) => {
       expect(clues.sourceById.get(interaction.clueId)?.kind).toBe(interaction.kind);
     }
   });
+});
 
-  it('includes the ship parking marker', async () => {
-    const { markers } = await load(world);
+describe('the arrival world', () => {
+  it('has the spot where the ship waits (PARK_Nave)', async () => {
+    const { markers } = await load('umbral');
 
     expect(markers.parks.has('PARK_Nave')).toBe(true);
   });

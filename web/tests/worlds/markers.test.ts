@@ -192,3 +192,50 @@ describe('parking marks (PARK_)', () => {
     expect(collectMarkers(new Group()).parks.size).toBe(0);
   });
 });
+
+describe('event props (EVT_)', () => {
+  it('collects what only shows during an event, hidden until then', () => {
+    const scene = umbralScene();
+    const beam = mesh('EVT_ranura_luz_Haz');
+    beam.userData = { event: 'ranura_luz' };
+    scene.add(beam);
+
+    const markers = collectMarkers(scene);
+
+    expect(markers.eventProps).toEqual([{ event: 'ranura_luz', object: beam }]);
+    expect(beam.visible).toBe(false);
+  });
+
+  it('needs the event name', () => {
+    const scene = umbralScene();
+    scene.add(mesh('EVT_sin_evento'));
+
+    expect(() => collectMarkers(scene)).toThrow(/event/);
+  });
+});
+
+describe('ambient light of a world', () => {
+  it('reads its own ambient light when the world has one', () => {
+    const scene = umbralScene();
+    const root = scene.getObjectByName('umbral');
+    if (!root) throw new Error('test setup');
+    root.userData.ambient = 1.6;
+    root.userData.ambient_color = '#8AA0C0';
+
+    expect(readWorldInfo(scene, 'umbral').ambient).toEqual({ color: 0x8aa0c0, intensity: 1.6 });
+  });
+
+  it('has none by default (the game uses its general ambient light)', () => {
+    expect(readWorldInfo(umbralScene(), 'umbral').ambient).toBeUndefined();
+  });
+
+  it('rejects a colour that is not #rrggbb', () => {
+    const scene = umbralScene();
+    const root = scene.getObjectByName('umbral');
+    if (!root) throw new Error('test setup');
+    root.userData.ambient = 1.2;
+    root.userData.ambient_color = 'azul';
+
+    expect(() => readWorldInfo(scene, 'umbral')).toThrow(/ambient_color/);
+  });
+});
