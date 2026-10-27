@@ -8,7 +8,7 @@ import { checkMarkers } from '../../src/registry/graphRules';
 import { parseWorld } from '../../src/worlds/loadWorld';
 
 /** Mundos con modelo y marcas de lectura ya construidos. */
-const BUILT_WORLDS = ['umbral', 'archivo'];
+const BUILT_WORLDS = ['umbral', 'archivo', 'taller'];
 
 async function load(world: string) {
   const bytes = readFileSync(

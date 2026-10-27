@@ -239,3 +239,28 @@ describe('ambient light of a world', () => {
     expect(() => readWorldInfo(scene, 'umbral')).toThrow(/ambient_color/);
   });
 });
+
+describe('animated parts (ANIM_)', () => {
+  it('collects parts that turn, always or only during an event', () => {
+    const scene = umbralScene();
+    const arm = mesh('ANIM_brazo_1');
+    arm.userData = { spin: 0.4 };
+    const core = mesh('ANIM_nucleo');
+    core.userData = { spin: 2, event: 'secuencia_fabrica' };
+    scene.add(arm, core);
+
+    const markers = collectMarkers(scene);
+
+    expect(markers.animated).toEqual([
+      { object: arm, spin: 0.4, event: undefined },
+      { object: core, spin: 2, event: 'secuencia_fabrica' },
+    ]);
+  });
+
+  it('needs a spin speed', () => {
+    const scene = umbralScene();
+    scene.add(mesh('ANIM_quieto'));
+
+    expect(() => collectMarkers(scene)).toThrow(/spin/);
+  });
+});

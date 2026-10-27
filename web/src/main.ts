@@ -270,6 +270,8 @@ async function start(): Promise<void> {
 
   // Lo que solo se ve durante un evento (EVT_): el haz de la ranura del Archivo…
   const eventProps = [...runtimes.values()].flatMap((r) => r.world.markers.eventProps);
+  // …y las piezas que giran (ANIM_): los brazos del Taller, siempre; la maqueta, solo en su evento.
+  const animated = [...runtimes.values()].flatMap((r) => r.world.markers.animated);
   /** La luz ambiente es la del mundo donde estás (o la general en el espacio abierto). */
   let litWorld: string | null = null;
   function lightFor(world: string | undefined): void {
@@ -312,6 +314,13 @@ async function start(): Promise<void> {
       if (timeRuns) shipDeath = undefined; // si el ciclo no corrió, la muerte espera
       for (const prop of eventProps) {
         prop.object.visible = session.activeEventIds.includes(prop.event);
+      }
+      if (timeRuns) {
+        for (const part of animated) {
+          if (!part.event || session.activeEventIds.includes(part.event)) {
+            part.object.rotateY(part.spin * dt);
+          }
+        }
       }
       // En pausa la física sigue (jugador quieto, se asienta en el suelo); el ciclo sí se detiene.
       const alpha = physics.advance(dt);

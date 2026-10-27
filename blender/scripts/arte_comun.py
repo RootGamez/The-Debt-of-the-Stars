@@ -329,3 +329,14 @@ def caja_entre(a, b, ancho, grueso):
         (eje_x.z * ancho, eje_y.z * largo.length, eje_z.z * grueso, centro.z),
         (0, 0, 0, 1),
     ))
+
+
+def objeto_suelto(planeta, nombre, malla, material, matriz_mundo, propiedades=None):
+    """Objeto aparte (no va en la malla común) con su origen en `matriz_mundo`: para piezas que giran
+    (ANIM_, alrededor de su Z local) o que aparecen con un evento (EVT_). La malla va en coordenadas
+    locales de ese origen."""
+    obj, tris = objeto(planeta, nombre, malla, material)
+    obj.matrix_world = matriz_mundo
+    for clave, valor in (propiedades or {}).items():
+        obj[clave] = valor
+    return obj, tris

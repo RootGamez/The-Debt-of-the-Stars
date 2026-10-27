@@ -1,3 +1,89 @@
 [
-  { "nombre": "SPAWN_Prueba", "lat": 35, "lon": 10, "alto": 1.0, "props": {} }
+  {
+    "nombre": "SPAWN_Montaje",
+    "lat": -6.376,
+    "lon": 2.0,
+    "alto": 2.049,
+    "props": {}
+  },
+  {
+    "nombre": "INT_montaje",
+    "lat": -1.49,
+    "lon": 2.0,
+    "alto": 2.062,
+    "props": {
+      "clue_id": "taller.montaje",
+      "kind": "observacion"
+    }
+  },
+  {
+    "nombre": "INT_secuencia",
+    "lat": 15.889,
+    "lon": 2.0,
+    "alto": 2.422,
+    "props": {
+      "clue_id": "taller.secuencia",
+      "kind": "observacion"
+    }
+  },
+  {
+    "nombre": "INT_cuna",
+    "lat": -18.678,
+    "lon": 42.399,
+    "alto": 1.353,
+    "props": {
+      "clue_id": "taller.cuna",
+      "kind": "objeto"
+    }
+  },
+  {
+    "nombre": "INT_nota_cuna",
+    "lat": -12.946,
+    "lon": 40.524,
+    "alto": 1.304,
+    "props": {
+      "clue_id": "taller.nota_cuna",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_manual",
+    "lat": -20.187,
+    "lon": 48.685,
+    "alto": 1.205,
+    "props": {
+      "clue_id": "taller.manual",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_gemelos",
+    "lat": 24.171,
+    "lon": -58.746,
+    "alto": 0.419,
+    "props": {
+      "clue_id": "taller.gemelos",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_dormitorios",
+    "lat": 24.633,
+    "lon": -63.748,
+    "alto": 0.568,
+    "props": {
+      "clue_id": "taller.dormitorios",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_cabina",
+    "lat": -4.287,
+    "lon": -29.74,
+    "alto": 0.784,
+    "props": {
+      "clue_id": "taller.cabina",
+      "kind": "observacion"
+    }
+  }
 ]

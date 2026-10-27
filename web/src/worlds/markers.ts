@@ -1,7 +1,7 @@
 // Lee las marcas de juego que vienen de Blender dentro del glTF de un mundo.
 // Convención (ver CLAUDE.md): COL_ colisión, INT_ interacción, SPAWN_ aparición del jugador,
 // PARK_ dónde espera la nave al empezar cada ciclo, TRIG_ evento, EVT_ algo que solo se ve durante un
-// evento de la cronología (por ejemplo, el haz de la ranura del Archivo).
+// evento de la cronología (por ejemplo, el haz de la ranura del Archivo), ANIM_ pieza que gira.
 // Las propiedades personalizadas de Blender llegan como userData (export_extras).
 import type { Mesh, Object3D } from 'three';
 
@@ -45,6 +45,14 @@ export interface WorldMarkers {
   triggers: TriggerMarker[];
   /** Objetos que solo se ven mientras dura su evento (EVT_, propiedad `event`); empiezan ocultos. */
   eventProps: EventProp[];
+  /** Piezas que giran sobre su eje vertical (ANIM_, propiedad `spin` en rad/s; con `event`, solo entonces). */
+  animated: AnimatedPart[];
+}
+
+export interface AnimatedPart {
+  object: Object3D;
+  spin: number;
+  event: string | undefined;
 }
 
 export interface EventProp {
@@ -82,6 +90,14 @@ function requireString(object: Object3D, key: string): string {
   const value: unknown = object.userData[key];
   if (typeof value !== 'string' || value.length === 0) {
     throw new WorldDataError(`${object.name}: falta "${key}" (texto)`);
+  }
+  return value;
+}
+
+function requireSpin(object: Object3D): number {
+  const value: unknown = object.userData.spin;
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new WorldDataError(`${object.name}: "spin" debe ser un número (rad/s)`);
   }
   return value;
 }
@@ -156,6 +172,7 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
     parks: new Map(),
     triggers: [],
     eventProps: [],
+    animated: [],
   };
   const colliderRoots: Object3D[] = [];
 
@@ -172,6 +189,13 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
       markers.spawns.set(name, object);
     } else if (name.startsWith('PARK_')) {
       markers.parks.set(name, object);
+    } else if (name.startsWith('ANIM_')) {
+      const event: unknown = object.userData.event;
+      markers.animated.push({
+        object,
+        spin: requireSpin(object),
+        event: event === undefined ? undefined : requireString(object, 'event'),
+      });
     } else if (name.startsWith('EVT_')) {
       markers.eventProps.push({ event: requireString(object, 'event'), object });
       object.visible = false;
