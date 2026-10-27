@@ -17,8 +17,14 @@ async function warpTo(page: Page, world: string): Promise<void> {
 test('the five worlds orbit the Brasa and keep their distance', async ({ page }) => {
   await startPlaying(page);
   const before = await bodies(page);
+  const beforeTime = await loopValue(page, 'umbral');
 
-  await expect.poll(async () => (await bodies(page)).taller?.[0]).not.toBe(before.taller?.[0]);
+  await expect
+    .poll(() => loopValue(page, 'umbral'), { timeout: 15_000 })
+    .toBeGreaterThan(beforeTime ?? 0);
+  await expect
+    .poll(async () => (await bodies(page)).taller?.[0], { timeout: 15_000 })
+    .not.toBe(before.taller?.[0]);
 
   const after = await bodies(page);
   expect(Object.keys(after).sort()).toEqual([...WORLDS].sort());

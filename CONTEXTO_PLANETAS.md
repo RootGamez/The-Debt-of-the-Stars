@@ -1,6 +1,6 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.3
+**Versión:** v0.4
 **Última actualización:** 2026-10-25 · Sesión 3
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
@@ -228,6 +228,8 @@
 
 **La Luna (🟡, nombre ❓).** Gris azulada, con cráteres. En ella apareció el fragmento más grande hasta ahora, clavado en el suelo y con un borde cortado en curva perfecta.
 
+**La nave (🟡, nombre ❓).** La lanzadera del Instituto con la que el explorador hace su primer vuelo: pequeña, redondeada y amable, en los colores de Hogar (crema, ocre y verde), con una burbuja delantera para mirar, un relicario bajo la panza donde iba a traer el fragmento de la luna y un farol en el mástil. En el tablero lleva el **reloj doble**. Llega con él al sistema ajeno y en cada ciclo espera posada cerca de La Boca.
+
 **Beats del prólogo (🟡, 10 a 15 minutos):**
 1. **El Instituto al amanecer.** Se enseña a caminar, interactuar y leer una ficha cotidiana en la lengua de los Ausentes.
 2. **La Sala de Fragmentos.** Vitrinas con fragmentos de pared y roca tallada. El jugador nota los bordes curvos y un símbolo recurrente. Se abre el Registro.
@@ -272,3 +274,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-10-24 · Sesión 1 (laboratorio).** Se confirma que el laboratorio es un sitio aparte, escondido por lente gravitacional.
 - **2026-10-25 · Sesión 2.** Anthony confirma el Observatorio como extra opcional y el Nudo como masa junto al Laboratorio Oculto (ver `CONTEXTO_PISTAS.md`).
 - **2026-10-25 · Sesión 3.** Anthony decide que los mundos orbitan en rieles y en tiempo real (pregunta 6) y aprueba el plan de la Fase 5 (sistema solar y nave): nave en cabina que llega contigo en cada ciclo, choque letal a más de 30 m/s, la Brasa mortal y el reloj que se mezcla según la cercanía a cada masa.
+- **2026-10-27 · Sesión 4.** Se propone el aspecto de la nave (🟡): la lanzadera del Instituto, con el reloj doble en el tablero. La primera versión copiaba la nave de Outer Wilds y se descartó.

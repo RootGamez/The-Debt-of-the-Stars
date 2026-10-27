@@ -52,6 +52,13 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - Con `?debug`: `window.__juego.teleportTo('umbral.placa')` coloca al jugador frente a una fuente.
 - Al añadir un mundo con fuentes: añade su `.glb` a `BUILT_WORLDS` en `web/tests/registry/umbralMarkers.test.ts` (regla 5).
 
+## El sistema y la nave (Fase 5)
+- Los mundos orbitan en rieles (`web/src/data/sistema.json`); todo se dibuja relativo al mundo donde estás (`render/systemScene.ts`).
+- La nave: `blender/scripts/generar_nave.py` → `blender/nave.blend` → `npm run modelos -- nave`. Espera en `PARK_Nave` (Umbral) al empezar cada ciclo.
+- Controles: **F** subir/bajar (solo posada) · ratón apuntar · **W/S** avanzar · **A/D** lateral · **Espacio/C** subir/bajar (mantener C para posarse) · **Q/E** alabeo · **X** frenar respecto al objetivo · **T** objetivo · **Z** estabilizador (sin él no hay ayudas).
+- Con `?debug`: `__juego.warpTo('archivo')` (a pie), `__juego.toShip()` (a la escotilla), `__juego.shipTo('archivo', 20)` (pilotando, sobre un mundo); `F4` mapa de órbitas.
+- E2E: no dejar el juego abierto en el panel de vista previa mientras corre `npm run e2e`.
+
 ## El ciclo (Fase 3)
 - Modo B (✅ Anthony): el tiempo real es el del jugador; en mundos lentos el reloj de Umbral corre más rápido (`src/data/loop.ts`, `TIME_MODE`).
 - La cronología (eventos, absorción, curvas de reloj) está en `web/src/data/cronologia.json`: se ajusta ahí, sin tocar código.

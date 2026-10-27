@@ -1,7 +1,7 @@
 // La nave del jugador: su estado de vuelo, si está posada y cómo reacciona al suelo. Vive siempre en el
 // marco de un mundo (o del sistema, en el espacio abierto); main.ts la pasa de un marco a otro.
 // Lógica pura: la lógica de física está en shipPhysics.ts y el contacto en shipContact.ts.
-import { Vector3, type Quaternion } from 'three';
+import { Quaternion, Vector3 } from 'three';
 import { SHIP_LAND_SLOPE_DEGREES, SHIP_LAND_SPEED, SHIP_STABILIZER_DEFAULT } from '../data/ship';
 import type { CollisionWorld } from '../physics/collisionWorld';
 import { alignUp, smoothingFactor } from '../physics/surfaceFrame';
@@ -21,12 +21,20 @@ export interface ShipStepResult {
 }
 
 const MIN_LAND_FLOOR_DOT = Math.cos((SHIP_LAND_SLOPE_DEGREES * Math.PI) / 180);
-/** Con el empuje por debajo de esto la nave se considera sin tocar los mandos. */
-const IDLE_THRUST_SQUARED = 0.05 * 0.05;
+/** Por debajo de esto, un mando se considera suelto. */
+const DEAD_INPUT = 0.05;
 /** Lo deprisa que se endereza contra el suelo al tocarlo (1/s). */
 const SETTLE_RATE = 8;
 
 const up = new Vector3();
+const AXIS_Y = new Vector3(0, 1, 0);
+const turnOnGround = new Quaternion();
+
+/** ¿Quiere el piloto despegar? Empujar hacia abajo o hacia atrás (o nada) la deja en el suelo. */
+function wantsToFly(input: ShipInput): boolean {
+  const { x, y, z } = input.thrust;
+  return Math.abs(x) > DEAD_INPUT || z > DEAD_INPUT || y > DEAD_INPUT;
+}
 const contact: ShipContactResult = createShipContactResult();
 const result: ShipStepResult = { crashed: false, impactSpeed: 0 };
 
@@ -39,7 +47,22 @@ export class Ship {
   /** Estabilizador de giro; con Z pasa a modo libre. */
   stabilize = SHIP_STABILIZER_DEFAULT;
 
+  private readonly previousPosition = new Vector3();
+  private readonly previousOrientation = new Quaternion();
+
   constructor(readonly radius: number) {}
+
+  /** Olvida el paso anterior (tras colocarla o cambiarla de marco): sin saltos al interpolar. */
+  syncPrevious(): void {
+    this.previousPosition.copy(this.state.position);
+    this.previousOrientation.copy(this.state.orientation);
+  }
+
+  /** Pose entre el paso anterior y el actual, para que se vea suave a más de 60 Hz. */
+  interpolate(alpha: number, position: Vector3, orientation: Quaternion): void {
+    position.copy(this.previousPosition).lerp(this.state.position, alpha);
+    orientation.copy(this.previousOrientation).slerp(this.state.orientation, alpha);
+  }
 
   /** La deja posada, quieta, en el marco de ese mundo. */
   park(frame: string | undefined, position: Vector3, orientation: Quaternion): void {
@@ -49,6 +72,7 @@ export class Ship {
     this.state.velocity.set(0, 0, 0);
     this.state.angularVelocity.set(0, 0, 0);
     this.landed = true;
+    this.syncPrevious();
   }
 
   /**
@@ -61,11 +85,17 @@ export class Ship {
     ground: ShipGround | undefined,
     dt: number,
   ): ShipStepResult {
+    this.syncPrevious();
     result.crashed = false;
     result.impactSpeed = 0;
-    const idle = shipInput.thrust.lengthSq() < IDLE_THRUST_SQUARED;
+    const flying = wantsToFly(shipInput);
     if (this.landed) {
-      if (idle) return result;
+      if (!flying) {
+        // Posada solo puede girar sobre sí misma, para mirar alrededor antes de despegar.
+        turnOnGround.setFromAxisAngle(AXIS_Y, shipInput.aim.yaw);
+        this.state.orientation.multiply(turnOnGround).normalize();
+        return result;
+      }
       this.landed = false;
     }
 
@@ -81,7 +111,7 @@ export class Ship {
     const slow = this.state.velocity.length() < SHIP_LAND_SPEED;
     if (slow && contact.floorDot >= MIN_LAND_FLOOR_DOT) {
       alignUp(this.state.orientation, contact.floorNormal, smoothingFactor(SETTLE_RATE, dt));
-      if (idle) this.settle(contact.floorNormal);
+      if (!flying) this.settle(contact.floorNormal);
     }
     return result;
   }

@@ -6,7 +6,7 @@ import { createLoopEffects } from '../render/loopEffects';
 import { createClockHud } from '../ui/clockHud';
 import type { LoopSnapshot } from '../ui/debugOverlay';
 import { createFadeLayer } from '../ui/fade';
-import { LoopDirector, type Locale } from './loopDirector';
+import { LoopDirector, type DeathCause, type Locale } from './loopDirector';
 import type { Player } from './player';
 import {
   browserStore,
@@ -42,7 +42,7 @@ export interface LoopSession {
   readonly acceptsInput: boolean;
   /** Temblor de cámara de los eventos (se suma a la posición de los ojos). */
   readonly shake: Vector3;
-  update(dt: number, playing: boolean): void;
+  update(dt: number, playing: boolean, forcedCause?: DeathCause): void;
   snapshot(): LoopSnapshot;
   /** Hechos guardados (sin filtrar: la sesión de lectura descarta los que ya no existen). */
   readonly savedFacts: readonly string[];
@@ -107,9 +107,9 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
       return director.phase !== 'dying';
     },
     shake: effects.shake,
-    update(dt, playing) {
+    update(dt, playing, forcedCause) {
       if (playing) {
-        const result = director.update(dt, player.state);
+        const result = director.update(dt, player.state, forcedCause);
         if (result.restart) onRestart();
       } else {
         director.observe(player.state); // la física sigue en pausa: no juzgar esos aterrizajes

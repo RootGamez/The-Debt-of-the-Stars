@@ -1,6 +1,6 @@
 [
   { "nombre": "SPAWN_LaBoca", "lat": 8, "lon": 20, "alto": 1.0, "props": {} },
-  { "nombre": "PARK_Nave", "lat": 8, "lon": 13, "alto": 0.0, "props": {} },
+  { "nombre": "PARK_Nave", "lat": 1, "lon": 27, "alto": 0.0, "props": {} },
   {
     "nombre": "INT_boca",
     "lat": 8,

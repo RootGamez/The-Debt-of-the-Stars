@@ -1,10 +1,11 @@
-// Arranque del juego: mundos → sistema → jugador → controles → ciclo → bucle de render.
+// Arranque del juego: mundos → sistema → nave → jugador → controles → ciclo → bucle de render.
 // Cada pieza vive en su módulo; aquí solo se conectan.
 import './style.css';
 import { Quaternion, Timer, Vector3, type PerspectiveCamera, type WebGLRenderer } from 'three';
 import { loadChronology } from './core/chronology';
 import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
+import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
 import { Player } from './core/player';
 import { triggersAsEvents } from './core/timeline';
@@ -14,26 +15,32 @@ import {
   MOUSE_LOOK_SENSITIVITY,
   PHYSICS_STEP,
 } from './data/movement';
+import { loadClues } from './data/pistas';
 import { createControls } from './game/controls';
 import { loadSystem } from './game/loadSystem';
-import { loadClues } from './data/pistas';
+import { createShipFlight, type ShipFlight } from './game/shipFlight';
+import type { MotorEnvironment } from './physics/characterMotor';
+import { withSphereObstacle } from './physics/obstacles';
+import { forwardOf, upOf } from './physics/surfaceFrame';
 import { ReadingSession } from './reading/readingSession';
 import { createReadingUi, type ReadingUi } from './reading/readingUi';
 import { createWorldSources, type WorldSources } from './reading/worldSources';
-import { forwardOf, upOf } from './physics/surfaceFrame';
 import { cameraPose } from './render/firstPersonCamera';
 import { createStarfield } from './render/sky';
 import { createStage } from './render/stage';
 import { createSystemScene } from './render/systemScene';
+import { loadShipModel } from './ship/loadShip';
 import { createLocator, createStandaloneLocator, type WorldBody } from './system/locator';
 import { bodyPose } from './system/orbits';
 import { createDebugOverlay, type SystemSnapshot } from './ui/debugOverlay';
 import { createOrbitMap } from './ui/orbitMap';
 import { isTouchDevice } from './ui/pauseOverlay';
-import { environmentOf, type WorldRuntime } from './worlds/worldRuntime';
+import type { WorldRuntime } from './worlds/worldRuntime';
 import { worldFromQuery, worldTitle } from './worlds/worldSelection';
 
 const NEAR_PLANE = 0.05;
+/** Mundo donde espera la nave al empezar cada ciclo (la llegada). */
+const SHIP_HOME = 'umbral';
 
 function requireElement<T extends HTMLElement>(id: string, type: new () => T): T {
   const element = document.getElementById(id);
@@ -79,6 +86,7 @@ async function start(): Promise<void> {
   watchGraphicsContext(canvas, status);
 
   const { spec, startWorld, runtimes } = await loadSystem(worldFromQuery(window.location.search));
+  const shipModel = spec && runtimes.has(SHIP_HOME) ? await loadShipModel() : undefined;
   const clues = loadClues();
   // Las fuentes salen de las marcas del modelo: se crean antes de colgar los mundos de la escena.
   const sources = new Map<string, WorldSources>(
@@ -95,15 +103,31 @@ async function start(): Promise<void> {
     start: startWorld,
   });
 
+  // A pie, la nave posada es un obstáculo más del mundo donde está.
+  const game: { ui?: ReadingUi; flight?: ShipFlight } = {};
+  const walking = new Map<string, MotorEnvironment>(
+    [...runtimes].map(([id, runtime]) => [
+      id,
+      {
+        wells: [runtime.well],
+        world: withSphereObstacle(runtime.collision, () => game.flight?.obstacleIn(id)),
+      },
+    ]),
+  );
+  const envOf = (id: string): MotorEnvironment => {
+    const env = walking.get(id);
+    if (!env) throw new Error(`El mundo "${id}" no está cargado`);
+    return env;
+  };
+
   const first = runtimeOf(runtimes, startWorld);
-  const player = new Player(first.spawn, environmentOf(first), first.well);
+  const player = new Player(first.spawn, envOf(startWorld), first.well);
   let currentWorld = first;
-  const game: { ui?: ReadingUi } = {};
 
   /** Pasa a pie a otro mundo: nuevo marco de referencia, gravedad, colisiones y fuentes. */
   function enterWorld(id: string): void {
     currentWorld = runtimeOf(runtimes, id);
-    player.switchWorld(currentWorld.spawn, environmentOf(currentWorld), currentWorld.well);
+    player.switchWorld(currentWorld.spawn, envOf(id), currentWorld.well);
     systemScene.setReference(id);
     const worldSources = sources.get(id);
     if (worldSources) game.ui?.setWorld(worldSources);
@@ -128,25 +152,41 @@ async function start(): Promise<void> {
     chronology,
     locate: (t) => {
       if (!systemLocator) return standalone(t);
-      systemScene.toSystem(player.state.position, t, systemPosition);
-      return systemLocator.locate(t, currentWorld.id, systemPosition);
+      const { flight } = game;
+      const piloting = flight?.piloting ?? false;
+      const frame = piloting ? flight?.frame : currentWorld.id;
+      const position = piloting && flight ? flight.position : player.state.position;
+      systemScene.toSystem(position, t, systemPosition);
+      return systemLocator.locate(t, frame, systemPosition);
     },
     extraEvents: [...runtimes.values()].flatMap((r) =>
       triggersAsEvents(r.world.markers.triggers, r.id),
     ),
     player,
     skyDirection: arrivalSkyDirection(player),
-    // Cada ciclo empieza en el mundo de llegada.
+    // Cada ciclo empieza en el mundo de llegada, a pie, con la nave esperando.
     onRestart: () => {
+      game.flight?.reset();
       enterWorld(startWorld);
     },
   });
   const reading = new ReadingSession(clues, session.savedFacts, (facts) =>
     session.saveFacts(facts),
   );
-  const { input, overlay } = createControls(canvas, worldTitle(startWorld), session, () => {
-    game.ui?.openRegistry();
-  });
+  const { input, overlay, touch } = createControls(
+    canvas,
+    worldTitle(startWorld),
+    session,
+    () => {
+      game.ui?.openRegistry();
+    },
+    {
+      isPiloting: () => game.flight?.piloting ?? false,
+      onShipAction: (action) => {
+        shipAction(action);
+      },
+    },
+  );
   const startSources = sources.get(startWorld);
   if (!startSources) throw new Error(`Faltan las fuentes de ${startWorld}`);
   const ui = createReadingUi({
@@ -161,17 +201,41 @@ async function start(): Promise<void> {
   });
   game.ui = ui;
 
+  const flight =
+    spec && shipModel
+      ? createShipFlight({
+          spec,
+          runtimes,
+          model: shipModel,
+          systemScene,
+          player,
+          homeWorld: SHIP_HOME,
+          walkInto: enterWorld,
+          setReadingEnabled: (enabled) => {
+            ui.setEnabled(enabled);
+          },
+          touch: isTouchDevice(),
+        })
+      : undefined;
+  game.flight = flight;
+  const canAct = (): boolean => overlay.playing && session.acceptsInput && !ui.blocking;
+  function shipAction(action: 'board' | 'target' | 'stabilize'): void {
+    if (flight && canAct()) flight.action(action, currentWorld.id, session.director.clock.t);
+  }
+  input.onActionKey = shipAction;
+
   const debug = createDebugOverlay({
     where: () => ({
       world: currentWorld.id,
       home: currentWorld.well,
-      wells: environmentOf(currentWorld).wells,
+      wells: envOf(currentWorld.id).wells,
     }),
     player,
     renderer,
     loop: () => session.snapshot(),
     registry: () => ui.snapshot(),
     system: () => systemSnapshot(),
+    ship: () => flight?.snapshot() ?? null,
   });
   function systemSnapshot(): SystemSnapshot {
     const t = session.director.clock.t;
@@ -185,23 +249,32 @@ async function start(): Promise<void> {
   const orbitMap = spec ? createOrbitMap(spec, systemSnapshot) : undefined;
   if (window.__juego) {
     window.__juego.teleportTo = (clueId) => {
+      if (flight?.piloting) return false;
       const owner = [...sources.values()].find((s) => s.interactables.some((i) => i.id === clueId));
       if (!owner) return false;
       if (owner.world !== currentWorld.id) enterWorld(owner.world);
       return ui.teleportTo(clueId);
     };
     window.__juego.warpTo = (world) => {
-      if (!runtimes.has(world)) return false;
+      if (flight?.piloting || !runtimes.has(world)) return false;
       enterWorld(world);
       return true;
     };
+    window.__juego.shipTo = (world, altitude) => flight?.warpTo(world, altitude) ?? false;
+    window.__juego.toShip = () => flight?.standAtHatch(currentWorld.id) ?? false;
   }
 
+  let shipDeath: DeathCause | undefined;
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
     (dt) => {
       const moving = overlay.playing && session.acceptsInput && !ui.blocking;
-      player.step(moving ? input.intent() : IDLE_INTENT, dt);
+      if (flight?.piloting) {
+        if (moving) shipDeath ??= flight.step(session.director.clock.t, input.flightKeys(), dt);
+        else flight.hold();
+      } else {
+        player.step(moving ? input.intent() : IDLE_INTENT, dt);
+      }
     },
   );
   status.textContent = '';
@@ -217,17 +290,27 @@ async function start(): Promise<void> {
       const look = input.consumeLook();
       const timeRuns = overlay.playing && !ui.blocking; // leer o abrir el Registro detiene el ciclo
       if (timeRuns && session.acceptsInput) {
-        player.look(-look.x * MOUSE_LOOK_SENSITIVITY, -look.y * MOUSE_LOOK_SENSITIVITY);
+        if (flight?.piloting) flight.addLook(look.x, look.y);
+        else player.look(-look.x * MOUSE_LOOK_SENSITIVITY, -look.y * MOUSE_LOOK_SENSITIVITY);
       }
-      session.update(dt, timeRuns);
+      session.update(dt, timeRuns, shipDeath);
+      if (timeRuns) shipDeath = undefined; // si el ciclo no corrió, la muerte espera
       // En pausa la física sigue (jugador quieto, se asienta en el suelo); el ciclo sí se detiene.
       const alpha = physics.advance(dt);
-      player.interpolatedFeet(alpha, feet);
-      player.interpolatedBody(alpha, body);
-      cameraPose(body, player.pitch, feet, camera.position, camera.quaternion);
+      if (flight?.piloting) {
+        flight.view(alpha, camera);
+      } else {
+        player.interpolatedFeet(alpha, feet);
+        player.interpolatedBody(alpha, body);
+        cameraPose(body, player.pitch, feet, camera.position, camera.quaternion);
+      }
       camera.position.add(session.shake);
-      systemScene.update(session.director.clock.t);
+      const t = session.director.clock.t;
+      systemScene.update(t);
+      camera.updateMatrixWorld();
+      flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);
+      touch?.update();
       debug.update(dt, overlay.playing);
       orbitMap?.update(dt);
     },

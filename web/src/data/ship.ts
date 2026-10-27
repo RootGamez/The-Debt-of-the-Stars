@@ -3,8 +3,8 @@
 /** Aceleraciones máximas (m/s²) en cada eje de la nave. */
 export const SHIP_THRUST_FORWARD = 20;
 export const SHIP_THRUST_LATERAL = 14;
-/** Subir o bajar: despega de Archivo (gravedad 14,7 m/s²) con margen. */
-export const SHIP_THRUST_VERTICAL = 25;
+/** Subir o bajar. Sin estabilizador aún despega de Archivo (gravedad 14,7 m/s²). */
+export const SHIP_THRUST_VERTICAL = 16;
 /** Velocidad máxima respecto al marco donde vuela (m/s). */
 export const SHIP_MAX_SPEED = 80;
 /** Velocidad de giro máxima (rad/s) y lo deprisa que se alcanza o se frena (rad/s²). */
@@ -12,6 +12,18 @@ export const SHIP_MAX_TURN_RATE = 1.5;
 export const SHIP_TURN_ACCEL = 4;
 /** Frenado al igualar la velocidad con el objetivo (m/s²). */
 export const SHIP_MATCH_ACCEL = 30;
+/** Modo libre: cuánta velocidad de giro (rad/s) añade cada radián de ratón. */
+export const SHIP_FREE_AIM_GAIN = 2.5;
+
+// Ayudas del estabilizador cerca de un mundo (con Z se apagan todas).
+/** Lo deprisa que se enderezan las alas con el horizonte (1/s). */
+export const SHIP_LEVEL_RATE = 1.5;
+/** Por debajo de esta altura (m) se suaviza el descenso… */
+export const SHIP_ASSIST_ALTITUDE = 40;
+/** …a esta velocidad por metro de altura (m/s por m)… */
+export const SHIP_ASSIST_DESCENT_PER_METER = 0.35;
+/** …y nunca por debajo de esta (m/s): siempre se puede bajar hasta posarse. */
+export const SHIP_ASSIST_MIN_DESCENT = 2.5;
 
 /** La nave colisiona como una esfera (el radio sale del modelo; este es el de reserva). */
 export const SHIP_DEFAULT_RADIUS = 2;
@@ -26,8 +38,6 @@ export const SHIP_LAND_SLOPE_DEGREES = 35;
 
 /** Distancia máxima a la escotilla para subir (m). */
 export const BOARD_DISTANCE = 3.5;
-/** La nave deja bajar si va por debajo de esta velocidad (m/s). */
-export const DISEMBARK_SPEED = 0.5;
 
 /** El estabilizador empieza puesto (con Z pasa a modo libre). */
 export const SHIP_STABILIZER_DEFAULT = true;

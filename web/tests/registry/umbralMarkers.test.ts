@@ -47,4 +47,10 @@ describe.each(BUILT_WORLDS)('the markers of %s', (world) => {
       expect(clues.sourceById.get(interaction.clueId)?.kind).toBe(interaction.kind);
     }
   });
+
+  it('includes the ship parking marker', async () => {
+    const { markers } = await load(world);
+
+    expect(markers.parks.has('PARK_Nave')).toBe(true);
+  });
 });

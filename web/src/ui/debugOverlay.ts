@@ -3,6 +3,7 @@
 // Sin `?debug` y con el panel oculto no calcula nada.
 import { Vector3, type WebGLRenderer } from 'three';
 import type { Player } from '../core/player';
+import type { ShipSnapshot } from '../game/shipFlight';
 import { gravityAt, type GravityWell } from '../physics/gravity';
 
 export interface DebugSnapshot {
@@ -25,6 +26,8 @@ export interface DebugSnapshot {
   loop: LoopSnapshot;
   /** El sistema: en qué marco estás y dónde está cada mundo en el marco del sistema. */
   system: SystemSnapshot;
+  /** La nave (null si el mundo no está en el sistema). */
+  ship: ShipSnapshot | null;
 }
 
 export interface SystemSnapshot {
@@ -64,6 +67,10 @@ declare global {
       teleportTo?(clueId: string): boolean;
       /** Pasa a pie a otro mundo del sistema (sin volar). false si no existe. */
       warpTo?(world: string): boolean;
+      /** Pilotando: la nave aparece quieta a esa altura sobre un mundo. false si no se puede. */
+      shipTo?(world: string, altitude: number): boolean;
+      /** A pie: el jugador aparece junto a la escotilla de la nave. */
+      toShip?(): boolean;
     };
   }
 }
@@ -83,6 +90,7 @@ export interface DebugSources {
   loop: () => LoopSnapshot;
   registry: () => RegistrySnapshot;
   system: () => SystemSnapshot;
+  ship: () => ShipSnapshot | null;
 }
 
 export function createDebugOverlay(sources: DebugSources): DebugOverlay {
@@ -126,6 +134,7 @@ export function createDebugOverlay(sources: DebugSources): DebugOverlay {
       loop: sources.loop(),
       registry: sources.registry(),
       system: sources.system(),
+      ship: sources.ship(),
     };
   };
 

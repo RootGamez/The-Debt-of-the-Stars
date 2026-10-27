@@ -50,6 +50,8 @@ export interface SystemScene {
   toSystem(localPoint: Vector3, t: number, target: Vector3): Vector3;
   /** El pivote de un mundo (para colgarle cosas que se muevan con él). */
   groupOf(world: string): Group | undefined;
+  /** Cuelga la nave del pivote del mundo correspondiente, o de la escena raíz si está en el espacio abierto. */
+  attachShip(shipObject: Object3D, world: string | undefined): void;
   dispose(): void;
 }
 
@@ -126,6 +128,13 @@ export function createSystemScene(options: SystemSceneOptions): SystemScene {
       return toSystemPosition(frameAt(t, tmpPose), localPoint, target);
     },
     groupOf: (world) => pivots.get(world)?.group,
+    attachShip(shipObject, world) {
+      if (world === undefined) {
+        scene.add(shipObject);
+        return;
+      }
+      pivotOf(world).group.add(shipObject);
+    },
     dispose() {
       for (const { group } of pivots.values()) scene.remove(group);
       if (star) {

@@ -30,7 +30,7 @@ export interface Locale {
 }
 
 export type LoopPhase = 'playing' | 'dying' | 'waking';
-export type DeathCause = 'fin' | 'absorcion' | 'caida';
+export type DeathCause = 'fin' | 'absorcion' | 'caida' | 'choque' | 'calor';
 
 export interface Fade {
   color: 'white' | 'black' | 'none';
@@ -115,7 +115,7 @@ export class LoopDirector {
     return { color: 'none', amount: 0 };
   }
 
-  update(realDt: number, landing: LandingInfo): DirectorUpdate {
+  update(realDt: number, landing: LandingInfo, forcedCause?: DeathCause): DirectorUpdate {
     if (!Number.isFinite(realDt) || realDt <= 0) return NOTHING;
     const hardLanding = this.readLanding(landing);
     if (this.phase === 'dying') return this.fadeOut(realDt);
@@ -128,7 +128,7 @@ export class LoopDirector {
       this.phaseTime += realDt;
       if (this.phaseTime >= FADE_IN_SECONDS) this.enter('playing');
     }
-    const cause = this.causeOfDeath(hardLanding);
+    const cause = forcedCause ?? this.causeOfDeath(hardLanding);
     if (cause) {
       this.deathCause = cause;
       this.enter('dying');

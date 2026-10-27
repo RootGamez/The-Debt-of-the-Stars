@@ -51,6 +51,8 @@ export interface ReadingUi {
   update(timeSeconds: number): void;
   /** El jugador pasa a otro mundo: sus fuentes sustituyen a las del anterior. */
   setWorld(sources: WorldSources): void;
+  /** Oculta y desactiva las interacciones mientras se pilota. */
+  setEnabled(enabled: boolean): void;
   /** Hay una lectura o el Registro abiertos: el ciclo y el movimiento deben esperar. */
   readonly blocking: boolean;
   openRegistry(): void;
@@ -80,6 +82,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   const available: Interactable[] = [];
   const forward = new Vector3();
   let target: Interactable | undefined;
+  let enabled = true;
 
   const notice = createNotice();
   const registryPanel = createRegistryPanel(() => {
@@ -95,6 +98,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   function canInteract(): boolean {
     return (
       overlay.playing &&
+      enabled &&
       loop.director.phase === 'playing' &&
       player.state.grounded && // no se esquiva una caída abriendo una lectura en el aire
       !reading.frozen &&
@@ -191,6 +195,12 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   return {
     update(timeSeconds) {
       if (!overlay.playing && reading.frozen) closeReading(); // al pausar se cierra la lectura
+      if (!enabled) {
+        prompt.hide();
+        current.markers.hide();
+        target = undefined;
+        return;
+      }
       if (overlay.playing && loop.director.phase === 'playing' && !reading.frozen) witnessEvents();
       target = findTarget();
       const kind = target ? clues.sourceById.get(target.id)?.kind : undefined;
@@ -208,6 +218,14 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       current = sources;
       target = undefined;
       prompt.hide();
+    },
+    setEnabled(value) {
+      enabled = value;
+      if (!enabled) {
+        target = undefined;
+        prompt.hide();
+        current.markers.hide();
+      }
     },
     openRegistry,
     get blocking() {

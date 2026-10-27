@@ -121,6 +121,15 @@ describe('dying', () => {
     expect(hard.deathCause).toBe('caida');
   });
 
+  it.each(['choque', 'calor'] as const)('accepts ship death cause %s', (cause) => {
+    const { d } = director();
+
+    d.update(0.1, QUIET, cause);
+
+    expect(d.phase).toBe('dying');
+    expect(d.deathCause).toBe(cause);
+  });
+
   it('reads each landing only once', () => {
     const { d } = director();
     d.update(0.1, { landings: 1, lastLandingSpeed: 5 });

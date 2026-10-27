@@ -158,3 +158,73 @@ describe('the stabilizer setting', () => {
     expect(off.state.angularVelocity.y).toBeCloseTo(1);
   });
 });
+
+describe('pilot comfort (Phase 5B review)', () => {
+  it('lands while the pilot keeps descending, without bouncing', () => {
+    const ship = new Ship(SHIP_R);
+    ship.state.position.set(0, R + SHIP_R + 6, 0);
+    const near = (s: Ship): ShipEnvironment => ({
+      ...envOf(s),
+      up: s.state.position.clone().normalize(),
+      altitude: s.state.position.length() - R - SHIP_R,
+    });
+
+    let crashed = false;
+    for (let i = 0; i < 400 && !ship.landed; i++) {
+      crashed ||= ship.step(
+        input({ thrust: new Vector3(0, -1, 0) }),
+        near(ship),
+        planet,
+        DT,
+      ).crashed;
+    }
+
+    expect(crashed).toBe(false);
+    expect(ship.landed).toBe(true);
+  });
+
+  it('turns on the spot while parked, but does not leave the ground', () => {
+    const ship = parked();
+    const before = ship.state.position.clone();
+
+    ship.step(input({ aim: { yaw: 0.5, pitch: 0.4 } }), envOf(ship), planet, DT);
+
+    expect(ship.landed).toBe(true);
+    expect(ship.state.position.distanceTo(before)).toBe(0);
+    const nose = new Vector3(0, 0, -1).applyQuaternion(ship.state.orientation);
+    expect(nose.y).toBeCloseTo(0, 6); // sin cabeceo
+    expect(nose.x).toBeLessThan(-0.4); // guiñada a la izquierda
+  });
+
+  it('interpolates smoothly between the last two physics steps', () => {
+    const ship = new Ship(SHIP_R);
+    ship.state.position.set(0, 500, 0);
+    ship.syncPrevious();
+    const free: ShipEnvironment = { gravity: new Vector3(), targetVelocity: undefined };
+    ship.state.velocity.set(6, 0, 0);
+
+    ship.step(input(), free, undefined, DT);
+    const middle = new Vector3();
+    ship.interpolate(0.5, middle, new Quaternion());
+
+    expect(middle.x).toBeCloseTo(6 * DT * 0.5, 9);
+  });
+});
+
+describe('taking off from the ground', () => {
+  it('stays parked when the pilot only pushes back (S)', () => {
+    const ship = parked();
+
+    run(ship, input({ thrust: new Vector3(0, 0, -1) }), 0.5);
+
+    expect(ship.landed).toBe(true);
+  });
+
+  it('leaves the ground going forward', () => {
+    const ship = parked();
+
+    run(ship, input({ thrust: new Vector3(0, 0, 1) }), 0.2);
+
+    expect(ship.landed).toBe(false);
+  });
+});

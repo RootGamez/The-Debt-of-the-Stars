@@ -125,6 +125,17 @@ describe('the system scene, anchored to a world', () => {
     expect(centre.distanceTo(bodyPose(specOf('umbral'), 77).position)).toBeLessThan(1e-9);
   });
 
+  it('attaches the ship to its world pivot or the open-space scene', () => {
+    const { scene, systemScene, groupOf } = setup();
+    const ship = new Group();
+
+    systemScene.attachShip(ship, 'umbral');
+    expect(ship.parent).toBe(groupOf('umbral'));
+
+    systemScene.attachShip(ship, undefined);
+    expect(ship.parent).toBe(scene);
+  });
+
   it('refuses a reference world it does not have', () => {
     const { systemScene } = setup();
 
