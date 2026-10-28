@@ -20,9 +20,11 @@ import { createInteractPrompt } from '../ui/interactPrompt';
 import { createNotice } from '../ui/notice';
 import type { PauseOverlay } from '../ui/pauseOverlay';
 import { createReadingPanel } from '../ui/readingPanel';
+import { createRecordingPanel } from '../ui/recordingPanel';
 import { createRegistryPanel } from '../ui/registryPanel';
 import { WorldDataError } from '../worlds/markers';
-import type { ReadingSession } from './readingSession';
+import { RecordingPlayback } from './recording';
+import type { OpenReading, ReadingSession } from './readingSession';
 import type { WorldSources } from './worldSources';
 
 export interface ReadingUiOptions {
@@ -44,6 +46,16 @@ export interface RegistrySnapshot {
   /** Id de la fuente abierta, o null. */
   reading: string | null;
   registryOpen: boolean;
+  /** La grabación que suena, o null. */
+  recording: { speed: number; clarity: number; understood: boolean } | null;
+}
+
+/** Lo que el sonido necesita de la grabación que suena (el murmullo de la voz). */
+export interface ListeningState {
+  /** Velocidad de la voz respecto a la natural (1 = como se habló). */
+  factor: number;
+  /** Alguien habla ahora (no es un silencio entre frases). */
+  speaking: boolean;
 }
 
 export interface ReadingUi {
@@ -55,6 +67,8 @@ export interface ReadingUi {
   setEnabled(enabled: boolean): void;
   /** Hay una lectura o el Registro abiertos: el ciclo y el movimiento deben esperar. */
   readonly blocking: boolean;
+  /** Una grabación está sonando (para el murmullo), o null. */
+  readonly listening: ListeningState | null;
   openRegistry(): void;
   /** Herramienta de depuración (`?debug`): coloca al jugador frente a una fuente. */
   teleportTo(clueId: string): boolean;
@@ -64,6 +78,8 @@ export interface ReadingUi {
 
 /** Distancia a la que se deja al jugador de una fuente al teletransportarlo (m). */
 const TELEPORT_DISTANCE = 1.4;
+/** Paso máximo de una grabación por fotograma (s): tras un tirón no salta frases enteras. */
+const MAX_PLAYBACK_STEP = 0.1;
 const GROUND_PROBE = 3;
 const GROUND_PROBE_DEPTH = 40;
 
@@ -91,6 +107,19 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   const readingPanel = createReadingPanel(() => {
     closeReading();
   }, touch);
+  /** La grabación abierta: suena con el tiempo real aunque el ciclo esté detenido. */
+  let playback: RecordingPlayback | null = null;
+  let understoodShown = false;
+  let lastTime: number | undefined;
+  const recordingPanel = createRecordingPanel(
+    () => {
+      closeReading();
+    },
+    (speed) => {
+      playback?.setSpeed(speed);
+    },
+    touch,
+  );
   const prompt = createInteractPrompt(touch, () => {
     activate();
   });
@@ -119,6 +148,8 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   function closeReading(): void {
     reading.close();
     readingPanel.hide();
+    recordingPanel.hide();
+    playback = null;
     if (!overlay.playing) overlay.focus(); // si se cerró al pausar, el foco vuelve a la pausa
   }
 
@@ -132,7 +163,35 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     const opened = reading.open(id, loop.activeEventIds);
     if (!opened) return;
     seen.add(id);
-    readingPanel.show(opened, opened.newFacts.map(lineOf));
+    if (opened.recording) openRecording(opened, opened.recording);
+    else readingPanel.show(opened, opened.newFacts.map(lineOf));
+  }
+
+  function openRecording(
+    opened: OpenReading,
+    recording: NonNullable<OpenReading['recording']>,
+  ): void {
+    // Si ya se entendió en otro ciclo, se recuerda cómo sonaba bien: la rueda empieza ahí.
+    const speed = recording.understoodBefore ? 1 / recording.rate : 1;
+    playback = new RecordingPlayback(recording.lines, recording.rate, speed);
+    understoodShown = false;
+    recordingPanel.show(opened, playback.speed);
+    recordingPanel.update(playback.view());
+    if (opened.newFacts.length > 0) {
+      notice.show(`Anotado en el Registro: ${opened.newFacts.map(lineOf).join(' · ')}`);
+    }
+  }
+
+  /** La grabación avanza con el tiempo real; al entenderla entera se anota lo que dice. */
+  function playRecording(dt: number): void {
+    if (!playback || !reading.frozen) return;
+    playback.update(Math.min(dt, MAX_PLAYBACK_STEP));
+    const view = playback.view();
+    recordingPanel.update(view);
+    if (view.understood && !understoodShown) {
+      understoodShown = true;
+      recordingPanel.showUnderstood(reading.understand().map(lineOf));
+    }
   }
 
   function activate(): void {
@@ -194,7 +253,10 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
 
   return {
     update(timeSeconds) {
+      const dt = lastTime === undefined ? 0 : Math.max(0, timeSeconds - lastTime);
+      lastTime = timeSeconds;
       if (!overlay.playing && reading.frozen) closeReading(); // al pausar se cierra la lectura
+      playRecording(dt);
       if (!enabled) {
         prompt.hide();
         current.markers.hide();
@@ -231,6 +293,11 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     get blocking() {
       return reading.frozen || registryPanel.isOpen;
     },
+    get listening() {
+      return playback && reading.frozen
+        ? { factor: playback.factor, speaking: playback.speaking }
+        : null;
+    },
     teleportTo(clueId) {
       const item = current.interactables.find((i) => i.id === clueId);
       if (!item) return false;
@@ -253,6 +320,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
         rumors: reading.rumors(),
         reading: reading.current?.source.id ?? null,
         registryOpen: registryPanel.isOpen,
+        recording: playback
+          ? { speed: playback.speed, clarity: playback.clarity, understood: playback.understood }
+          : null,
       };
     },
     dispose() {
@@ -260,6 +330,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       notice.dispose();
       registryPanel.dispose();
       readingPanel.dispose();
+      recordingPanel.dispose();
       prompt.dispose();
     },
   };

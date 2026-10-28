@@ -70,7 +70,9 @@ class Voice {
   private readonly pitched: Retunable[] = [];
   private readonly swells: Retunable[] = [];
   private nextPulse = 0;
-  private fading = false;
+  private level = 0;
+  /** Azar reproducible para los golpes irregulares (sílabas de una voz). */
+  private seed = 0x2545f491;
   /** Instante (reloj del contexto) a partir del cual puede detenerse; `undefined` mientras suena. */
   releaseAt: number | undefined;
 
@@ -135,11 +137,26 @@ class Voice {
     this.swells.push({ param: lfo.frequency, base: swell.hz });
   }
 
-  /** La voz suena (true) o se apaga (false). */
-  setActive(active: boolean, now: number): void {
-    this.fading = !active;
-    this.output.gain.setTargetAtTime(active ? 1 : 0, now, LEVEL_SMOOTH);
-    this.releaseAt = active ? undefined : (this.releaseAt ?? now + RELEASE_AFTER);
+  /** La voz suena a ese volumen (0 = callada, pero sigue viva: una grabación entre frases). */
+  setLevel(level: number, now: number, smooth = LEVEL_SMOOTH): void {
+    this.output.gain.setTargetAtTime(level, now, smooth);
+    this.level = level;
+    this.releaseAt = undefined;
+  }
+
+  /** La voz ya no hace falta: se apaga poco a poco y, pasado un rato, se puede detener. */
+  release(now: number): void {
+    if (this.releaseAt === undefined) this.output.gain.setTargetAtTime(0, now, LEVEL_SMOOTH);
+    this.level = 0;
+    this.releaseAt ??= now + RELEASE_AFTER;
+  }
+
+  /** Número entre -1 y 1, siempre la misma serie (xorshift). */
+  private spread(): number {
+    this.seed ^= this.seed << 13;
+    this.seed ^= this.seed >>> 17;
+    this.seed ^= this.seed << 5;
+    return ((this.seed >>> 0) / 0xffffffff) * 2 - 1;
   }
 
   setShape(pitch: number, tempo: number, now: number): void {
@@ -152,12 +169,14 @@ class Voice {
   /** Programa los golpes que caen en la próxima fracción de segundo; su ritmo sigue al del reloj. */
   tick(now: number, pitch: number, tempo: number): void {
     const pulse = this.scape.pulse;
-    if (!pulse || this.fading) return;
-    // Tras una pausa no se recuperan los golpes perdidos: se sigue desde ahora.
+    if (!pulse || this.level <= 0) return;
+    // Tras una pausa (o un silencio) no se recuperan los golpes perdidos: se sigue desde ahora.
     if (this.nextPulse < now) this.nextPulse = now + 0.05;
     while (this.nextPulse < now + PULSE_LOOKAHEAD) {
-      this.hit(this.nextPulse, pitch);
-      this.nextPulse += pulse.everySeconds / tempo;
+      const wobble = 1 + (pulse.wobble ?? 0) * this.spread();
+      this.hit(this.nextPulse, pitch * wobble);
+      const jitter = 1 + (pulse.jitter ?? 0) * this.spread();
+      this.nextPulse += (pulse.everySeconds / tempo) * jitter;
     }
   }
 
@@ -268,20 +287,20 @@ export function createAudioEngine(createContext: () => AudioContext = defaultCon
       master.gain.setTargetAtTime(mix.master, now, MASTER_SMOOTH);
       muffle.frequency.setTargetAtTime(mix.muffle, now, MUFFLE_SMOOTH);
       const wanted = new Set<string>();
-      for (const { id, scape } of mix.voices) {
+      for (const { id, scape, level, pitch, tempo, smooth } of mix.voices) {
         wanted.add(id);
         let voice = voices.get(id);
         if (!voice) {
           voice = new Voice(context, scape, noise, bus);
           voices.set(id, voice);
         }
-        voice.setActive(true, now);
-        voice.setShape(mix.pitch, mix.tempo, now);
-        voice.tick(now, mix.pitch, mix.tempo);
+        voice.setLevel(level, now, smooth);
+        voice.setShape(pitch, tempo, now);
+        voice.tick(now, pitch, tempo);
       }
       for (const [id, voice] of voices) {
         if (wanted.has(id)) continue;
-        voice.setActive(false, now);
+        voice.release(now);
         if (voice.releaseAt !== undefined && now >= voice.releaseAt) {
           voice.stop();
           voices.delete(id);

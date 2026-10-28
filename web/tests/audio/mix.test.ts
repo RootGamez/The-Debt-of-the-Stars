@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import chronology from '../../src/data/cronologia.json';
-import { EVENT_SOUNDS, WORLD_SOUNDSCAPES, type Soundscape } from '../../src/data/soundscapes';
+import {
+  EVENT_SOUNDS,
+  RECORDING_VOICE,
+  SHIP_SOUND,
+  WORLD_SOUNDSCAPES,
+  type Soundscape,
+} from '../../src/data/soundscapes';
 import { computeMix, type MixInput } from '../../src/audio/mix';
 import { WORLD_IDS } from '../../src/worlds/worldSelection';
 
@@ -93,14 +99,68 @@ describe('the local clock shapes the sound', () => {
   });
 });
 
+const levelOf = (input: Partial<MixInput>, id: string): number | undefined =>
+  mix(input).voices.find((v) => v.id === id)?.level;
+
+describe('listening to a recording', () => {
+  const slow = { factor: 0.2, speaking: true };
+
+  it('adds the voice of the recording while it plays', () => {
+    expect(voiceIds({ running: false, recording: slow })).toContain('grabacion');
+    expect(voiceIds({ running: false, recording: null })).not.toContain('grabacion');
+  });
+
+  it('plays the voice at full level even though the loop is stopped, and the world further away', () => {
+    const input = { running: false, recording: slow };
+
+    expect(levelOf(input, 'grabacion')).toBe(1);
+    expect(levelOf(input, 'mundo:umbral')).toBeLessThan(
+      levelOf({ running: false }, 'mundo:umbral') ?? 0,
+    );
+  });
+
+  it('lets the voice fall silent quickly between sentences, unlike the slow ambience', () => {
+    const voices = mix({ running: false, recording: slow }).voices;
+
+    expect(voices.find((v) => v.id === 'grabacion')?.smooth).toBeLessThan(0.2);
+    expect(voices.find((v) => v.id === 'mundo:umbral')?.smooth).toBeUndefined();
+  });
+
+  it('keeps the voice quiet (but alive) between sentences', () => {
+    expect(
+      levelOf({ running: false, recording: { factor: 0.2, speaking: false } }, 'grabacion'),
+    ).toBe(0);
+  });
+
+  it('follows the speed of the recording, not the clock of the place', () => {
+    const voice = mix({ rate: 1, running: false, recording: slow }).voices.find(
+      (v) => v.id === 'grabacion',
+    );
+
+    expect(voice?.tempo).toBeCloseTo(0.2);
+    expect(voice?.pitch).toBeLessThan(0.6);
+  });
+
+  it('sounds high and hurried when played too fast, within limits', () => {
+    const voice = mix({ running: false, recording: { factor: 40, speaking: true } }).voices.find(
+      (v) => v.id === 'grabacion',
+    );
+
+    expect(voice?.pitch).toBeGreaterThan(1.5);
+    expect(voice?.pitch).toBeLessThanOrEqual(3);
+    expect(voice?.tempo).toBeLessThanOrEqual(8);
+  });
+});
+
 describe('the master volume', () => {
   it('is silent when muted', () => {
     expect(mix({ muted: true }).master).toBe(0);
   });
 
-  it('ducks while the game is paused or you are reading', () => {
-    expect(mix({ running: false }).master).toBeLessThan(mix().master);
-    expect(mix({ running: false }).master).toBeGreaterThan(0);
+  it('ducks the world while the game is paused or you are reading', () => {
+    expect(levelOf({ running: false }, 'mundo:umbral')).toBeLessThan(1);
+    expect(levelOf({ running: false }, 'mundo:umbral')).toBeGreaterThan(0);
+    expect(levelOf({ running: true }, 'mundo:umbral')).toBe(1);
   });
 
   it('fades out as the white fade of a death covers the screen', () => {
@@ -143,6 +203,8 @@ describe('the soundscape data', () => {
       ([id, s]) => [`mundo:${id}`, s] as [string, Soundscape],
     ),
     ...Object.entries(EVENT_SOUNDS).map(([id, s]) => [`evento:${id}`, s] as [string, Soundscape]),
+    ['nave', SHIP_SOUND],
+    ['grabacion', RECORDING_VOICE],
   ];
 
   it.each(all)('%s is well formed and cannot clip alone', (_id, scape) => {
@@ -162,6 +224,10 @@ describe('the soundscape data', () => {
       expect(scape.pulse.everySeconds).toBeGreaterThan(0);
       expect(scape.pulse.decay).toBeGreaterThan(0);
       expect(scape.pulse.gain).toBeGreaterThan(0);
+      for (const spread of [scape.pulse.jitter ?? 0, scape.pulse.wobble ?? 0]) {
+        expect(spread).toBeGreaterThanOrEqual(0);
+        expect(spread).toBeLessThan(1);
+      }
       total += scape.pulse.gain;
     }
     expect(total).toBeGreaterThan(0);

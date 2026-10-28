@@ -348,6 +348,7 @@ async function start(): Promise<void> {
         fade: session.director.fade.amount,
         running: timeRuns,
         piloting: flight?.piloting ?? false,
+        recording: ui.listening,
       });
       camera.updateMatrixWorld();
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });

@@ -93,11 +93,28 @@ describe('the audio engine', () => {
 
     (context as unknown as { __advance(dt: number): void }).__advance(0.1);
     engine.update(computeMix(input));
-    expect(engine.voiceCount).toBe(2); // todavÃ­a se estÃ¡ apagando
+    expect(engine.voiceCount).toBe(2); // todavía se está apagando
 
     (context as unknown as { __advance(dt: number): void }).__advance(10);
     engine.update(computeMix(input));
     expect(engine.voiceCount).toBe(1);
+  });
+
+  it('keeps the voice of a recording alive in the silences between sentences', () => {
+    const context = fakeContext();
+    const engine = createAudioEngine(() => context);
+    engine.unlock();
+    const quiet = computeMix({
+      ...input,
+      running: false,
+      recording: { factor: 0.2, speaking: false },
+    });
+
+    engine.update(quiet);
+    (context as unknown as { __advance(dt: number): void }).__advance(10);
+    engine.update(quiet);
+
+    expect(engine.voiceIds).toContain('grabacion');
   });
 
   it('survives a long run of changing worlds, rates and events', () => {
@@ -124,6 +141,7 @@ describe('the audio engine', () => {
           events: i % 3 === 0 ? ['alineacion', 'secuencia_fabrica'] : [],
           piloting: i % 5 === 0,
           running: i % 11 !== 0,
+          recording: i % 4 === 0 ? { factor: (i % 9) * 0.5, speaking: i % 8 === 0 } : null,
         }),
       );
     }

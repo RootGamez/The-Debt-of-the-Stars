@@ -8,7 +8,7 @@ import {
   rumorsOf,
   unlockedConclusions,
 } from '../../src/registry/knowledge';
-import { parse } from '../helpers/clueFixture';
+import { parse, withRecording } from '../helpers/clueFixture';
 import type { Source } from '../../src/registry/clues';
 
 const clues = parse();
@@ -75,6 +75,16 @@ describe('canGiveNew', () => {
   it('does not count a locked deep reading', () => {
     expect(canGiveNew(source('umbral.envios'), known())).toBe(false);
     expect(canGiveNew(source('umbral.envios'), known('deuda.palabra'))).toBe(true);
+  });
+
+  it('counts what a recording gives once understood, whatever is known (understanding it is the key)', () => {
+    const recording = parse(withRecording()).sourceById.get('cicatriz.grabacion');
+    if (!recording) throw new Error('falta la grabación de prueba');
+
+    expect(canGiveNew(recording, known())).toBe(true);
+    expect(canGiveNew(recording, known('lab.existe_lugar_lento', 'lab.imagen_desplazada'))).toBe(
+      false,
+    );
   });
 });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { at, deepOf, parse, raw } from '../helpers/clueFixture';
+import { at, deepOf, parse, raw, withRecording } from '../helpers/clueFixture';
 import { WorldDataError } from '../../src/worlds/markers';
 
 describe('parseClues with valid data', () => {
@@ -135,6 +135,32 @@ describe('parseClues rejects malformed data', () => {
   ])('rejects %s', (_name, change, message) => {
     const data = raw();
     change(data);
+
+    expect(() => parse(data)).toThrow(WorldDataError);
+    expect(() => parse(data)).toThrow(message);
+  });
+});
+
+describe('recordings', () => {
+  it('keep the clock rate they were recorded with', () => {
+    const clues = parse(withRecording());
+
+    expect(clues.sourceById.get('cicatriz.grabacion')?.recordedRate).toBe(0.2);
+  });
+
+  it('other sources have no clock rate', () => {
+    expect(parse().sourceById.get('umbral.placa')?.recordedRate).toBeUndefined();
+  });
+
+  it.each<[string, (source: Record<string, unknown>) => void, RegExp]>([
+    ['a recording without clock', (s) => delete s.reloj, /cicatriz\.grabacion.*reloj/],
+    ['a clock of zero', (s) => (s.reloj = 0), /cicatriz\.grabacion.*reloj/],
+    ['a negative clock', (s) => (s.reloj = -1), /cicatriz\.grabacion.*reloj/],
+    ['an absurd clock', (s) => (s.reloj = 50), /cicatriz\.grabacion.*reloj/],
+    ['a clock that is not a number', (s) => (s.reloj = 'lento'), /cicatriz\.grabacion.*reloj/],
+    ['a clock on a text source', (s) => (s.tipo = 'texto'), /cicatriz\.grabacion.*reloj/],
+  ])('rejects %s', (_name, change, message) => {
+    const data = withRecording(change);
 
     expect(() => parse(data)).toThrow(WorldDataError);
     expect(() => parse(data)).toThrow(message);

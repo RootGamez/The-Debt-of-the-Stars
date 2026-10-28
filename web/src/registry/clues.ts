@@ -48,6 +48,11 @@ export interface Source {
   when: string | undefined;
   /** Nombre del evento (`TRIG_`) que se presencia, para las fuentes de tipo "evento". */
   eventName: string | undefined;
+  /**
+   * Solo las grabaciones: ritmo del reloj con que se grabaron (0,20 = donde el tiempo iba cinco veces
+   * más lento). Se entienden reproducidas a la velocidad que deshace ese reloj (reading/recording.ts).
+   */
+  recordedRate: number | undefined;
   surface: Reading;
   deep: Reading | undefined;
 }
@@ -245,6 +250,19 @@ function parseReading(
 }
 
 const KINDS: readonly string[] = SOURCE_KINDS;
+/** Ritmos de reloj razonables para una grabación (el más rápido del sistema anda cerca de 1,2). */
+const MAX_RECORDED_RATE = 10;
+
+function parseRecordedRate(raw: unknown, id: string, kind: string): number | undefined {
+  if (kind !== 'grabacion') {
+    if (raw !== undefined) fail(`${id}: solo las grabaciones llevan "reloj"`);
+    return undefined;
+  }
+  if (typeof raw !== 'number' || !Number.isFinite(raw) || raw <= 0 || raw > MAX_RECORDED_RATE) {
+    fail(`${id}: las grabaciones necesitan "reloj", un ritmo entre 0 y ${MAX_RECORDED_RATE}`);
+  }
+  return raw;
+}
 
 function parseSource(item: unknown, facts: Map<string, Fact>, context: ClueContext): Source {
   const r = record(item, 'fuente');
@@ -271,6 +289,7 @@ function parseSource(item: unknown, facts: Map<string, Fact>, context: ClueConte
     draft: r.borrador === true,
     when,
     eventName,
+    recordedRate: parseRecordedRate(r.reloj, id, kind),
     surface: parseReading(r.superficial, `${id}.superficial`, facts, false),
     deep:
       r.profunda === undefined

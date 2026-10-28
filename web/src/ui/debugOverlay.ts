@@ -43,6 +43,8 @@ export interface RegistrySnapshot {
   rumors: string[];
   reading: string | null;
   registryOpen: boolean;
+  /** La grabación que suena, o null. */
+  recording: { speed: number; clarity: number; understood: boolean } | null;
 }
 
 export interface LoopSnapshot {

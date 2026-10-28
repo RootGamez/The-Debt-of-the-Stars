@@ -31,6 +31,10 @@ export interface Pulse {
   gain: number;
   /** Con ruido (tictac seco) o con tono que cae (golpe grave). */
   noise?: boolean;
+  /** Irregularidad del ritmo (0–1): cada intervalo varía hasta esa fracción. Sin ella, va a compás. */
+  jitter?: number;
+  /** Variación del tono de cada golpe (0–1): las sílabas de una voz no suenan todas igual. */
+  wobble?: number;
 }
 
 export interface Soundscape {
@@ -174,6 +178,28 @@ export const EVENT_SOUNDS: Readonly<Record<string, Soundscape>> = {
   secuencia_fabrica: {
     noise: { filter: 'highpass', frequency: 2000, q: 0.6, gain: 0.03 },
     pulse: { everySeconds: 0.25, frequency: 140, decay: 0.08, gain: 0.08 },
+  },
+};
+
+/**
+ * La voz de una grabación, mientras no haya voces de verdad: un zumbido que tiembla al ritmo de las sílabas
+ * y golpes de ruido filtrado como consonantes. Su ritmo y su tono siguen a la velocidad de reproducción: a
+ * ×1 una grabación lenta suena grave y arrastrada; acertando la velocidad, a ritmo de habla.
+ */
+export const RECORDING_VOICE: Soundscape = {
+  noise: { filter: 'bandpass', frequency: 1600, q: 1.5, gain: 0.012 },
+  tones: [
+    { frequency: 125, gain: 0.035, type: 'triangle', swell: { hz: 4.5, depth: 0.9 } },
+    { frequency: 250, gain: 0.012, type: 'sine', detune: 7, swell: { hz: 4.5, depth: 0.9 } },
+  ],
+  pulse: {
+    everySeconds: 0.21,
+    frequency: 950,
+    decay: 0.08,
+    gain: 0.1,
+    noise: true,
+    jitter: 0.45,
+    wobble: 0.35,
   },
 };
 

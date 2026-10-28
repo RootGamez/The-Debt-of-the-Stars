@@ -5,10 +5,21 @@ import type { Clues, Source } from '../registry/clues';
 import {
   readSource,
   rumorsOf,
+  understoodFacts,
   unlockedConclusions,
   type KnownFacts,
   type ReadingView,
 } from '../registry/knowledge';
+
+/** Lo que hace falta para reproducir una grabación (reading/recording.ts). */
+export interface OpenRecording {
+  /** Ritmo del reloj con que se grabó. */
+  rate: number;
+  /** Lo que se dice, frase a frase (la lectura profunda de los datos). */
+  lines: readonly string[];
+  /** Ya se entendió en otro ciclo: la rueda puede empezar en la velocidad buena. */
+  understoodBefore: boolean;
+}
 
 export interface OpenReading {
   source: Source;
@@ -21,6 +32,8 @@ export interface OpenReading {
   newFacts: string[];
   /** Texto provisional que Anthony reescribirá. */
   draft: boolean;
+  /** Solo las grabaciones: `text` es lo que se oye al pulsarla y esto, lo que hay que entender. */
+  recording?: OpenRecording;
 }
 
 type Listener = (facts: string[]) => void;
@@ -77,9 +90,14 @@ export class ReadingSession {
     const source = this.clues.sourceById.get(sourceId);
     if (!source || source.kind === 'evento' || !this.isAvailable(sourceId, activeEvents))
       return null;
+    this.open_ = source.recordedRate === undefined ? this.read(source) : this.listen(source);
+    return this.open_;
+  }
+
+  private read(source: Source): OpenReading {
     const result = readSource(source, this.facts);
     this.learn(result.newFacts);
-    this.open_ = {
+    return {
       source,
       title: source.title,
       level: result.level,
@@ -88,7 +106,35 @@ export class ReadingSession {
       newFacts: result.newFacts,
       draft: source.draft,
     };
-    return this.open_;
+  }
+
+  /** Una grabación da al abrirla solo lo que se oye; lo profundo, al entenderla (`understand`). */
+  private listen(source: Source): OpenReading {
+    const newFacts = source.surface.facts.filter((id) => !this.facts.has(id));
+    this.learn(newFacts);
+    return {
+      source,
+      title: source.title,
+      level: 'surface',
+      text: source.surface.text,
+      deepPending: false,
+      newFacts,
+      draft: source.draft,
+      recording: {
+        rate: source.recordedRate ?? 1,
+        lines: source.deep?.text ?? source.surface.text,
+        understoodBefore: understoodFacts(source, this.facts).length === 0,
+      },
+    };
+  }
+
+  /** La grabación abierta se ha entendido entera: devuelve los hechos nuevos (vacío si no hay ninguno). */
+  understand(): string[] {
+    const source = this.open_?.source;
+    if (!this.open_?.recording || !source) return [];
+    const newFacts = understoodFacts(source, this.facts);
+    this.learn(newFacts);
+    return newFacts;
   }
 
   close(): void {

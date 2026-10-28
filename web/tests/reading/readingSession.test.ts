@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ReadingSession } from '../../src/reading/readingSession';
-import { parse } from '../helpers/clueFixture';
+import { parse, withRecording } from '../helpers/clueFixture';
 
 const clues = parse();
 
@@ -143,6 +143,71 @@ describe('witnessing an event', () => {
 
   it('ignores sources that are not events', () => {
     expect(session().s.witness('umbral.placa', ['boca_destello'])).toEqual([]);
+  });
+});
+
+describe('listening to a recording', () => {
+  const recorded = parse(withRecording());
+
+  function listener(initial: string[] = []) {
+    const saved: string[][] = [];
+    const s = new ReadingSession(recorded, initial, (facts) => {
+      saved.push([...facts]);
+      return true;
+    });
+    return { s, saved };
+  }
+
+  it('opens with what is heard and the lines to play, at the clock it was recorded with', () => {
+    const { s } = listener();
+
+    const opened = s.open('cicatriz.grabacion', []);
+
+    expect(opened?.text).toEqual(['Una voz lentísima.']);
+    expect(opened?.recording).toEqual({
+      rate: 0.2,
+      lines: ['Aquí un día vuestro son cinco.', 'La luz sale torcida.'],
+      understoodBefore: false,
+    });
+    expect(opened?.deepPending).toBe(false);
+  });
+
+  it('gives nothing deep just for opening it, even when the requirements are known', () => {
+    const { s } = listener(['deuda.palabra']);
+
+    expect(s.open('cicatriz.grabacion', [])?.newFacts).toEqual([]);
+    expect(s.known.has('lab.existe_lugar_lento')).toBe(false);
+  });
+
+  it('learns the deep facts once it is understood, and only once', () => {
+    const { s, saved } = listener();
+    s.open('cicatriz.grabacion', []);
+
+    expect(s.understand()).toEqual(['lab.existe_lugar_lento', 'lab.imagen_desplazada']);
+    expect(s.understand()).toEqual([]);
+    expect(saved).toEqual([['lab.existe_lugar_lento', 'lab.imagen_desplazada']]);
+  });
+
+  it('remembers that it was understood before (the wheel can start at the right speed)', () => {
+    const { s } = listener(['lab.existe_lugar_lento', 'lab.imagen_desplazada']);
+
+    expect(s.open('cicatriz.grabacion', [])?.recording?.understoodBefore).toBe(true);
+  });
+
+  it('understands nothing when what is open is not a recording', () => {
+    const { s } = listener();
+    s.open('umbral.placa', []);
+
+    expect(s.understand()).toEqual([]);
+    expect(s.known.has('lab.existe_lugar_lento')).toBe(false);
+  });
+
+  it('understands nothing with nothing open', () => {
+    expect(listener().s.understand()).toEqual([]);
+  });
+
+  it('texts have no recording', () => {
+    expect(listener().s.open('umbral.placa', [])?.recording).toBeUndefined();
   });
 });
 
