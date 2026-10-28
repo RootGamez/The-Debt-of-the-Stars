@@ -4,7 +4,12 @@ import { Vector3 } from 'three';
 export interface TargetBody {
   id: string;
   name: string;
+  /** Oculto (el Nudo): solo se puede fijar cuando `revealed` lo permite (estando cerca). */
+  hidden?: boolean;
 }
+
+/** Qué cuerpos ocultos se pueden fijar ahora mismo; por defecto, todos. */
+export type Revealed = (id: string) => boolean;
 
 export class TargetingSystem {
   private targetIndex = -1;
@@ -18,11 +23,15 @@ export class TargetingSystem {
     return this.bodies[this.targetIndex];
   }
 
-  /** Cicla al siguiente objetivo disponible. */
-  cycleTarget(): TargetBody | undefined {
-    if (this.bodies.length === 0) return undefined;
-    this.targetIndex = (this.targetIndex + 1) % this.bodies.length;
-    return this.currentTarget;
+  /** Cicla al siguiente objetivo disponible (se salta los ocultos que aún no se ven). */
+  cycleTarget(revealed: Revealed = () => true): TargetBody | undefined {
+    for (let tried = 0; tried < this.bodies.length; tried++) {
+      this.targetIndex = (this.targetIndex + 1) % this.bodies.length;
+      const body = this.currentTarget;
+      if (body && (!body.hidden || revealed(body.id))) return body;
+    }
+    this.targetIndex = -1;
+    return undefined;
   }
 
   /** Establece directamente un objetivo por su id. */

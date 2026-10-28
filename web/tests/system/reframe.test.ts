@@ -13,6 +13,7 @@ const taller: BodySpec = {
   phase: 0.4,
   spin: 90,
   spinPhase: 0.2,
+  hidden: false,
 };
 const archivo: BodySpec = {
   world: 'archivo',
@@ -21,6 +22,7 @@ const archivo: BodySpec = {
   phase: 4.1,
   spin: 'locked',
   spinPhase: 1.9,
+  hidden: false,
 };
 const T = 37;
 

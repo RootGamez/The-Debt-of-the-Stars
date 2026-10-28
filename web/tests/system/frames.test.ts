@@ -19,6 +19,7 @@ const spinning: BodySpec = {
   phase: 0.8,
   spin: 60,
   spinPhase: 0.3,
+  hidden: false,
 };
 
 const surfacePoint = new Vector3(30, 20, -10);

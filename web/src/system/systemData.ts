@@ -19,6 +19,8 @@ export interface BodySpec {
   spin: 'locked' | number;
   /** Ángulo de giro al empezar el ciclo, o respecto a la órbita si está bloqueado (rad). */
   spinPhase: number;
+  /** Oculto (el Nudo, `"oculto": true`): la nave no lo ofrece como objetivo hasta tenerlo cerca. */
+  hidden: boolean;
 }
 
 export interface SystemSpec {
@@ -61,7 +63,10 @@ function parseBody(raw: unknown, starRadius: number, knownWorlds: readonly strin
   if (orbitRadius <= starRadius) fail(`${world} orbita dentro de la Brasa`);
   const period = finiteNumber(raw.periodo, `${world}.periodo`);
   if (period < 0) fail(`${world}.periodo no puede ser negativo`);
+  if (raw.oculto !== undefined && typeof raw.oculto !== 'boolean')
+    fail(`${world}.oculto debe ser true o false`);
   return {
+    hidden: raw.oculto === true,
     world,
     orbitRadius,
     period,

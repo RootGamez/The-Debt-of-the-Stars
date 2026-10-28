@@ -3,6 +3,7 @@
 // posiciones salen de las marcas de Blender tal como están en el modelo.
 import { Vector3 } from 'three';
 import type { RaycastWorld } from '../physics/collisionWorld';
+import { surfaceUp, type GravityWell } from '../physics/gravity';
 import type { Clues } from '../registry/clues';
 import type { Interactable } from '../registry/interaction';
 import { createSourceMarkers, type SourceMarkers } from '../render/sourceMarkers';
@@ -21,8 +22,8 @@ export interface WorldSources {
   /** Los rombos cuelgan del propio mundo, así que se mueven con él. */
   markers: SourceMarkers;
   collision: RaycastWorld;
-  /** Centro del mundo en su propio marco. */
-  center: Vector3;
+  /** Pozo del mundo en su propio marco (de él sale el "arriba" de cada punto). */
+  well: GravityWell;
 }
 
 function worldPosition(object: { getWorldPosition(target: Vector3): Vector3 }): Vector3 {
@@ -46,8 +47,8 @@ export function createWorldSources(runtime: WorldRuntime, clues: Clues): WorldSo
     world: runtime.id,
     interactables,
     eventSources,
-    markers: createSourceMarkers(world.scene, interactables, well.center),
+    markers: createSourceMarkers(world.scene, interactables, (p) => surfaceUp(p, well)),
     collision,
-    center: well.center,
+    well,
   };
 }

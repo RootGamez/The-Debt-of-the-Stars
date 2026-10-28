@@ -35,6 +35,30 @@ describe('TargetingSystem', () => {
     expect(targeting.currentTarget?.id).toBe('taller');
   });
 
+  it('skips a hidden body (the Nudo) until it is revealed', () => {
+    const targeting = new TargetingSystem([
+      { id: 'umbral', name: 'Umbral' },
+      { id: 'laboratorio', name: 'Laboratorio', hidden: true },
+      { id: 'observatorio', name: 'Observatorio' },
+    ]);
+    let near = false;
+    const revealed = (id: string) => id !== 'laboratorio' || near;
+
+    const ids = [1, 2, 3].map(() => targeting.cycleTarget(revealed)?.id);
+    expect(ids).toEqual(['umbral', 'observatorio', 'umbral']);
+
+    near = true;
+    expect(targeting.cycleTarget(revealed)?.id).toBe('laboratorio');
+  });
+
+  it('finds nothing to cycle to when every body is hidden', () => {
+    const targeting = new TargetingSystem([
+      { id: 'laboratorio', name: 'Laboratorio', hidden: true },
+    ]);
+
+    expect(targeting.cycleTarget(() => false)).toBeUndefined();
+  });
+
   it('allows clearing target', () => {
     const targeting = new TargetingSystem(bodies);
     targeting.cycleTarget();

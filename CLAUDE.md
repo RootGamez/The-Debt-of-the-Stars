@@ -68,4 +68,10 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - Blender 5.2: `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` (o variable `BLENDER_PATH`).
 - Base nueva de un mundo (sobrescribe el `.blend`):
   `blender -b --factory-startup --python blender/scripts/generar_mundo.py -- <mundo>`
-- 1 unidad = 1 metro. Marcas: `COL_`, `INT_<id>`, `SPAWN_<nombre>`, `TRIG_<nombre>`; las propiedades viajan como `userData`.
+- 1 unidad = 1 metro. Marcas: `COL_`, `INT_<id>`, `SPAWN_<nombre>`, `TRIG_<nombre>`, `PARK_`, `PASO_` (anillo de una Puerta plegada, con `destino`); objetos `EVT_` (solo durante un evento) y `ANIM_` (giran); las propiedades viajan como `userData`.
+- Cada mundo se viste con `blender/scripts/arte_<mundo>.py` sobre su base (reproducible, sin tocar el `.blend` a mano).
+- Mundos huecos (el Nudo, mundo `laboratorio`): `inner_radius` en la raíz; dentro la gravedad empuja hacia fuera. En `blender/marcas/laboratorio.json`, `"dentro": true` pone la marca en la cara interior; `"rumbo"` la orienta.
+
+## Relatividad jugable (Fase 7)
+- Grabaciones: las fuentes `grabacion` llevan `reloj` (ritmo con que se grabaron) y se entienden con la rueda de velocidad (velocidad × reloj ≈ 1). La M silencia el juego.
+- El Laboratorio está dentro del Nudo (cuerpo oculto en `sistema.json`); se entra por la Puerta plegada. Con `?debug`: `__juego.warpTo('laboratorio')` y `__juego.place()`.

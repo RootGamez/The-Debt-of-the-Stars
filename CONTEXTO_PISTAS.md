@@ -59,6 +59,9 @@ compacta** cerca del Laboratorio. Antes del minuto 13:30 todavía no hay agujero
   su imagen llega desplazada (la luz rodea el Nudo).
 - Une piezas que ya existen: la Primera Puerta en ruinas de Cicatriz, el "primer colapso" que el Consejo
   encubrió, y por qué la investigación estaba justo allí.
+- ✅ (Anthony, 2026-10-28) **El Laboratorio está dentro del Nudo**, con la gravedad invertida (ver
+  `CONTEXTO_PLANETAS.md` §8). 🟡 Por eso su tiempo va tan lento y por eso no se ve donde está: la luz que escapa
+  del Nudo sale curvada y su imagen aparece desplazada hacia la Brasa (la regla de la lente, Fase 7).
 
 
 ---
@@ -178,7 +181,7 @@ final se entiende como aviso.
 |---|---|---|---|---|---|
 | `cicatriz.sala_motor` | Objeto | Siempre (el núcleo solo se abre en el pulso) | Un anillo enorme con el núcleo cerrado; dentro, el motor viejo | Aquí se instala el Contrapeso; el núcleo se abre a las 9:00 (K6) | `contrapeso.lugar`, `contrapeso.ventana_pulso` · H6 |
 | `cicatriz.mordidas` | Observación | Siempre | Decenas de cortes esféricos perfectos | Una pared con medio símbolo que encaja con el del Instituto: los fragmentos de casa salieron de aquí | `deuda.filtraciones`, `casa.fragmentos_de_aqui` · H2, H7 |
-| `cicatriz.grabacion_esceptico` | Grabación | Siempre | Una grabación que suena lentísima e incomprensible | Grabada con un reloj 5 veces más lento: reproducida a ese ritmo se entiende. Advierte del Límite y describe desde dónde graba: "el Nudo me tapa la Brasa por la izquierda…" (K1, corrección, H4) | `lab.existe_lugar_lento`, `lab.correccion`, `silencio.advertencia` · H4, H5 |
+| `cicatriz.grabacion_esceptico` | Grabación | Siempre | Una grabación que suena lentísima e incomprensible | Grabada con un reloj 5 veces más lento: reproducida a ese ritmo se entiende. Advierte del Límite y describe desde dónde graba: dentro del Nudo, y que su luz sale torcida hacia la Brasa, así que hay que apartar la vista de ella para dar con el sitio (K1, corrección, H4) | `lab.existe_lugar_lento`, `lab.correccion`, `silencio.advertencia` · H4, H5 |
 | `cicatriz.bitacora` | Texto | Siempre | Bitácora de la máquina con picos en cada uso | Los picos se disparan durante la evacuación (H3); la última entrada: "una boca nueva llama desde un sistema joven" con su cuenta (K8); el núcleo solo se abre en el pulso (K6) | `partida.cascada`, `casa.prueba_llama`, `contrapeso.ventana_pulso` · H3, H6, H7 |
 | `cicatriz.lista_mundos` | Texto | Siempre | La lista de mundos conectados a la red, con huecos | Cada boca tiene su hora anotada y no coinciden (K7); un hueco lleva el símbolo del sistema del protagonista | `bocas.relojes_distintos`, `casa.en_la_red` · H2, H7 |
 | `cicatriz.primera_puerta` | Observación | Siempre | Ruina del primer anillo | Su garganta se cerró mal: ahí empezó el Nudo (sección 3) | `nudo.origen` · H2, H5 |

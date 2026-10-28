@@ -5,6 +5,7 @@
 import { Vector3, type PerspectiveCamera } from 'three';
 import type { Player } from '../core/player';
 import type { LoopSession } from '../core/loopSession';
+import { surfaceUp } from '../physics/gravity';
 import { lookAlong } from '../physics/surfaceFrame';
 import type { Clues } from '../registry/clues';
 import {
@@ -301,7 +302,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     teleportTo(clueId) {
       const item = current.interactables.find((i) => i.id === clueId);
       if (!item) return false;
-      const up = item.position.clone().sub(current.center).normalize();
+      const up = surfaceUp(item.position, current.well);
       const side = new Vector3()
         .crossVectors(up, Math.abs(up.y) > 0.9 ? new Vector3(1, 0, 0) : new Vector3(0, 1, 0))
         .normalize();

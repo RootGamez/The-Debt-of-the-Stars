@@ -225,6 +225,53 @@ body {
   pointer-events: none;
 }
 
+/* Destello al cruzar una Puerta plegada: el espacio se dobla un instante. */
+.fold-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  opacity: 0;
+  background: radial-gradient(
+    circle,
+    rgb(232 240 230 / 95%) 0%,
+    rgb(120 150 140 / 70%) 45%,
+    rgb(7 7 12 / 0%) 80%
+  );
+  pointer-events: none;
+}
+
+.fold-flash-on {
+  animation: fold-flash 0.6s ease-out;
+}
+
+@keyframes fold-flash {
+  0% {
+    opacity: 0.95;
+    transform: scale(0.6);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fold-flash-on {
+    animation-duration: 0.25s;
+  }
+
+  @keyframes fold-flash {
+    0% {
+      opacity: 0.6;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+}
+
 .overlay-actions {
   display: flex;
   flex-wrap: wrap;

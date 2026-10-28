@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.5
-**Última actualización:** 2026-10-25 · Sesión 3
+**Versión:** v0.6
+**Última actualización:** 2026-10-28 · Sesión 5 (Laboratorio dentro del Nudo)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -203,15 +203,25 @@
 
 **Idea.** Un laboratorio pequeño, íntimo, abandonado con prisa, donde se hacía la investigación que nadie debía ver.
 
-**Forma.** Radio 25 m, gravedad 0.3. Muy cerca de la masa, así que su tiempo corre unas **cinco veces más lento** que fuera.
+> ✅ Decidido (Anthony, 2026-10-28): **el Laboratorio está dentro del Nudo**, en un sitio con la **gravedad invertida**: se camina por la cara interior de una esfera hueca.
+
+**Forma.** El Nudo y el Laboratorio son un solo sitio (🟡 cómo):
+- **El Nudo** es la garganta de la primera Puerta, que se cerró mal y quedó plegada sobre sí misma. Por fuera, una **cáscara negra** de 25 m de radio (negro sobre negro: casi no se ve), con una Puerta de anillos de los Ausentes y un pequeño muelle donde posarse.
+- **Por dentro**, una cavidad de 21 m de radio donde **la gravedad empuja hacia fuera**: el suelo se curva hacia arriba a tu alrededor y, en el centro, cuelga la **semilla** del Nudo (lo que despierta a las 13:30), negra, con un halo frío y tres anillos que giran muy despacio. Franjas oscuras cada 30° de latitud (los estratos) ayudan a orientarse.
+- **Se entra por una Puerta plegada**: el anillo de la cáscara y su gemelo de la cara interior comparten el paso; al cruzar uno se aparece delante del otro. Dentro no llega la Brasa: luce la semilla.
+- Gravedad 0.3. Tan cerca de la masa que su tiempo corre unas **cinco veces más lento** que fuera.
+- Inspiración general: un lugar escondido dentro de otro cuerpo. La forma, la historia y el lenguaje visual son propios.
 
 **Lo que el jugador siente.** Al entrar, todo se mueve más despacio: la llama de una vela, un reloj de pared, el polvo. El HUD lo confirma. Quienes trabajaron aquí vivieron *meses* mientras fuera pasaban *años*.
 
-**Lugares clave:**
-1. **La Sala de Trabajo.** Una pizarra con una ecuación a medias.
-2. **El Dormitorio compartido.** Dos camas, una sola con huellas de uso.
+**Lugares clave** (repartidos por la cara interior y unidos por senderos con farolas):
+1. **La Sala de Trabajo.** Una pizarra con una ecuación a medias y el armario con la orden de silencio (sobre sellado).
+2. **El Dormitorio compartido.** Un cuarto sin techo con dos camas, una sola con huellas de uso.
 3. **El Banco del Contrapeso.** Donde estaba el artilugio, o lo que queda de él.
-4. **El Escritorio de la Investigadora.** Sus últimas notas y la orden de silencio que recibió.
+4. **El Escritorio de la Investigadora.** Sus últimas notas y el reloj de mesa de aguja casi quieta.
+5. **El Escritorio del Escéptico.** La silla tumbada, la funda vacía de su grabadora y una carta del cielo con una flecha a lápiz.
+6. **La Cámara.** Dos anillos cruzados, un asiento y un dial de 24 marcas con el último cuarto encendido.
+7. **El Recibidor.** La Puerta gemela por donde se entra.
 
 **Textos clave:** las últimas notas de la investigadora; las del escéptico; el documento que ordena callar (y quién lo firma ❓).
 
@@ -277,3 +287,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-10-25 · Sesión 3.** Anthony decide que los mundos orbitan en rieles y en tiempo real (pregunta 6) y aprueba el plan de la Fase 5 (sistema solar y nave): nave en cabina que llega contigo en cada ciclo, choque letal a más de 30 m/s, la Brasa mortal y el reloj que se mezcla según la cercanía a cada masa.
 - **2026-10-27 · Sesión 4.** Se propone el aspecto de la nave (🟡): la lanzadera del Instituto, con el reloj doble en el tablero. La primera versión copiaba la nave de Outer Wilds y se descartó.
 - **2026-10-27 · Sesión 4 (Fase 6).** Se propone el lenguaje visual de los Ausentes (🟡 anillos y estratos) y Umbral se viste con sus siete lugares; el Mirador queda en el terminador, con la Brasa en el horizonte.
+- **2026-10-28 · Sesión 5 (Fase 7).** Anthony decide que el Laboratorio esté **dentro del Nudo, con la gravedad invertida**. Se propone (🟡) el Nudo como garganta plegada: cáscara negra por fuera, cavidad de 21 m por dentro con la semilla en el centro, Puerta plegada para entrar y siete zonas del Laboratorio en la cara interior. El Nudo entra en `sistema.json` (órbita 2350 m) como cuerpo oculto.

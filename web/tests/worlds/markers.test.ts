@@ -240,6 +240,67 @@ describe('ambient light of a world', () => {
   });
 });
 
+describe('a hollow world (the Nudo)', () => {
+  function hollow(extra: Record<string, unknown> = {}) {
+    const scene = umbralScene();
+    const root = scene.getObjectByName('umbral');
+    if (!root) throw new Error('test setup');
+    Object.assign(root.userData, { radius: 25, inner_radius: 21, ...extra });
+    return scene;
+  }
+
+  it('reads the radius of its cavity and the light inside', () => {
+    const info = readWorldInfo(
+      hollow({ interior_light: 2, interior_light_color: '#C0D8C8' }),
+      'umbral',
+    );
+
+    expect(info.innerRadius).toBe(21);
+    expect(info.interiorLight).toEqual({ color: 0xc0d8c8, intensity: 2 });
+  });
+
+  it('is an ordinary world without a cavity', () => {
+    const info = readWorldInfo(umbralScene(), 'umbral');
+
+    expect(info.innerRadius).toBeUndefined();
+    expect(info.interiorLight).toBeUndefined();
+  });
+
+  it('rejects a cavity as big as the world', () => {
+    expect(() => readWorldInfo(hollow({ inner_radius: 25 }), 'umbral')).toThrow(/inner_radius/);
+  });
+});
+
+describe('folded gates (PASO_)', () => {
+  it('collects the two twin rings with their destination', () => {
+    const scene = umbralScene();
+    const out = node('PASO_Boca', { destino: 'PASO_Dentro' });
+    const back = node('PASO_Dentro', { destino: 'PASO_Boca' });
+    scene.add(out, back);
+
+    const { gates } = collectMarkers(scene);
+
+    expect(gates).toEqual([
+      { name: 'PASO_Boca', object: out, target: 'PASO_Dentro' },
+      { name: 'PASO_Dentro', object: back, target: 'PASO_Boca' },
+    ]);
+  });
+
+  it('needs a destination', () => {
+    const scene = umbralScene();
+    scene.add(node('PASO_Suelto'));
+
+    expect(() => collectMarkers(scene)).toThrow(/destino/);
+  });
+
+  it('rejects a destination that is not another ring of the same world', () => {
+    const scene = umbralScene();
+    scene.add(node('PASO_Boca', { destino: 'PASO_Inexistente' }));
+
+    expect(() => collectMarkers(scene)).toThrow(/PASO_Inexistente/);
+  });
+});
+
 describe('animated parts (ANIM_)', () => {
   it('collects parts that turn, always or only during an event', () => {
     const scene = umbralScene();

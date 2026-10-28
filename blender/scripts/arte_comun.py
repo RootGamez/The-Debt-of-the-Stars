@@ -165,6 +165,45 @@ class Planeta:
         ))
         return Lugar(base)
 
+    def suelo_dentro(self, lat, lon):
+        """Punto de la cara interior de un mundo hueco (el Nudo) en esa dirección: el rayo sale del centro."""
+        d = direccion(lat, lon)
+        hit, loc, _, _ = self.terreno.ray_cast(d * 0.01, d)
+        if not hit:
+            raise RuntimeError(f"{self.mundo}: no hay cara interior en lat {lat}, lon {lon}")
+        return loc
+
+    def lugar_dentro(self, lat, lon, rumbo=0.0, hundir=0.0, apoyo=0.0, tomar=max):
+        """Como `lugar`, pero en la cara interior de un mundo hueco: Z (arriba) apunta al centro. La cara
+        interior es cóncava (sube a tu alrededor), así que con `apoyo` el suelo se pone en el punto más alto
+        del círculo (`tomar=max`): los bordes quedan a ras y el centro, sobre un zócalo."""
+        d = direccion(lat, lon)
+        arriba = -d
+        norte = Vector((0, 0, 1)) - arriba * arriba.z
+        if norte.length < 1e-6:
+            norte = Vector((1, 0, 0))
+        norte.normalize()
+        este = norte.cross(arriba).normalized()
+        r = math.radians(rumbo)
+        frente = (norte * math.cos(r) + este * math.sin(r)).normalized()
+        derecha = frente.cross(arriba).normalized()
+        # Alturas hacia el centro: cuanto más cerca del centro, más alto.
+        alturas = [-self.suelo_dentro(lat, lon).length]
+        if apoyo > 0:
+            radio = self.suelo_dentro(lat, lon).length
+            grados = math.degrees(apoyo / radio)
+            for k in range(8):
+                a = 2 * math.pi * k / 8
+                alturas.append(-self.suelo_dentro(lat + grados * math.cos(a), lon + grados * math.sin(a) / max(0.2, math.cos(math.radians(lat)))).length)
+        origen = d * (-tomar(alturas) + hundir)
+        base = Matrix((
+            (derecha.x, frente.x, arriba.x, origen.x),
+            (derecha.y, frente.y, arriba.y, origen.y),
+            (derecha.z, frente.z, arriba.z, origen.z),
+            (0, 0, 0, 1),
+        ))
+        return Lugar(base)
+
     def rumbo_hacia(self, lat, lon, objetivo):
         """Rumbo (grados desde el norte hacia el este) que mira hacia una dirección del espacio."""
         arriba = direccion(lat, lon)
@@ -257,8 +296,9 @@ class Vestido:
         self.vista.pieza(color, crear, m)
         self.col.pieza(crear_col or crear, m)
 
-    def marca(self, nombre, lugar, pos):
-        self.marcas[nombre] = lugar.base @ Vector(pos)
+    def marca(self, nombre, lugar, pos, rumbo=None):
+        """`rumbo`: hacia dónde mira la marca (grados desde el norte), si importa (aparición, PASO_)."""
+        self.marcas[nombre] = (lugar.base @ Vector(pos), rumbo)
 
     def suelo_local(self, lugar, x, y):
         """Altura del terreno (en el marco del lugar) bajo el punto local (x, y), o None si no hay suelo."""
@@ -284,8 +324,8 @@ class Vestido:
         b = lugar.base @ Vector((final[0], final[1], final[2] - bajo - 0.1))
         self.solido(color, caja, caja_entre(a, b, ancho, grueso))
 
-    def marca_en(self, nombre, punto):
-        self.marcas[nombre] = Vector(punto)
+    def marca_en(self, nombre, punto, rumbo=None):
+        self.marcas[nombre] = (Vector(punto), rumbo)
 
     def construir(self):
         borrar([f"{self.mundo}_Lugares", f"{self.mundo}_Luces", f"COL_{self.mundo}_Lugares"]
@@ -312,15 +352,21 @@ class Vestido:
         with open(ruta, encoding="utf-8") as f:
             datos = json.load(f)
         for marca in datos:
-            punto = self.marcas.get(marca["nombre"])
-            if punto is None:
+            colocada = self.marcas.get(marca["nombre"])
+            if colocada is None:
                 continue
+            punto, rumbo = colocada
             d = punto.normalized()
             lat = math.degrees(math.asin(max(-1.0, min(1.0, d.z))))
             lon = math.degrees(math.atan2(d.y, d.x))
-            suelo = self.planeta.suelo(lat, lon).length
             marca["lat"], marca["lon"] = round(lat, 3), round(lon, 3)
-            marca["alto"] = round(punto.length - suelo, 3)
+            if marca.get("dentro"):
+                # Cara interior: la altura se mide hacia el centro.
+                marca["alto"] = round(self.planeta.suelo_dentro(lat, lon).length - punto.length, 3)
+            else:
+                marca["alto"] = round(punto.length - self.planeta.suelo(lat, lon).length, 3)
+            if rumbo is not None:
+                marca["rumbo"] = round(rumbo, 2)
         with open(ruta, "w", encoding="utf-8", newline="\n") as f:
             json.dump(datos, f, ensure_ascii=False, indent=2)
             f.write("\n")

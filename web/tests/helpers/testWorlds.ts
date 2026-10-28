@@ -42,6 +42,30 @@ export function sphereWorld(center: Vector3, radius: number): CollisionWorld {
   };
 }
 
+/**
+ * El interior de una esfera hueca: todo es sólido más allá de `innerRadius` y se camina por la cara de
+ * dentro (como en el Nudo). El suelo empuja hacia el centro.
+ */
+export function hollowSphereWorld(center: Vector3, innerRadius: number): CollisionWorld {
+  const start = new Vector3();
+  const end = new Vector3();
+  return {
+    resolve(capsule: Capsule, up: Vector3, contact: Contact): boolean {
+      clearContact(contact);
+      start.subVectors(capsule.start, center);
+      end.subVectors(capsule.end, center);
+      const far = start.lengthSq() > end.lengthSq() ? start : end;
+      const distance = far.length();
+      const penetration = distance + capsule.radius - innerRadius;
+      if (penetration <= 0 || distance === 0) return false;
+      normal.copy(far).divideScalar(-distance); // hacia el centro
+      contact.correction.copy(normal).multiplyScalar(penetration);
+      considerFloor(contact, normal, up);
+      return true;
+    },
+  };
+}
+
 /** Semiespacio sólido bajo el plano que pasa por `point` con normal `planeNormal` (unitaria). */
 export function halfSpaceWorld(point: Vector3, planeNormal: Vector3): CollisionWorld {
   return {

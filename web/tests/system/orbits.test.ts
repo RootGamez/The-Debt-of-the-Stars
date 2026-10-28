@@ -10,6 +10,7 @@ const spec = (patch: Partial<BodySpec> = {}): BodySpec => ({
   phase: 0,
   spin: 'locked',
   spinPhase: 0,
+  hidden: false,
   ...patch,
 });
 
