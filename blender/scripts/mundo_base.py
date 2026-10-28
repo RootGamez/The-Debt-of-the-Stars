@@ -26,7 +26,7 @@ PRESETS = {
                    massif=((0.8, 0.3, 0.5), 0.35, 0.18, "#7A6A5E"), polar_ice="#A8D0E8"),
     "archivo": dict(radius=70, gravity=1.5, clock=0.80, relief=0.03, freq=1.6,
                     bands=[(0.0, "#22303E"), (0.25, "#4A6680"), (0.55, "#C8CCD0"), (0.85, "#EEE6D2")],
-                    canyon=(0.16, 0.22, "#22303E")),
+                    canyon=(0.16, 12.0, "#33465C")),  # semiancho (rad) y hondo (m) del cañón ecuatorial
     "taller": dict(radius=45, gravity=0.6, clock=0.85, relief=0.05, freq=1.4,
                    bands=[(0.0, "#2A2E34"), (0.35, "#6A7480"), (0.6, "#EEEEEA"), (0.85, "#E07830")],
                    terraces=4),
@@ -79,17 +79,20 @@ class Relieve:
             x = d.angle(Vector(md).normalized()) / mr
             if x < 1:
                 h += (mh / c["relief"]) * (1 - x * x)
-        if "canyon" in c:
-            w, depth, _ = c["canyon"]
-            lat = abs(math.asin(max(-1, min(1, d.z))))
-            if lat < w:
-                h -= (depth / c["relief"]) * min(1.0, (w - lat) / (w * 0.25))
         if "terraces" in c:
             h = round(h * c["terraces"]) / c["terraces"]
         h01 = (max(-1.0, min(1.0, h)) + 1) / 2
         if "sea" in c:
             h01 = max(h01, c["sea"])
-        return c["radius"] * (1 + (h01 * 2 - 1) * c["relief"]), h01
+        radio = c["radius"] * (1 + (h01 * 2 - 1) * c["relief"])
+        if "canyon" in c:
+            # Cañón de verdad (metros, no limitado por el relieve): suelo plano y paredes casi verticales.
+            w, hondo, _ = c["canyon"]
+            lat = abs(math.asin(max(-1, min(1, d.z))))
+            if lat < w:
+                radio -= hondo * min(1.0, (w - lat) / (w * 0.25))
+                h01 = min(h01, 0.2)
+        return radio, h01
 
     def mordida(self, d, r):
         """Corte esférico perfecto: lleva el punto a la cara interior de la esfera que lo contiene."""

@@ -34,7 +34,13 @@ def informe(objs):
             continue
         n = triangulos(obj, depsgraph)
         total += n
-        limite = PRESUPUESTO_PLANETA if obj.name.endswith("_Terreno") else PRESUPUESTO_PROP
+        if obj.name.endswith("_Terreno"):
+            limite = PRESUPUESTO_PLANETA
+        elif obj.name.endswith(("_Lugares", "_Luces")):
+            # Los lugares de arte_<mundo>.py van en una sola malla: los vigila el total del mundo.
+            limite = PRESUPUESTO_TOTAL
+        else:
+            limite = PRESUPUESTO_PROP
         if n > limite and obj.data.name not in datos_vistos:
             avisos.append(f"  {obj.name}: {n} > {limite}")
         datos_vistos.add(obj.data.name)

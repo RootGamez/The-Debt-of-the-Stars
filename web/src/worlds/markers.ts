@@ -1,6 +1,7 @@
 // Lee las marcas de juego que vienen de Blender dentro del glTF de un mundo.
 // Convención (ver CLAUDE.md): COL_ colisión, INT_ interacción, SPAWN_ aparición del jugador,
-// PARK_ dónde espera la nave al empezar cada ciclo, TRIG_ evento.
+// PARK_ dónde espera la nave al empezar cada ciclo, TRIG_ evento, EVT_ algo que solo se ve durante un
+// evento de la cronología (por ejemplo, el haz de la ranura del Archivo), ANIM_ pieza que gira.
 // Las propiedades personalizadas de Blender llegan como userData (export_extras).
 import type { Mesh, Object3D } from 'three';
 
@@ -15,6 +16,8 @@ export interface WorldInfo {
   radius: number;
   gravity: number;
   clockRate: number;
+  /** Luz ambiente propia del mundo (propiedades `ambient` y `ambient_color` de la raíz), si la tiene. */
+  ambient?: { color: number; intensity: number } | undefined;
 }
 
 export interface InteractionMarker {
@@ -40,6 +43,21 @@ export interface WorldMarkers {
   /** Dónde espera la nave al empezar cada ciclo (PARK_). */
   parks: Map<string, Object3D>;
   triggers: TriggerMarker[];
+  /** Objetos que solo se ven mientras dura su evento (EVT_, propiedad `event`); empiezan ocultos. */
+  eventProps: EventProp[];
+  /** Piezas que giran sobre su eje vertical (ANIM_, propiedad `spin` en rad/s; con `event`, solo entonces). */
+  animated: AnimatedPart[];
+}
+
+export interface AnimatedPart {
+  object: Object3D;
+  spin: number;
+  event: string | undefined;
+}
+
+export interface EventProp {
+  event: string;
+  object: Object3D;
 }
 
 /** Datos del mundo mal formados (error del contenido exportado, no del código). */
@@ -76,6 +94,14 @@ function requireString(object: Object3D, key: string): string {
   return value;
 }
 
+function requireSpin(object: Object3D): number {
+  const value: unknown = object.userData.spin;
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new WorldDataError(`${object.name}: "spin" debe ser un número (rad/s)`);
+  }
+  return value;
+}
+
 function isInteractionKind(value: string): value is InteractionKind {
   return (INTERACTION_KINDS as readonly string[]).includes(value);
 }
@@ -94,7 +120,18 @@ export function readWorldInfo(scene: Object3D, worldId: string): WorldInfo {
     radius: requireNumber(root, 'radius', 'positive'),
     gravity: requireNumber(root, 'gravity', 'positive'),
     clockRate: requireNumber(root, 'clock_rate', 'positive'),
+    ambient: readAmbient(root),
   };
+}
+
+function readAmbient(root: Object3D): WorldInfo['ambient'] {
+  const intensity = optionalNumber(root, 'ambient', 'positive');
+  if (intensity === undefined) return undefined;
+  const color = requireString(root, 'ambient_color');
+  if (!/^#[0-9a-f]{6}$/i.test(color)) {
+    throw new WorldDataError(`${root.name}: "ambient_color" debe ser #rrggbb (recibido ${color})`);
+  }
+  return { color: Number.parseInt(color.slice(1), 16), intensity };
 }
 
 function readInteraction(object: Object3D): InteractionMarker {
@@ -134,6 +171,8 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
     spawns: new Map(),
     parks: new Map(),
     triggers: [],
+    eventProps: [],
+    animated: [],
   };
   const colliderRoots: Object3D[] = [];
 
@@ -150,6 +189,16 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
       markers.spawns.set(name, object);
     } else if (name.startsWith('PARK_')) {
       markers.parks.set(name, object);
+    } else if (name.startsWith('ANIM_')) {
+      const event: unknown = object.userData.event;
+      markers.animated.push({
+        object,
+        spin: requireSpin(object),
+        event: event === undefined ? undefined : requireString(object, 'event'),
+      });
+    } else if (name.startsWith('EVT_')) {
+      markers.eventProps.push({ event: requireString(object, 'event'), object });
+      object.visible = false;
     }
   });
 

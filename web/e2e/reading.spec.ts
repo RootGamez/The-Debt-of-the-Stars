@@ -93,7 +93,8 @@ test('the Registro lists facts by thread, rumors as questions and unlocked concl
 test('witnessing the flash of La Boca at 10:00 notes its fact', async ({ page }) => {
   await startPlaying(page);
 
-  for (let i = 0; i < 10; i++) await page.keyboard.press(']');
+  // Justo antes de las 10:00: no depende de lo que tarde en cargar el mundo.
+  await page.evaluate(() => window.__juego?.skipTo?.(598.5));
 
   await expect.poll(() => facts(page)).toContain('deuda.puertas_se_buscan');
   await expect(page.locator('.notice')).toContainText('Anotado en el Registro');

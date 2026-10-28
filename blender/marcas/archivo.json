@@ -1,3 +1,79 @@
 [
-  { "nombre": "SPAWN_Prueba", "lat": 35, "lon": 10, "alto": 1.0, "props": {} }
+  {
+    "nombre": "SPAWN_Borde",
+    "lat": 12.6,
+    "lon": -26.0,
+    "alto": 1.0,
+    "props": {}
+  },
+  {
+    "nombre": "INT_informe_oficial",
+    "lat": -0.0,
+    "lon": -11.392,
+    "alto": 1.33,
+    "props": {
+      "clue_id": "archivo.informe_oficial",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_indice",
+    "lat": 4.147,
+    "lon": 20.0,
+    "alto": 2.723,
+    "props": {
+      "clue_id": "archivo.indice",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_sala_relojes",
+    "lat": -2.452,
+    "lon": -32.0,
+    "alto": 1.56,
+    "props": {
+      "clue_id": "archivo.sala_relojes",
+      "kind": "observacion"
+    }
+  },
+  {
+    "nombre": "INT_cartas",
+    "lat": -3.988,
+    "lon": 44.0,
+    "alto": 1.131,
+    "props": {
+      "clue_id": "archivo.cartas",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_escritorio",
+    "lat": -3.895,
+    "lon": 38.0,
+    "alto": 1.21,
+    "props": {
+      "clue_id": "archivo.escritorio",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_ranura_luz",
+    "lat": -0.0,
+    "lon": 99.526,
+    "alto": 1.25,
+    "props": {
+      "clue_id": "archivo.ranura_luz",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_fondo_canon",
+    "lat": -0.0,
+    "lon": -100.957,
+    "alto": 1.178,
+    "props": {
+      "clue_id": "archivo.fondo_canon",
+      "kind": "texto"
+    }
+  }
 ]

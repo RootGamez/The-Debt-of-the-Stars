@@ -3,6 +3,7 @@
 import './style.css';
 import { Quaternion, Timer, Vector3, type PerspectiveCamera, type WebGLRenderer } from 'three';
 import { loadChronology } from './core/chronology';
+import { createSoundtrack } from './audio/soundtrack';
 import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
@@ -27,7 +28,7 @@ import { createReadingUi, type ReadingUi } from './reading/readingUi';
 import { createWorldSources, type WorldSources } from './reading/worldSources';
 import { cameraPose } from './render/firstPersonCamera';
 import { createStarfield } from './render/sky';
-import { createStage } from './render/stage';
+import { AMBIENT_COLOR, AMBIENT_INTENSITY, createStage } from './render/stage';
 import { createSystemScene } from './render/systemScene';
 import { loadShipModel } from './ship/loadShip';
 import { createLocator, createStandaloneLocator, type WorldBody } from './system/locator';
@@ -81,7 +82,7 @@ function runtimeOf(runtimes: ReadonlyMap<string, WorldRuntime>, id: string): Wor
 async function start(): Promise<void> {
   const canvas = requireElement('game', HTMLCanvasElement);
   const status = requireElement('status', HTMLParagraphElement);
-  const { renderer, scene, camera, sun } = createStage(canvas);
+  const { renderer, scene, camera, sun, ambient } = createStage(canvas);
   setupCamera(camera);
   watchGraphicsContext(canvas, status);
 
@@ -247,6 +248,8 @@ async function start(): Promise<void> {
     return { reference: systemScene.referenceWorld ?? null, bodies: positions };
   }
   const orbitMap = spec ? createOrbitMap(spec, systemSnapshot) : undefined;
+  // El sonido se sintetiza (sin archivos) y arranca con el primer gesto del jugador.
+  const soundtrack = createSoundtrack();
   if (window.__juego) {
     window.__juego.teleportTo = (clueId) => {
       if (flight?.piloting) return false;
@@ -262,8 +265,26 @@ async function start(): Promise<void> {
     };
     window.__juego.shipTo = (world, altitude) => flight?.warpTo(world, altitude) ?? false;
     window.__juego.toShip = () => flight?.standAtHatch(currentWorld.id) ?? false;
+    window.__juego.audio = () => soundtrack.snapshot();
+    window.__juego.skipTo = (seconds) => {
+      session.director.skip(seconds - session.director.clock.t);
+      return session.director.clock.t;
+    };
   }
 
+  // Lo que solo se ve durante un evento (EVT_): el haz de la ranura del Archivo…
+  const eventProps = [...runtimes.values()].flatMap((r) => r.world.markers.eventProps);
+  // …y las piezas que giran (ANIM_): los brazos del Taller, siempre; la maqueta, solo en su evento.
+  const animated = [...runtimes.values()].flatMap((r) => r.world.markers.animated);
+  /** La luz ambiente es la del mundo donde estás (o la general en el espacio abierto). */
+  let litWorld: string | null = null;
+  function lightFor(world: string | undefined): void {
+    if ((world ?? '') === litWorld) return;
+    litWorld = world ?? '';
+    const own = world ? runtimes.get(world)?.world.info.ambient : undefined;
+    ambient.color.setHex(own?.color ?? AMBIENT_COLOR);
+    ambient.intensity = own?.intensity ?? AMBIENT_INTENSITY;
+  }
   let shipDeath: DeathCause | undefined;
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
@@ -295,6 +316,16 @@ async function start(): Promise<void> {
       }
       session.update(dt, timeRuns, shipDeath);
       if (timeRuns) shipDeath = undefined; // si el ciclo no corrió, la muerte espera
+      for (const prop of eventProps) {
+        prop.object.visible = session.activeEventIds.includes(prop.event);
+      }
+      if (timeRuns) {
+        for (const part of animated) {
+          if (!part.event || session.activeEventIds.includes(part.event)) {
+            part.object.rotateY(part.spin * dt);
+          }
+        }
+      }
       // En pausa la física sigue (jugador quieto, se asienta en el suelo); el ciclo sí se detiene.
       const alpha = physics.advance(dt);
       if (flight?.piloting) {
@@ -307,6 +338,17 @@ async function start(): Promise<void> {
       camera.position.add(session.shake);
       const t = session.director.clock.t;
       systemScene.update(t);
+      lightFor(systemScene.referenceWorld);
+      soundtrack.update({
+        worldId: spec ? systemScene.referenceWorld : currentWorld.id,
+        rate: session.director.rate,
+        events: session.activeEventIds,
+        absorption: session.director.absorption,
+        phase: session.director.phase,
+        fade: session.director.fade.amount,
+        running: timeRuns,
+        piloting: flight?.piloting ?? false,
+      });
       camera.updateMatrixWorld();
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);

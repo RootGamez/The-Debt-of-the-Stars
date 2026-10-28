@@ -1,60 +1,98 @@
 [
-  { "nombre": "SPAWN_LaBoca", "lat": 8, "lon": 20, "alto": 1.0, "props": {} },
-  { "nombre": "PARK_Nave", "lat": 1, "lon": 27, "alto": 0.0, "props": {} },
+  {
+    "nombre": "SPAWN_LaBoca",
+    "lat": 7.992,
+    "lon": 19.846,
+    "alto": 1.952,
+    "props": {}
+  },
+  {
+    "nombre": "PARK_Nave",
+    "lat": 1,
+    "lon": 27,
+    "alto": 0.0,
+    "props": {}
+  },
   {
     "nombre": "INT_boca",
-    "lat": 8,
-    "lon": 25,
-    "alto": 1.2,
-    "props": { "clue_id": "umbral.boca", "kind": "observacion" }
+    "lat": 7.999,
+    "lon": 23.502,
+    "alto": 2.332,
+    "props": {
+      "clue_id": "umbral.boca",
+      "kind": "observacion"
+    }
   },
   {
     "nombre": "INT_placa_inauguracion",
-    "lat": 9,
-    "lon": 23,
-    "alto": 1.2,
-    "props": { "clue_id": "umbral.placa", "kind": "texto" }
+    "lat": 9.873,
+    "lon": 22.437,
+    "alto": 1.277,
+    "props": {
+      "clue_id": "umbral.placa",
+      "kind": "texto"
+    }
   },
   {
     "nombre": "INT_cuaderno_turno",
-    "lat": 3,
-    "lon": 60,
-    "alto": 1.0,
-    "props": { "clue_id": "umbral.cuaderno", "kind": "texto" }
+    "lat": 3.061,
+    "lon": 58.68,
+    "alto": 0.735,
+    "props": {
+      "clue_id": "umbral.cuaderno",
+      "kind": "texto"
+    }
   },
   {
     "nombre": "INT_registro_envios",
-    "lat": -5,
-    "lon": 40,
-    "alto": 1.0,
-    "props": { "clue_id": "umbral.envios", "kind": "texto" }
+    "lat": -7.687,
+    "lon": 40.633,
+    "alto": 1.327,
+    "props": {
+      "clue_id": "umbral.envios",
+      "kind": "texto"
+    }
   },
   {
     "nombre": "INT_carta_mirador",
-    "lat": 25,
-    "lon": -60,
-    "alto": 1.0,
-    "props": { "clue_id": "umbral.carta", "kind": "texto" }
+    "lat": 23.969,
+    "lon": 10.065,
+    "alto": 1.014,
+    "props": {
+      "clue_id": "umbral.carta",
+      "kind": "texto"
+    }
   },
   {
     "nombre": "INT_aula",
-    "lat": -15,
-    "lon": 110,
-    "alto": 1.0,
-    "props": { "clue_id": "umbral.aula", "kind": "texto" }
+    "lat": -15.955,
+    "lon": 109.5,
+    "alto": 0.493,
+    "props": {
+      "clue_id": "umbral.aula",
+      "kind": "texto"
+    }
   },
   {
     "nombre": "INT_casas",
-    "lat": 5,
-    "lon": 150,
-    "alto": 1.0,
-    "props": { "clue_id": "umbral.casas", "kind": "objeto" }
+    "lat": 8.943,
+    "lon": 151.086,
+    "alto": 1.062,
+    "props": {
+      "clue_id": "umbral.casas",
+      "kind": "objeto"
+    }
   },
   {
     "nombre": "TRIG_LaBoca_Destello",
-    "lat": 8,
-    "lon": 20,
-    "alto": 0.0,
-    "props": { "event": "boca_destello", "loop_time": 600, "duration": 3, "radius": 12 }
+    "lat": 7.994,
+    "lon": 24.694,
+    "alto": 4.787,
+    "props": {
+      "event": "boca_destello",
+      "loop_time": 600,
+      "duration": 3,
+      "radius": 12
+    }
   }
 ]
