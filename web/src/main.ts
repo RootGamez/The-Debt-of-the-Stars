@@ -3,6 +3,7 @@
 import './style.css';
 import { Quaternion, Timer, Vector3, type PerspectiveCamera, type WebGLRenderer } from 'three';
 import { loadChronology } from './core/chronology';
+import { createSoundtrack } from './audio/soundtrack';
 import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
@@ -247,6 +248,8 @@ async function start(): Promise<void> {
     return { reference: systemScene.referenceWorld ?? null, bodies: positions };
   }
   const orbitMap = spec ? createOrbitMap(spec, systemSnapshot) : undefined;
+  // El sonido se sintetiza (sin archivos) y arranca con el primer gesto del jugador.
+  const soundtrack = createSoundtrack();
   if (window.__juego) {
     window.__juego.teleportTo = (clueId) => {
       if (flight?.piloting) return false;
@@ -262,6 +265,7 @@ async function start(): Promise<void> {
     };
     window.__juego.shipTo = (world, altitude) => flight?.warpTo(world, altitude) ?? false;
     window.__juego.toShip = () => flight?.standAtHatch(currentWorld.id) ?? false;
+    window.__juego.audio = () => soundtrack.snapshot();
     window.__juego.skipTo = (seconds) => {
       session.director.skip(seconds - session.director.clock.t);
       return session.director.clock.t;
@@ -335,6 +339,16 @@ async function start(): Promise<void> {
       const t = session.director.clock.t;
       systemScene.update(t);
       lightFor(systemScene.referenceWorld);
+      soundtrack.update({
+        worldId: spec ? systemScene.referenceWorld : currentWorld.id,
+        rate: session.director.rate,
+        events: session.activeEventIds,
+        absorption: session.director.absorption,
+        phase: session.director.phase,
+        fade: session.director.fade.amount,
+        running: timeRuns,
+        piloting: flight?.piloting ?? false,
+      });
       camera.updateMatrixWorld();
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);

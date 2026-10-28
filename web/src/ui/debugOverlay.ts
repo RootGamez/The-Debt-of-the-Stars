@@ -73,6 +73,8 @@ declare global {
       toShip?(): boolean;
       /** Lleva el reloj de Umbral a ese instante del ciclo (s); devuelve dónde quedó. */
       skipTo?(seconds: number): number;
+      /** El sonido: si el audio está activo, si está silenciado y qué voces suenan. */
+      audio?(): { muted: boolean; running: boolean; voices: string[] };
     };
   }
 }
