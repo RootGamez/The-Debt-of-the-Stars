@@ -1,3 +1,39 @@
 [
-  { "nombre": "SPAWN_Prueba", "lat": 35, "lon": 10, "alto": 1.0, "props": {} }
+  {
+    "nombre": "SPAWN_Cupula",
+    "lat": 67.451,
+    "lon": 0.0,
+    "alto": 2.767,
+    "props": {}
+  },
+  {
+    "nombre": "INT_libro",
+    "lat": 79.257,
+    "lon": -32.414,
+    "alto": 2.76,
+    "props": {
+      "clue_id": "observatorio.libro",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_telescopio",
+    "lat": 84.869,
+    "lon": 0.0,
+    "alto": 2.937,
+    "props": {
+      "clue_id": "observatorio.telescopio",
+      "kind": "observacion"
+    }
+  },
+  {
+    "nombre": "INT_informe",
+    "lat": 67.408,
+    "lon": 72.676,
+    "alto": 4.153,
+    "props": {
+      "clue_id": "observatorio.informe",
+      "kind": "texto"
+    }
+  }
 ]

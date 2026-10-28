@@ -260,6 +260,30 @@ class Vestido:
     def marca(self, nombre, lugar, pos):
         self.marcas[nombre] = lugar.base @ Vector(pos)
 
+    def suelo_local(self, lugar, x, y):
+        """Altura del terreno (en el marco del lugar) bajo el punto local (x, y), o None si no hay suelo."""
+        arriba = lugar.base.to_3x3() @ Vector((0, 0, 1))
+        hit, loc, _, _ = self.planeta.terreno.ray_cast(lugar.base @ Vector((x, y, 60)), -arriba)
+        return (lugar.base.inverted() @ loc).z if hit else None
+
+    def rampa(self, lugar, x0, y0, z0, dx, dy, color, ancho=2.4, pendiente=0.45, grueso=0.4):
+        """Rampa que baja desde el borde de una plataforma (x0, y0, a altura z0) en la dirección local (dx, dy)
+        hasta que alcanza el terreno: así se sube a edificios que el planeta pequeño deja en alto."""
+        norma = math.hypot(dx, dy)
+        dx, dy = dx / norma, dy / norma
+        largo, final = 0.0, (x0, y0, z0)
+        while largo < 14.0:
+            largo += 0.5
+            x, y, z = x0 + dx * largo, y0 + dy * largo, z0 - pendiente * largo
+            final = (x, y, z)
+            suelo = self.suelo_local(lugar, x, y)
+            if suelo is None or z <= suelo + 0.1:
+                break
+        bajo = grueso / 2
+        a = lugar.base @ Vector((x0, y0, z0 - bajo))
+        b = lugar.base @ Vector((final[0], final[1], final[2] - bajo - 0.1))
+        self.solido(color, caja, caja_entre(a, b, ancho, grueso))
+
     def marca_en(self, nombre, punto):
         self.marcas[nombre] = Vector(punto)
 
