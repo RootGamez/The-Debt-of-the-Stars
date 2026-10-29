@@ -5,6 +5,9 @@ import { WorldDataError } from '../worlds/markers';
 
 export const SOURCE_KINDS = ['texto', 'grabacion', 'objeto', 'observacion', 'evento'] as const;
 export type SourceKind = (typeof SOURCE_KINDS)[number];
+/** Lectores de puzle (Fase 7): el cuaderno de Umbral y las cartas del Archivo (reading/puzzles.ts). */
+export const PUZZLE_READERS = ['cuaderno', 'cartas'] as const;
+export type PuzzleReader = (typeof PUZZLE_READERS)[number];
 
 const ID = /^[a-z0-9_.-]{1,64}$/i;
 const CONCLUSION_ID = /^K[0-9A-Z]{1,3}$/;
@@ -53,6 +56,8 @@ export interface Source {
    * más lento). Se entienden reproducidas a la velocidad que deshace ese reloj (reading/recording.ts).
    */
   recordedRate: number | undefined;
+  /** Lector de puzle (`lector` en los datos): lo que da la fuente se anota al resolverlo. */
+  reader: PuzzleReader | undefined;
   surface: Reading;
   deep: Reading | undefined;
 }
@@ -253,6 +258,16 @@ const KINDS: readonly string[] = SOURCE_KINDS;
 /** Ritmos de reloj razonables para una grabación (el más rápido del sistema anda cerca de 1,2). */
 const MAX_RECORDED_RATE = 10;
 
+const READERS: readonly string[] = PUZZLE_READERS;
+
+function parseReader(raw: unknown, id: string): PuzzleReader | undefined {
+  if (raw === undefined) return undefined;
+  const reader = text(raw, `${id}.lector`);
+  if (!READERS.includes(reader))
+    fail(`${id}: lector desconocido "${reader}" (${PUZZLE_READERS.join(', ')})`);
+  return reader as PuzzleReader;
+}
+
 function parseRecordedRate(raw: unknown, id: string, kind: string): number | undefined {
   if (kind !== 'grabacion') {
     if (raw !== undefined) fail(`${id}: solo las grabaciones llevan "reloj"`);
@@ -290,6 +305,7 @@ function parseSource(item: unknown, facts: Map<string, Fact>, context: ClueConte
     when,
     eventName,
     recordedRate: parseRecordedRate(r.reloj, id, kind),
+    reader: parseReader(r.lector, id),
     surface: parseReading(r.superficial, `${id}.superficial`, facts, false),
     deep:
       r.profunda === undefined

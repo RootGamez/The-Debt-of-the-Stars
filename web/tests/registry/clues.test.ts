@@ -167,6 +167,23 @@ describe('recordings', () => {
   });
 });
 
+describe('puzzle readers', () => {
+  it('keep the reader a source declares', () => {
+    const data = raw();
+    (at(data.fuentes, 0) as { lector?: string }).lector = 'cartas';
+
+    expect(parse(data).sourceById.get('umbral.placa')?.reader).toBe('cartas');
+    expect(parse().sourceById.get('umbral.placa')?.reader).toBeUndefined();
+  });
+
+  it('reject a reader the game does not have', () => {
+    const data = raw();
+    (at(data.fuentes, 0) as { lector?: string }).lector = 'crucigrama';
+
+    expect(() => parse(data)).toThrow(/umbral\.placa.*crucigrama/);
+  });
+});
+
 describe('parseClues with something that is not a clue file', () => {
   it.each([
     ['text', 'hola'],

@@ -48,7 +48,8 @@ export function understoodFacts(source: Source, known: KnownFacts): string[] {
 
 /** ¿Aún puede dar algo la lectura que toca ahora? (Los rombos del mundo solo marcan lo que falta.) */
 export function canGiveNew(source: Source, known: KnownFacts): boolean {
-  if (source.kind === 'grabacion') return understoodFacts(source, known).length > 0;
+  if (source.kind === 'grabacion' || source.reader)
+    return understoodFacts(source, known).length > 0;
   return readSource(source, known).newFacts.length > 0;
 }
 

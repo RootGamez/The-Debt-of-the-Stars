@@ -25,6 +25,17 @@ async function closeReader(page: Page): Promise<void> {
   await expect(page.locator('.reader')).toBeHidden();
 }
 
+/** El cuaderno del turno es un puzle (Fase 7): se anota al completar la última hora del Archivo. */
+async function solveNotebook(page: Page): Promise<void> {
+  await goTo(page, 'umbral.cuaderno');
+  await page.keyboard.press('KeyE');
+  await expect(page.locator('.puzzle')).toBeVisible();
+  await page.locator('.puzzle-choice', { hasText: '10:00' }).click();
+  await expect(page.locator('.puzzle-noted-title')).toBeVisible();
+  await page.keyboard.press('KeyE');
+  await expect(page.locator('.puzzle')).toBeHidden();
+}
+
 test('reading a source shows its text, notes the facts and the Registro keeps them', async ({
   page,
 }) => {
@@ -42,7 +53,7 @@ test('reading a source shows its text, notes the facts and the Registro keeps th
 
 test('time stops while reading and the double clock keeps still', async ({ page }) => {
   await startPlaying(page);
-  await readSource(page, 'umbral.cuaderno');
+  await readSource(page, 'umbral.envios');
   const stopped = await loopValue(page, 'umbral');
 
   await page.waitForTimeout(1200);
@@ -59,8 +70,7 @@ test('a deep reading appears once the player knows enough', async ({ page }) => 
   await expect(page.locator('.reader')).not.toContainText('Lectura más profunda');
   await expect(page.locator('.reader-hint')).toBeVisible(); // hay algo más que aún no sabe leer
   await closeReader(page);
-  await readSource(page, 'umbral.cuaderno'); // enseña que los relojes se separan
-  await closeReader(page);
+  await solveNotebook(page); // enseña que los relojes se separan
   await readSource(page, 'umbral.placa');
 
   await expect(page.locator('.reader')).toContainText('Lectura más profunda');
@@ -72,8 +82,7 @@ test('the Registro lists facts by thread, rumors as questions and unlocked concl
   page,
 }) => {
   await startPlaying(page);
-  await readSource(page, 'umbral.cuaderno');
-  await closeReader(page);
+  await solveNotebook(page);
   await readSource(page, 'umbral.envios'); // ahora sí se puede leer en profundidad
   await closeReader(page);
 
@@ -102,8 +111,7 @@ test('witnessing the flash of La Boca at 10:00 notes its fact', async ({ page })
 
 test('what was learned survives dying and reloading', async ({ page }) => {
   await startPlaying(page, '&ciclo=12');
-  await readSource(page, 'umbral.cuaderno');
-  await closeReader(page);
+  await solveNotebook(page);
 
   await expect.poll(() => loopValue(page, 'loops'), { timeout: 60_000 }).toBe(1);
   expect(await facts(page)).toContain('deuda.relojes_se_separan');
@@ -116,8 +124,7 @@ test('what was learned survives dying and reloading', async ({ page }) => {
 
 test('"Empezar de cero" also erases the Registro', async ({ page }) => {
   await startPlaying(page, '&ciclo=10');
-  await readSource(page, 'umbral.cuaderno');
-  await closeReader(page);
+  await solveNotebook(page);
   await expect.poll(() => loopValue(page, 'loops'), { timeout: 60_000 }).toBe(1);
 
   await page.keyboard.press('Escape');

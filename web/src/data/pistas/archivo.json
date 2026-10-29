@@ -32,6 +32,7 @@
     "id": "archivo.cartas",
     "mundo": "archivo",
     "tipo": "texto",
+    "lector": "cartas",
     "titulo": "Las cartas que contestan antes",
     "borrador": true,
     "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },

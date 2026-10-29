@@ -1,7 +1,7 @@
 // Sesión de lectura: abre una fuente, apunta lo aprendido y lo guarda. Mientras hay una lectura abierta
 // el tiempo del ciclo está detenido (decisión de Anthony, CONTEXTO_PISTAS.md §10). Sin DOM: la
 // interfaz (ui/readingPanel.ts) solo muestra lo que esta clase devuelve.
-import type { Clues, Source } from '../registry/clues';
+import type { Clues, PuzzleReader, Source } from '../registry/clues';
 import {
   readSource,
   rumorsOf,
@@ -34,6 +34,8 @@ export interface OpenReading {
   draft: boolean;
   /** Solo las grabaciones: `text` es lo que se oye al pulsarla y esto, lo que hay que entender. */
   recording?: OpenRecording;
+  /** Solo los lectores de puzle: cuál, y si ya se resolvió en otro ciclo. */
+  puzzle?: { reader: PuzzleReader; solvedBefore: boolean };
 }
 
 type Listener = (facts: string[]) => void;
@@ -90,8 +92,23 @@ export class ReadingSession {
     const source = this.clues.sourceById.get(sourceId);
     if (!source || source.kind === 'evento' || !this.isAvailable(sourceId, activeEvents))
       return null;
-    this.open_ = source.recordedRate === undefined ? this.read(source) : this.listen(source);
+    if (source.reader) this.open_ = this.puzzle(source, source.reader);
+    else this.open_ = source.recordedRate === undefined ? this.read(source) : this.listen(source);
     return this.open_;
+  }
+
+  /** Un lector de puzle no anota nada al abrirlo: lo que da se anota al resolverlo (`understand`). */
+  private puzzle(source: Source, reader: PuzzleReader): OpenReading {
+    return {
+      source,
+      title: source.title,
+      level: 'surface',
+      text: source.surface.text,
+      deepPending: false,
+      newFacts: [],
+      draft: source.draft,
+      puzzle: { reader, solvedBefore: understoodFacts(source, this.facts).length === 0 },
+    };
   }
 
   private read(source: Source): OpenReading {
@@ -128,10 +145,13 @@ export class ReadingSession {
     };
   }
 
-  /** La grabación abierta se ha entendido entera: devuelve los hechos nuevos (vacío si no hay ninguno). */
+  /**
+   * La grabación abierta se ha entendido entera, o el puzle abierto se ha resuelto: devuelve los hechos
+   * nuevos (vacío si no hay ninguno).
+   */
   understand(): string[] {
     const source = this.open_?.source;
-    if (!this.open_?.recording || !source) return [];
+    if (!source || !(this.open_?.recording ?? this.open_?.puzzle)) return [];
     const newFacts = understoodFacts(source, this.facts);
     this.learn(newFacts);
     return newFacts;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ReadingSession } from '../../src/reading/readingSession';
-import { parse, withRecording } from '../helpers/clueFixture';
+import { parse, raw, withRecording } from '../helpers/clueFixture';
 
 const clues = parse();
 
@@ -208,6 +208,38 @@ describe('listening to a recording', () => {
 
   it('texts have no recording', () => {
     expect(listener().s.open('umbral.placa', [])?.recording).toBeUndefined();
+  });
+});
+
+describe('solving a puzzle reader', () => {
+  const data = raw();
+  const puzzled = parse({
+    ...data,
+    fuentes: data.fuentes.map((f) => (f.id === 'umbral.placa' ? { ...f, lector: 'cuaderno' } : f)),
+  });
+
+  it('opens the puzzle without noting anything yet', () => {
+    const s = new ReadingSession(puzzled, [], () => true);
+
+    const opened = s.open('umbral.placa', []);
+
+    expect(opened?.puzzle).toEqual({ reader: 'cuaderno', solvedBefore: false });
+    expect(opened?.newFacts).toEqual([]);
+    expect(s.known.size).toBe(0);
+  });
+
+  it('notes what the source gives once it is solved', () => {
+    const s = new ReadingSession(puzzled, [], () => true);
+    s.open('umbral.placa', []);
+
+    expect(s.understand()).toEqual(['deuda.palabra']);
+    expect(s.known.has('deuda.palabra')).toBe(true);
+  });
+
+  it('remembers it was solved before', () => {
+    const s = new ReadingSession(puzzled, ['deuda.palabra'], () => true);
+
+    expect(s.open('umbral.placa', [])?.puzzle?.solvedBefore).toBe(true);
   });
 });
 

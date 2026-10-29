@@ -20,6 +20,7 @@ import { buildRegistryView } from '../registry/registryView';
 import { createInteractPrompt } from '../ui/interactPrompt';
 import { createNotice } from '../ui/notice';
 import type { PauseOverlay } from '../ui/pauseOverlay';
+import { createPuzzlePanel } from '../ui/puzzlePanel';
 import { createReadingPanel } from '../ui/readingPanel';
 import { createRecordingPanel } from '../ui/recordingPanel';
 import { createRegistryPanel } from '../ui/registryPanel';
@@ -108,6 +109,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   const readingPanel = createReadingPanel(() => {
     closeReading();
   }, touch);
+  const puzzlePanel = createPuzzlePanel(() => {
+    closeReading();
+  }, touch);
   /** La grabación abierta: suena con el tiempo real aunque el ciclo esté detenido. */
   let playback: RecordingPlayback | null = null;
   let understoodShown = false;
@@ -146,11 +150,23 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     return value;
   }
 
+  /** Los paneles con botones y rueda necesitan el cursor: se suelta el ratón sin pausar. */
+  let pointerFreed = false;
+  function freePointer(): void {
+    pointerFreed = true;
+    overlay.releasePointer();
+  }
+
   function closeReading(): void {
     reading.close();
     readingPanel.hide();
     recordingPanel.hide();
+    puzzlePanel.hide();
     playback = null;
+    if (pointerFreed) {
+      pointerFreed = false;
+      overlay.recapturePointer();
+    }
     if (!overlay.playing) overlay.focus(); // si se cerró al pausar, el foco vuelve a la pausa
   }
 
@@ -165,7 +181,12 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     if (!opened) return;
     seen.add(id);
     if (opened.recording) openRecording(opened, opened.recording);
-    else readingPanel.show(opened, opened.newFacts.map(lineOf));
+    else if (opened.puzzle) {
+      freePointer();
+      puzzlePanel.show(opened, () => {
+        puzzlePanel.showSolved(reading.understand().map(lineOf));
+      });
+    } else readingPanel.show(opened, opened.newFacts.map(lineOf));
   }
 
   function openRecording(
@@ -176,6 +197,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     const speed = recording.understoodBefore ? 1 / recording.rate : 1;
     playback = new RecordingPlayback(recording.lines, recording.rate, speed);
     understoodShown = false;
+    freePointer();
     recordingPanel.show(opened, playback.speed);
     recordingPanel.update(playback.view());
     if (opened.newFacts.length > 0) {
@@ -332,6 +354,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       registryPanel.dispose();
       readingPanel.dispose();
       recordingPanel.dispose();
+      puzzlePanel.dispose();
       prompt.dispose();
     },
   };

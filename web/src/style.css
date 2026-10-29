@@ -446,6 +446,7 @@ body {
 
 .reader,
 .recorder,
+.puzzle,
 .registry {
   position: fixed;
   inset: 0;
@@ -463,12 +464,14 @@ body {
 
 .reader[hidden],
 .recorder[hidden],
+.puzzle[hidden],
 .registry[hidden] {
   display: none;
 }
 
 .reader-card,
 .recorder-card,
+.puzzle-card,
 .registry-card {
   box-sizing: border-box;
   width: min(640px, 100%);
@@ -544,6 +547,127 @@ body {
   color: var(--text);
   font: inherit;
   cursor: pointer;
+}
+
+/* Lectores de puzle: el cuaderno del turno y las cartas del Archivo. */
+.puzzle-title {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.puzzle-text {
+  margin: 0 0 12px;
+  font-size: 17px;
+}
+
+.puzzle-tag,
+.puzzle-hint {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.puzzle-notebook {
+  margin: 4px 0 14px;
+  border-collapse: collapse;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 17px;
+}
+
+.puzzle-notebook th {
+  padding: 2px 22px 6px 0;
+  color: var(--muted);
+  font-weight: 400;
+  text-align: left;
+}
+
+.puzzle-cell {
+  padding: 3px 22px 3px 0;
+  border-top: 1px solid rgb(232 220 196 / 12%);
+  font-variant-numeric: tabular-nums;
+}
+
+.puzzle-choices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.puzzle-choices .puzzle-hint {
+  width: 100%;
+}
+
+.puzzle-choice,
+.puzzle-move,
+.puzzle-check,
+.puzzle-close {
+  min-height: 40px;
+  padding: 6px 14px;
+  border: 1px solid rgb(232 220 196 / 45%);
+  border-radius: 8px;
+  background: rgb(7 7 12 / 50%);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.puzzle-move {
+  min-width: 40px;
+  padding: 6px;
+}
+
+.puzzle-move:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.puzzle-close {
+  margin-top: 12px;
+}
+
+.puzzle-letters {
+  margin: 0 0 12px;
+  padding-left: 22px;
+}
+
+.puzzle-letter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.puzzle-letter-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.puzzle-letter-text small {
+  color: var(--muted);
+}
+
+.puzzle-status {
+  min-height: 1.4em;
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.puzzle-noted-title {
+  margin: 12px 0 4px;
+  color: #e0c98a;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.puzzle-noted-list {
+  margin: 0 0 8px;
+  padding-left: 18px;
 }
 
 /* Reproductor de grabaciones: la cinta (frases), la rueda de velocidad y la claridad. */
