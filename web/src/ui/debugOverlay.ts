@@ -75,6 +75,8 @@ declare global {
       toShip?(): boolean;
       /** Lleva el reloj de Umbral a ese instante del ciclo (s); devuelve dónde quedó. */
       skipTo?(seconds: number): number;
+      /** El agujero negro: su radio (m) y si se ve. */
+      blackHole?(): { radius: number; visible: boolean };
       /** La marea donde estás y la tensión acumulada (0–1; a 1, muerte `marea`). */
       tide?(): { tide: number; strain: number };
       /** La imagen del Nudo: si se ve, con qué claridad y cuánto la desvía la lente (grados). */

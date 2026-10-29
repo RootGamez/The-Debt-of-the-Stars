@@ -2,15 +2,13 @@
 //   senales        anillos de luz que se curvan en el cielo (5:00)
 //   pulso_cicatriz destello rojo y temblor de cámara (9:00)
 //   cielo_rojo     el cielo se tiñe de rojo
-//   agujero_negro  esfera negra con halo que crece (13:30)
 //   absorción      el cielo y la Brasa se apagan mientras el mundo es absorbido
+// El agujero negro ya no está aquí: tiene su sitio en el sistema (render/blackHoleView.ts, Fase 8).
 import {
   AdditiveBlending,
-  BackSide,
   Color,
   Mesh,
   MeshBasicMaterial,
-  SphereGeometry,
   TorusGeometry,
   Vector3,
   type Light,
@@ -22,7 +20,6 @@ const SKY = new Color(0x07070c);
 const RED_SKY = new Color(0x5a1a10);
 const PULSE = new Color(0xa0301a);
 const SKY_DISTANCE = 2600;
-const BLACK_HOLE_MAX_RADIUS = 420;
 const RING_COUNT = 4;
 const SHAKE_METERS = 0.06;
 
@@ -41,7 +38,7 @@ function progressOf(active: readonly TimelineEvent[], id: string, t: number): nu
 }
 
 /**
- * @param skyDirection Dirección (unitaria) donde aparecen los anillos y el agujero negro. Provisional:
+ * @param skyDirection Dirección (unitaria) donde aparecen los anillos de las señales. Provisional:
  * delante y por encima del horizonte de la llegada, para que se vea crecer desde La Boca.
  */
 export function createLoopEffects(scene: Scene, sun: Light, skyDirection: Vector3): LoopEffects {
@@ -69,24 +66,6 @@ export function createLoopEffects(scene: Scene, sun: Light, skyDirection: Vector
     ring.visible = false;
     rings.push(ring);
     scene.add(ring);
-  }
-
-  const hole = new Mesh(new SphereGeometry(1, 32, 16), new MeshBasicMaterial({ color: 0x000000 }));
-  const halo = new Mesh(
-    new SphereGeometry(1.35, 32, 16),
-    new MeshBasicMaterial({
-      color: 0xff8a3a,
-      transparent: true,
-      opacity: 0.35,
-      blending: AdditiveBlending,
-      depthWrite: false,
-      side: BackSide, // solo el borde, detrás de la esfera negra
-    }),
-  );
-  for (const m of [hole, halo]) {
-    m.position.copy(skyDirection).multiplyScalar(SKY_DISTANCE);
-    m.visible = false;
-    scene.add(m);
   }
 
   const shake = new Vector3();
@@ -122,17 +101,11 @@ export function createLoopEffects(scene: Scene, sun: Light, skyDirection: Vector
         }
       }
 
-      const growth = progressOf(active, 'agujero_negro', t);
-      const radius = growth === undefined ? 0 : BLACK_HOLE_MAX_RADIUS * Math.max(0.05, growth);
-      hole.visible = halo.visible = growth !== undefined;
-      hole.scale.setScalar(radius);
-      halo.scale.setScalar(radius);
-
       background.multiplyScalar(1 - absorption);
       sun.intensity = sunIntensity * (1 - 0.9 * absorption);
     },
     dispose() {
-      for (const m of [...rings, hole, halo]) {
+      for (const m of rings) {
         scene.remove(m);
         m.geometry.dispose();
         (m.material as MeshBasicMaterial).dispose();

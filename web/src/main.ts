@@ -9,6 +9,8 @@ import { createTideEffects } from './game/tideEffects';
 import { insideCavity } from './physics/gravity';
 import { createInteriorLights } from './render/interiorLight';
 import { createLensView } from './render/lensView';
+import { createBlackHoleView } from './render/blackHoleView';
+import { BLACK_HOLE } from './data/blackHole';
 import { createSightScale } from './ui/sightScale';
 import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
@@ -120,6 +122,11 @@ async function start(): Promise<void> {
   const passage = createFoldedPassage();
   // …y por fuera: su imagen en el cielo, girada hacia la Brasa, y las estrellas que dobla a su paso.
   const lens = createLensView(scene, sky);
+  // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
+  const birthplace = sources
+    .get(BLACK_HOLE.world)
+    ?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
+  const blackHole = createBlackHoleView(systemScene.groupOf(BLACK_HOLE.world), birthplace);
   // La mira graduada (G): solo mide ángulos; con ella se corrige la imagen sin calcular nada.
   const sight = createSightScale(camera, canvas);
   // Las mareas: junto al Borde de Cicatriz, subiendo hacia la semilla del Nudo y sobre su cáscara.
@@ -303,6 +310,7 @@ async function start(): Promise<void> {
     window.__juego.audio = () => soundtrack.snapshot();
     window.__juego.lens = () => lens.snapshot();
     window.__juego.tide = () => tides.snapshot();
+    window.__juego.blackHole = () => blackHole.snapshot();
     window.__juego.skipTo = (seconds) => {
       session.director.skip(seconds - session.director.clock.t);
       return session.director.clock.t;
@@ -393,6 +401,7 @@ async function start(): Promise<void> {
       const t = session.director.clock.t;
       systemScene.update(t);
       lightFor(systemScene.referenceWorld);
+      blackHole.update(t, camera, timeRuns ? dt : 0);
       lens.update({
         camera: camera.position,
         nudo: hiddenWorld ? systemScene.groupOf(hiddenWorld) : undefined,
