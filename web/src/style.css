@@ -225,6 +225,39 @@ body {
   pointer-events: none;
 }
 
+/* Mira graduada (tecla G): anillos cada 10° y marcas cada 2°. */
+.sight {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.sight line,
+.sight-ring {
+  fill: none;
+  stroke: rgb(232 220 196 / 55%);
+  stroke-width: 1;
+}
+
+.sight-ring {
+  stroke: rgb(232 220 196 / 30%);
+  stroke-dasharray: 4 6;
+}
+
+.sight-dot {
+  fill: rgb(224 201 138 / 85%);
+}
+
+.sight-label {
+  fill: rgb(232 220 196 / 70%);
+  font:
+    12px system-ui,
+    sans-serif;
+}
+
 /* Destello al cruzar una Puerta plegada: el espacio se dobla un instante. */
 .fold-flash {
   position: fixed;

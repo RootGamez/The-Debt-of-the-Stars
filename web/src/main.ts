@@ -7,6 +7,8 @@ import { createSoundtrack } from './audio/soundtrack';
 import { createFoldedPassage } from './game/foldedPassage';
 import { insideCavity } from './physics/gravity';
 import { createInteriorLights } from './render/interiorLight';
+import { createLensView } from './render/lensView';
+import { createSightScale } from './ui/sightScale';
 import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
@@ -45,6 +47,9 @@ import { worldFromQuery, worldTitle } from './worlds/worldSelection';
 const NEAR_PLANE = 0.05;
 /** Mundo donde espera la nave al empezar cada ciclo (la llegada). */
 const SHIP_HOME = 'umbral';
+/** Desde aquí, durante este evento, la imagen del Nudo se ve con claridad (cronologia.json). */
+const OBSERVATORY = 'observatorio';
+const ALIGNMENT_EVENT = 'alineacion';
 
 function requireElement<T extends HTMLElement>(id: string, type: new () => T): T {
   const element = document.getElementById(id);
@@ -109,6 +114,11 @@ async function start(): Promise<void> {
   // El Nudo por dentro: su luz sustituye a la de la Brasa, y sus anillos pliegan el paso.
   const interior = createInteriorLights(runtimes, sun);
   const passage = createFoldedPassage();
+  // …y por fuera: su imagen en el cielo, girada hacia la Brasa, y las estrellas que dobla a su paso.
+  const lens = createLensView(scene, sky);
+  // La mira graduada (G): solo mide ángulos; con ella se corrige la imagen sin calcular nada.
+  const sight = createSightScale(camera, canvas);
+  const hiddenWorld = spec?.bodies.find((body) => body.hidden)?.world;
 
   // A pie, la nave posada es un obstáculo más del mundo donde está.
   const game: { ui?: ReadingUi; flight?: ShipFlight } = {};
@@ -280,6 +290,7 @@ async function start(): Promise<void> {
     window.__juego.shipTo = (world, altitude) => flight?.warpTo(world, altitude) ?? false;
     window.__juego.toShip = () => flight?.standAtHatch(currentWorld.id) ?? false;
     window.__juego.audio = () => soundtrack.snapshot();
+    window.__juego.lens = () => lens.snapshot();
     window.__juego.skipTo = (seconds) => {
       session.director.skip(seconds - session.director.clock.t);
       return session.director.clock.t;
@@ -359,6 +370,14 @@ async function start(): Promise<void> {
       const t = session.director.clock.t;
       systemScene.update(t);
       lightFor(systemScene.referenceWorld);
+      lens.update({
+        camera: camera.position,
+        nudo: hiddenWorld ? systemScene.groupOf(hiddenWorld) : undefined,
+        brasa: sun.position,
+        aligned: session.activeEventIds.includes(ALIGNMENT_EVENT),
+        inObservatory: systemScene.referenceWorld === OBSERVATORY,
+        time: performance.now() / 1000,
+      });
       soundtrack.update({
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,
         rate: session.director.rate,
@@ -373,6 +392,7 @@ async function start(): Promise<void> {
       camera.updateMatrixWorld();
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);
+      sight.update();
       touch?.update();
       debug.update(dt, overlay.playing);
       orbitMap?.update(dt);

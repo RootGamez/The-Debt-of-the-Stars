@@ -75,6 +75,8 @@ declare global {
       toShip?(): boolean;
       /** Lleva el reloj de Umbral a ese instante del ciclo (s); devuelve dónde quedó. */
       skipTo?(seconds: number): number;
+      /** La imagen del Nudo: si se ve, con qué claridad y cuánto la desvía la lente (grados). */
+      lens?(): { visible: boolean; clarity: number; offsetDegrees: number | null };
       /** Dónde está el jugador a pie: mundo, si está dentro de una cavidad y anillos cruzados. */
       place?(): { world: string; inside: boolean; crossings: number };
       /** El sonido: si el audio está activo, si está silenciado y qué voces suenan. */
