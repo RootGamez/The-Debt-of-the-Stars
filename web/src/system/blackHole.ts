@@ -2,12 +2,32 @@
 // red: al principio caen las Puertas cercanas y la deuda llega a chorro; al final apenas queda nada que descargar
 // (curva que frena, 1 − (1 − p)²). No barre los mundos con su horizonte: los atrae y los estira (Fase 8C), así que
 // nunca se ve tragado un mundo que aún vive. render/blackHoleView.ts lo dibuja.
+import type { Chronology } from '../core/timeline';
 import { BLACK_HOLE } from '../data/blackHole';
 
+/** El evento de la cronología con el que nace. */
+const BIRTH_EVENT = 'agujero_negro';
+
+/** Cuándo nace, cuándo acaba de crecer (s del reloj de Umbral) y hasta qué radio (m). */
+export interface HoleGrowth {
+  born: number;
+  end: number;
+  maxRadius: number;
+}
+
+/**
+ * El crecimiento según la cronología en uso: nace con su evento y acaba con el ciclo. Con `?ciclo=` (pruebas)
+ * la cronología viene escalada y el agujero la sigue.
+ */
+export function growthFor(chronology: Chronology, hole: HoleGrowth = BLACK_HOLE): HoleGrowth {
+  const birth = chronology.events.find((event) => event.id === BIRTH_EVENT);
+  return { born: birth?.t ?? hole.born, end: chronology.duration, maxRadius: hole.maxRadius };
+}
+
 /** Radio del horizonte (m) en el instante `t` del reloj de Umbral; 0 antes de nacer. */
-export function blackHoleRadius(t: number, hole = BLACK_HOLE): number {
+export function blackHoleRadius(t: number, hole: HoleGrowth = BLACK_HOLE): number {
   if (!Number.isFinite(t) || t < hole.born) return 0;
-  const progress = Math.min(1, (t - hole.born) / (hole.end - hole.born));
+  const progress = hole.end > hole.born ? Math.min(1, (t - hole.born) / (hole.end - hole.born)) : 1;
   return hole.maxRadius * (1 - (1 - progress) ** 2);
 }
 

@@ -10,6 +10,7 @@ import { insideCavity } from './physics/gravity';
 import { createInteriorLights } from './render/interiorLight';
 import { createLensView } from './render/lensView';
 import { createBlackHoleView } from './render/blackHoleView';
+import { growthFor } from './system/blackHole';
 import { BLACK_HOLE } from './data/blackHole';
 import { qualityFromQuery } from './core/quality';
 import { createSightScale } from './ui/sightScale';
@@ -127,10 +128,15 @@ async function start(): Promise<void> {
   // (el agujero negro dobla también las estrellas; con `?calidad=baja` no se dobla nada).
   const lens = createLensView(scene, sky, qualityFromQuery(window.location.search) === 'alta');
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
+  const chronology = loadChronology(window.location.search);
   const birthplace = sources
     .get(BLACK_HOLE.world)
     ?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
-  const blackHole = createBlackHoleView(systemScene.groupOf(BLACK_HOLE.world), birthplace);
+  const blackHole = createBlackHoleView(
+    systemScene.groupOf(BLACK_HOLE.world),
+    birthplace,
+    growthFor(chronology),
+  );
   // La mira graduada (G): solo mide ángulos; con ella se corrige la imagen sin calcular nada.
   const sight = createSightScale(camera, canvas);
   // Las mareas: junto al Borde de Cicatriz, subiendo hacia la semilla del Nudo y sobre su cáscara, y la del
@@ -174,7 +180,6 @@ async function start(): Promise<void> {
     if (worldSources) game.ui?.setWorld(worldSources);
   }
 
-  const chronology = loadChronology(window.location.search);
   // Cada mundo, en su ventana, se estira hacia el agujero, suelta trozos y cae (solo lo que se ve).
   const absorption = spec
     ? createAbsorptionView(

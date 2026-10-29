@@ -17,7 +17,7 @@ import {
   type Object3D,
 } from 'three';
 import { apparentDistance, skyFill } from '../system/absorption';
-import { blackHoleRadius, diskRadii, photonRingRadius } from '../system/blackHole';
+import { blackHoleRadius, diskRadii, photonRingRadius, type HoleGrowth } from '../system/blackHole';
 
 const RING_COLOR = 0xffe2b0;
 const DISK_INNER = new Color(0xfff4dc);
@@ -64,10 +64,12 @@ function diskGeometry(): RingGeometry {
 /**
  * @param world grupo del mundo donde nace (se mueve con él), o `undefined` si no está en este sistema.
  * @param anchor dónde nace, en el marco de ese mundo (la Sala del Motor).
+ * @param growth cuándo nace y cuánto crece (de la cronología en uso, `growthFor`).
  */
 export function createBlackHoleView(
   world: Object3D | undefined,
   anchor: Vector3 | undefined,
+  growth?: HoleGrowth,
 ): BlackHoleView {
   const root = new Group();
   root.name = 'Agujero negro';
@@ -76,10 +78,11 @@ export function createBlackHoleView(
   root.position.copy(home);
   world?.add(root);
 
-  // Bastantes caras: al final llena medio cielo y con pocas se le ve el polígono en el borde.
+  // Bastantes caras: al final llena medio cielo y con pocas se le ve el polígono en el borde. Por las dos
+  // caras: dentro del horizonte (en Cicatriz, donde nace) todo lo de fuera queda negro.
   const horizon = new Mesh(
     new SphereGeometry(1, 64, 32),
-    new MeshBasicMaterial({ color: 0x000000 }),
+    new MeshBasicMaterial({ color: 0x000000, side: DoubleSide }),
   );
   const ring = new Mesh(
     new RingGeometry(0.93, 1.07, 96),
@@ -114,7 +117,7 @@ export function createBlackHoleView(
 
   return {
     update(t, camera, dt, approach = 0) {
-      radius = blackHoleRadius(t);
+      radius = blackHoleRadius(t, growth);
       approached = approach;
       root.visible = world !== undefined && radius > 0;
       if (!world || !root.visible) {

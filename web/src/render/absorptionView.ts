@@ -10,6 +10,7 @@ import {
   Object3D,
   Vector3,
   type Material,
+  type Mesh,
 } from 'three';
 import { absorptionProgress, debrisTravel, frozenRate, STRETCH_SHAPE } from '../system/absorption';
 import { isMesh } from '../worlds/markers';
@@ -85,6 +86,8 @@ interface Piece {
 interface Entry {
   world: AbsorbingWorld;
   uniforms: Uniforms;
+  /** Sus mallas: mientras cae se dibujan aunque su sitio quede fuera de la vista (el sombreador las lleva lejos). */
+  meshes: Mesh[];
   progress: number;
   /** Trozos pendientes de soltar (se acumula la parte fraccionaria). */
   owed: number;
@@ -173,12 +176,14 @@ export function createAbsorptionView(
     .filter((world) => world.window !== undefined)
     .map((world) => {
       const uniforms = createUniforms(world.radius);
+      const meshes: Mesh[] = [];
       world.model.traverse((object) => {
         if (!isMesh(object)) return;
+        meshes.push(object);
         const materials = Array.isArray(object.material) ? object.material : [object.material];
         for (const material of materials) patch(material, uniforms);
       });
-      return { world, uniforms, progress: 0, owed: 0 };
+      return { world, uniforms, meshes, progress: 0, owed: 0 };
     });
   const byId = new Map(entries.map((entry) => [entry.world.id, entry]));
 
@@ -187,6 +192,7 @@ export function createAbsorptionView(
   const debris = new InstancedMesh(geometry, material, DEBRIS_POOL);
   debris.name = 'Trozos que caen';
   debris.frustumCulled = false; // cada trozo va por su lado: la caja de la malla no sirve
+  debris.visible = false;
   root.add(debris);
   const pieces: Piece[] = Array.from({ length: DEBRIS_POOL }, () => ({
     world: undefined,
@@ -199,6 +205,8 @@ export function createAbsorptionView(
   const toHole = new Vector3();
   const place = new Object3D();
   let reference: string | undefined;
+  /** Trozos cayendo ahora mismo; sin ninguno, ni se recorren ni se dibujan. */
+  let live = 0;
 
   function spawn(entry: Entry): void {
     const free = pieces.find((piece) => piece.world === undefined);
@@ -207,6 +215,7 @@ export function createAbsorptionView(
     looseDirection(toHole, free.direction);
     free.age = 0;
     free.life = DEBRIS_LIFE[0] + Math.random() * (DEBRIS_LIFE[1] - DEBRIS_LIFE[0]);
+    live += 1;
   }
 
   function hide(index: number): void {
@@ -215,23 +224,32 @@ export function createAbsorptionView(
     debris.setMatrixAt(index, place.matrix);
   }
 
-  pieces.forEach((_, index) => {
+  function release(piece: Piece, index: number): void {
+    piece.world = undefined;
+    live -= 1;
     hide(index);
-  });
+  }
+
+  for (let index = 0; index < pieces.length; index++) hide(index);
+
+  /** Mientras cae, el sombreador lleva sus vértices lejos de su caja: se dibuja aunque su sitio no se vea. */
+  function cullOnlyWhenStill(entry: Entry): void {
+    const still = !(entry.progress > 0 && entry.progress < 1);
+    if (entry.meshes[0]?.frustumCulled === still) return;
+    for (const mesh of entry.meshes) mesh.frustumCulled = still;
+  }
 
   function updatePieces(hole: Vector3 | undefined, dt: number): void {
-    pieces.forEach((piece, index) => {
-      const entry = piece.world;
-      if (!entry || !hole) {
-        piece.world = undefined;
-        hide(index);
-        return;
-      }
+    debris.visible = live > 0;
+    if (live === 0) return;
+    for (let index = 0; index < pieces.length; index++) {
+      const piece = pieces[index];
+      const entry = piece?.world;
+      if (!piece || !entry) continue;
       piece.age += dt;
-      if (piece.age >= piece.life) {
-        piece.world = undefined;
-        hide(index);
-        return;
+      if (!hole || piece.age >= piece.life) {
+        release(piece, index);
+        continue;
       }
       const { radius, model } = entry.world;
       const travel = debrisTravel(piece.age / piece.life);
@@ -243,7 +261,7 @@ export function createAbsorptionView(
       place.scale.set(size, size, size * (1 + 5 * travel));
       place.updateMatrix();
       debris.setMatrixAt(index, place.matrix);
-    });
+    }
     debris.instanceMatrix.needsUpdate = true;
   }
 
@@ -253,6 +271,7 @@ export function createAbsorptionView(
       for (const entry of entries) {
         const { world, uniforms } = entry;
         entry.progress = hole ? absorptionProgress(world.window, t) : 0;
+        cullOnlyWhenStill(entry);
         const own = world.id === here;
         world.model.visible = !(entry.progress >= 1 && !own);
         uniforms.uAbsorbProgress.value = entry.progress;
@@ -285,9 +304,14 @@ export function createAbsorptionView(
     },
     dispose() {
       root.remove(debris);
+      debris.dispose();
       geometry.dispose();
       material.dispose();
-      for (const { world } of entries) world.model.visible = true;
+      for (const entry of entries) {
+        entry.world.model.visible = true;
+        entry.progress = 0;
+        cullOnlyWhenStill(entry);
+      }
     },
   };
 }
