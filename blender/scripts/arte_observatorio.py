@@ -2,8 +2,9 @@
 # una cúpula de costillas abierta al cielo y su gran telescopio, la caseta del turno con el libro y el informe,
 # y el Mirador, una plataforma en la punta desde donde se ve el sistema entero (el palco del final).
 #
-# Hacia las 6:30 (evento `alineacion`) aparece en el cielo, en la dirección que apunta el telescopio, un punto
-# que no se mueve como una estrella: la imagen desplazada del Laboratorio (objeto EVT_alineacion_Punto).
+# Hacia las 6:30 (evento `alineacion`) se ve con claridad en el cielo la imagen desplazada del Nudo, donde está
+# el Laboratorio. La dibuja el juego (render/lensView.ts), porque el Nudo se mueve en sus rieles: un punto fijo
+# del modelo (EVT_alineacion_Punto, Fase 6) no lo seguía.
 # Gramática de los Ausentes (🟡): anillos y estratos; aquí arenisca clara, pizarra índigo y luz ámbar.
 # Uso: blender -b blender/observatorio.blend --python-exit-code 1 --python blender/scripts/arte_observatorio.py
 import math
@@ -18,7 +19,6 @@ sys.path.insert(0, SCRIPTS)
 import arte_comun as ac  # noqa: E402
 
 MUNDO = "observatorio"
-ALINEACION = "alineacion"
 
 ARENISCA = "#B8AD94"
 ARENISCA_SOMBRA = "#8E8570"
@@ -27,7 +27,6 @@ PIZARRA_OSCURA = "#222640"
 LATON = "#A88A50"
 PAPEL = "#E6DEC8"
 AMBAR = "#FFC070"
-BLANCO = "#FFF4D0"
 
 ELEVACION = math.radians(52)  # lo que se levanta el telescopio sobre el horizonte
 POLO = (88.0, 0.0)            # la cúpula, en el casquete norte, que es casi plano
@@ -103,13 +102,6 @@ class Observatorio(ac.Vestido):
         self.luces.pieza(AMBAR, ac.bola(0.07, 1), lugar.m((atril[0] - 0.5, atril[1] + 0.25, top + 1.15)))
         self.marca("INT_libro", lugar, (atril[0] + 0.5, atril[1] - 0.6, top + 1.35))
 
-        # El punto del cielo que se ve en la alineación: en la dirección del tubo, lejos, sin sitio fijo entre las estrellas.
-        punto = ac.Malla()
-        punto.pieza(BLANCO, ac.bola(1.0, 1), ac.matriz())
-        punto.pieza(BLANCO, ac.caja, ac.matriz(escala=(0.1, 0.1, 5.0)))
-        punto.pieza(BLANCO, ac.caja, ac.matriz(escala=(5.0, 0.1, 0.1)))
-        ac.objeto_suelto(self.p, f"EVT_{ALINEACION}_Punto", punto, ac.material_luces("M_Alineacion_observatorio", BLANCO),
-                         lugar.m(tuple(pivote + dir_tubo * 160)), {"event": ALINEACION})
 
     def caseta(self):
         """La caseta del turno: una habitación pequeña con su mesa y, fuera, el tablón con el informe."""

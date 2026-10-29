@@ -1,76 +1,106 @@
 [
   {
     "nombre": "SPAWN_Laboratorio",
-    "lat": -12.665,
+    "lat": -48.111,
     "lon": 0.0,
-    "alto": 2.938,
+    "alto": 1.119,
+    "dentro": true,
+    "rumbo": 0,
     "props": {}
   },
   {
+    "nombre": "PASO_Boca",
+    "lat": -55.0,
+    "lon": 0.0,
+    "alto": 0.31,
+    "rumbo": 180,
+    "props": {
+      "destino": "PASO_Dentro"
+    }
+  },
+  {
+    "nombre": "PASO_Dentro",
+    "lat": -55.0,
+    "lon": 0.0,
+    "alto": 0.181,
+    "dentro": true,
+    "rumbo": 0,
+    "props": {
+      "destino": "PASO_Boca"
+    }
+  },
+  {
     "nombre": "INT_pizarra",
-    "lat": 12.978,
-    "lon": -4.307,
-    "alto": 2.779,
+    "lat": -14.78,
+    "lon": 0.0,
+    "alto": 1.248,
+    "dentro": true,
     "props": {
       "clue_id": "lab.pizarra",
       "kind": "texto"
     }
   },
   {
-    "nombre": "INT_notas_investigadora",
-    "lat": 10.96,
-    "lon": 10.216,
-    "alto": 3.003,
-    "props": {
-      "clue_id": "lab.notas_investigadora",
-      "kind": "texto"
-    }
-  },
-  {
-    "nombre": "INT_notas_esceptico",
-    "lat": -0.7,
-    "lon": 10.853,
-    "alto": 3.004,
-    "props": {
-      "clue_id": "lab.notas_esceptico",
-      "kind": "texto"
-    }
-  },
-  {
     "nombre": "INT_orden_silencio",
-    "lat": 8.2,
-    "lon": 13.144,
-    "alto": 2.853,
+    "lat": -15.007,
+    "lon": -6.572,
+    "alto": 0.925,
+    "dentro": true,
     "props": {
       "clue_id": "lab.orden_silencio",
       "kind": "texto"
     }
   },
   {
-    "nombre": "INT_dormitorio",
-    "lat": 8.916,
-    "lon": -10.715,
-    "alto": 2.514,
-    "props": {
-      "clue_id": "lab.dormitorio",
-      "kind": "objeto"
-    }
-  },
-  {
     "nombre": "INT_contrapeso",
-    "lat": 1.179,
-    "lon": 5.491,
-    "alto": 2.456,
+    "lat": -10.63,
+    "lon": 39.727,
+    "alto": 1.477,
+    "dentro": true,
     "props": {
       "clue_id": "lab.contrapeso",
       "kind": "objeto"
     }
   },
   {
+    "nombre": "INT_notas_esceptico",
+    "lat": -12.069,
+    "lon": -41.712,
+    "alto": 1.416,
+    "dentro": true,
+    "props": {
+      "clue_id": "lab.notas_esceptico",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_notas_investigadora",
+    "lat": 21.165,
+    "lon": 26.333,
+    "alto": 1.296,
+    "dentro": true,
+    "props": {
+      "clue_id": "lab.notas_investigadora",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_dormitorio",
+    "lat": 20.908,
+    "lon": -25.831,
+    "alto": 1.041,
+    "dentro": true,
+    "props": {
+      "clue_id": "lab.dormitorio",
+      "kind": "objeto"
+    }
+  },
+  {
     "nombre": "INT_camara",
-    "lat": -4.872,
-    "lon": -7.54,
-    "alto": 2.607,
+    "lat": 50.445,
+    "lon": -0.0,
+    "alto": 1.317,
+    "dentro": true,
     "props": {
       "clue_id": "lab.camara",
       "kind": "objeto"

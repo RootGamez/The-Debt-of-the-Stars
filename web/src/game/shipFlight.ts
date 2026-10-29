@@ -100,6 +100,8 @@ const ENGINE_IDLE = 0.35;
 const ENGINE_FULL = 3;
 const ENGINE_RATE = 6;
 const MARKER_MARGIN = 0.12;
+/** A esta distancia (m) del Nudo ya se ve su cáscara y la nave lo puede fijar como objetivo. */
+const HIDDEN_REVEAL_DISTANCE = 400;
 /** Hasta dónde se busca el suelo bajo la nave para medir la altura (m). */
 const ALTITUDE_PROBE = 200;
 /** Lámpara cálida de la cabina: la Brasa no ilumina el tablero desde fuera. */
@@ -131,7 +133,11 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
   const ship = new Ship(model.radius);
   const boarding = new BoardingManager();
   const targeting = new TargetingSystem(
-    spec.bodies.map((body) => ({ id: body.world, name: worldTitle(body.world) })),
+    spec.bodies.map((body) => ({
+      id: body.world,
+      name: worldTitle(body.world),
+      hidden: body.hidden,
+    })),
   );
   const hud = createShipHud();
   const engineMaterial = model.engine?.material as MeshStandardMaterial | undefined;
@@ -261,6 +267,13 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
     environment.targetVelocity = targetVelocity;
   }
 
+  /** Un cuerpo oculto (el Nudo) solo se puede fijar desde cerca: ninguna marca lo delata de lejos. */
+  function revealed(world: string, t: number): boolean {
+    if (!spec.bodyOf(world)?.hidden) return true;
+    toSystemPosition(framePose(ship.frame, t), ship.state.position, sysPosition);
+    return framePose(world, t).position.distanceTo(sysPosition) < HIDDEN_REVEAL_DISTANCE;
+  }
+
   /** Al subir, si el objetivo es el mundo donde estás, apunta al mundo más cercano. */
   function chooseTarget(t: number): void {
     const current = targeting.currentTarget;
@@ -268,7 +281,7 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
     toSystemPosition(framePose(ship.frame, t), ship.state.position, sysPosition);
     let best: { id: string; distance: number } | undefined;
     for (const body of spec.bodies) {
-      if (body.world === ship.frame) continue;
+      if (body.world === ship.frame || !revealed(body.world, t)) continue;
       const distance = framePose(body.world, t).position.distanceTo(sysPosition);
       if (!best || distance < best.distance) best = { id: body.world, distance };
     }
@@ -421,8 +434,9 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
       }
       if (!boarding.isPiloting) return;
       if (action === 'target') {
-        targeting.cycleTarget();
-        if (targeting.currentTarget?.id === ship.frame) targeting.cycleTarget();
+        const seen = (id: string): boolean => revealed(id, t);
+        targeting.cycleTarget(seen);
+        if (targeting.currentTarget?.id === ship.frame) targeting.cycleTarget(seen);
       } else {
         ship.stabilize = !ship.stabilize;
       }

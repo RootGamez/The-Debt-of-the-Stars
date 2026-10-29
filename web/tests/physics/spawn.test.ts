@@ -41,6 +41,31 @@ describe('spawnOnGround', () => {
     expect(up.x).toBeCloseTo(1);
   });
 
+  it('inside a hollow world, stands on the inner face with the head toward the center', () => {
+    // La cara de dentro de una esfera de 21 m: el rayo sale hacia fuera desde el punto.
+    const cavity = {
+      resolve: () => false,
+      raycast(origin: Vector3, direction: Vector3, max: number): number | null {
+        const b = origin.dot(direction);
+        const c = origin.lengthSq() - 21 * 21;
+        const t = -b + Math.sqrt(b * b - c);
+        return t >= 0 && t <= max ? t : null;
+      },
+    };
+    const well = {
+      center: new Vector3(),
+      radius: 25,
+      strength: 3,
+      range: 50,
+      innerRadius: 21,
+    };
+
+    const start = spawnOnGround(marker(new Vector3(0, -20, 0)), cavity, well);
+
+    expect(start.feet.y).toBeCloseTo(-21);
+    expect(upOf(start.body).y).toBeCloseTo(1);
+  });
+
   it('fails with a clear message when there is no ground below the marker', () => {
     const lost = marker(new Vector3(0, 0, 500));
     lost.name = 'SPAWN_Perdido';

@@ -90,6 +90,31 @@ export function raw() {
   });
 }
 
+/** Una grabación hecha con un reloj cinco veces más lento (como la del escéptico). */
+export function recordingSource() {
+  return {
+    id: 'cicatriz.grabacion',
+    mundo: 'cicatriz',
+    tipo: 'grabacion',
+    reloj: 0.2,
+    titulo: 'La grabación',
+    superficial: { texto: ['Una voz lentísima.'], hechos: [] as string[] },
+    profunda: {
+      requiere: ['deuda.palabra'],
+      texto: ['Aquí un día vuestro son cinco.', 'La luz sale torcida.'],
+      hechos: ['lab.existe_lugar_lento', 'lab.imagen_desplazada'],
+    },
+  };
+}
+
+/** Los datos mínimos más la grabación. */
+export function withRecording(change: (source: Record<string, unknown>) => void = () => undefined) {
+  const data = raw();
+  const source: Record<string, unknown> = recordingSource();
+  change(source);
+  return { ...data, fuentes: [...data.fuentes, source] };
+}
+
 export function parse(data: unknown = raw()) {
   return parseClues(data, { worlds: WORLDS, events: EVENTS });
 }

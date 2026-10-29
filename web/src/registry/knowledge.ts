@@ -38,8 +38,18 @@ export function readSource(source: Source, known: KnownFacts): ReadResult {
   return { ...view, newFacts };
 }
 
+/**
+ * Lo que da una grabación al entenderla entera. No depende de lo que se sepa: entenderla (dar con la
+ * velocidad buena) es justo lo que la abre. El `requiere` de los datos dice qué ayuda a encontrarla.
+ */
+export function understoodFacts(source: Source, known: KnownFacts): string[] {
+  return factsOf(source, 'deep').filter((id) => !known.has(id));
+}
+
 /** ¿Aún puede dar algo la lectura que toca ahora? (Los rombos del mundo solo marcan lo que falta.) */
 export function canGiveNew(source: Source, known: KnownFacts): boolean {
+  if (source.kind === 'grabacion' || source.reader)
+    return understoodFacts(source, known).length > 0;
   return readSource(source, known).newFacts.length > 0;
 }
 

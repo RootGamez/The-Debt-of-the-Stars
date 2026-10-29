@@ -1,7 +1,8 @@
 // Lee las marcas de juego que vienen de Blender dentro del glTF de un mundo.
 // Convención (ver CLAUDE.md): COL_ colisión, INT_ interacción, SPAWN_ aparición del jugador,
 // PARK_ dónde espera la nave al empezar cada ciclo, TRIG_ evento, EVT_ algo que solo se ve durante un
-// evento de la cronología (por ejemplo, el haz de la ranura del Archivo), ANIM_ pieza que gira.
+// evento de la cronología (por ejemplo, el haz de la ranura del Archivo), ANIM_ pieza que gira y PASO_
+// anillo de una Puerta plegada (se cruza uno y se sale por su gemelo).
 // Las propiedades personalizadas de Blender llegan como userData (export_extras).
 import type { Mesh, Object3D } from 'three';
 
@@ -18,6 +19,13 @@ export interface WorldInfo {
   clockRate: number;
   /** Luz ambiente propia del mundo (propiedades `ambient` y `ambient_color` de la raíz), si la tiene. */
   ambient?: { color: number; intensity: number } | undefined;
+  /**
+   * Mundos huecos (el Nudo): radio de la cara interior (propiedad `inner_radius`). Dentro de la cavidad
+   * la gravedad empuja hacia fuera y se camina por dentro de la esfera.
+   */
+  innerRadius?: number | undefined;
+  /** Luz de dentro de la cavidad, que sustituye a la de la Brasa (`interior_light` y `interior_light_color`). */
+  interiorLight?: { color: number; intensity: number } | undefined;
 }
 
 export interface InteractionMarker {
@@ -47,6 +55,14 @@ export interface WorldMarkers {
   eventProps: EventProp[];
   /** Piezas que giran sobre su eje vertical (ANIM_, propiedad `spin` en rad/s; con `event`, solo entonces). */
   animated: AnimatedPart[];
+  /** Puertas plegadas (PASO_, propiedad `destino` = el anillo gemelo): se cruza una y se sale por la otra. */
+  gates: GateMarker[];
+}
+
+export interface GateMarker {
+  name: string;
+  object: Object3D;
+  target: string;
 }
 
 export interface AnimatedPart {
@@ -115,21 +131,31 @@ export function readWorldInfo(scene: Object3D, worldId: string): WorldInfo {
   if (!root) {
     throw new WorldDataError(`No existe el objeto raíz del mundo "${worldId}"`);
   }
+  const radius = requireNumber(root, 'radius', 'positive');
+  const innerRadius = optionalNumber(root, 'inner_radius', 'positive');
+  if (innerRadius !== undefined && innerRadius >= radius) {
+    throw new WorldDataError(
+      `${root.name}: "inner_radius" (${innerRadius}) debe ser menor que "radius" (${radius})`,
+    );
+  }
   return {
     id: worldId,
-    radius: requireNumber(root, 'radius', 'positive'),
+    radius,
     gravity: requireNumber(root, 'gravity', 'positive'),
     clockRate: requireNumber(root, 'clock_rate', 'positive'),
-    ambient: readAmbient(root),
+    ambient: readLight(root, 'ambient'),
+    innerRadius,
+    interiorLight: innerRadius === undefined ? undefined : readLight(root, 'interior_light'),
   };
 }
 
-function readAmbient(root: Object3D): WorldInfo['ambient'] {
-  const intensity = optionalNumber(root, 'ambient', 'positive');
+/** Una luz de la raíz: intensidad en `key` y color #rrggbb en `key_color` (opcional las dos juntas). */
+function readLight(root: Object3D, key: string): { color: number; intensity: number } | undefined {
+  const intensity = optionalNumber(root, key, 'positive');
   if (intensity === undefined) return undefined;
-  const color = requireString(root, 'ambient_color');
+  const color = requireString(root, `${key}_color`);
   if (!/^#[0-9a-f]{6}$/i.test(color)) {
-    throw new WorldDataError(`${root.name}: "ambient_color" debe ser #rrggbb (recibido ${color})`);
+    throw new WorldDataError(`${root.name}: "${key}_color" debe ser #rrggbb (recibido ${color})`);
   }
   return { color: Number.parseInt(color.slice(1), 16), intensity };
 }
@@ -173,6 +199,7 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
     triggers: [],
     eventProps: [],
     animated: [],
+    gates: [],
   };
   const colliderRoots: Object3D[] = [];
 
@@ -199,8 +226,18 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
     } else if (name.startsWith('EVT_')) {
       markers.eventProps.push({ event: requireString(object, 'event'), object });
       object.visible = false;
+    } else if (name.startsWith('PASO_')) {
+      markers.gates.push({ name, object, target: requireString(object, 'destino') });
     }
   });
+  const gateNames = new Set(markers.gates.map((g) => g.name));
+  for (const gate of markers.gates) {
+    if (!gateNames.has(gate.target) || gate.target === gate.name) {
+      throw new WorldDataError(
+        `${gate.name}: "destino" debe ser otro anillo PASO_ del mismo mundo (recibido ${gate.target})`,
+      );
+    }
+  }
 
   // Solo las raíces COL_ (un grupo COL_ incluye a sus hijos COL_).
   for (const root of colliderRoots) {

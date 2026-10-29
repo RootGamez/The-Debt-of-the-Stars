@@ -36,8 +36,15 @@ PRESETS = {
     "observatorio": dict(radius=30, gravity=0.2, clock=1.15, relief=0.12, freq=1.0,
                          bands=[(0.0, "#0A0A12"), (0.35, "#2A2A5A"), (0.7, "#77778A")],
                          stretch=(1.25, 0.9, 0.8), craters=6),
-    "laboratorio": dict(radius=25, gravity=0.3, clock=0.20, relief=0.03, freq=1.3,
-                        bands=[(0.0, "#4E5650"), (0.4, "#8A9A88"), (0.75, "#EDEAE0")]),
+    # El Nudo (Fase 7): una cáscara oscura y rugosa por fuera y, por dentro, una cavidad donde se camina por la
+    # cara interior (la gravedad empuja hacia fuera). Dentro está el Laboratorio Oculto.
+    # Relieve exterior acotado: la cáscara nunca baja de 23,75 m, por encima del límite de la cavidad (23 m).
+    "laboratorio": dict(radius=25, gravity=0.3, clock=0.20, relief=0.05, freq=1.9, subdiv=4,
+                        bands=[(0.0, "#0B0A10"), (0.4, "#17151E"), (0.7, "#26232F")],
+                        # Por dentro, franjas oscuras cada 30° de latitud: los estratos de los Ausentes, que además
+                        # dan dónde mirar en una esfera donde todo se parece.
+                        hollow=dict(inner=21, relief=0.02, freq=2.2, strata=(30, 3.2, "#47514A"),
+                                    bands=[(0.0, "#56605A"), (0.45, "#7C8A7E"), (0.8, "#A3AE9F")])),
     "hogar": dict(radius=120, gravity=1.0, clock=1.00, relief=0.05, freq=1.4,
                   bands=[(0.0, "#3A7AA0"), (0.42, "#C8963C"), (0.47, "#8AB04A"), (0.65, "#5A8A3A"), (0.85, "#7A5A3A")],
                   sea=0.42),
@@ -106,12 +113,73 @@ class Relieve:
         return r, False
 
 
-def construir(nombre, subdiv, cfg, relieve, con_color):
-    bm = bmesh.new()
+def icosfera(bm, subdiv):
     try:
-        bmesh.ops.create_icosphere(bm, subdivisions=subdiv, radius=1.0)
+        return bmesh.ops.create_icosphere(bm, subdivisions=subdiv, radius=1.0)["verts"]
     except TypeError:
-        bmesh.ops.create_icosphere(bm, subdivisions=subdiv, diameter=2.0)
+        return bmesh.ops.create_icosphere(bm, subdivisions=subdiv, diameter=2.0)["verts"]
+
+
+def construir_hueco(nombre, cfg, con_color):
+    """Mundo hueco: cáscara exterior (caras hacia fuera) y cara interior (caras hacia el centro), juntas en
+    una sola malla. En la interior, 'más alto' es más cerca del centro."""
+    hueco = cfg["hollow"]
+    bm = bmesh.new()
+    capa = bm.loops.layers.float_color.new("Color") if con_color else None
+
+    def capa_esfera(verts, radio_de, bandas, invertir, estratos=None):
+        caras = {f for v in verts for f in v.link_faces}
+        alturas = {}
+        for v in verts:
+            d = v.co.normalized()
+            r, h01 = radio_de(d)
+            v.co = d * r
+            alturas[v] = h01
+        if invertir:
+            bmesh.ops.reverse_faces(bm, faces=list(caras))
+        if capa is not None:
+            for f in caras:
+                h01 = sum(alturas[v] for v in f.verts) / len(f.verts)
+                color = bandas[0][1]
+                for pos, col in bandas:
+                    if h01 >= pos:
+                        color = col
+                if estratos:
+                    cada, ancho, tono = estratos
+                    lat = math.degrees(math.asin(max(-1, min(1, f.calc_center_median().normalized().z))))
+                    if abs((lat + cada / 2) % cada - cada / 2) < ancho:
+                        color = tono
+                rgba = hex_lineal(color)
+                for loop in f.loops:
+                    loop[capa] = rgba
+
+    relieve = Relieve(cfg, SEED)
+    capa_esfera(icosfera(bm, cfg.get("subdiv", SUBDIV)), relieve.altura, cfg["bands"], False)
+
+    interior = dict(radius=hueco["inner"], relief=hueco["relief"], freq=hueco["freq"], bands=hueco["bands"])
+    relieve_dentro = Relieve(interior, SEED + 1)
+
+    def radio_dentro(d):
+        _, h01 = relieve_dentro.altura(d)
+        # Los bultos suben hacia el centro: más alto = más cerca.
+        return hueco["inner"] * (1 - (h01 * 2 - 1) * hueco["relief"]), h01
+
+    capa_esfera(icosfera(bm, SUBDIV), radio_dentro, hueco["bands"], True, hueco.get("strata"))
+    mesh = bpy.data.meshes.new(nombre)
+    bm.to_mesh(mesh)
+    bm.free()
+    for p in mesh.polygons:
+        p.use_smooth = False
+    if con_color and "Color" in mesh.color_attributes:
+        mesh.color_attributes.active_color = mesh.color_attributes["Color"]
+    return mesh
+
+
+def construir(nombre, subdiv, cfg, relieve, con_color):
+    if "hollow" in cfg:
+        return construir_hueco(nombre, cfg, con_color)
+    bm = bmesh.new()
+    icosfera(bm, subdiv)
     info = {}
     stretch = Vector(cfg.get("stretch", (1, 1, 1)))
     for v in bm.verts:
@@ -192,6 +260,8 @@ def main():
     raiz["radius"] = float(cfg["radius"])
     raiz["gravity"] = float(cfg["gravity"])
     raiz["clock_rate"] = float(cfg["clock"])
+    if "hollow" in cfg:
+        raiz["inner_radius"] = float(cfg["hollow"]["inner"])
 
     relieve = Relieve(cfg, SEED)
     terreno = bpy.data.objects.new(f"{WORLD}_Terreno", construir(f"{WORLD}_Terreno", SUBDIV, cfg, relieve, True))

@@ -16,17 +16,18 @@ export interface SourceMarkers {
   dispose(): void;
 }
 
+/** @param upAt "arriba" del suelo en cada punto (hacia el centro dentro de un mundo hueco). */
 export function createSourceMarkers(
   scene: Object3D,
   sources: readonly Interactable[],
-  planetCenter: Vector3,
+  upAt: (position: Vector3) => Vector3,
 ): SourceMarkers {
   const group = new Group();
   group.name = 'Rombos de fuentes';
   const geometry = new OctahedronGeometry(0.14);
   const material = new MeshBasicMaterial({ color: 0xffe2a0, transparent: true, opacity: 0.9 });
   const entries = sources.map((source) => {
-    const up = source.position.clone().sub(planetCenter).normalize();
+    const up = upAt(source.position);
     const mesh = new Mesh(geometry, material);
     mesh.position.copy(source.position).addScaledVector(up, HOVER_METERS);
     mesh.visible = false;

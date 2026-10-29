@@ -15,10 +15,15 @@ import {
   type MotorEnvironment,
 } from '../../src/physics/characterMotor';
 import type { GravityWell } from '../../src/physics/gravity';
-import { forwardOf, yaw } from '../../src/physics/surfaceFrame';
+import { forwardOf, upOf, yaw } from '../../src/physics/surfaceFrame';
 import type { MoveIntent } from '../../src/core/input';
 import { JUMP_HEIGHT, PHYSICS_STEP, RUN_SPEED, WALK_SPEED } from '../../src/data/movement';
-import { compositeWorld, halfSpaceWorld, sphereWorld } from '../helpers/testWorlds';
+import {
+  compositeWorld,
+  halfSpaceWorld,
+  hollowSphereWorld,
+  sphereWorld,
+} from '../helpers/testWorlds';
 
 const IDLE: MoveIntent = { x: 0, z: 0, run: false, jump: false };
 const WALK: MoveIntent = { x: 0, z: 1, run: false, jump: false };
@@ -94,6 +99,70 @@ describe('standing on a planet', () => {
     simulate(state, planet(), IDLE, 0.5);
 
     expect(state.position.y).toBeGreaterThan(R - 0.05);
+  });
+});
+
+describe('inside a hollow world (the Nudo)', () => {
+  const INNER = 21;
+
+  function inside(): MotorEnvironment {
+    const well: GravityWell = {
+      center: new Vector3(),
+      radius: 25,
+      strength: 9.8 * 0.3,
+      range: 50,
+      innerRadius: INNER,
+    };
+    return { wells: [well], world: hollowSphereWorld(new Vector3(), INNER) };
+  }
+
+  /** De pie en el "fondo" de la cavidad, con la cabeza hacia el centro (+Y). */
+  function standingInside(): CharacterState {
+    return createCharacter(new Vector3(0, -INNER, 0), new Quaternion());
+  }
+
+  it('stands on the inner face with the head toward the center', () => {
+    const state = standingInside();
+
+    simulate(state, inside(), IDLE, 2);
+
+    expect(state.grounded).toBe(true);
+    expect(state.position.length()).toBeCloseTo(INNER, 1);
+    expect(upOf(state.body).y).toBeCloseTo(1, 2);
+  });
+
+  it('walks up the curve of the cavity without falling off', () => {
+    const state = standingInside();
+    let farthestFromFace = 0;
+
+    simulate(state, inside(), WALK, 20, (s) => {
+      farthestFromFace = Math.max(farthestFromFace, INNER - s.position.length());
+    });
+
+    expect(state.grounded).toBe(true);
+    expect(farthestFromFace).toBeLessThan(0.3);
+    // Veinte segundos andando lo llevan a la otra mitad de la cavidad, ahora "boca abajo" vista desde el inicio.
+    expect(state.position.y).toBeGreaterThan(0);
+    expect(upOf(state.body).dot(state.position.clone().normalize())).toBeCloseTo(-1, 1);
+  });
+
+  it('jumps toward the center and lands back on the inner face', () => {
+    const state = standingInside();
+    simulate(state, inside(), IDLE, 0.5);
+    let highest = 0;
+
+    simulate(state, inside(), JUMP, 0.1);
+    simulate(
+      state,
+      inside(),
+      IDLE,
+      6,
+      (s) => (highest = Math.max(highest, INNER - s.position.length())),
+    );
+
+    expect(highest).toBeGreaterThan(1);
+    expect(state.grounded).toBe(true);
+    expect(state.position.length()).toBeCloseTo(INNER, 1);
   });
 });
 

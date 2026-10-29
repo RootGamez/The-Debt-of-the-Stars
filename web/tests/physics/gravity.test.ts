@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
-import { gravityAt, wellForWorld, type GravityWell } from '../../src/physics/gravity';
+import {
+  gravityAt,
+  insideCavity,
+  surfaceUp,
+  wellForWorld,
+  type GravityWell,
+} from '../../src/physics/gravity';
 import { G_BASE } from '../../src/data/movement';
 
 const umbral: GravityWell = { center: new Vector3(), radius: 90, strength: 9.8, range: 180 };
@@ -58,7 +64,69 @@ describe('gravityAt', () => {
   });
 });
 
+describe('a hollow world (the Nudo)', () => {
+  // Cáscara de 25 m por fuera y cavidad de 21 m por dentro.
+  const nudo: GravityWell = {
+    center: new Vector3(),
+    radius: 25,
+    strength: 3,
+    range: 50,
+    innerRadius: 21,
+  };
+
+  it('pushes outward, onto its inner face, inside the cavity', () => {
+    const g = gravityAt(new Vector3(0, -21, 0), [nudo]);
+
+    expect(g.y).toBeCloseTo(-3);
+    expect(gravityAt(new Vector3(21, 0, 0), [nudo]).x).toBeCloseTo(3);
+  });
+
+  it('keeps full strength a few metres above the inner face (a jump comes back down)', () => {
+    expect(gravityAt(new Vector3(0, 0, 15), [nudo]).length()).toBeCloseTo(3);
+  });
+
+  it('fades toward the middle of the cavity and is zero at the very center', () => {
+    const near = gravityAt(new Vector3(0, 2, 0), [nudo]).length();
+
+    expect(near).toBeGreaterThan(0);
+    expect(near).toBeLessThan(3);
+    expect(gravityAt(new Vector3(), [nudo]).toArray()).toEqual([0, 0, 0]);
+  });
+
+  it('still pulls inward, like any world, on its outer shell', () => {
+    const g = gravityAt(new Vector3(0, 25, 0), [nudo]);
+
+    expect(g.y).toBeCloseTo(-3);
+    expect(gravityAt(new Vector3(0, 25 + 25, 0), [nudo]).y).toBeCloseTo(-1.5);
+  });
+
+  it('tells which way is up: toward the center inside, away from it outside', () => {
+    expect(surfaceUp(new Vector3(0, -21, 0), nudo).y).toBeCloseTo(1);
+    expect(surfaceUp(new Vector3(0, 25, 0), nudo).y).toBeCloseTo(1);
+    expect(surfaceUp(new Vector3(0, 25, 0), umbral).y).toBeCloseTo(1);
+    expect(surfaceUp(new Vector3(21, 0, 0), nudo).x).toBeCloseTo(-1);
+  });
+
+  it('knows whether a point is inside the cavity', () => {
+    expect(insideCavity(new Vector3(0, -20, 0), nudo)).toBe(true);
+    expect(insideCavity(new Vector3(0, -25.5, 0), nudo)).toBe(false);
+    expect(insideCavity(new Vector3(0, -20, 0), umbral)).toBe(false);
+  });
+});
+
 describe('wellForWorld', () => {
+  it('passes the cavity of a hollow world', () => {
+    const well = wellForWorld({
+      id: 'laboratorio',
+      radius: 25,
+      gravity: 0.3,
+      clockRate: 0.2,
+      innerRadius: 21,
+    });
+
+    expect(well.innerRadius).toBe(21);
+  });
+
   it('scales the base gravity by the world gravity and reaches two radii above the surface', () => {
     const well = wellForWorld({ id: 'archivo', radius: 70, gravity: 1.5, clockRate: 0.8 });
 

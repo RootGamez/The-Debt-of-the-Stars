@@ -30,7 +30,8 @@ export interface Locale {
 }
 
 export type LoopPhase = 'playing' | 'dying' | 'waking';
-export type DeathCause = 'fin' | 'absorcion' | 'caida' | 'choque' | 'calor';
+/** `marea`: la tensión de la marea llegó al máximo (Fase 7, physics/tides.ts). */
+export type DeathCause = 'fin' | 'absorcion' | 'caida' | 'choque' | 'calor' | 'marea';
 
 export interface Fade {
   color: 'white' | 'black' | 'none';

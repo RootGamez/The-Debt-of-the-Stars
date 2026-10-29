@@ -5,6 +5,9 @@ import { WorldDataError } from '../worlds/markers';
 
 export const SOURCE_KINDS = ['texto', 'grabacion', 'objeto', 'observacion', 'evento'] as const;
 export type SourceKind = (typeof SOURCE_KINDS)[number];
+/** Lectores de puzle (Fase 7): el cuaderno de Umbral y las cartas del Archivo (reading/puzzles.ts). */
+export const PUZZLE_READERS = ['cuaderno', 'cartas'] as const;
+export type PuzzleReader = (typeof PUZZLE_READERS)[number];
 
 const ID = /^[a-z0-9_.-]{1,64}$/i;
 const CONCLUSION_ID = /^K[0-9A-Z]{1,3}$/;
@@ -48,6 +51,13 @@ export interface Source {
   when: string | undefined;
   /** Nombre del evento (`TRIG_`) que se presencia, para las fuentes de tipo "evento". */
   eventName: string | undefined;
+  /**
+   * Solo las grabaciones: ritmo del reloj con que se grabaron (0,20 = donde el tiempo iba cinco veces
+   * más lento). Se entienden reproducidas a la velocidad que deshace ese reloj (reading/recording.ts).
+   */
+  recordedRate: number | undefined;
+  /** Lector de puzle (`lector` en los datos): lo que da la fuente se anota al resolverlo. */
+  reader: PuzzleReader | undefined;
   surface: Reading;
   deep: Reading | undefined;
 }
@@ -245,6 +255,29 @@ function parseReading(
 }
 
 const KINDS: readonly string[] = SOURCE_KINDS;
+/** Ritmos de reloj razonables para una grabación (el más rápido del sistema anda cerca de 1,2). */
+const MAX_RECORDED_RATE = 10;
+
+const READERS: readonly string[] = PUZZLE_READERS;
+
+function parseReader(raw: unknown, id: string): PuzzleReader | undefined {
+  if (raw === undefined) return undefined;
+  const reader = text(raw, `${id}.lector`);
+  if (!READERS.includes(reader))
+    fail(`${id}: lector desconocido "${reader}" (${PUZZLE_READERS.join(', ')})`);
+  return reader as PuzzleReader;
+}
+
+function parseRecordedRate(raw: unknown, id: string, kind: string): number | undefined {
+  if (kind !== 'grabacion') {
+    if (raw !== undefined) fail(`${id}: solo las grabaciones llevan "reloj"`);
+    return undefined;
+  }
+  if (typeof raw !== 'number' || !Number.isFinite(raw) || raw <= 0 || raw > MAX_RECORDED_RATE) {
+    fail(`${id}: las grabaciones necesitan "reloj", un ritmo entre 0 y ${MAX_RECORDED_RATE}`);
+  }
+  return raw;
+}
 
 function parseSource(item: unknown, facts: Map<string, Fact>, context: ClueContext): Source {
   const r = record(item, 'fuente');
@@ -271,6 +304,8 @@ function parseSource(item: unknown, facts: Map<string, Fact>, context: ClueConte
     draft: r.borrador === true,
     when,
     eventName,
+    recordedRate: parseRecordedRate(r.reloj, id, kind),
+    reader: parseReader(r.lector, id),
     surface: parseReading(r.superficial, `${id}.superficial`, facts, false),
     deep:
       r.profunda === undefined

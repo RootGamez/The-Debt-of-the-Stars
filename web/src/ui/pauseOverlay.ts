@@ -7,6 +7,10 @@ export interface PauseOverlay {
   readonly dragLook: boolean;
   /** Pausa el juego (botón de pausa táctil, Esc). */
   pause(): void;
+  /** Suelta el ratón para usar un panel (puzle, grabadora) SIN pausar; se sigue jugando al cerrarlo. */
+  releasePointer(): void;
+  /** Vuelve a capturar el ratón tras `releasePointer` (llamar desde el gesto que cierra el panel). */
+  recapturePointer(): void;
   /** Inhabilita la pantalla (otro diálogo está encima): sin foco ni clics, para que no se pueda reanudar detrás. */
   setInert(inert: boolean): void;
   /** Devuelve el foco al botón principal de la pantalla de pausa (al cerrar otro diálogo). */
@@ -19,7 +23,7 @@ export function isTouchDevice(): boolean {
 }
 
 const DESKTOP_HELP =
-  'WASD moverse · ratón mirar · Espacio saltar · Shift correr · F nave · M sonido · Esc pausa · F3 datos';
+  'WASD moverse · ratón mirar · Espacio saltar · Shift correr · F nave · G mira · M sonido · Esc pausa · F3 datos';
 
 function line(tag: 'strong' | 'span' | 'small', text: string, className?: string): HTMLElement {
   const element = document.createElement(tag);
@@ -212,9 +216,16 @@ export function createPauseOverlay(
     },
     { signal },
   );
+  /** El ratón se soltó a propósito para un panel: perder la captura no es pausar. */
+  let releasing = false;
   document.addEventListener(
     'pointerlockchange',
     () => {
+      if (releasing && document.pointerLockElement !== canvas) {
+        releasing = false;
+        dragLook = true; // se sigue jugando, con el ratón libre
+        return;
+      }
       dragLook = false;
       setPlaying(document.pointerLockElement === canvas);
     },
@@ -232,6 +243,20 @@ export function createPauseOverlay(
       return dragLook;
     },
     pause,
+    releasePointer() {
+      if (!playing || document.pointerLockElement !== canvas) return;
+      releasing = true;
+      document.exitPointerLock();
+    },
+    recapturePointer() {
+      if (!playing || !dragLook || document.pointerLockElement === canvas) return;
+      try {
+        const request: unknown = canvas.requestPointerLock();
+        Promise.resolve(request).catch(() => undefined); // si no se concede, se sigue mirando arrastrando
+      } catch {
+        // sin captura: se sigue mirando arrastrando
+      }
+    },
     setInert(inert) {
       overlay.inert = inert;
     },

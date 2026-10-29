@@ -45,6 +45,13 @@ describe('parseSystem', () => {
     expect(taller).toMatchObject({ phase: 0, spinPhase: 0, spin: 180 });
   });
 
+  it('marks hidden bodies (the Nudo), visible by default', () => {
+    const system = parseSystem(withBody({ oculto: true }), WORLD_IDS);
+
+    expect(system.bodies[0]?.hidden).toBe(true);
+    expect(system.bodies[1]?.hidden).toBe(false);
+  });
+
   it('looks bodies up by world', () => {
     const system = parseSystem(valid, WORLD_IDS);
 
@@ -67,6 +74,7 @@ describe('parseSystem', () => {
     ['an unknown spin word', withBody({ rotacion: 'rapida' })],
     ['a negative spin period', withBody({ rotacion: -1 })],
     ['a body without spin', withBody({ rotacion: undefined })],
+    ['a hidden flag that is not true or false', withBody({ oculto: 'si' })],
   ])('rejects %s with a Spanish message', (_name, raw) => {
     expect(() => parseSystem(raw, WORLD_IDS)).toThrow(/^sistema: /);
   });
@@ -79,10 +87,11 @@ async function radiusOf(world: string): Promise<number> {
 describe('the real system (sistema.json)', () => {
   const system = parseSystem(systemData, WORLD_IDS);
 
-  it('holds the five worlds of the alien system', () => {
+  it('holds the five worlds of the alien system and the hidden Nudo', () => {
     expect(system.bodies.map((b) => b.world).sort()).toEqual(
-      ['archivo', 'cicatriz', 'observatorio', 'taller', 'umbral'].sort(),
+      ['archivo', 'cicatriz', 'laboratorio', 'observatorio', 'taller', 'umbral'].sort(),
     );
+    expect(system.bodies.filter((b) => b.hidden).map((b) => b.world)).toEqual(['laboratorio']);
   });
 
   it('keeps the worlds clear of the star and of each other, whatever the phases', async () => {

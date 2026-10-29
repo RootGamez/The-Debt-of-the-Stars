@@ -29,12 +29,24 @@
     "id": "cicatriz.grabacion_esceptico",
     "mundo": "cicatriz",
     "tipo": "grabacion",
+    "reloj": 0.2,
     "titulo": "La grabación del escéptico",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "superficial": {
+      "texto": [
+        "Una grabadora sobre la mesa del puesto. Al pulsarla, una voz arrastra cada sílaba como si hablara desde el fondo de un pozo."
+      ],
+      "hechos": []
+    },
     "profunda": {
       "requiere": ["contrapeso.medir_desfase"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Si me entiendes, es que has girado la rueda lo bastante. Donde grabo, un día vuestro son cinco.",
+        "Grabo dentro del Nudo, en la cara de dentro, con la semilla colgando encima.",
+        "Desde fuera no nos veréis donde estamos: la luz que sale de aquí se tuerce hacia la Brasa.",
+        "Para dar con nosotros, mirad la imagen y apartad la vista de la Brasa unos dieciocho grados.",
+        "El Consejo dirá que no hay riesgo. Hay un Límite, y cada viaje nos acerca a él."
+      ],
       "hechos": ["silencio.advertencia", "lab.existe_lugar_lento", "lab.correccion"]
     }
   },

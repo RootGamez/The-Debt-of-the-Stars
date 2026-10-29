@@ -154,7 +154,9 @@ export class InputController {
     }
 
     const bound = FLIGHT_KEY_CODES.has(event.code) || event.code in KEY_BINDINGS;
-    if (bound && (this.pointerLocked || this.dragLookEnabled())) {
+    // Las flechas sobre un control (la rueda del reproductor) son para el control, no para la página.
+    const onControl = event.target instanceof HTMLInputElement;
+    if (bound && !onControl && (this.pointerLocked || this.dragLookEnabled())) {
       event.preventDefault(); // sin desplazar la página
     }
 

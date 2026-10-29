@@ -1,10 +1,12 @@
 // Un mundo cargado y listo para pisarlo: su pozo de gravedad, sus colisiones y su punto de aparición, todo
 // en el marco del propio mundo (centro en el origen). Hay que crearlo ANTES de colgar el mundo de su pivote
 // en la escena, para que las posiciones salgan del modelo sin ninguna transformación encima.
+import { Quaternion, Vector3 } from 'three';
 import type { MotorEnvironment } from '../physics/characterMotor';
 import { createBvhWorld, type BvhWorld } from '../physics/bvhWorld';
-import { wellForWorld, type GravityWell } from '../physics/gravity';
+import { surfaceUp, wellForWorld, type GravityWell } from '../physics/gravity';
 import { chooseSpawn, spawnOnGround, type SpawnPoint } from '../physics/spawn';
+import type { Gate } from './gates';
 import type { LoadedWorld } from './loadWorld';
 import { WorldDataError } from './markers';
 
@@ -14,6 +16,8 @@ export interface WorldRuntime {
   well: GravityWell;
   collision: BvhWorld;
   spawn: SpawnPoint;
+  /** Anillos de Puertas plegadas (vacío en casi todos los mundos). */
+  gates: Gate[];
 }
 
 export function createWorldRuntime(world: LoadedWorld): WorldRuntime {
@@ -31,8 +35,22 @@ export function createWorldRuntime(world: LoadedWorld): WorldRuntime {
     world,
     well,
     collision,
-    spawn: spawnOnGround(spawnMarker[1], collision, well.center),
+    spawn: spawnOnGround(spawnMarker[1], collision, well),
+    gates: readGates(world, well),
   };
+}
+
+/** Los anillos PASO_ en el marco del propio mundo: pie, arriba del suelo y hacia dónde miran. */
+function readGates(world: LoadedWorld, well: GravityWell): Gate[] {
+  return world.markers.gates.map(({ name, object, target }) => {
+    const position = object.getWorldPosition(new Vector3());
+    const rotation = object.getWorldQuaternion(new Quaternion());
+    const up = surfaceUp(position, well);
+    // La marca mira hacia su -Z (como la cámara); se quita lo que tenga de inclinación.
+    const forward = new Vector3(0, 0, -1).applyQuaternion(rotation);
+    forward.addScaledVector(up, -forward.dot(up)).normalize();
+    return { name, position, up, forward, target };
+  });
 }
 
 /** Lo que el motor del personaje necesita para moverse por ese mundo. */

@@ -1,7 +1,7 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.4
-**Última actualización:** 2026-10-25 · Sesión 2
+**Versión:** v0.5
+**Última actualización:** 2026-10-28 · Fase 7 (grabaciones)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
 > Este documento dice **qué se puede aprender, dónde y en qué orden**. Es el puente entre la historia y el
@@ -59,6 +59,9 @@ compacta** cerca del Laboratorio. Antes del minuto 13:30 todavía no hay agujero
   su imagen llega desplazada (la luz rodea el Nudo).
 - Une piezas que ya existen: la Primera Puerta en ruinas de Cicatriz, el "primer colapso" que el Consejo
   encubrió, y por qué la investigación estaba justo allí.
+- ✅ (Anthony, 2026-10-28) **El Laboratorio está dentro del Nudo**, con la gravedad invertida (ver
+  `CONTEXTO_PLANETAS.md` §8). 🟡 Por eso su tiempo va tan lento y por eso no se ve donde está: la luz que escapa
+  del Nudo sale curvada y su imagen aparece desplazada hacia la Brasa (la regla de la lente, Fase 7).
 
 
 ---
@@ -178,7 +181,7 @@ final se entiende como aviso.
 |---|---|---|---|---|---|
 | `cicatriz.sala_motor` | Objeto | Siempre (el núcleo solo se abre en el pulso) | Un anillo enorme con el núcleo cerrado; dentro, el motor viejo | Aquí se instala el Contrapeso; el núcleo se abre a las 9:00 (K6) | `contrapeso.lugar`, `contrapeso.ventana_pulso` · H6 |
 | `cicatriz.mordidas` | Observación | Siempre | Decenas de cortes esféricos perfectos | Una pared con medio símbolo que encaja con el del Instituto: los fragmentos de casa salieron de aquí | `deuda.filtraciones`, `casa.fragmentos_de_aqui` · H2, H7 |
-| `cicatriz.grabacion_esceptico` | Grabación | Siempre | Una grabación que suena lentísima e incomprensible | Grabada con un reloj 5 veces más lento: reproducida a ese ritmo se entiende. Advierte del Límite y describe desde dónde graba: "el Nudo me tapa la Brasa por la izquierda…" (K1, corrección, H4) | `lab.existe_lugar_lento`, `lab.correccion`, `silencio.advertencia` · H4, H5 |
+| `cicatriz.grabacion_esceptico` | Grabación | Siempre | Una grabación que suena lentísima e incomprensible | Grabada con un reloj 5 veces más lento: reproducida a ese ritmo se entiende. Advierte del Límite y describe desde dónde graba: dentro del Nudo, y que su luz sale torcida hacia la Brasa, así que hay que apartar la vista de ella para dar con el sitio (K1, corrección, H4) | `lab.existe_lugar_lento`, `lab.correccion`, `silencio.advertencia` · H4, H5 |
 | `cicatriz.bitacora` | Texto | Siempre | Bitácora de la máquina con picos en cada uso | Los picos se disparan durante la evacuación (H3); la última entrada: "una boca nueva llama desde un sistema joven" con su cuenta (K8); el núcleo solo se abre en el pulso (K6) | `partida.cascada`, `casa.prueba_llama`, `contrapeso.ventana_pulso` · H3, H6, H7 |
 | `cicatriz.lista_mundos` | Texto | Siempre | La lista de mundos conectados a la red, con huecos | Cada boca tiene su hora anotada y no coinciden (K7); un hueco lleva el símbolo del sistema del protagonista | `bocas.relojes_distintos`, `casa.en_la_red` · H2, H7 |
 | `cicatriz.primera_puerta` | Observación | Siempre | Ruina del primer anillo | Su garganta se cerró mal: ahí empezó el Nudo (sección 3) | `nudo.origen` · H2, H5 |
@@ -269,7 +272,7 @@ textos de ambiente sin peso en el grafo.
 | 2 | ¿Cuándo se puede instalar el Contrapeso? (pregunta 7 de la historia) | Solo durante el **pulso de las 9:00**, cuando el núcleo se abre; antes hay que sacar el motor viejo | ✅ Anthony (durante el pulso) · 🟡 sacar el motor viejo |
 | 3 | ¿Dónde está la Cámara? (H1) | En el Laboratorio, con las notas de quien la construyó | ✅ Anthony |
 | 4 | ¿Quién firma la orden de silencio? (pregunta 18) | "El Consejo de Tránsito" (los que gestionaban las Puertas) | 🟡 · ❓ quién en concreto |
-| 5 | ¿Las grabaciones suenan al ritmo del reloj donde se grabaron? | Sí, es la mecánica de lectura de `cicatriz.grabacion_esceptico` (ya propuesta en la historia §6) | 🟡 |
+| 5 | ¿Las grabaciones suenan al ritmo del reloj donde se grabaron? | Sí, es la mecánica de lectura de `cicatriz.grabacion_esceptico` (ya propuesta en la historia §6) | ✅ Anthony (plan de la Fase 7, 2026-10-28) |
 | 6 | ¿Existe el Observatorio? | Sí, como extra opcional; el grafo no depende de él | ✅ Anthony |
 | 7 | El hueco con el símbolo de casa en `cicatriz.lista_mundos` | La red ya incluye el sistema del protagonista | 🟡 |
 
@@ -289,6 +292,8 @@ textos de ambiente sin peso en el grafo.
 - El Registro muestra cada hecho bajo su **primer hilo**, con su frase y enlaces "ver también", pero **no el lugar** donde se aprendió (no se guarda; solo se guardan los hechos).
 - Los rumores y las conclusiones se **calculan** a partir de los hechos; la partida guardada solo tiene hechos y ciclos.
 - Reglas del grafo comprobadas por código: 1 (≥ 2 fuentes por hecho esencial y ≥ 2 mundos por conclusión), 2 (sin depender solo del Observatorio ni del prólogo), 3 (cada mundo da un "dónde" y un "por qué"), 4 (todo alcanzable, sin esperas circulares), 5 (marcas y fuentes se corresponden; hoy solo Umbral), 6 (cada fuente da algo; el prólogo tiene lectura profunda) y 7 (K3 se logra sin entrar al Laboratorio).
+- **Grabaciones (Fase 7):** cada fuente de tipo grabación lleva `reloj`, el ritmo con que se grabó (0,20 la del escéptico). Se oye con una rueda de velocidad: se entiende cuando velocidad × reloj ≈ 1 (±15 %); si no, las palabras salen arrastradas (lenta) o tragadas (rápida). La lectura superficial es lo que se oye al pulsarla; la profunda es lo que dice, frase a frase. **Lo profundo se anota al oírla entera a la velocidad buena**, sepa lo que sepa el jugador: entenderla es la llave. El `requiere` de los datos sigue diciendo qué ayuda a encontrar esa velocidad (lo usan las reglas del grafo). Mientras no haya voces de verdad suena un murmullo sintetizado.
+- **Lectores de puzle (Fase 7):** `umbral.cuaderno` (completar la última hora del Archivo) y `archivo.cartas` (ordenar las cartas por cuándo se escribieron en días de Umbral) llevan `lector`. Lo que dan se anota **al resolverlos**, no al abrirlos. `taller.gemelos`, `taller.cabina` y `lab.pizarra` tendrán su lector en la Fase 10.
 
 ## 12. Bitácora
 
@@ -296,3 +301,4 @@ textos de ambiente sin peso en el grafo.
 - **2026-10-25 · Sesión 2 (decisiones).** Anthony confirma: el Nudo como masa del Laboratorio; el Contrapeso solo se instala durante el pulso de las 9:00; la Cámara está en el Laboratorio; el Observatorio existe como extra opcional.
 - **2026-10-25 · Sesión 2 (lectura).** Anthony decide que el tiempo del ciclo se detiene al leer y con el Registro abierto, y aprueba las demás propuestas de la Fase 4 (ver `docs/plan-fase-4-leer-registro.md`).
 - **2026-10-25 · Sesión 2 (Fase 4).** Se implementa el Registro: datos del grafo, lectura, hechos persistentes y reglas comprobadas por código. Textos de Umbral en borrador; el resto, esqueleto.
+- **2026-10-28 · Fase 7 (hito 7A).** Anthony aprueba el plan de la Fase 7: las grabaciones suenan al ritmo de su reloj (decisión 5 ✅) y el Laboratorio está dentro del Nudo, con la gravedad invertida. Se implementa el reproductor; la grabación del escéptico lleva un **borrador** (para probar la mecánica) que ya habla desde dentro del Nudo y de corregir unos 18° alejándose de la Brasa: Anthony lo reescribirá.

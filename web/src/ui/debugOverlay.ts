@@ -43,6 +43,8 @@ export interface RegistrySnapshot {
   rumors: string[];
   reading: string | null;
   registryOpen: boolean;
+  /** La grabación que suena, o null. */
+  recording: { speed: number; clarity: number; understood: boolean } | null;
 }
 
 export interface LoopSnapshot {
@@ -73,6 +75,12 @@ declare global {
       toShip?(): boolean;
       /** Lleva el reloj de Umbral a ese instante del ciclo (s); devuelve dónde quedó. */
       skipTo?(seconds: number): number;
+      /** La marea donde estás y la tensión acumulada (0–1; a 1, muerte `marea`). */
+      tide?(): { tide: number; strain: number };
+      /** La imagen del Nudo: si se ve, con qué claridad y cuánto la desvía la lente (grados). */
+      lens?(): { visible: boolean; clarity: number; offsetDegrees: number | null };
+      /** Dónde está el jugador a pie: mundo, si está dentro de una cavidad y anillos cruzados. */
+      place?(): { world: string; inside: boolean; crossings: number };
       /** El sonido: si el audio está activo, si está silenciado y qué voces suenan. */
       audio?(): { muted: boolean; running: boolean; voices: string[] };
     };

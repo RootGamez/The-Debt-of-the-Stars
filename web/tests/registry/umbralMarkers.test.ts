@@ -50,10 +50,10 @@ describe.each(BUILT_WORLDS)('the markers of %s', (world) => {
 });
 
 describe('the Observatorio', () => {
-  it('shows the displaced image only during the alignment event', async () => {
+  it('leaves the displaced image of the Nudo to the game (it moves on its rails)', async () => {
     const { markers } = await load('observatorio');
 
-    expect(markers.eventProps.map((p) => p.event)).toEqual(['alineacion']);
+    expect(markers.eventProps).toEqual([]);
   });
 });
 

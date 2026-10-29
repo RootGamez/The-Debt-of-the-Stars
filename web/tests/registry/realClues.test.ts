@@ -40,12 +40,23 @@ describe('the real clue data', () => {
     });
   });
 
-  it('gives Umbral readable draft texts and leaves the other worlds as skeleton', () => {
-    const umbral = clues.sources.filter((s) => s.world === 'umbral');
-    const others = clues.sources.filter((s) => s.world !== 'umbral');
+  it('gives Umbral and the recordings readable draft texts and leaves the rest as skeleton', () => {
+    // Las grabaciones necesitan un borrador para que su mecánica se pueda probar (Fase 7).
+    const drafted = (s: { world: string; kind: string }) =>
+      s.world === 'umbral' || s.kind === 'grabacion';
+    const readable = clues.sources.filter(drafted);
+    const others = clues.sources.filter((s) => !drafted(s));
 
-    expect(umbral.every((s) => s.draft)).toBe(true);
-    expect(umbral.every((s) => !s.surface.text.includes('[texto pendiente]'))).toBe(true);
+    expect(readable.map((s) => s.id)).toContain('cicatriz.grabacion_esceptico');
+    expect(readable.every((s) => s.draft)).toBe(true);
+    expect(readable.every((s) => !s.surface.text.includes('[texto pendiente]'))).toBe(true);
     expect(others.every((s) => s.surface.text[0] === '[texto pendiente]')).toBe(true);
+  });
+
+  it('every recording carries the clock it was recorded with', () => {
+    const recordings = clues.sources.filter((s) => s.kind === 'grabacion');
+
+    expect(recordings.length).toBeGreaterThan(0);
+    for (const recording of recordings) expect(recording.recordedRate).toBeGreaterThan(0);
   });
 });

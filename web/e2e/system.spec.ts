@@ -3,7 +3,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { loopValue, ready, snapshot, startPlaying } from './helpers';
 
-const WORLDS = ['taller', 'cicatriz', 'archivo', 'umbral', 'observatorio'];
+/** Los cinco mundos y el Nudo (oculto, con el Laboratorio dentro). */
+const WORLDS = ['taller', 'cicatriz', 'archivo', 'umbral', 'laboratorio', 'observatorio'];
 
 async function bodies(page: Page): Promise<Record<string, [number, number, number]>> {
   return (await snapshot(page))?.system.bodies ?? {};
@@ -14,7 +15,7 @@ async function warpTo(page: Page, world: string): Promise<void> {
   expect(ok).toBe(true);
 }
 
-test('the five worlds orbit the Brasa and keep their distance', async ({ page }) => {
+test('the worlds and the Nudo orbit the Brasa and keep their distance', async ({ page }) => {
   await startPlaying(page);
   const before = await bodies(page);
   const beforeTime = await loopValue(page, 'umbral');

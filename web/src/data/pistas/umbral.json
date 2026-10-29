@@ -47,6 +47,7 @@
     "id": "umbral.cuaderno",
     "mundo": "umbral",
     "tipo": "texto",
+    "lector": "cuaderno",
     "titulo": "Cuaderno del turno",
     "borrador": true,
     "superficial": {

@@ -4,6 +4,12 @@ import './style.css';
 import { Quaternion, Timer, Vector3, type PerspectiveCamera, type WebGLRenderer } from 'three';
 import { loadChronology } from './core/chronology';
 import { createSoundtrack } from './audio/soundtrack';
+import { createFoldedPassage } from './game/foldedPassage';
+import { createTideEffects } from './game/tideEffects';
+import { insideCavity } from './physics/gravity';
+import { createInteriorLights } from './render/interiorLight';
+import { createLensView } from './render/lensView';
+import { createSightScale } from './ui/sightScale';
 import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
@@ -42,6 +48,12 @@ import { worldFromQuery, worldTitle } from './worlds/worldSelection';
 const NEAR_PLANE = 0.05;
 /** Mundo donde espera la nave al empezar cada ciclo (la llegada). */
 const SHIP_HOME = 'umbral';
+/** Desde aquí, durante este evento, la imagen del Nudo se ve con claridad (cronologia.json). */
+const OBSERVATORY = 'observatorio';
+const ALIGNMENT_EVENT = 'alineacion';
+/** La marea del Borde sale de donde está su fuente de lectura (CONTEXTO_PLANETAS.md §6). */
+const EDGE_WORLD = 'cicatriz';
+const EDGE_SOURCE = 'cicatriz.borde';
 
 function requireElement<T extends HTMLElement>(id: string, type: new () => T): T {
   const element = document.getElementById(id);
@@ -103,6 +115,20 @@ async function start(): Promise<void> {
     sky,
     start: startWorld,
   });
+  // El Nudo por dentro: su luz sustituye a la de la Brasa, y sus anillos pliegan el paso.
+  const interior = createInteriorLights(runtimes, sun);
+  const passage = createFoldedPassage();
+  // …y por fuera: su imagen en el cielo, girada hacia la Brasa, y las estrellas que dobla a su paso.
+  const lens = createLensView(scene, sky);
+  // La mira graduada (G): solo mide ángulos; con ella se corrige la imagen sin calcular nada.
+  const sight = createSightScale(camera, canvas);
+  // Las mareas: junto al Borde de Cicatriz, subiendo hacia la semilla del Nudo y sobre su cáscara.
+  const edge = sources.get(EDGE_WORLD)?.interactables.find((i) => i.id === EDGE_SOURCE);
+  const tides = createTideEffects(camera, {
+    edge: edge ? { world: EDGE_WORLD, position: edge.position } : undefined,
+  });
+  let tideDeath: DeathCause | undefined;
+  const hiddenWorld = spec?.bodies.find((body) => body.hidden)?.world;
 
   // A pie, la nave posada es un obstáculo más del mundo donde está.
   const game: { ui?: ReadingUi; flight?: ShipFlight } = {};
@@ -129,6 +155,7 @@ async function start(): Promise<void> {
   function enterWorld(id: string): void {
     currentWorld = runtimeOf(runtimes, id);
     player.switchWorld(currentWorld.spawn, envOf(id), currentWorld.well);
+    passage.reset(player.state.position);
     systemScene.setReference(id);
     const worldSources = sources.get(id);
     if (worldSources) game.ui?.setWorld(worldSources);
@@ -165,10 +192,11 @@ async function start(): Promise<void> {
     ),
     player,
     skyDirection: arrivalSkyDirection(player),
-    // Cada ciclo empieza en el mundo de llegada, a pie, con la nave esperando.
+    // Cada ciclo empieza en el mundo de llegada, a pie, con la nave esperando (y sin tensión de marea).
     onRestart: () => {
       game.flight?.reset();
       enterWorld(startWorld);
+      tides.reset();
     },
   });
   const reading = new ReadingSession(clues, session.savedFacts, (facts) =>
@@ -256,8 +284,15 @@ async function start(): Promise<void> {
       const owner = [...sources.values()].find((s) => s.interactables.some((i) => i.id === clueId));
       if (!owner) return false;
       if (owner.world !== currentWorld.id) enterWorld(owner.world);
-      return ui.teleportTo(clueId);
+      const placed = ui.teleportTo(clueId);
+      passage.reset(player.state.position);
+      return placed;
     };
+    window.__juego.place = () => ({
+      world: currentWorld.id,
+      inside: insideCavity(player.state.position, currentWorld.well),
+      crossings: passage.crossings,
+    });
     window.__juego.warpTo = (world) => {
       if (flight?.piloting || !runtimes.has(world)) return false;
       enterWorld(world);
@@ -266,6 +301,8 @@ async function start(): Promise<void> {
     window.__juego.shipTo = (world, altitude) => flight?.warpTo(world, altitude) ?? false;
     window.__juego.toShip = () => flight?.standAtHatch(currentWorld.id) ?? false;
     window.__juego.audio = () => soundtrack.snapshot();
+    window.__juego.lens = () => lens.snapshot();
+    window.__juego.tide = () => tides.snapshot();
     window.__juego.skipTo = (seconds) => {
       session.director.skip(seconds - session.director.clock.t);
       return session.director.clock.t;
@@ -294,7 +331,7 @@ async function start(): Promise<void> {
         if (moving) shipDeath ??= flight.step(session.director.clock.t, input.flightKeys(), dt);
         else flight.hold();
       } else {
-        player.step(moving ? input.intent() : IDLE_INTENT, dt);
+        player.step(moving ? tides.slow(input.intent()) : IDLE_INTENT, dt);
       }
     },
   );
@@ -314,8 +351,8 @@ async function start(): Promise<void> {
         if (flight?.piloting) flight.addLook(look.x, look.y);
         else player.look(-look.x * MOUSE_LOOK_SENSITIVITY, -look.y * MOUSE_LOOK_SENSITIVITY);
       }
-      session.update(dt, timeRuns, shipDeath);
-      if (timeRuns) shipDeath = undefined; // si el ciclo no corrió, la muerte espera
+      session.update(dt, timeRuns, shipDeath ?? tideDeath);
+      if (timeRuns) shipDeath = tideDeath = undefined; // si el ciclo no corrió, la muerte espera
       for (const prop of eventProps) {
         prop.object.visible = session.activeEventIds.includes(prop.event);
       }
@@ -328,6 +365,23 @@ async function start(): Promise<void> {
       }
       // En pausa la física sigue (jugador quieto, se asienta en el suelo); el ciclo sí se detiene.
       const alpha = physics.advance(dt);
+      const piloting = flight?.piloting ?? false;
+      if (!piloting && canAct()) passage.update(currentWorld, player);
+      interior.update(
+        currentWorld.id,
+        !piloting && insideCavity(player.state.position, currentWorld.well),
+      );
+      const tideLethal = tides.update(
+        {
+          world: piloting ? (flight?.frame ? runtimes.get(flight.frame) : undefined) : currentWorld,
+          position: piloting && flight ? flight.position : player.state.position,
+          loopTime: session.director.clock.t,
+          running: timeRuns && session.acceptsInput,
+          piloting,
+        },
+        dt,
+      );
+      if (tideLethal && session.acceptsInput) tideDeath = 'marea';
       if (flight?.piloting) {
         flight.view(alpha, camera);
       } else {
@@ -339,6 +393,14 @@ async function start(): Promise<void> {
       const t = session.director.clock.t;
       systemScene.update(t);
       lightFor(systemScene.referenceWorld);
+      lens.update({
+        camera: camera.position,
+        nudo: hiddenWorld ? systemScene.groupOf(hiddenWorld) : undefined,
+        brasa: sun.position,
+        aligned: session.activeEventIds.includes(ALIGNMENT_EVENT),
+        inObservatory: systemScene.referenceWorld === OBSERVATORY,
+        time: performance.now() / 1000,
+      });
       soundtrack.update({
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,
         rate: session.director.rate,
@@ -348,10 +410,12 @@ async function start(): Promise<void> {
         fade: session.director.fade.amount,
         running: timeRuns,
         piloting: flight?.piloting ?? false,
+        recording: ui.listening,
       });
       camera.updateMatrixWorld();
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);
+      sight.update();
       touch?.update();
       debug.update(dt, overlay.playing);
       orbitMap?.update(dt);

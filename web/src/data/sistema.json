@@ -1,5 +1,5 @@
 {
-  "_fuente": "CONTEXTO_PLANETAS.md §1 y plan de la Fase 5. Valores de partida 🟡 para ajustar jugando. Distancias en metros, tiempos en segundos del reloj de Umbral, ángulos en radianes. Periodo 0 = quieto; rotación 'bloqueada' = siempre la misma cara a la Brasa; rotación en segundos = giro propio (Taller gira cada 90 s mientras orbita cada 180 s: su día dura 180 s). faseRotacion elige dónde queda la Brasa sobre el punto de aparición (Umbral: baja, ~12°).",
+  "_fuente": "CONTEXTO_PLANETAS.md §1 y plan de la Fase 5. Valores de partida 🟡 para ajustar jugando. Distancias en metros, tiempos en segundos del reloj de Umbral, ángulos en radianes. Periodo 0 = quieto; rotación 'bloqueada' = siempre la misma cara a la Brasa; rotación en segundos = giro propio (Taller gira cada 90 s mientras orbita cada 180 s: su día dura 180 s). faseRotacion elige dónde queda la Brasa sobre el punto de aparición (Umbral: baja, ~12°). El Nudo (mundo 'laboratorio', Fase 7) es un cuerpo oculto: la nave no lo ofrece como objetivo hasta tenerlo cerca.",
   "estrella": { "radio": 100 },
   "cuerpos": [
     { "mundo": "taller", "orbita": 500, "periodo": 180, "fase": 0.0, "rotacion": 90 },
@@ -26,6 +26,15 @@
       "fase": 0.9,
       "rotacion": "bloqueada",
       "faseRotacion": 1.433
+    },
+    {
+      "mundo": "laboratorio",
+      "orbita": 2350,
+      "periodo": 1834,
+      "fase": 3.0,
+      "rotacion": "bloqueada",
+      "faseRotacion": 0,
+      "oculto": true
     },
     {
       "mundo": "observatorio",
