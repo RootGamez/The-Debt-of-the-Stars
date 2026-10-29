@@ -15,6 +15,7 @@ const calm: MixInput = {
   rate: 1,
   events: [],
   absorption: 0,
+  hole: 0,
   phase: 'playing',
   fade: 0,
   running: true,
@@ -171,6 +172,12 @@ describe('the master volume', () => {
     expect(end).toBeLessThan(start * 0.2);
   });
 
+  it('falls silent early in the white fade: silence just before the loop starts again', () => {
+    expect(mix({ phase: 'dying', fade: 0.1 }).master).toBeGreaterThan(0);
+    expect(mix({ phase: 'dying', fade: 0.25 }).master).toBe(0);
+    expect(mix({ phase: 'dying', fade: 0.9 }).master).toBe(0);
+  });
+
   it('comes back as the black fade of waking clears', () => {
     expect(mix({ phase: 'waking', fade: 1 }).master).toBeLessThan(mix().master * 0.2);
     expect(mix({ phase: 'waking', fade: 0 }).master).toBeCloseTo(mix().master);
@@ -182,6 +189,32 @@ describe('the master volume', () => {
       expect(master).toBeGreaterThanOrEqual(0);
       expect(master).toBeLessThanOrEqual(1);
     }
+  });
+});
+
+describe('the rumble of the black hole', () => {
+  const rumble = (hole: number, change: Partial<MixInput> = {}) =>
+    levelOf({ events: ['agujero_negro'], hole, ...change }, 'evento:agujero_negro') ?? 0;
+
+  it('is already there, quiet, when the hole is born', () => {
+    expect(rumble(0)).toBeGreaterThan(0);
+    expect(rumble(0)).toBeLessThan(0.5);
+  });
+
+  it('grows with how much of the sky the hole fills (its size and how close it is)', () => {
+    expect(rumble(0.1)).toBeGreaterThan(rumble(0));
+    expect(rumble(0.25)).toBeGreaterThan(rumble(0.1));
+    expect(rumble(1)).toBe(1);
+  });
+
+  it('stays within limits and leaves the other voices alone', () => {
+    expect(rumble(7)).toBe(1);
+    expect(rumble(Number.NaN)).toBe(rumble(0));
+    expect(levelOf({ events: ['cielo_rojo'], hole: 0 }, 'evento:cielo_rojo')).toBe(1);
+  });
+
+  it('is further away while paused, like everything else', () => {
+    expect(rumble(1, { running: false })).toBeLessThan(rumble(1));
   });
 });
 

@@ -2,29 +2,30 @@
 //   senales        anillos de luz que se curvan en el cielo (5:00)
 //   pulso_cicatriz destello rojo y temblor de cámara (9:00)
 //   cielo_rojo     el cielo se tiñe de rojo
-//   agujero_negro  esfera negra con halo que crece (13:30)
-//   absorción      el cielo y la Brasa se apagan mientras el mundo es absorbido
+//   absorción      el cielo y la Brasa se apagan y el suelo tiembla mientras el mundo es absorbido; al final
+//                  la Brasa se apaga del todo (Fase 8D, `finalLight`)
+// El agujero negro ya no está aquí: tiene su sitio en el sistema (render/blackHoleView.ts, Fase 8).
 import {
   AdditiveBlending,
-  BackSide,
   Color,
   Mesh,
   MeshBasicMaterial,
-  SphereGeometry,
   TorusGeometry,
   Vector3,
   type Light,
   type Scene,
 } from 'three';
 import type { TimelineEvent } from '../core/timeline';
+import { finalLight } from '../system/absorption';
 
 const SKY = new Color(0x07070c);
 const RED_SKY = new Color(0x5a1a10);
 const PULSE = new Color(0xa0301a);
 const SKY_DISTANCE = 2600;
-const BLACK_HOLE_MAX_RADIUS = 420;
 const RING_COUNT = 4;
 const SHAKE_METERS = 0.06;
+/** Temblor al final de la absorción del mundo donde estás (en unidades del temblor del pulso). */
+const ABSORPTION_QUAKE = 1.5;
 
 export interface LoopEffects {
   /** Ajusta todos los efectos al instante `t` con los eventos en curso. */
@@ -41,7 +42,7 @@ function progressOf(active: readonly TimelineEvent[], id: string, t: number): nu
 }
 
 /**
- * @param skyDirection Dirección (unitaria) donde aparecen los anillos y el agujero negro. Provisional:
+ * @param skyDirection Dirección (unitaria) donde aparecen los anillos de las señales. Provisional:
  * delante y por encima del horizonte de la llegada, para que se vea crecer desde La Boca.
  */
 export function createLoopEffects(scene: Scene, sun: Light, skyDirection: Vector3): LoopEffects {
@@ -71,24 +72,6 @@ export function createLoopEffects(scene: Scene, sun: Light, skyDirection: Vector
     scene.add(ring);
   }
 
-  const hole = new Mesh(new SphereGeometry(1, 32, 16), new MeshBasicMaterial({ color: 0x000000 }));
-  const halo = new Mesh(
-    new SphereGeometry(1.35, 32, 16),
-    new MeshBasicMaterial({
-      color: 0xff8a3a,
-      transparent: true,
-      opacity: 0.35,
-      blending: AdditiveBlending,
-      depthWrite: false,
-      side: BackSide, // solo el borde, detrás de la esfera negra
-    }),
-  );
-  for (const m of [hole, halo]) {
-    m.position.copy(skyDirection).multiplyScalar(SKY_DISTANCE);
-    m.visible = false;
-    scene.add(m);
-  }
-
   const shake = new Vector3();
   let elapsed = 0;
 
@@ -111,28 +94,25 @@ export function createLoopEffects(scene: Scene, sun: Light, skyDirection: Vector
       if (red !== undefined) background.lerp(RED_SKY, Math.min(1, red * 4));
       const pulse = progressOf(active, 'pulso_cicatriz', t);
       shake.set(0, 0, 0);
+      // El suelo tiembla con el pulso y, cada vez más, mientras el agujero se traga el mundo.
+      let quake = absorption * ABSORPTION_QUAKE;
       if (pulse !== undefined) {
         const strength = Math.sin(pulse * Math.PI);
         background.lerp(PULSE, reducedMotion ? strength * 0.4 : strength);
-        // Sin temblor en pausa (dt = 0) ni con "reducir movimiento" activado en el sistema.
-        if (dt > 0 && !reducedMotion) {
-          shake
-            .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
-            .multiplyScalar(SHAKE_METERS * 2 * strength);
-        }
+        quake = Math.max(quake, strength);
+      }
+      // Sin temblor en pausa (dt = 0) ni con "reducir movimiento" activado en el sistema.
+      if (quake > 0 && dt > 0 && !reducedMotion) {
+        shake
+          .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+          .multiplyScalar(SHAKE_METERS * 2 * quake);
       }
 
-      const growth = progressOf(active, 'agujero_negro', t);
-      const radius = growth === undefined ? 0 : BLACK_HOLE_MAX_RADIUS * Math.max(0.05, growth);
-      hole.visible = halo.visible = growth !== undefined;
-      hole.scale.setScalar(radius);
-      halo.scale.setScalar(radius);
-
       background.multiplyScalar(1 - absorption);
-      sun.intensity = sunIntensity * (1 - 0.9 * absorption);
+      sun.intensity = sunIntensity * (1 - 0.9 * absorption) * finalLight(absorption);
     },
     dispose() {
-      for (const m of [...rings, hole, halo]) {
+      for (const m of rings) {
         scene.remove(m);
         m.geometry.dispose();
         (m.material as MeshBasicMaterial).dispose();

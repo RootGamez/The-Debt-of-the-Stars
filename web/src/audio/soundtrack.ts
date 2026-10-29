@@ -3,15 +3,24 @@
 // la mezcla al motor. Lo cubren las pruebas de Playwright (e2e/audio.spec.ts).
 import { browserStore } from '../core/save';
 import { createAudioEngine, type AudioEngine } from './engine';
-import { computeMix, type MixInput } from './mix';
+import { computeMix, type Mix, type MixInput } from './mix';
 import { loadMuted, saveMuted } from './mutePreference';
 
 const UNLOCK_EVENTS = ['pointerdown', 'keydown', 'touchstart'] as const;
 
 export interface Soundtrack {
   readonly muted: boolean;
-  /** Para la depuración y las pruebas: si suena y qué voces hay. */
-  snapshot(): { muted: boolean; running: boolean; voices: string[] };
+  /**
+   * Para la depuración y las pruebas: si suena, qué voces hay y la última mezcla (volumen general y el de cada
+   * voz), que se calcula aunque el audio aún no haya arrancado.
+   */
+  snapshot(): {
+    muted: boolean;
+    running: boolean;
+    voices: string[];
+    master: number;
+    levels: Record<string, number>;
+  };
   update(input: Omit<MixInput, 'muted'>): void;
   dispose(): void;
 }
@@ -19,6 +28,7 @@ export interface Soundtrack {
 export function createSoundtrack(engine: AudioEngine = createAudioEngine()): Soundtrack {
   const store = browserStore();
   let muted = loadMuted(store);
+  let last: Mix | undefined;
   const abort = new AbortController();
   const { signal } = abort;
 
@@ -56,10 +66,17 @@ export function createSoundtrack(engine: AudioEngine = createAudioEngine()): Sou
       return muted;
     },
     snapshot() {
-      return { muted, running: engine.running, voices: engine.voiceIds };
+      return {
+        muted,
+        running: engine.running,
+        voices: engine.voiceIds,
+        master: last?.master ?? 0,
+        levels: Object.fromEntries((last?.voices ?? []).map((voice) => [voice.id, voice.level])),
+      };
     },
     update(input) {
-      engine.update(computeMix({ ...input, muted }));
+      last = computeMix({ ...input, muted });
+      engine.update(last);
     },
     dispose() {
       abort.abort();

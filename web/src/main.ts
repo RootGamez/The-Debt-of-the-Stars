@@ -9,13 +9,18 @@ import { createTideEffects } from './game/tideEffects';
 import { insideCavity } from './physics/gravity';
 import { createInteriorLights } from './render/interiorLight';
 import { createLensView } from './render/lensView';
+import { createBlackHoleView } from './render/blackHoleView';
+import { growthFor } from './system/blackHole';
+import { BLACK_HOLE } from './data/blackHole';
+import { qualityFromQuery } from './core/quality';
 import { createSightScale } from './ui/sightScale';
 import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
 import { Player } from './core/player';
-import { triggersAsEvents } from './core/timeline';
+import { absorptionWindow, triggersAsEvents } from './core/timeline';
+import { createAbsorptionView } from './render/absorptionView';
 import {
   FIELD_OF_VIEW,
   MAX_PHYSICS_STEPS_PER_FRAME,
@@ -33,7 +38,8 @@ import { ReadingSession } from './reading/readingSession';
 import { createReadingUi, type ReadingUi } from './reading/readingUi';
 import { createWorldSources, type WorldSources } from './reading/worldSources';
 import { cameraPose } from './render/firstPersonCamera';
-import { createStarfield } from './render/sky';
+import { createStarfield, dimStars } from './render/sky';
+import { finalApproach, finalLight } from './system/absorption';
 import { AMBIENT_COLOR, AMBIENT_INTENSITY, createStage } from './render/stage';
 import { createSystemScene } from './render/systemScene';
 import { loadShipModel } from './ship/loadShip';
@@ -119,13 +125,26 @@ async function start(): Promise<void> {
   const interior = createInteriorLights(runtimes, sun);
   const passage = createFoldedPassage();
   // …y por fuera: su imagen en el cielo, girada hacia la Brasa, y las estrellas que dobla a su paso.
-  const lens = createLensView(scene, sky);
+  // (el agujero negro dobla también las estrellas; con `?calidad=baja` no se dobla nada).
+  const lens = createLensView(scene, sky, qualityFromQuery(window.location.search) === 'alta');
+  // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
+  const chronology = loadChronology(window.location.search);
+  const birthplace = sources
+    .get(BLACK_HOLE.world)
+    ?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
+  const blackHole = createBlackHoleView(
+    systemScene.groupOf(BLACK_HOLE.world),
+    birthplace,
+    growthFor(chronology),
+  );
   // La mira graduada (G): solo mide ángulos; con ella se corrige la imagen sin calcular nada.
   const sight = createSightScale(camera, canvas);
-  // Las mareas: junto al Borde de Cicatriz, subiendo hacia la semilla del Nudo y sobre su cáscara.
+  // Las mareas: junto al Borde de Cicatriz, subiendo hacia la semilla del Nudo y sobre su cáscara, y la del
+  // agujero en el mundo que se traga (en el palco no mata: desde ahí se ve el final).
   const edge = sources.get(EDGE_WORLD)?.interactables.find((i) => i.id === EDGE_SOURCE);
   const tides = createTideEffects(camera, {
     edge: edge ? { world: EDGE_WORLD, position: edge.position } : undefined,
+    palco: BLACK_HOLE.palco,
   });
   let tideDeath: DeathCause | undefined;
   const hiddenWorld = spec?.bodies.find((body) => body.hidden)?.world;
@@ -161,7 +180,18 @@ async function start(): Promise<void> {
     if (worldSources) game.ui?.setWorld(worldSources);
   }
 
-  const chronology = loadChronology(window.location.search);
+  // Cada mundo, en su ventana, se estira hacia el agujero, suelta trozos y cae (solo lo que se ve).
+  const absorption = spec
+    ? createAbsorptionView(
+        scene,
+        [...runtimes.values()].map((r) => ({
+          id: r.id,
+          model: r.world.scene,
+          radius: r.world.info.radius,
+          window: absorptionWindow(chronology, r.id),
+        })),
+      )
+    : undefined;
   const bodies: WorldBody[] = [...runtimes.values()].map((r) => ({
     world: r.id,
     radius: r.world.info.radius,
@@ -303,6 +333,23 @@ async function start(): Promise<void> {
     window.__juego.audio = () => soundtrack.snapshot();
     window.__juego.lens = () => lens.snapshot();
     window.__juego.tide = () => tides.snapshot();
+    window.__juego.blackHole = () => blackHole.snapshot();
+    window.__juego.absorption = () => absorption?.snapshot() ?? null;
+    window.__juego.aimAt = (target) => {
+      const where =
+        target === 'agujero'
+          ? blackHole.lens()?.position.clone()
+          : systemScene.groupOf(target)?.getWorldPosition(new Vector3());
+      if (!where || flight?.piloting) return false;
+      // La dirección en el marco del cuerpo: el giro va sobre su vertical y el cabeceo, aparte.
+      const local = where
+        .sub(camera.position)
+        .normalize()
+        .applyQuaternion(player.state.body.clone().invert());
+      const level = Math.hypot(local.x, local.z);
+      player.look(Math.atan2(-local.x, -local.z), Math.atan2(local.y, level) - player.pitch);
+      return true;
+    };
     window.__juego.skipTo = (seconds) => {
       session.director.skip(seconds - session.director.clock.t);
       return session.director.clock.t;
@@ -312,15 +359,24 @@ async function start(): Promise<void> {
   // Lo que solo se ve durante un evento (EVT_): el haz de la ranura del Archivo…
   const eventProps = [...runtimes.values()].flatMap((r) => r.world.markers.eventProps);
   // …y las piezas que giran (ANIM_): los brazos del Taller, siempre; la maqueta, solo en su evento.
-  const animated = [...runtimes.values()].flatMap((r) => r.world.markers.animated);
-  /** La luz ambiente es la del mundo donde estás (o la general en el espacio abierto). */
+  const animated = [...runtimes.values()].flatMap((r) =>
+    r.world.markers.animated.map((part) => ({ part, world: r.id })),
+  );
+  /**
+   * La luz ambiente es la del mundo donde estás (o la general en el espacio abierto); `light` es lo que queda
+   * de ella y de las estrellas al final, cuando caes con tu mundo (1 = toda).
+   */
   let litWorld: string | null = null;
-  function lightFor(world: string | undefined): void {
-    if ((world ?? '') === litWorld) return;
-    litWorld = world ?? '';
-    const own = world ? runtimes.get(world)?.world.info.ambient : undefined;
-    ambient.color.setHex(own?.color ?? AMBIENT_COLOR);
-    ambient.intensity = own?.intensity ?? AMBIENT_INTENSITY;
+  let ambientIntensity = AMBIENT_INTENSITY;
+  function lightFor(world: string | undefined, light: number): void {
+    if ((world ?? '') !== litWorld) {
+      litWorld = world ?? '';
+      const own = world ? runtimes.get(world)?.world.info.ambient : undefined;
+      ambient.color.setHex(own?.color ?? AMBIENT_COLOR);
+      ambientIntensity = own?.intensity ?? AMBIENT_INTENSITY;
+    }
+    ambient.intensity = ambientIntensity * light;
+    dimStars(sky, light);
   }
   let shipDeath: DeathCause | undefined;
   const physics = createFixedStep(
@@ -357,9 +413,10 @@ async function start(): Promise<void> {
         prop.object.visible = session.activeEventIds.includes(prop.event);
       }
       if (timeRuns) {
-        for (const part of animated) {
+        // Un mundo que el agujero se está tragando se ve casi quieto desde fuera.
+        for (const { part, world } of animated) {
           if (!part.event || session.activeEventIds.includes(part.event)) {
-            part.object.rotateY(part.spin * dt);
+            part.object.rotateY(part.spin * dt * (absorption?.rateOf(world) ?? 1));
           }
         }
       }
@@ -376,6 +433,7 @@ async function start(): Promise<void> {
           world: piloting ? (flight?.frame ? runtimes.get(flight.frame) : undefined) : currentWorld,
           position: piloting && flight ? flight.position : player.state.position,
           loopTime: session.director.clock.t,
+          absorption: session.director.absorption,
           running: timeRuns && session.acceptsInput,
           piloting,
         },
@@ -391,8 +449,19 @@ async function start(): Promise<void> {
       }
       camera.position.add(session.shake);
       const t = session.director.clock.t;
+      // Al final de la ventana de tu mundo caes con él: el agujero se acerca y la luz se apaga.
+      const fallen = session.director.absorption;
       systemScene.update(t);
-      lightFor(systemScene.referenceWorld);
+      lightFor(systemScene.referenceWorld, finalLight(fallen));
+      blackHole.update(t, camera, timeRuns ? dt : 0, finalApproach(fallen));
+      const hole = blackHole.lens();
+      absorption?.update({
+        t,
+        hole,
+        reference: systemScene.referenceWorld,
+        viewer: camera.position,
+        dt: timeRuns ? dt : 0,
+      });
       lens.update({
         camera: camera.position,
         nudo: hiddenWorld ? systemScene.groupOf(hiddenWorld) : undefined,
@@ -400,12 +469,14 @@ async function start(): Promise<void> {
         aligned: session.activeEventIds.includes(ALIGNMENT_EVENT),
         inObservatory: systemScene.referenceWorld === OBSERVATORY,
         time: performance.now() / 1000,
+        hole,
       });
       soundtrack.update({
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,
         rate: session.director.rate,
         events: session.activeEventIds,
-        absorption: session.director.absorption,
+        absorption: fallen,
+        hole: blackHole.fill,
         phase: session.director.phase,
         fade: session.director.fade.amount,
         running: timeRuns,

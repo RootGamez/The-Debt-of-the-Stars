@@ -2,6 +2,7 @@
 // muere (fin del ciclo, absorción del mundo o caída) y encadena fundido → reinicio → guardado.
 // Lógica pura: main.ts aplica los efectos (fundidos, reaparecer al jugador, cielo).
 import { FADE_IN_SECONDS, FADE_OUT_SECONDS, FALL_DEATH_SPEED } from '../data/loop';
+import { absorptionProgress } from '../system/absorption';
 import {
   advanceClock,
   createLoopClock,
@@ -99,11 +100,7 @@ export class LoopDirector {
   get absorption(): number {
     const { worldId, engulfed } = this.locale();
     if (worldId === undefined) return engulfed ? 1 : 0;
-    const window = absorptionWindow(this.options.chronology, worldId);
-    if (!window) return 0;
-    const [start, end] = window;
-    if (end <= start) return this.clock.t >= start ? 1 : 0;
-    return Math.min(1, Math.max(0, (this.clock.t - start) / (end - start)));
+    return absorptionProgress(absorptionWindow(this.options.chronology, worldId), this.clock.t);
   }
 
   get fade(): Fade {

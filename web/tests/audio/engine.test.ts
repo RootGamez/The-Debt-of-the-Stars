@@ -58,6 +58,7 @@ const input: MixInput = {
   rate: 1,
   events: [],
   absorption: 0,
+  hole: 0,
   phase: 'playing',
   fade: 0,
   running: true,
