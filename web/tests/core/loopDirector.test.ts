@@ -396,3 +396,59 @@ describe('following the player from place to place (Phase 5)', () => {
     expect(d.phase).toBe('playing');
   });
 });
+
+describe('at home, in the prologue (Phase 9)', () => {
+  const HARD = { landings: 1, lastLandingSpeed: FALL_DEATH_SPEED + 5 };
+
+  it('does not run the loop clock nor fire events', () => {
+    const { d } = director({ looping: false });
+
+    const { started } = run(d, 120);
+
+    expect(d.clock.t).toBe(0);
+    expect(started).toEqual([]);
+    expect(d.phase).toBe('playing');
+  });
+
+  it('sends you back somewhere safe after an accident, without dying nor counting a loop', () => {
+    const { d, saved } = director({ looping: false });
+
+    const update = d.update(0.1, HARD);
+
+    expect(update.restart).toBe(true);
+    expect(d.phase).toBe('waking');
+    expect(d.deathCause).toBeUndefined();
+    expect(d.loopsCompleted).toBe(0);
+    expect(saved).toEqual([]);
+    expect(d.fade.color).toBe('black');
+  });
+
+  it('ignores debug time skips: no end of the loop, and no rescue over and over', () => {
+    const { d } = director({ looping: false });
+
+    expect(d.skip(1000)).toEqual([]);
+    const { restarts } = run(d, 5);
+
+    expect(d.clock.t).toBe(0);
+    expect(restarts).toBe(0);
+    expect(d.phase).toBe('playing');
+  });
+
+  it('fades to white through the wormhole and says so once, when the screen is covered', () => {
+    const { d, saved } = director({ looping: false });
+
+    expect(d.update(0.1, QUIET, 'gusano').crossed).toBe(false);
+    expect(d.phase).toBe('dying');
+    expect(d.fade.color).toBe('white');
+    let crossings = 0;
+    for (let i = 0; i < Math.round((FADE_OUT_SECONDS + 1) * 10); i++) {
+      const update = d.update(0.1, QUIET);
+      if (update.crossed) crossings++;
+      expect(update.restart).toBe(false);
+    }
+
+    expect(crossings).toBe(1);
+    expect(d.loopsCompleted).toBe(0);
+    expect(saved).toEqual([]);
+  });
+});

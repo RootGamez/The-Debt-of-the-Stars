@@ -1,3 +1,4 @@
 [
-  { "nombre": "SPAWN_Prueba", "lat": 35, "lon": 10, "alto": 1.0, "props": {} }
+  { "nombre": "SPAWN_Instituto", "lat": 35, "lon": 10, "alto": 1.0, "props": {} },
+  { "nombre": "PARK_Hangar", "lat": 33, "lon": 20, "alto": 0.0, "props": {} }
 ]

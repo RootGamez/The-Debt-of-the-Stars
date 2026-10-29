@@ -18,8 +18,10 @@ import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
+import { browserStore, loadSave } from './core/save';
+import { createPrologueGate } from './game/prologue';
 import { Player } from './core/player';
-import { absorptionWindow, triggersAsEvents } from './core/timeline';
+import { absorptionWindow, quietChronology, triggersAsEvents } from './core/timeline';
 import { createAbsorptionView } from './render/absorptionView';
 import {
   FIELD_OF_VIEW,
@@ -49,11 +51,9 @@ import { createDebugOverlay, type SystemSnapshot } from './ui/debugOverlay';
 import { createOrbitMap } from './ui/orbitMap';
 import { isTouchDevice } from './ui/pauseOverlay';
 import type { WorldRuntime } from './worlds/worldRuntime';
-import { worldFromQuery, worldTitle } from './worlds/worldSelection';
+import { arrivalHref, startWorld as firstWorld, worldTitle } from './worlds/worldSelection';
 
 const NEAR_PLANE = 0.05;
-/** Mundo donde espera la nave al empezar cada ciclo (la llegada). */
-const SHIP_HOME = 'umbral';
 /** Desde aquí, durante este evento, la imagen del Nudo se ve con claridad (cronologia.json). */
 const OBSERVATORY = 'observatorio';
 const ALIGNMENT_EVENT = 'alineacion';
@@ -104,8 +104,18 @@ async function start(): Promise<void> {
   setupCamera(camera);
   watchGraphicsContext(canvas, status);
 
-  const { spec, startWorld, runtimes } = await loadSystem(worldFromQuery(window.location.search));
-  const shipModel = spec && runtimes.has(SHIP_HOME) ? await loadShipModel() : undefined;
+  // Una partida nueva empieza en casa (el prólogo); tras cruzar el gusano, en Umbral. `?mundo=` manda.
+  const saved = loadSave(browserStore());
+  if (saved.warning) console.warn(saved.warning);
+  // Una partida de una versión más nueva (que no se toca) ya pasó por casa: se empieza en Umbral.
+  const { spec, startWorld, runtimes } = await loadSystem(
+    firstWorld(window.location.search, saved.data.prologueDone || saved.readOnly),
+  );
+  // La nave espera donde diga su sistema: junto a La Boca o en el hangar del Instituto.
+  const shipHome = spec?.ship !== undefined && runtimes.has(spec.ship) ? spec.ship : undefined;
+  const shipModel = shipHome ? await loadShipModel() : undefined;
+  // En casa no corre el ciclo: ni eventos, ni absorciones, ni reloj doble.
+  const looping = spec?.looping ?? true;
   const clues = loadClues();
   // Las fuentes salen de las marcas del modelo: se crean antes de colgar los mundos de la escena.
   const sources = new Map<string, WorldSources>(
@@ -128,7 +138,7 @@ async function start(): Promise<void> {
   // (el agujero negro dobla también las estrellas; con `?calidad=baja` no se dobla nada).
   const lens = createLensView(scene, sky, qualityFromQuery(window.location.search) === 'alta');
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
-  const chronology = loadChronology(window.location.search);
+  const chronology = looping ? loadChronology(window.location.search) : quietChronology();
   const birthplace = sources
     .get(BLACK_HOLE.world)
     ?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
@@ -221,6 +231,13 @@ async function start(): Promise<void> {
       triggersAsEvents(r.world.markers.triggers, r.id),
     ),
     player,
+    looping,
+    saved,
+    // Cruzado el gusano, el sistema ajeno se carga de nuevo con la página, detrás del fundido a blanco.
+    onCross: (wasSaved) => {
+      // Sin dejar atrás en el historial la pantalla en blanco.
+      window.location.replace(arrivalHref(window.location.href, wasSaved));
+    },
     skyDirection: arrivalSkyDirection(player),
     // Cada ciclo empieza en el mundo de llegada, a pie, con la nave esperando (y sin tensión de marea).
     onRestart: () => {
@@ -261,14 +278,14 @@ async function start(): Promise<void> {
   game.ui = ui;
 
   const flight =
-    spec && shipModel
+    spec && shipModel && shipHome
       ? createShipFlight({
           spec,
           runtimes,
           model: shipModel,
           systemScene,
           player,
-          homeWorld: SHIP_HOME,
+          homeWorld: shipHome,
           walkInto: enterWorld,
           setReadingEnabled: (enabled) => {
             ui.setEnabled(enabled);
@@ -379,6 +396,9 @@ async function start(): Promise<void> {
     dimStars(sky, light);
   }
   let shipDeath: DeathCause | undefined;
+  // El final del prólogo: el gusano junto al fragmento de la Luna (solo en casa).
+  const prologue = looping ? undefined : createPrologueGate();
+  let wormhole: DeathCause | undefined;
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
     (dt) => {
@@ -407,8 +427,17 @@ async function start(): Promise<void> {
         if (flight?.piloting) flight.addLook(look.x, look.y);
         else player.look(-look.x * MOUSE_LOOK_SENSITIVITY, -look.y * MOUSE_LOOK_SENSITIVITY);
       }
-      session.update(dt, timeRuns, shipDeath ?? tideDeath);
-      if (timeRuns) shipDeath = tideDeath = undefined; // si el ciclo no corrió, la muerte espera
+      const opened = prologue?.update(
+        {
+          world: currentWorld.id,
+          onFoot: !(flight?.piloting ?? false),
+          running: timeRuns && session.acceptsInput,
+        },
+        dt,
+      );
+      if (opened) wormhole = 'gusano';
+      session.update(dt, timeRuns, wormhole ?? shipDeath ?? tideDeath);
+      if (timeRuns) wormhole = shipDeath = tideDeath = undefined; // si el ciclo no corrió, espera
       for (const prop of eventProps) {
         prop.object.visible = session.activeEventIds.includes(prop.event);
       }

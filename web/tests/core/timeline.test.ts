@@ -7,6 +7,7 @@ import {
   triggersAsEvents,
   scaleChronology,
   cycleLengthFromQuery,
+  quietChronology,
   type Chronology,
 } from '../../src/core/timeline';
 import { WorldDataError } from '../../src/worlds/markers';
@@ -225,5 +226,16 @@ describe('stricter chronology validation (review fixes)', () => {
 
   it('accepts the real chronology with the eight known worlds', () => {
     expect(() => parseChronology(chronologyJson, WORLD_IDS)).not.toThrow();
+  });
+});
+
+describe('quietChronology (at home, in the prologue)', () => {
+  it('has nothing happening: no events, no absorption, no clocks that change', () => {
+    const quiet = quietChronology();
+
+    expect(quiet.events).toEqual([]);
+    expect(absorptionWindow(quiet, 'hogar')).toBeUndefined();
+    expect(activeAt(quiet.events, 300, 'hogar')).toEqual([]);
+    expect(quiet.duration).toBeGreaterThan(0);
   });
 });

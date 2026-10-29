@@ -1,5 +1,7 @@
 // Director del ciclo: avanza los relojes, informa de los eventos de la cronología, decide cuándo se
 // muere (fin del ciclo, absorción del mundo o caída) y encadena fundido → reinicio → guardado.
+// En casa, en el prólogo (Fase 9), no hay ciclo: el reloj no corre, un accidente te devuelve a un sitio seguro
+// sin morir y el gusano (con el mismo fundido a blanco) lleva al sistema ajeno.
 // Lógica pura: main.ts aplica los efectos (fundidos, reaparecer al jugador, cielo).
 import { FADE_IN_SECONDS, FADE_OUT_SECONDS, FALL_DEATH_SPEED } from '../data/loop';
 import { absorptionProgress } from '../system/absorption';
@@ -31,8 +33,11 @@ export interface Locale {
 }
 
 export type LoopPhase = 'playing' | 'dying' | 'waking';
-/** `marea`: la tensión de la marea llegó al máximo (Fase 7, physics/tides.ts). */
-export type DeathCause = 'fin' | 'absorcion' | 'caida' | 'choque' | 'calor' | 'marea';
+/**
+ * `marea`: la tensión de la marea llegó al máximo (Fase 7, physics/tides.ts). `gusano` no es una muerte: es el
+ * paso al sistema ajeno al final del prólogo, con el mismo fundido a blanco.
+ */
+export type DeathCause = 'fin' | 'absorcion' | 'caida' | 'choque' | 'calor' | 'marea' | 'gusano';
 
 export interface Fade {
   color: 'white' | 'black' | 'none';
@@ -56,15 +61,22 @@ export interface DirectorOptions {
   save: SaveData;
   /** Guarda el progreso; devuelve false si no se pudo (el juego sigue igual). */
   persist: (data: SaveData) => boolean;
+  /** Si corre el ciclo (sí por defecto); en casa no. */
+  looping?: boolean;
 }
 
 export interface DirectorUpdate {
   changes: EventChange[];
   /** true en el instante del reinicio: hay que reaparecer al jugador y reiniciar el mundo. */
   restart: boolean;
+  /** true una sola vez, cuando el fundido del gusano ha cubierto la pantalla: toca ir al sistema ajeno. */
+  crossed: boolean;
 }
 
-const NOTHING: DirectorUpdate = Object.freeze({ changes: [], restart: false });
+const NOTHING: DirectorUpdate = Object.freeze({ changes: [], restart: false, crossed: false });
+/** En casa, tras un accidente: de vuelta a un sitio seguro, sin muerte ni ciclo nuevo. */
+const RESCUED: DirectorUpdate = Object.freeze({ changes: [], restart: true, crossed: false });
+const CROSSED: DirectorUpdate = Object.freeze({ changes: [], restart: false, crossed: true });
 /** Cuántos eventos recientes se recuerdan (panel F3 y pruebas). */
 const RECENT_EVENTS = 10;
 
@@ -78,6 +90,7 @@ export class LoopDirector {
   readonly recentEvents: string[] = [];
   private phaseTime = 0;
   private seenLandings = 0;
+  private hasCrossed = false;
   private progress: SaveData;
   private readonly events: readonly TimelineEvent[];
 
@@ -118,20 +131,33 @@ export class LoopDirector {
     const hardLanding = this.readLanding(landing);
     if (this.phase === 'dying') return this.fadeOut(realDt);
 
-    const here = this.locale();
-    const span = advanceClock(this.clock, realDt, Math.max(MIN_RATE, here.rate), this.options.mode);
-    const changes = eventsBetween(this.events, span.from, span.to, here.worldId);
-    this.remember(changes);
+    const changes = this.looping ? this.tick(realDt) : [];
     if (this.phase === 'waking') {
       this.phaseTime += realDt;
       if (this.phaseTime >= FADE_IN_SECONDS) this.enter('playing');
     }
     const cause = forcedCause ?? this.causeOfDeath(hardLanding);
-    if (cause) {
-      this.deathCause = cause;
-      this.enter('dying');
+    if (!cause) return { changes, restart: false, crossed: false };
+    if (!this.looping && cause !== 'gusano') {
+      this.enter('waking'); // en casa nadie muere: un parpadeo a negro y de vuelta a un sitio seguro
+      return RESCUED;
     }
-    return { changes, restart: false };
+    this.deathCause = cause;
+    this.enter('dying');
+    return { changes, restart: false, crossed: false };
+  }
+
+  private get looping(): boolean {
+    return this.options.looping !== false;
+  }
+
+  /** Avanza los relojes y devuelve los eventos que empezaron o acabaron. */
+  private tick(realDt: number): EventChange[] {
+    const here = this.locale();
+    const span = advanceClock(this.clock, realDt, Math.max(MIN_RATE, here.rate), this.options.mode);
+    const changes = eventsBetween(this.events, span.from, span.to, here.worldId);
+    this.remember(changes);
+    return changes;
   }
 
   /** Eventos en curso ahora mismo (para que los efectos se pongan al día tras un salto). */
@@ -152,7 +178,7 @@ export class LoopDirector {
    * eventos saltados. Mueve el reloj de Umbral, no el del jugador (los dos dejan de cuadrar).
    */
   skip(seconds: number): EventChange[] {
-    if (this.phase !== 'playing') return [];
+    if (this.phase !== 'playing' || !this.looping) return []; // en casa el reloj no corre
     const from = this.clock.t;
     this.clock.t = Math.max(0, Math.min(this.clock.duration, from + seconds));
     if (this.clock.t <= from) return [];
@@ -182,6 +208,7 @@ export class LoopDirector {
 
   private causeOfDeath(hardLanding: boolean): DeathCause | undefined {
     if (hardLanding) return 'caida';
+    if (!this.looping) return undefined; // en casa no hay fin del ciclo ni absorción
     const { worldId, engulfed } = this.locale();
     if (worldId === undefined && engulfed) return 'absorcion';
     const window =
@@ -194,13 +221,19 @@ export class LoopDirector {
   private fadeOut(realDt: number): DirectorUpdate {
     this.phaseTime += realDt;
     if (this.phaseTime < FADE_OUT_SECONDS) return NOTHING;
+    if (this.deathCause === 'gusano') {
+      // La pantalla se queda en blanco: quien llama se va al sistema ajeno (solo se avisa una vez).
+      if (this.hasCrossed) return NOTHING;
+      this.hasCrossed = true;
+      return CROSSED;
+    }
     this.progress = { ...this.progress, loopsCompleted: this.progress.loopsCompleted + 1 };
     this.saveFailed = !this.options.persist(this.progress);
     this.clock = createLoopClock(this.options.chronology.duration);
     this.seenLandings = 0;
     this.deathCause = undefined;
     this.enter('waking');
-    return { changes: [], restart: true };
+    return { changes: [], restart: true, crossed: false };
   }
 
   private enter(phase: LoopPhase): void {

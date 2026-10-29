@@ -1,10 +1,45 @@
 import { describe, expect, it } from 'vitest';
 import {
+  arrivalHref,
   DEFAULT_WORLD,
+  PROLOGUE_WORLD,
+  startWorld,
   WORLD_IDS,
   worldFromQuery,
   worldTitle,
 } from '../../src/worlds/worldSelection';
+
+describe('where the game starts', () => {
+  it('starts a new game at home and, once through the wormhole, in Umbral', () => {
+    expect(startWorld('', false)).toBe(PROLOGUE_WORLD);
+    expect(PROLOGUE_WORLD).toBe('hogar');
+    expect(startWorld('', true)).toBe('umbral');
+  });
+
+  it('lets ?mundo= choose, whatever the save says', () => {
+    expect(startWorld('?debug&mundo=umbral', false)).toBe('umbral');
+    expect(startWorld('?mundo=hogar', true)).toBe('hogar');
+    expect(startWorld('?mundo=marte', false)).toBe('hogar');
+  });
+});
+
+describe('the way to Umbral through the wormhole', () => {
+  it('drops ?mundo= and keeps the rest of the address', () => {
+    expect(arrivalHref('http://localhost:5180/?debug&mundo=hogar&ciclo=60', true)).toBe(
+      'http://localhost:5180/?debug=&ciclo=60',
+    );
+  });
+
+  it('drops the fragment, so going there always loads the page again', () => {
+    expect(arrivalHref('http://localhost:5180/#algo', true)).toBe('http://localhost:5180/');
+  });
+
+  it('asks for Umbral in the address when the save could not be written', () => {
+    expect(arrivalHref('http://localhost:5180/', false)).toBe(
+      'http://localhost:5180/?mundo=umbral',
+    );
+  });
+});
 
 describe('worldFromQuery', () => {
   it('starts in Umbral by default', () => {

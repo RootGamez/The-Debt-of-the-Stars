@@ -171,6 +171,11 @@ export function triggersAsEvents(
   );
 }
 
+/** Una cronología sin nada: en casa, en el prólogo, no hay eventos, absorciones ni relojes que cambien. */
+export function quietChronology(duration = 900): Chronology {
+  return { duration, events: [], absorption: {}, clocks: {} };
+}
+
 export function absorptionWindow(
   chronology: Chronology,
   worldId: string,

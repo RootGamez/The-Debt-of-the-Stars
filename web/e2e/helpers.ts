@@ -21,9 +21,13 @@ export async function loopValue<K extends keyof LoopSnapshot>(
   return (await snapshot(page))?.loop[key] ?? null;
 }
 
-/** Abre el juego con `?debug` (más parámetros opcionales) y espera a que el jugador esté de pie. */
+/**
+ * Abre el juego con `?debug` (más parámetros opcionales) y espera a que el jugador esté de pie. Empieza en
+ * Umbral salvo que la consulta pida otro mundo: una partida nueva sin `?mundo=` empezaría el prólogo en casa.
+ */
 export async function ready(page: Page, query = ''): Promise<void> {
-  await page.goto(`/?debug${query}`);
+  const world = query.includes('mundo=') ? '' : '&mundo=umbral';
+  await page.goto(`/?debug${world}${query}`);
   await expect(page.locator('.overlay')).toBeVisible();
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
 }

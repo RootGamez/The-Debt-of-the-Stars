@@ -1,6 +1,7 @@
-// Carga lo que hace falta para jugar en un mundo: si pertenece al sistema ajeno, todos sus mundos; si no
-// (Hogar, Luna), solo ese. Cada mundo se prepara (gravedad, colisiones, aparición) ANTES de colgarlo de
-// la escena, para que sus posiciones sean las del modelo.
+// Carga lo que hace falta para jugar en un mundo: todos los mundos de su sistema (el ajeno o el de casa del
+// prólogo) o, si no está en ninguno, solo ese. Cada mundo se prepara (gravedad, colisiones, aparición) ANTES de
+// colgarlo de la escena, para que sus posiciones sean las del modelo.
+import homeData from '../data/sistema-hogar.json';
 import systemData from '../data/sistema.json';
 import { parseSystem, type SystemSpec } from '../system/systemData';
 import { loadWorld } from '../worlds/loadWorld';
@@ -14,9 +15,15 @@ export interface LoadedSystem {
   runtimes: ReadonlyMap<string, WorldRuntime>;
 }
 
+/** El sistema donde está un mundo: el ajeno o el de casa (`undefined` si no está en ninguno). */
+export function systemOf(world: string): SystemSpec | undefined {
+  return [systemData, homeData]
+    .map((raw) => parseSystem(raw, WORLD_IDS))
+    .find((system) => system.bodyOf(world));
+}
+
 export async function loadSystem(startWorld: string): Promise<LoadedSystem> {
-  const system = parseSystem(systemData, WORLD_IDS);
-  const spec = system.bodyOf(startWorld) ? system : undefined;
+  const spec = systemOf(startWorld);
   const ids = spec ? spec.bodies.map((body) => body.world) : [startWorld];
   const worlds = await Promise.all(ids.map((id) => loadWorld(id)));
   const runtimes = new Map(worlds.map((world) => [world.info.id, createWorldRuntime(world)]));

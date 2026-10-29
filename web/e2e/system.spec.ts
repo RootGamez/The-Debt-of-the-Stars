@@ -87,11 +87,14 @@ test('a source can be read from a world the player is not in', async ({ page }) 
   await expect(page.locator('.prompt')).toBeVisible();
 });
 
-test('a world outside the system (Hogar) stands alone with no orbits', async ({ page }) => {
+test('Hogar has its own system, with the Luna, and the loop does not run there', async ({
+  page,
+}) => {
   await ready(page, '&mundo=hogar');
 
   const s = await snapshot(page);
 
   expect(s?.world).toBe('hogar');
-  expect(s?.system.bodies).toEqual({});
+  expect(Object.keys(s?.system.bodies ?? {}).sort()).toEqual(['hogar', 'luna']);
+  expect(s?.loop.umbral).toBe(0);
 });

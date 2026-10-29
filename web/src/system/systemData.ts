@@ -1,5 +1,6 @@
-// El sistema ajeno: la Brasa y la órbita de cada mundo (src/data/sistema.json, plan de la Fase 5). Son
-// datos externos, así que se validan al cargar como la cronología, con mensajes en español.
+// Un sistema: su estrella y la órbita de cada mundo. El ajeno, con la Brasa (src/data/sistema.json, plan de la
+// Fase 5), y el de casa del prólogo, Hogar y su Luna (src/data/sistema-hogar.json, Fase 9). Son datos externos,
+// así que se validan al cargar como la cronología, con mensajes en español.
 import { WorldDataError } from '../worlds/markers';
 
 export interface StarSpec {
@@ -27,6 +28,10 @@ export interface SystemSpec {
   star: StarSpec;
   bodies: readonly BodySpec[];
   bodyOf(world: string): BodySpec | undefined;
+  /** Mundo donde espera la nave (`"nave"`); `undefined` = este sistema no tiene nave. */
+  ship: string | undefined;
+  /** Si aquí corre el ciclo (`"bucle"`, sí por defecto): en casa, en el prólogo, no. */
+  looping: boolean;
 }
 
 function fail(message: string): never {
@@ -88,5 +93,20 @@ export function parseSystem(raw: unknown, knownWorlds: readonly string[]): Syste
     if (byWorld.has(body.world)) fail(`mundo repetido: ${body.world}`);
     byWorld.set(body.world, body);
   }
-  return { star: { radius }, bodies, bodyOf: (world) => byWorld.get(world) };
+  if (raw.bucle !== undefined && typeof raw.bucle !== 'boolean')
+    fail('"bucle" debe ser true o false');
+  return {
+    star: { radius },
+    bodies,
+    bodyOf: (world) => byWorld.get(world),
+    ship: parseShip(raw.nave, byWorld),
+    looping: raw.bucle !== false,
+  };
+}
+
+function parseShip(raw: unknown, bodies: ReadonlyMap<string, BodySpec>): string | undefined {
+  if (raw === undefined) return undefined;
+  if (typeof raw !== 'string' || !bodies.has(raw))
+    fail('"nave" debe ser uno de los mundos del sistema');
+  return raw;
 }
