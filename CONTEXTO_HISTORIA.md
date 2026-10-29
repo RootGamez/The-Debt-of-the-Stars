@@ -303,7 +303,7 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 5. ❓ **Final B:** ¿llega tarde, nadie le cree, o profecía autocumplida?
 6. ❓ **Qué decide el final:** Registro completo, una elección final, o ambos.
 7. ✅ **Cuándo se instala el Contrapeso:** durante el pulso de las 9:00. ❓ Falta: los pasos exactos (🟡 sacar primero el motor viejo; sincronizar su reloj) y de qué piezas está hecho.
-8. ❓ **Justificación física** de que el agujero negro se trague el sistema.
+8. ✅ **Justificación física** de que el agujero negro se trague el sistema (Anthony, 2026-10-28): **la deuda de la red se descarga en él**. Las Puertas están acopladas: al colapsar la garganta de la máquina de Cicatriz, el tiempo que debían todas las demás fluye por ella y la hace crecer. Crece deprisa al principio y se calma al final. ✅ **Nace en Cicatriz**, en la Sala del Motor; el Nudo es la semilla que llama.
 9. ❓ **Sabor cultural:** nombres, música e identidad de ambos pueblos (el del protagonista y los Ausentes).
 10. ❓ **Aspecto de los Ausentes:** humanos, parecidos a humanos o algo muy distinto.
 11. ✅ **Qué entiende el Instituto:** resuelto. No saben si está viva o muerta, pero esperan que esté viva.
