@@ -130,6 +130,7 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
         events: [...activeEventIds],
         fired: [...director.recentEvents],
         saving: savingWorks(),
+        cause: director.deathCause ?? null,
       };
     },
     get savingWorks() {

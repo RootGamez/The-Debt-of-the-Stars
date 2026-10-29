@@ -1,12 +1,19 @@
 import { Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
+import { absorptionWindow, parseChronology } from '../../src/core/timeline';
+import { BLACK_HOLE } from '../../src/data/blackHole';
+import rawChronology from '../../src/data/cronologia.json';
 import { DAMAGE_FROM } from '../../src/physics/tides';
 import {
   absorptionProgress,
   anchorWeight,
+  apparentDistance,
   debrisTravel,
+  finalApproach,
+  finalLight,
   frozenRate,
   holeTide,
+  skyFill,
   stretchedPoint,
 } from '../../src/system/absorption';
 
@@ -94,6 +101,67 @@ describe('the tide of the black hole on a world being swallowed', () => {
     expect(holeTide(0.3)).toBeGreaterThan(DAMAGE_FROM);
     expect(holeTide(1)).toBeGreaterThan(holeTide(0.5));
     expect(holeTide(Number.NaN)).toBe(0);
+  });
+
+  it('is felt in the palco but never hurts there, so the end can be watched', () => {
+    expect(holeTide(0.3, true)).toBeGreaterThan(0);
+    expect(holeTide(1, true)).toBeLessThanOrEqual(DAMAGE_FROM);
+    expect(holeTide(0, true)).toBe(0);
+  });
+
+  it('the palco is the last world to fall: its window ends with the cycle', () => {
+    const chronology = parseChronology(rawChronology);
+    const palco = absorptionWindow(chronology, BLACK_HOLE.palco);
+    const ends = Object.keys(chronology.absorption).map(
+      (world) => absorptionWindow(chronology, world)?.[1] ?? 0,
+    );
+
+    expect(palco?.[1]).toBe(chronology.duration);
+    expect(Math.max(...ends)).toBe(palco?.[1]);
+  });
+});
+
+describe('the end seen from the world that falls', () => {
+  const R = 600;
+
+  it('you fall with your world only in the last part of its window', () => {
+    expect(finalApproach(0)).toBe(0);
+    expect(finalApproach(0.5)).toBe(0);
+    expect(finalApproach(0.8)).toBeGreaterThan(0);
+    expect(finalApproach(1)).toBe(1);
+    expect(finalApproach(Number.NaN)).toBe(0);
+  });
+
+  it('the hole is drawn closer and closer until its horizon fills the sky', () => {
+    const far = 2500;
+
+    expect(apparentDistance(far, R, 0)).toBe(far);
+    expect(apparentDistance(far, R, 0.5)).toBeLessThan(far);
+    expect(apparentDistance(far, R, 0.5)).toBeGreaterThan(apparentDistance(far, R, 0.9));
+    const end = apparentDistance(far, R, 1);
+    expect(end).toBeGreaterThan(R); // nunca dentro: desde dentro no se ve el horizonte
+    expect(Math.asin(skyFill(R, end))).toBeGreaterThan((70 * Math.PI) / 180);
+  });
+
+  it('leaves the hole where it is when you are already inside it or nearly so', () => {
+    expect(apparentDistance(300, R, 1)).toBe(300);
+    expect(apparentDistance(R * 1.01, R, 1)).toBe(R * 1.01);
+    expect(apparentDistance(Number.NaN, R, 1)).toBeNaN();
+  });
+
+  it('measures how much of the sky the hole fills, from nothing to all of it', () => {
+    expect(skyFill(0, 1000)).toBe(0);
+    expect(skyFill(R, 2400)).toBeCloseTo(0.25);
+    expect(skyFill(R, 300)).toBe(1);
+    expect(skyFill(R, Number.POSITIVE_INFINITY)).toBe(0);
+  });
+
+  it('the lights go out at the very end, but not quite', () => {
+    expect(finalLight(0)).toBe(1);
+    expect(finalLight(0.7)).toBe(1);
+    expect(finalLight(0.9)).toBeLessThan(1);
+    expect(finalLight(1)).toBeGreaterThan(0);
+    expect(finalLight(1)).toBeLessThan(0.1);
   });
 });
 

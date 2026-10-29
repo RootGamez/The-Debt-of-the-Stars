@@ -1,6 +1,7 @@
 // El agujero negro en la escena (Fase 8A): un horizonte negro, el anillo de luz que lo rodea (siempre de cara a
 // quien mira) y un disco que brilla y gira. Cuelga del mundo donde nace (Cicatriz, en la Sala del Motor), así que
-// viaja con él por sus rieles. Su tamaño sale de system/blackHole.ts (con tests).
+// viaja con él por sus rieles. Su tamaño sale de system/blackHole.ts (con tests). Al final (Fase 8D), quien cae
+// con su mundo lo ve acercarse hasta que el horizonte le llena el cielo (system/absorption.ts).
 import {
   AdditiveBlending,
   BufferAttribute,
@@ -15,6 +16,7 @@ import {
   type Camera,
   type Object3D,
 } from 'three';
+import { apparentDistance, skyFill } from '../system/absorption';
 import { blackHoleRadius, diskRadii, photonRingRadius } from '../system/blackHole';
 
 const RING_COLOR = 0xffe2b0;
@@ -26,8 +28,12 @@ const DISK_SPIN = 0.05;
 const DISK_TILT = 1.15;
 
 export interface BlackHoleView {
-  update(t: number, camera: Camera, dt: number): void;
-  snapshot(): { radius: number; visible: boolean };
+  /** `approach`: cuánto ha caído hacia él quien mira (0–1, `finalApproach`); cuanto más, más cerca se dibuja. */
+  update(t: number, camera: Camera, dt: number, approach?: number): void;
+  /** Radio (m), si se ve, su radio aparente desde quien mira (rad) y cuánto se ha acercado (0–1). */
+  snapshot(): { radius: number; visible: boolean; span: number; approach: number };
+  /** Cuánto ocupa en el cielo de quien mira (0–1, `skyFill`); 0 si aún no ha nacido. */
+  readonly fill: number;
   /** Dónde está en la escena y su radio, para la lente del cielo; `undefined` si aún no ha nacido. */
   lens(): { position: Vector3; radius: number } | undefined;
   dispose(): void;
@@ -66,11 +72,13 @@ export function createBlackHoleView(
   const root = new Group();
   root.name = 'Agujero negro';
   root.visible = false;
-  if (anchor) root.position.copy(anchor);
+  const home = anchor?.clone() ?? new Vector3();
+  root.position.copy(home);
   world?.add(root);
 
+  // Bastantes caras: al final llena medio cielo y con pocas se le ve el polígono en el borde.
   const horizon = new Mesh(
-    new SphereGeometry(1, 40, 20),
+    new SphereGeometry(1, 64, 32),
     new MeshBasicMaterial({ color: 0x000000 }),
   );
   const ring = new Mesh(
@@ -95,23 +103,54 @@ export function createBlackHoleView(
   );
   disk.rotation.x = DISK_TILT;
   root.add(horizon, disk, ring);
-  const cameraPosition = new Vector3();
+  const center = new Vector3();
+  const eye = new Vector3();
+  const toEye = new Vector3();
+  const spot = new Vector3();
   const lens = { position: new Vector3(), radius: 0 };
   let radius = 0;
+  let fill = 0;
+  let approached = 0;
 
   return {
-    update(t, camera, dt) {
+    update(t, camera, dt, approach = 0) {
       radius = blackHoleRadius(t);
+      approached = approach;
       root.visible = world !== undefined && radius > 0;
-      if (!root.visible) return;
+      if (!world || !root.visible) {
+        fill = 0;
+        return;
+      }
+      // Dónde está de verdad y desde dónde se mira; quien cae con su mundo lo ve más cerca, en la misma dirección.
+      world.updateWorldMatrix(true, false);
+      center.copy(home).applyMatrix4(world.matrixWorld);
+      camera.getWorldPosition(eye);
+      toEye.subVectors(eye, center);
+      const distance = toEye.length();
+      if (distance > 1e-6) toEye.divideScalar(distance);
+      else toEye.set(0, 0, 1);
+      const drawn = apparentDistance(distance, radius, approach);
+      root.position.copy(world.worldToLocal(spot.copy(eye).addScaledVector(toEye, -drawn)));
+      root.updateMatrixWorld();
+      fill = skyFill(radius, drawn);
+
       horizon.scale.setScalar(radius);
       disk.scale.setScalar(radius);
       disk.rotateZ(DISK_SPIN * 2 * Math.PI * dt);
-      ring.scale.setScalar(photonRingRadius(radius));
-      ring.lookAt(camera.getWorldPosition(cameraPosition)); // el anillo de luz siempre de cara
+      // El anillo de luz rodea el borde del horizonte tal como se ve: ese borde queda algo más cerca de quien
+      // mira que el centro y es más pequeño que el horizonte (de lejos apenas; de cerca, mucho). Dentro, centrado.
+      const rim = fill < 1 ? fill : 0;
+      ring.position.copy(
+        root.worldToLocal(spot.copy(eye).addScaledVector(toEye, radius * rim - drawn)),
+      );
+      ring.scale.setScalar(photonRingRadius(radius) * Math.sqrt(1 - rim * rim));
+      ring.lookAt(eye); // siempre de cara
+    },
+    get fill() {
+      return fill;
     },
     snapshot() {
-      return { radius, visible: root.visible };
+      return { radius, visible: root.visible, span: Math.asin(fill), approach: approached };
     },
     lens() {
       if (!root.visible) return undefined;

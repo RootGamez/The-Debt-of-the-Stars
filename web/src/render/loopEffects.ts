@@ -2,7 +2,8 @@
 //   senales        anillos de luz que se curvan en el cielo (5:00)
 //   pulso_cicatriz destello rojo y temblor de cámara (9:00)
 //   cielo_rojo     el cielo se tiñe de rojo
-//   absorción      el cielo y la Brasa se apagan y el suelo tiembla mientras el mundo es absorbido
+//   absorción      el cielo y la Brasa se apagan y el suelo tiembla mientras el mundo es absorbido; al final
+//                  la Brasa se apaga del todo (Fase 8D, `finalLight`)
 // El agujero negro ya no está aquí: tiene su sitio en el sistema (render/blackHoleView.ts, Fase 8).
 import {
   AdditiveBlending,
@@ -15,6 +16,7 @@ import {
   type Scene,
 } from 'three';
 import type { TimelineEvent } from '../core/timeline';
+import { finalLight } from '../system/absorption';
 
 const SKY = new Color(0x07070c);
 const RED_SKY = new Color(0x5a1a10);
@@ -107,7 +109,7 @@ export function createLoopEffects(scene: Scene, sun: Light, skyDirection: Vector
       }
 
       background.multiplyScalar(1 - absorption);
-      sun.intensity = sunIntensity * (1 - 0.9 * absorption);
+      sun.intensity = sunIntensity * (1 - 0.9 * absorption) * finalLight(absorption);
     },
     dispose() {
       for (const m of rings) {

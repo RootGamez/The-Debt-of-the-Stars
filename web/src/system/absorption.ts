@@ -4,7 +4,10 @@
 // antes (si se adelanta mucho, sus triángulos se vuelven láminas enormes). Solo se
 // deforma lo que se ve: las colisiones no cambian (la absorción mata antes de que importe) y el suelo bajo tus
 // pies se queda quieto. render/absorptionView.ts lo dibuja y su sombreador repite la cuenta de `stretchedPoint`.
+// El final (Fase 8D): quien está en el mundo que cae, cae con él; el agujero se dibuja cada vez más cerca hasta
+// que su horizonte llena el cielo, las luces se apagan y el fundido de la Cámara reinicia el ciclo.
 import { Vector3 } from 'three';
+import { DAMAGE_FROM } from '../physics/tides';
 
 /** La forma del estiramiento; el sombreador de render/absorptionView.ts usa estos mismos números. */
 export const STRETCH_SHAPE = {
@@ -33,6 +36,11 @@ const HOLE_TIDE_FROM = 0.3;
 const HOLE_TIDE_MAX = 1.4;
 /** Lo poco que aún se mueve un mundo tragado, visto desde fuera (nunca del todo quieto). */
 const FROZEN = 0.05;
+/** Lo más cerca que se dibuja el horizonte al final (en radios, desde quien mira): llena casi medio cielo. */
+const CLOSEST = 1.03;
+/** Desde qué punto de la ventana se apagan las luces de quien cae, y lo que queda de ellas al final. */
+const DARK_FROM = 0.8;
+const DARKEST = 0.04;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -109,10 +117,40 @@ export function anchorWeight(distance: number): number {
   return smoothstep(ANCHOR_NEAR, ANCHOR_FAR, distance);
 }
 
-/** La marea del agujero en un mundo que está siendo absorbido (como las de physics/tides.ts). */
-export function holeTide(progress: number): number {
+/**
+ * La marea del agujero en un mundo que está siendo absorbido (como las de physics/tides.ts). En el palco (el
+ * último en caer) se nota, pero no llega a hacer daño: el ciclo termina antes y se ve el final entero.
+ */
+export function holeTide(progress: number, palco = false): number {
   const p = unit(progress);
-  return p > 0 ? HOLE_TIDE_FROM + (HOLE_TIDE_MAX - HOLE_TIDE_FROM) * p : 0;
+  const tide = p > 0 ? HOLE_TIDE_FROM + (HOLE_TIDE_MAX - HOLE_TIDE_FROM) * p : 0;
+  return palco ? Math.min(tide, DAMAGE_FROM) : tide;
+}
+
+/** Cuánto ha caído hacia el agujero quien está en el mundo que se traga (0–1): con el resto de su mundo. */
+export function finalApproach(progress: number): number {
+  return fallAmount(unit(progress));
+}
+
+/**
+ * A qué distancia se dibuja el agujero para quien cae con su mundo (`approach`, de `finalApproach`): se acerca en
+ * proporción, para que el horizonte crezca sin saltos, hasta llenar el cielo. Dentro del horizonte, donde está.
+ */
+export function apparentDistance(distance: number, radius: number, approach: number): number {
+  const closest = radius * CLOSEST;
+  if (!Number.isFinite(distance) || !(distance > closest)) return distance;
+  return distance * (closest / distance) ** unit(approach);
+}
+
+/** Cuánto ocupa el agujero en el cielo de quien mira: el seno de su radio aparente (1 dentro del horizonte). */
+export function skyFill(radius: number, distance: number): number {
+  if (!(radius > 0) || !Number.isFinite(distance)) return 0;
+  return distance <= radius ? 1 : radius / distance;
+}
+
+/** La luz que le queda a quien cae con su mundo (1 = toda): se apaga en el último tramo, antes de la Cámara. */
+export function finalLight(progress: number): number {
+  return 1 - (1 - DARKEST) * smoothstep(DARK_FROM, 1, unit(progress));
 }
 
 /** Lo deprisa que se mueve un mundo que está siendo absorbido, visto desde fuera (1 = normal). */

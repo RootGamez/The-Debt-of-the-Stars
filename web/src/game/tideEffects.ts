@@ -20,6 +20,8 @@ const SHOW_TIDE = 0.12;
 export interface TideSources {
   /** El Borde de Cicatriz: mundo y posición en el marco de ese mundo (si existe). */
   edge: { world: string; position: Vector3 } | undefined;
+  /** El palco (Fase 8D): ahí la marea del agujero se nota, pero no mata. */
+  palco: string | undefined;
 }
 
 export interface TideFrame {
@@ -48,7 +50,7 @@ export interface TideEffects {
 function tideOf(frame: TideFrame, sources: TideSources): number {
   const { world, position, loopTime, piloting, absorption } = frame;
   if (!world) return 0;
-  let tide = holeTide(absorption);
+  let tide = holeTide(absorption, world.id === sources.palco);
   const { edge } = sources;
   if (edge && world.id === edge.world && !piloting) {
     tide = Math.max(tide, edgeTide(position.distanceTo(edge.position), loopTime));

@@ -37,7 +37,8 @@ import { ReadingSession } from './reading/readingSession';
 import { createReadingUi, type ReadingUi } from './reading/readingUi';
 import { createWorldSources, type WorldSources } from './reading/worldSources';
 import { cameraPose } from './render/firstPersonCamera';
-import { createStarfield } from './render/sky';
+import { createStarfield, dimStars } from './render/sky';
+import { finalApproach, finalLight } from './system/absorption';
 import { AMBIENT_COLOR, AMBIENT_INTENSITY, createStage } from './render/stage';
 import { createSystemScene } from './render/systemScene';
 import { loadShipModel } from './ship/loadShip';
@@ -132,10 +133,12 @@ async function start(): Promise<void> {
   const blackHole = createBlackHoleView(systemScene.groupOf(BLACK_HOLE.world), birthplace);
   // La mira graduada (G): solo mide ángulos; con ella se corrige la imagen sin calcular nada.
   const sight = createSightScale(camera, canvas);
-  // Las mareas: junto al Borde de Cicatriz, subiendo hacia la semilla del Nudo y sobre su cáscara.
+  // Las mareas: junto al Borde de Cicatriz, subiendo hacia la semilla del Nudo y sobre su cáscara, y la del
+  // agujero en el mundo que se traga (en el palco no mata: desde ahí se ve el final).
   const edge = sources.get(EDGE_WORLD)?.interactables.find((i) => i.id === EDGE_SOURCE);
   const tides = createTideEffects(camera, {
     edge: edge ? { world: EDGE_WORLD, position: edge.position } : undefined,
+    palco: BLACK_HOLE.palco,
   });
   let tideDeath: DeathCause | undefined;
   const hiddenWorld = spec?.bodies.find((body) => body.hidden)?.world;
@@ -354,14 +357,21 @@ async function start(): Promise<void> {
   const animated = [...runtimes.values()].flatMap((r) =>
     r.world.markers.animated.map((part) => ({ part, world: r.id })),
   );
-  /** La luz ambiente es la del mundo donde estás (o la general en el espacio abierto). */
+  /**
+   * La luz ambiente es la del mundo donde estás (o la general en el espacio abierto); `light` es lo que queda
+   * de ella y de las estrellas al final, cuando caes con tu mundo (1 = toda).
+   */
   let litWorld: string | null = null;
-  function lightFor(world: string | undefined): void {
-    if ((world ?? '') === litWorld) return;
-    litWorld = world ?? '';
-    const own = world ? runtimes.get(world)?.world.info.ambient : undefined;
-    ambient.color.setHex(own?.color ?? AMBIENT_COLOR);
-    ambient.intensity = own?.intensity ?? AMBIENT_INTENSITY;
+  let ambientIntensity = AMBIENT_INTENSITY;
+  function lightFor(world: string | undefined, light: number): void {
+    if ((world ?? '') !== litWorld) {
+      litWorld = world ?? '';
+      const own = world ? runtimes.get(world)?.world.info.ambient : undefined;
+      ambient.color.setHex(own?.color ?? AMBIENT_COLOR);
+      ambientIntensity = own?.intensity ?? AMBIENT_INTENSITY;
+    }
+    ambient.intensity = ambientIntensity * light;
+    dimStars(sky, light);
   }
   let shipDeath: DeathCause | undefined;
   const physics = createFixedStep(
@@ -434,9 +444,11 @@ async function start(): Promise<void> {
       }
       camera.position.add(session.shake);
       const t = session.director.clock.t;
+      // Al final de la ventana de tu mundo caes con él: el agujero se acerca y la luz se apaga.
+      const fallen = session.director.absorption;
       systemScene.update(t);
-      lightFor(systemScene.referenceWorld);
-      blackHole.update(t, camera, timeRuns ? dt : 0);
+      lightFor(systemScene.referenceWorld, finalLight(fallen));
+      blackHole.update(t, camera, timeRuns ? dt : 0, finalApproach(fallen));
       const hole = blackHole.lens();
       absorption?.update({
         t,
@@ -458,7 +470,8 @@ async function start(): Promise<void> {
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,
         rate: session.director.rate,
         events: session.activeEventIds,
-        absorption: session.director.absorption,
+        absorption: fallen,
+        hole: blackHole.fill,
         phase: session.director.phase,
         fade: session.director.fade.amount,
         running: timeRuns,

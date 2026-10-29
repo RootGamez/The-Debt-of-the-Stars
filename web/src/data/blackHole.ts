@@ -12,4 +12,9 @@ export const BLACK_HOLE = {
   end: 900,
   /** Radio del horizonte al final del ciclo. */
   maxRadius: 600,
+  /**
+   * El palco (CONTEXTO_PLANETAS §7): el último mundo en caer, desde donde se ve el final entero. 🟡 Ahí la marea
+   * del agujero se nota, pero no mata.
+   */
+  palco: 'observatorio',
 } as const;

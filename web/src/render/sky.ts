@@ -17,6 +17,11 @@ function mulberry32(seed: number): () => number {
   };
 }
 
+/** Cuánto brillan las estrellas (1 = todo): al final del ciclo se apagan con lo demás (Fase 8D). */
+export function dimStars(stars: Points, light: number): void {
+  (stars.material as PointsMaterial).color.setHex(STAR_COLOR).multiplyScalar(light);
+}
+
 export function createStarfield(seed = 7): Points {
   const random = mulberry32(seed);
   const positions = new Float32Array(STAR_COUNT * 3);

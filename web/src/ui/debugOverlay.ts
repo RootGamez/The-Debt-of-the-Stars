@@ -58,6 +58,8 @@ export interface LoopSnapshot {
   fired: string[];
   /** El progreso se guarda. */
   saving: boolean;
+  /** De qué se está muriendo (mientras dura el fundido a blanco); null si no. */
+  cause: string | null;
 }
 
 declare global {
@@ -75,8 +77,11 @@ declare global {
       toShip?(): boolean;
       /** Lleva el reloj de Umbral a ese instante del ciclo (s); devuelve dónde quedó. */
       skipTo?(seconds: number): number;
-      /** El agujero negro: su radio (m) y si se ve. */
-      blackHole?(): { radius: number; visible: boolean };
+      /**
+       * El agujero negro: su radio (m), si se ve, su radio aparente desde quien mira (rad) y cuánto ha caído hacia
+       * él quien está en el mundo que se traga (0–1).
+       */
+      blackHole?(): { radius: number; visible: boolean; span: number; approach: number };
       /** A pie, gira la vista hacia un mundo o hacia el agujero (`'agujero'`), para encuadrar capturas. */
       aimAt?(target: string): boolean;
       /** La absorción de los mundos: avance de cada uno (0–1), los ya tragados y los trozos que caen. */
@@ -100,8 +105,17 @@ declare global {
       };
       /** Dónde está el jugador a pie: mundo, si está dentro de una cavidad y anillos cruzados. */
       place?(): { world: string; inside: boolean; crossings: number };
-      /** El sonido: si el audio está activo, si está silenciado y qué voces suenan. */
-      audio?(): { muted: boolean; running: boolean; voices: string[] };
+      /**
+       * El sonido: si el audio está activo, si está silenciado, qué voces suenan y la última mezcla (volumen
+       * general y el de cada voz).
+       */
+      audio?(): {
+        muted: boolean;
+        running: boolean;
+        voices: string[];
+        master: number;
+        levels: Record<string, number>;
+      };
     };
   }
 }
