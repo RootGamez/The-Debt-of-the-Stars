@@ -18,7 +18,8 @@ import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
 import { Player } from './core/player';
-import { triggersAsEvents } from './core/timeline';
+import { absorptionWindow, triggersAsEvents } from './core/timeline';
+import { createAbsorptionView } from './render/absorptionView';
 import {
   FIELD_OF_VIEW,
   MAX_PHYSICS_STEPS_PER_FRAME,
@@ -171,6 +172,18 @@ async function start(): Promise<void> {
   }
 
   const chronology = loadChronology(window.location.search);
+  // Cada mundo, en su ventana, se estira hacia el agujero, suelta trozos y cae (solo lo que se ve).
+  const absorption = spec
+    ? createAbsorptionView(
+        scene,
+        [...runtimes.values()].map((r) => ({
+          id: r.id,
+          model: r.world.scene,
+          radius: r.world.info.radius,
+          window: absorptionWindow(chronology, r.id),
+        })),
+      )
+    : undefined;
   const bodies: WorldBody[] = [...runtimes.values()].map((r) => ({
     world: r.id,
     radius: r.world.info.radius,
@@ -313,6 +326,22 @@ async function start(): Promise<void> {
     window.__juego.lens = () => lens.snapshot();
     window.__juego.tide = () => tides.snapshot();
     window.__juego.blackHole = () => blackHole.snapshot();
+    window.__juego.absorption = () => absorption?.snapshot() ?? null;
+    window.__juego.aimAt = (target) => {
+      const where =
+        target === 'agujero'
+          ? blackHole.lens()?.position.clone()
+          : systemScene.groupOf(target)?.getWorldPosition(new Vector3());
+      if (!where || flight?.piloting) return false;
+      // La dirección en el marco del cuerpo: el giro va sobre su vertical y el cabeceo, aparte.
+      const local = where
+        .sub(camera.position)
+        .normalize()
+        .applyQuaternion(player.state.body.clone().invert());
+      const level = Math.hypot(local.x, local.z);
+      player.look(Math.atan2(-local.x, -local.z), Math.atan2(local.y, level) - player.pitch);
+      return true;
+    };
     window.__juego.skipTo = (seconds) => {
       session.director.skip(seconds - session.director.clock.t);
       return session.director.clock.t;
@@ -322,7 +351,9 @@ async function start(): Promise<void> {
   // Lo que solo se ve durante un evento (EVT_): el haz de la ranura del Archivo…
   const eventProps = [...runtimes.values()].flatMap((r) => r.world.markers.eventProps);
   // …y las piezas que giran (ANIM_): los brazos del Taller, siempre; la maqueta, solo en su evento.
-  const animated = [...runtimes.values()].flatMap((r) => r.world.markers.animated);
+  const animated = [...runtimes.values()].flatMap((r) =>
+    r.world.markers.animated.map((part) => ({ part, world: r.id })),
+  );
   /** La luz ambiente es la del mundo donde estás (o la general en el espacio abierto). */
   let litWorld: string | null = null;
   function lightFor(world: string | undefined): void {
@@ -367,9 +398,10 @@ async function start(): Promise<void> {
         prop.object.visible = session.activeEventIds.includes(prop.event);
       }
       if (timeRuns) {
-        for (const part of animated) {
+        // Un mundo que el agujero se está tragando se ve casi quieto desde fuera.
+        for (const { part, world } of animated) {
           if (!part.event || session.activeEventIds.includes(part.event)) {
-            part.object.rotateY(part.spin * dt);
+            part.object.rotateY(part.spin * dt * (absorption?.rateOf(world) ?? 1));
           }
         }
       }
@@ -386,6 +418,7 @@ async function start(): Promise<void> {
           world: piloting ? (flight?.frame ? runtimes.get(flight.frame) : undefined) : currentWorld,
           position: piloting && flight ? flight.position : player.state.position,
           loopTime: session.director.clock.t,
+          absorption: session.director.absorption,
           running: timeRuns && session.acceptsInput,
           piloting,
         },
@@ -404,6 +437,14 @@ async function start(): Promise<void> {
       systemScene.update(t);
       lightFor(systemScene.referenceWorld);
       blackHole.update(t, camera, timeRuns ? dt : 0);
+      const hole = blackHole.lens();
+      absorption?.update({
+        t,
+        hole,
+        reference: systemScene.referenceWorld,
+        viewer: camera.position,
+        dt: timeRuns ? dt : 0,
+      });
       lens.update({
         camera: camera.position,
         nudo: hiddenWorld ? systemScene.groupOf(hiddenWorld) : undefined,
@@ -411,7 +452,7 @@ async function start(): Promise<void> {
         aligned: session.activeEventIds.includes(ALIGNMENT_EVENT),
         inObservatory: systemScene.referenceWorld === OBSERVATORY,
         time: performance.now() / 1000,
-        hole: blackHole.lens(),
+        hole,
       });
       soundtrack.update({
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,

@@ -1,4 +1,5 @@
-// Las mareas en el juego: de dónde salen (el Borde de Cicatriz, la semilla y la cáscara del Nudo), cómo se
+// Las mareas en el juego: de dónde salen (el Borde de Cicatriz, la semilla y la cáscara del Nudo, y el agujero
+// negro sobre el mundo que se está tragando), cómo se
 // notan (la vista se ensancha, los bordes de la pantalla se oscurecen y andar cuesta) y la tensión que se
 // acumula, con su indicador. Las cuentas están en physics/tides.ts (con tests); esto lo cubre e2e/tides.spec.ts.
 import type { PerspectiveCamera, Vector3 } from 'three';
@@ -6,6 +7,7 @@ import type { MoveIntent } from '../core/input';
 import { FIELD_OF_VIEW } from '../data/movement';
 import { insideCavity } from '../physics/gravity';
 import { edgeTide, seedTide, shellTide, speedFactor, TideStrain } from '../physics/tides';
+import { holeTide } from '../system/absorption';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 
 /** Cuánto se ensancha la vista con la marea (fracción del campo de visión por unidad de marea). */
@@ -26,6 +28,8 @@ export interface TideFrame {
   /** Pies del jugador (o la nave, pilotando) en el marco de `world`. */
   position: Vector3;
   loopTime: number;
+  /** Avance de la absorción del mundo donde estás (0–1): la marea del agujero negro (Fase 8C). */
+  absorption: number;
   /** El ciclo corre (sin pausa ni lectura): solo entonces se acumula la tensión. */
   running: boolean;
   piloting: boolean;
@@ -42,9 +46,9 @@ export interface TideEffects {
 }
 
 function tideOf(frame: TideFrame, sources: TideSources): number {
-  const { world, position, loopTime, piloting } = frame;
+  const { world, position, loopTime, piloting, absorption } = frame;
   if (!world) return 0;
-  let tide = 0;
+  let tide = holeTide(absorption);
   const { edge } = sources;
   if (edge && world.id === edge.world && !piloting) {
     tide = Math.max(tide, edgeTide(position.distanceTo(edge.position), loopTime));

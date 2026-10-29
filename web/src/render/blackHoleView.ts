@@ -18,8 +18,9 @@ import {
 import { blackHoleRadius, diskRadii, photonRingRadius } from '../system/blackHole';
 
 const RING_COLOR = 0xffe2b0;
-const DISK_INNER = new Color(0xfff0d0);
-const DISK_OUTER = new Color(0x7a1a08);
+const DISK_INNER = new Color(0xfff4dc);
+const DISK_MIDDLE = new Color(0xffa24a);
+const DISK_OUTER = new Color(0xb0300c);
 /** Vueltas del disco por segundo real y su inclinación (rad). */
 const DISK_SPIN = 0.05;
 const DISK_TILT = 1.15;
@@ -32,19 +33,25 @@ export interface BlackHoleView {
   dispose(): void;
 }
 
-/** Disco con color de dentro (blanco caliente) a fuera (rojo oscuro). */
+/**
+ * Disco con color de dentro (blanco caliente) a fuera (rojo), que se desvanece hacia el borde. No se suma a lo
+ * de detrás: tapa, para que se lea también contra el cielo rojo del final.
+ */
 function diskGeometry(): RingGeometry {
   const { inner, outer } = diskRadii(1);
-  const geometry = new RingGeometry(inner, outer, 96, 4);
+  // Muchos anillos: al final el disco mide kilómetros y pasa cerca de los mundos; con pocos, su
+  // transparencia se ve en dientes de sierra.
+  const geometry = new RingGeometry(inner, outer, 128, 24);
   const position = geometry.getAttribute('position');
-  const colors = new Float32Array(position.count * 3);
+  const colors = new Float32Array(position.count * 4);
   const color = new Color();
   for (let i = 0; i < position.count; i++) {
-    const r = Math.hypot(position.getX(i), position.getY(i));
-    color.copy(DISK_INNER).lerp(DISK_OUTER, (r - inner) / (outer - inner));
-    colors.set([color.r, color.g, color.b], i * 3);
+    const k = (Math.hypot(position.getX(i), position.getY(i)) - inner) / (outer - inner);
+    if (k < 0.4) color.copy(DISK_INNER).lerp(DISK_MIDDLE, k / 0.4);
+    else color.copy(DISK_MIDDLE).lerp(DISK_OUTER, (k - 0.4) / 0.6);
+    colors.set([color.r, color.g, color.b, (1 - k) ** 2], i * 4);
   }
-  geometry.setAttribute('color', new BufferAttribute(colors, 3));
+  geometry.setAttribute('color', new BufferAttribute(colors, 4));
   return geometry;
 }
 
@@ -82,8 +89,6 @@ export function createBlackHoleView(
     new MeshBasicMaterial({
       vertexColors: true,
       transparent: true,
-      opacity: 0.85,
-      blending: AdditiveBlending,
       depthWrite: false,
       side: DoubleSide,
     }),

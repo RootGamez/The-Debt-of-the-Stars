@@ -2,7 +2,7 @@
 //   senales        anillos de luz que se curvan en el cielo (5:00)
 //   pulso_cicatriz destello rojo y temblor de cámara (9:00)
 //   cielo_rojo     el cielo se tiñe de rojo
-//   absorción      el cielo y la Brasa se apagan mientras el mundo es absorbido
+//   absorción      el cielo y la Brasa se apagan y el suelo tiembla mientras el mundo es absorbido
 // El agujero negro ya no está aquí: tiene su sitio en el sistema (render/blackHoleView.ts, Fase 8).
 import {
   AdditiveBlending,
@@ -22,6 +22,8 @@ const PULSE = new Color(0xa0301a);
 const SKY_DISTANCE = 2600;
 const RING_COUNT = 4;
 const SHAKE_METERS = 0.06;
+/** Temblor al final de la absorción del mundo donde estás (en unidades del temblor del pulso). */
+const ABSORPTION_QUAKE = 1.5;
 
 export interface LoopEffects {
   /** Ajusta todos los efectos al instante `t` con los eventos en curso. */
@@ -90,15 +92,18 @@ export function createLoopEffects(scene: Scene, sun: Light, skyDirection: Vector
       if (red !== undefined) background.lerp(RED_SKY, Math.min(1, red * 4));
       const pulse = progressOf(active, 'pulso_cicatriz', t);
       shake.set(0, 0, 0);
+      // El suelo tiembla con el pulso y, cada vez más, mientras el agujero se traga el mundo.
+      let quake = absorption * ABSORPTION_QUAKE;
       if (pulse !== undefined) {
         const strength = Math.sin(pulse * Math.PI);
         background.lerp(PULSE, reducedMotion ? strength * 0.4 : strength);
-        // Sin temblor en pausa (dt = 0) ni con "reducir movimiento" activado en el sistema.
-        if (dt > 0 && !reducedMotion) {
-          shake
-            .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
-            .multiplyScalar(SHAKE_METERS * 2 * strength);
-        }
+        quake = Math.max(quake, strength);
+      }
+      // Sin temblor en pausa (dt = 0) ni con "reducir movimiento" activado en el sistema.
+      if (quake > 0 && dt > 0 && !reducedMotion) {
+        shake
+          .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+          .multiplyScalar(SHAKE_METERS * 2 * quake);
       }
 
       background.multiplyScalar(1 - absorption);

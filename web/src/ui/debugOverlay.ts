@@ -77,6 +77,14 @@ declare global {
       skipTo?(seconds: number): number;
       /** El agujero negro: su radio (m) y si se ve. */
       blackHole?(): { radius: number; visible: boolean };
+      /** A pie, gira la vista hacia un mundo o hacia el agujero (`'agujero'`), para encuadrar capturas. */
+      aimAt?(target: string): boolean;
+      /** La absorción de los mundos: avance de cada uno (0–1), los ya tragados y los trozos que caen. */
+      absorption?(): {
+        progress: Record<string, number>;
+        swallowed: string[];
+        debris: number;
+      } | null;
       /** La marea donde estás y la tensión acumulada (0–1; a 1, muerte `marea`). */
       tide?(): { tide: number; strain: number };
       /**
