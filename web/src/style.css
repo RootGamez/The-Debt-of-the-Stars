@@ -225,6 +225,58 @@ body {
   pointer-events: none;
 }
 
+/* Marea: los bordes de la pantalla se oscurecen y aparece la tensión acumulada. */
+.tide-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  opacity: 0;
+  background: radial-gradient(ellipse at center, rgb(0 0 0 / 0%) 45%, rgb(40 8 4 / 85%) 100%);
+  pointer-events: none;
+}
+
+.tide {
+  position: fixed;
+  left: 50%;
+  bottom: 112px; /* por encima del reloj doble y del aviso de lectura */
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: rgb(7 7 12 / 45%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.tide[hidden] {
+  display: none;
+}
+
+.tide-label {
+  color: var(--muted);
+  font:
+    12px system-ui,
+    sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tide-bar {
+  width: 120px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: rgb(232 220 196 / 15%);
+}
+
+.tide-fill {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #e0c98a, #ff6a3a);
+}
+
 /* Mira graduada (tecla G): anillos cada 10° y marcas cada 2°. */
 .sight {
   position: fixed;

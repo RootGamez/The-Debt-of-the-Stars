@@ -76,3 +76,4 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - Grabaciones: las fuentes `grabacion` llevan `reloj` (ritmo con que se grabaron) y se entienden con la rueda de velocidad (velocidad × reloj ≈ 1). La M silencia el juego.
 - El Laboratorio está dentro del Nudo (cuerpo oculto en `sistema.json`); se entra por la Puerta plegada. Con `?debug`: `__juego.warpTo('laboratorio')` y `__juego.place()`.
 - La lente (`system/lens.ts`): la imagen del Nudo se ve girada 18° hacia la Brasa; nítida solo desde el Observatorio en la alineación. **G** muestra la mira graduada. Con `?debug`: `__juego.lens()`.
+- Mareas (`physics/tides.ts`): el Borde de Cicatriz, la semilla del Nudo y su cáscara; la tensión acumulada mata (`marea`). Con `?debug`: `__juego.tide()`.

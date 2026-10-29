@@ -121,7 +121,7 @@ describe('dying', () => {
     expect(hard.deathCause).toBe('caida');
   });
 
-  it.each(['choque', 'calor'] as const)('accepts ship death cause %s', (cause) => {
+  it.each(['choque', 'calor', 'marea'] as const)('accepts the forced death cause %s', (cause) => {
     const { d } = director();
 
     d.update(0.1, QUIET, cause);
