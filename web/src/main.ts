@@ -9,6 +9,8 @@ import { createTideEffects } from './game/tideEffects';
 import { insideCavity } from './physics/gravity';
 import { createInteriorLights } from './render/interiorLight';
 import { createLensView } from './render/lensView';
+import { createAtmosphereView } from './render/atmosphereView';
+import { ATMOSPHERES } from './data/atmospheres';
 import { createBlackHoleView } from './render/blackHoleView';
 import { growthFor } from './system/blackHole';
 import { BLACK_HOLE } from './data/blackHole';
@@ -137,6 +139,8 @@ async function start(): Promise<void> {
   // …y por fuera: su imagen en el cielo, girada hacia la Brasa, y las estrellas que dobla a su paso.
   // (el agujero negro dobla también las estrellas; con `?calidad=baja` no se dobla nada).
   const lens = createLensView(scene, sky, qualityFromQuery(window.location.search) === 'alta');
+  // El cielo de los mundos con aire (Hogar): tapa las estrellas en el suelo y se apaga al subir.
+  const atmosphere = createAtmosphereView(scene);
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
   const chronology = looping ? loadChronology(window.location.search) : quietChronology();
   const birthplace = sources
@@ -351,6 +355,7 @@ async function start(): Promise<void> {
     window.__juego.lens = () => lens.snapshot();
     window.__juego.tide = () => tides.snapshot();
     window.__juego.blackHole = () => blackHole.snapshot();
+    window.__juego.sky = () => ({ density: atmosphere.density });
     window.__juego.absorption = () => absorption?.snapshot() ?? null;
     window.__juego.aimAt = (target) => {
       const where =
@@ -414,6 +419,7 @@ async function start(): Promise<void> {
   status.textContent = '';
 
   const feet = new Vector3();
+  const airCenter = new Vector3();
   const body = new Quaternion();
   runFrameLoop(
     renderer,
@@ -482,6 +488,19 @@ async function start(): Promise<void> {
       const fallen = session.director.absorption;
       systemScene.update(t);
       lightFor(systemScene.referenceWorld, finalLight(fallen));
+      const airWorld = systemScene.referenceWorld;
+      const air = airWorld === undefined ? undefined : ATMOSPHERES[airWorld];
+      const airGroup = airWorld === undefined ? undefined : systemScene.groupOf(airWorld);
+      const airRadius =
+        airWorld === undefined ? undefined : runtimes.get(airWorld)?.world.info.radius;
+      atmosphere.update({
+        eye: camera.position,
+        world:
+          air && airGroup && airRadius !== undefined
+            ? { center: airGroup.getWorldPosition(airCenter), radius: airRadius, air }
+            : undefined,
+        star: sun.position,
+      });
       blackHole.update(t, camera, timeRuns ? dt : 0, finalApproach(fallen));
       const hole = blackHole.lens();
       absorption?.update({

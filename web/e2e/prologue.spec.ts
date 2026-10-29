@@ -29,6 +29,8 @@ test('a new game starts at home, where the loop does not run', async ({ page }) 
   expect(await loopValue(page, 'events')).toEqual([]);
   await expect(page.locator('.clock-hud')).toBeHidden();
   expect((await snapshot(page))?.ship?.landed).toBe(true); // el Albatros II, en el hangar
+  // Hogar tiene aire: desde el suelo se ve el cielo y no el espacio.
+  expect((await page.evaluate(() => window.__juego?.sky?.()))?.density).toBe(1);
 });
 
 test('on the Moon the wormhole opens and the game goes on in Umbral from then on', async ({
@@ -44,6 +46,7 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
   expect(await value(page, 'world')).toBe('umbral');
   expect(await loopValue(page, 'loops')).toBe(0);
+  expect((await page.evaluate(() => window.__juego?.sky?.()))?.density).toBe(0); // Umbral no tiene aire
   expect(new URL(page.url()).searchParams.has('mundo')).toBe(false);
 
   await page.reload();

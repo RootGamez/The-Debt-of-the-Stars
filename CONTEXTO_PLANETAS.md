@@ -237,6 +237,10 @@
 
 **Hogar (🟡, nombre ❓).** Un planeta templado, verde y ocre, cálido, vivo. Contraste fuerte con Umbral. En una colina está el **Instituto**; abajo, **la aldea** de los Ool, que también se recorre (✅ Anthony, 2026-10-29).
 
+**Cómo es Hogar (🟡, Fase 9).** El Instituto en la cima llana de una colina: la Sala de Fragmentos (una rotonda) y tres alas redondas —el aula de la Maestra, el taller de la Puerta pequeña y el despacho de la Directora— unidas por pasillos de aros y lona, con su plaza de entrada. Al este de la cima, el hangar del Albatros II. Abajo, en los prados del norte, la aldea con su árbol de musgo, y en la costa del este un embarcadero. Es el único mundo con aire: cielo de amanecer, la estrella baja al este.
+
+**Lenguaje de los Ool (🟡).** Redondeado, blando y hecho a mano: telas cosidas en gajos de colores sobre costillas de madera, puertas y ventanas redondeadas, musgo por todas partes y luz viva verde azulada (bulbos en tallos, frutos en los árboles). Nada de troncos ni chapa remachada. Junto a esto, los fragmentos de los Ausentes (arenisca y pizarra, cortados en curva perfecta) se ven ajenos.
+
 **La Luna (🟡, nombre ❓).** Gris azulada, con cráteres. En ella apareció el fragmento más grande hasta ahora, clavado en el suelo y con un borde cortado en curva perfecta.
 
 **La nave: el Albatros II (✅ nombre, Anthony 2026-10-29; 🟡 el resto).** La lanzadera del Instituto con la que el explorador hace su primer vuelo: pequeña, redondeada y amable, en los colores de Hogar (crema, ocre y verde), con una burbuja delantera para mirar, un relicario bajo la panza donde iba a traer el fragmento de la luna y un farol en el mástil. En el tablero lleva el **reloj doble**. Llega con él al sistema ajeno y en cada ciclo espera posada cerca de La Boca.

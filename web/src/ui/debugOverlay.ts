@@ -84,6 +84,8 @@ declare global {
       blackHole?(): { radius: number; visible: boolean; span: number; approach: number };
       /** A pie, gira la vista hacia un mundo o hacia el agujero (`'agujero'`), para encuadrar capturas. */
       aimAt?(target: string): boolean;
+      /** El cielo de un mundo con aire: cuánto se ve (0 = el espacio, 1 = todo cielo). */
+      sky?(): { density: number };
       /** La absorción de los mundos: avance de cada uno (0–1), los ya tragados y los trozos que caen. */
       absorption?(): {
         progress: Record<string, number>;

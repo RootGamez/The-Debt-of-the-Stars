@@ -1,4 +1,77 @@
 [
-  { "nombre": "SPAWN_Instituto", "lat": 35, "lon": 10, "alto": 1.0, "props": {} },
-  { "nombre": "PARK_Hangar", "lat": 33, "lon": 20, "alto": 0.0, "props": {} }
+  {
+    "nombre": "SPAWN_Instituto",
+    "lat": 41.028,
+    "lon": 8.0,
+    "alto": 1.178,
+    "props": {},
+    "rumbo": 0
+  },
+  {
+    "nombre": "PARK_Hangar",
+    "lat": 42.0,
+    "lon": 22.0,
+    "alto": 0.025,
+    "props": {}
+  },
+  {
+    "nombre": "INT_ficha",
+    "lat": 47.379,
+    "lon": -0.513,
+    "alto": 1.447,
+    "props": {
+      "clue_id": "instituto.ficha",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_vitrina_bordes",
+    "lat": 48.394,
+    "lon": 10.129,
+    "alto": 1.579,
+    "props": {
+      "clue_id": "instituto.vitrina_bordes",
+      "kind": "objeto"
+    }
+  },
+  {
+    "nombre": "INT_simbolo_partido",
+    "lat": 48.394,
+    "lon": 5.871,
+    "alto": 1.582,
+    "props": {
+      "clue_id": "instituto.simbolo_partido",
+      "kind": "objeto"
+    }
+  },
+  {
+    "nombre": "INT_informe_deuda",
+    "lat": 53.278,
+    "lon": 8.261,
+    "alto": 1.465,
+    "props": {
+      "clue_id": "instituto.informe_deuda",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_mesa_puerta",
+    "lat": 46.727,
+    "lon": 16.254,
+    "alto": 1.512,
+    "props": {
+      "clue_id": "instituto.mesa_puerta",
+      "kind": "objeto"
+    }
+  },
+  {
+    "nombre": "INT_directora",
+    "lat": 53.896,
+    "lon": 7.314,
+    "alto": 1.528,
+    "props": {
+      "clue_id": "instituto.directora",
+      "kind": "texto"
+    }
+  }
 ]

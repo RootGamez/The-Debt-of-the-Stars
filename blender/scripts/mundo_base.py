@@ -12,10 +12,9 @@ from mathutils import Vector, noise
 
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 WORLD = ARGS[0] if ARGS else "umbral"  # umbral, archivo, taller, cicatriz, observatorio, laboratorio, hogar, luna
-SUBDIV = 5            # 5 ≈ 5.120 triángulos (presupuesto 3k–8k)
-# Colisión con la misma resolución que el suelo visible: con menos, el jugador se hundiría o
-# flotaría entre vértices. Se puede bajar en la Fase 2 si la física lo necesita.
-COL_SUBDIV = SUBDIV
+SUBDIV = 5            # 5 ≈ 5.120 triángulos (presupuesto 3k–8k); un preset puede pedir más ("subdiv")
+# La colisión usa la misma resolución que el suelo visible: con menos, el jugador se hundiría o
+# flotaría entre vértices.
 SEED = 1
 REPLACE = True
 
@@ -45,9 +44,12 @@ PRESETS = {
                         # dan dónde mirar en una esfera donde todo se parece.
                         hollow=dict(inner=21, relief=0.02, freq=2.2, strata=(30, 3.2, "#47514A"),
                                     bands=[(0.0, "#56605A"), (0.45, "#7C8A7E"), (0.8, "#A3AE9F")])),
-    "hogar": dict(radius=120, gravity=1.0, clock=1.00, relief=0.05, freq=1.4,
-                  bands=[(0.0, "#3A7AA0"), (0.42, "#C8963C"), (0.47, "#8AB04A"), (0.65, "#5A8A3A"), (0.85, "#7A5A3A")],
-                  sea=0.42),
+    # Hogar (Fase 9): el mundo más grande y el único vivo. Más resolución que los demás, una colina con la cima
+    # llana para el Instituto (lat 36, lon 14) y prados con un poco de variación de color por cara.
+    "hogar": dict(radius=120, gravity=1.0, clock=1.00, relief=0.05, freq=1.4, subdiv=6, jitter=0.06,
+                  bands=[(0.0, "#3A7AA0"), (0.42, "#D8B070"), (0.46, "#9ABA5A"), (0.62, "#6E9A4A"),
+                         (0.8, "#5E8E40"), (0.97, "#88B058")],
+                  sea=0.42, massif=((0.74, 0.14, 0.66), 0.32, 0.1, "#88B058")),
     "luna": dict(radius=35, gravity=0.4, clock=1.00, relief=0.04, freq=1.3,
                  bands=[(0.0, "#4E5666"), (0.4, "#8A94A6"), (0.7, "#B4BCC8")], craters=12),
 }
@@ -224,6 +226,10 @@ def pintar(mesh, cfg, info):
         d = sum((v[2] for v in vals), Vector()).normalized()
         borde = cfg.get("bites") and any(v[1] for v in vals) and not mordido
         col = hex_lineal(cfg["bites"][3] if borde else color_cara(cfg, h01, mordido, d))
+        if cfg.get("jitter") and not ("sea" in cfg and h01 <= cfg["sea"] + 1e-4):
+            # Un poco de variación por cara (siempre la misma): el prado no parece de plástico.
+            k = 1 + cfg["jitter"] * noise.noise(d * 37.0)
+            col = [min(1.0, c * k) for c in col[:3]] + [1.0]
         for li in p.loop_indices:
             attr.data[li].color = col
 
@@ -264,10 +270,11 @@ def main():
         raiz["inner_radius"] = float(cfg["hollow"]["inner"])
 
     relieve = Relieve(cfg, SEED)
-    terreno = bpy.data.objects.new(f"{WORLD}_Terreno", construir(f"{WORLD}_Terreno", SUBDIV, cfg, relieve, True))
+    subdiv = cfg.get("subdiv", SUBDIV)
+    terreno = bpy.data.objects.new(f"{WORLD}_Terreno", construir(f"{WORLD}_Terreno", subdiv, cfg, relieve, True))
     terreno.data.materials.append(material(WORLD))
     colision = bpy.data.objects.new(f"COL_{WORLD}_Terreno",
-                                    construir(f"COL_{WORLD}_Terreno", COL_SUBDIV, cfg, relieve, False))
+                                    construir(f"COL_{WORLD}_Terreno", subdiv, cfg, relieve, False))
     colision.display_type = "WIRE"
     colision.hide_render = True
     for obj in (terreno, colision):
