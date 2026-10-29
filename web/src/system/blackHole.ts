@@ -16,6 +16,19 @@ export function photonRingRadius(horizon: number): number {
   return horizon * 1.5;
 }
 
+/** Hasta dónde dobla la luz alrededor: el anillo de estrellas, un poco más allá del anillo de luz. */
+const EINSTEIN_FACTOR = 2.6;
+const MAX_EINSTEIN = Math.PI / 3;
+
+/**
+ * Radio angular (rad) del anillo de estrellas dobladas que se ve alrededor del agujero, desde `distance` metros.
+ * Lo usa el sombreador del cielo con la misma cuenta que el Nudo (`lensedAngle`).
+ */
+export function holeEinstein(horizon: number, distance: number): number {
+  if (!Number.isFinite(horizon) || !Number.isFinite(distance) || horizon <= 0) return 0;
+  return Math.min(MAX_EINSTEIN, Math.atan((EINSTEIN_FACTOR * horizon) / Math.max(distance, 1)));
+}
+
 /** El disco que brilla alrededor (de 2,2 a 5 radios del horizonte). */
 export function diskRadii(horizon: number): { inner: number; outer: number } {
   return { inner: horizon * 2.2, outer: horizon * 5 };

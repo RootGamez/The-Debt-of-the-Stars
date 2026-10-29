@@ -79,8 +79,17 @@ declare global {
       blackHole?(): { radius: number; visible: boolean };
       /** La marea donde estás y la tensión acumulada (0–1; a 1, muerte `marea`). */
       tide?(): { tide: number; strain: number };
-      /** La imagen del Nudo: si se ve, con qué claridad y cuánto la desvía la lente (grados). */
-      lens?(): { visible: boolean; clarity: number; offsetDegrees: number | null };
+      /**
+       * La imagen del Nudo: si se ve, con qué claridad y cuánto la desvía la lente (grados); si las estrellas se
+       * doblan (no con calidad baja) y cuánto las dobla el agujero negro (rad).
+       */
+      lens?(): {
+        visible: boolean;
+        clarity: number;
+        offsetDegrees: number | null;
+        bending: boolean;
+        holeLens: number;
+      };
       /** Dónde está el jugador a pie: mundo, si está dentro de una cavidad y anillos cruzados. */
       place?(): { world: string; inside: boolean; crossings: number };
       /** El sonido: si el audio está activo, si está silenciado y qué voces suenan. */

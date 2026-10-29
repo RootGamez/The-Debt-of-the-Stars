@@ -27,6 +27,8 @@ const DISK_TILT = 1.15;
 export interface BlackHoleView {
   update(t: number, camera: Camera, dt: number): void;
   snapshot(): { radius: number; visible: boolean };
+  /** Dónde está en la escena y su radio, para la lente del cielo; `undefined` si aún no ha nacido. */
+  lens(): { position: Vector3; radius: number } | undefined;
   dispose(): void;
 }
 
@@ -89,6 +91,7 @@ export function createBlackHoleView(
   disk.rotation.x = DISK_TILT;
   root.add(horizon, disk, ring);
   const cameraPosition = new Vector3();
+  const lens = { position: new Vector3(), radius: 0 };
   let radius = 0;
 
   return {
@@ -104,6 +107,12 @@ export function createBlackHoleView(
     },
     snapshot() {
       return { radius, visible: root.visible };
+    },
+    lens() {
+      if (!root.visible) return undefined;
+      root.getWorldPosition(lens.position);
+      lens.radius = radius;
+      return lens;
     },
     dispose() {
       root.removeFromParent();

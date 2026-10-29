@@ -11,6 +11,7 @@ import { createInteriorLights } from './render/interiorLight';
 import { createLensView } from './render/lensView';
 import { createBlackHoleView } from './render/blackHoleView';
 import { BLACK_HOLE } from './data/blackHole';
+import { qualityFromQuery } from './core/quality';
 import { createSightScale } from './ui/sightScale';
 import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
@@ -121,7 +122,8 @@ async function start(): Promise<void> {
   const interior = createInteriorLights(runtimes, sun);
   const passage = createFoldedPassage();
   // …y por fuera: su imagen en el cielo, girada hacia la Brasa, y las estrellas que dobla a su paso.
-  const lens = createLensView(scene, sky);
+  // (el agujero negro dobla también las estrellas; con `?calidad=baja` no se dobla nada).
+  const lens = createLensView(scene, sky, qualityFromQuery(window.location.search) === 'alta');
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
   const birthplace = sources
     .get(BLACK_HOLE.world)
@@ -409,6 +411,7 @@ async function start(): Promise<void> {
         aligned: session.activeEventIds.includes(ALIGNMENT_EVENT),
         inObservatory: systemScene.referenceWorld === OBSERVATORY,
         time: performance.now() / 1000,
+        hole: blackHole.lens(),
       });
       soundtrack.update({
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,
