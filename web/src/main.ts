@@ -58,7 +58,13 @@ import { bodyPose } from './system/orbits';
 import { createDebugOverlay, type SystemSnapshot } from './ui/debugOverlay';
 import { createOrbitMap } from './ui/orbitMap';
 import { isTouchDevice } from './ui/pauseOverlay';
-import { createArrivalLayer, markCrossing, sessionStore, takeCrossing } from './ui/arrival';
+import {
+  createArrivalLayer,
+  endArrivingPaint,
+  markCrossing,
+  sessionStore,
+  takeCrossing,
+} from './ui/arrival';
 import type { WorldRuntime } from './worlds/worldRuntime';
 import { arrivalHref, startWorld as firstWorld, worldTitle } from './worlds/worldSelection';
 
@@ -437,7 +443,7 @@ async function start(): Promise<void> {
   let walked = 0;
   let registryOpened = false;
   // El gusano junto al fragmento de la Luna: se abre, y al terminar llega el fundido a blanco de la Cámara.
-  const wormholeView = looping ? undefined : createWormholeView(scene);
+  const wormholeView = looping ? undefined : createWormholeView();
   let crossingAsked = false;
   function openWormhole(): void {
     const fragment = sources
@@ -448,10 +454,10 @@ async function start(): Promise<void> {
       wormhole = 'gusano'; // sin la escena, directamente al fundido
       return;
     }
-    // Sobre el fragmento y un poco más allá, visto desde ti (en el marco de la Luna, cuyo centro es su origen).
+    // Sobre el fragmento y un poco más allá, visto desde ti; cuelga de la Luna (su centro es su origen).
     moon.updateWorldMatrix(true, false);
     const eye = moon.worldToLocal(camera.position.clone());
-    wormholeView.start(moon.localToWorld(wormholeCenter(fragment.position, new Vector3(), eye)));
+    wormholeView.start(moon, wormholeCenter(fragment.position, new Vector3(), eye));
   }
   let wormhole: DeathCause | undefined;
   const physics = createFixedStep(
@@ -652,7 +658,9 @@ function setupCamera(camera: PerspectiveCamera): void {
 
 start().catch((error: unknown) => {
   console.error(error);
-  document.querySelector('.llegada')?.remove(); // que se lea el aviso
+  // Que se lea el aviso, sin el blanco del gusano.
+  endArrivingPaint();
+  document.querySelector('.llegada')?.remove();
   const status = document.getElementById('status');
   if (status) status.textContent = 'No se pudo cargar el mundo. Revisa la consola.';
 });

@@ -36,6 +36,7 @@ test('a new game starts at home, where the loop does not run', async ({ page }) 
 test('on the Moon the wormhole opens and the game goes on in Umbral from then on', async ({
   page,
 }) => {
+  test.setTimeout(120_000); // dos cargas del sistema ajeno y una de casa
   await newGame(page);
   await play(page);
 
@@ -55,12 +56,26 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
       timeout: 10_000,
     })
     .toBe(true);
+  // Con el Registro abierto el tiempo se para, y el gusano también.
+  const wormhole = () => page.evaluate(() => window.__juego?.wormhole?.().progress ?? -1);
+  await page.keyboard.press('Tab');
+  await expect(page.locator('.registry')).toBeVisible();
+  const opened = await wormhole();
+  await page.waitForTimeout(800);
+  expect(await wormhole()).toBe(opened);
+  expect(opened).toBeLessThan(1);
+  await page.keyboard.press('KeyR');
+  await expect(page.locator('.registry')).toBeHidden();
+  await play(page); // cerrar el Registro deja la pausa: un clic y sigue
 
   // Tras el fundido a blanco la página se carga de nuevo, ya en el sistema ajeno (sin `?mundo=`): el blanco
   // sigue mientras llega el mundo y luego se aclara.
   await page.waitForURL(/debug=/, { timeout: 30_000 });
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
   await expect(page.locator('.llegada')).toHaveCount(0, { timeout: 10_000 });
+  expect(await page.evaluate(() => document.documentElement.classList.contains('llegando'))).toBe(
+    false,
+  );
   expect(await value(page, 'world')).toBe('umbral');
   expect(await loopValue(page, 'loops')).toBe(0);
   // El primer despertar frente a La Boca: aparece el reloj de Umbral.

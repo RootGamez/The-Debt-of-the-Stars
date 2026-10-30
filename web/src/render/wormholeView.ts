@@ -1,6 +1,7 @@
-// La apertura del gusano junto al fragmento de la Luna (Fase 9E, 🟡): un anillo de luz que se abre delante del
-// fragmento, siempre de cara a quien mira, con un velo de luz dentro. Da a la lente del cielo un "peso" que crece
-// (las estrellas se doblan alrededor) y cuánto se estira la vista. Los tiempos y tamaños, en game/wormhole.ts.
+// La apertura del gusano junto al fragmento de la Luna (Fase 9E, 🟡): un anillo de luz que se abre sobre el
+// fragmento, siempre de cara a quien mira, con un velo de luz dentro. Cuelga de la Luna, así que sigue en su sitio
+// aunque cambie el marco de la escena. Da a la lente del cielo un "peso" que crece (las estrellas se doblan
+// alrededor) y cuánto se estira la vista. Los tiempos y tamaños, en game/wormhole.ts.
 import {
   AdditiveBlending,
   BufferAttribute,
@@ -10,7 +11,7 @@ import {
   MeshBasicMaterial,
   TorusGeometry,
   Vector3,
-  type Scene,
+  type Object3D,
 } from 'three';
 import { lensRadius, ringRadius, viewStretch, wormholeProgress } from '../game/wormhole';
 
@@ -32,9 +33,9 @@ function glowDisc(radius: number, segments: number): CircleGeometry {
 }
 
 export interface WormholeView {
-  /** Abre el gusano en `center` (en la escena). */
-  start(center: Vector3): void;
-  /** `dt`: segundos de juego (0 en pausa); `eye`: dónde está quien mira. */
+  /** Abre el gusano colgado de `parent` (el mundo), en `center` (en su marco). */
+  start(parent: Object3D, center: Vector3): void;
+  /** `dt`: segundos de juego (0 en pausa); `eye`: dónde está quien mira (en la escena). */
   update(dt: number, eye: Vector3): void;
   /** Ya se ha abierto (y sigue abierto hasta que el fundido se lleva al jugador). */
   readonly active: boolean;
@@ -42,12 +43,12 @@ export interface WormholeView {
   readonly progress: number;
   /** Cuánto se ensancha la vista ahora (fracción). */
   readonly stretch: number;
-  /** Lo que la lente del cielo debe doblar, si está abierto. */
+  /** Lo que la lente del cielo debe doblar (en la escena), si está abierto. */
   lens(): { position: Vector3; radius: number } | undefined;
   dispose(): void;
 }
 
-export function createWormholeView(scene: Scene): WormholeView {
+export function createWormholeView(): WormholeView {
   const root = new Group();
   root.name = 'Gusano';
   root.visible = false;
@@ -69,26 +70,26 @@ export function createWormholeView(scene: Scene): WormholeView {
   });
   const veil = new Mesh(glowDisc(0.95, 48), veilMaterial);
   root.add(ring, inner, veil);
-  scene.add(root);
   const lensOut = { position: new Vector3(), radius: 0 };
   let elapsed = 0;
   let active = false;
   let progress = 0;
 
   return {
-    start(center) {
+    start(parent, center) {
       if (active) return;
       active = true;
       elapsed = 0;
       root.position.copy(center);
       root.visible = true;
+      parent.add(root);
     },
     update(dt, eye) {
       if (!active) return;
       elapsed += dt;
       progress = wormholeProgress(elapsed);
       root.scale.setScalar(Math.max(1e-3, ringRadius(progress)));
-      root.lookAt(eye); // siempre de cara
+      root.lookAt(eye); // siempre de cara (lookAt sabe del marco del padre)
       ringMaterial.opacity = Math.min(1, progress * 4);
       veilMaterial.opacity = VEIL_OPACITY * progress * progress;
     },
@@ -103,12 +104,12 @@ export function createWormholeView(scene: Scene): WormholeView {
     },
     lens() {
       if (!active) return undefined;
-      lensOut.position.copy(root.position);
+      root.getWorldPosition(lensOut.position);
       lensOut.radius = lensRadius(progress);
       return lensOut.radius > 0 ? lensOut : undefined;
     },
     dispose() {
-      scene.remove(root);
+      root.removeFromParent();
       ring.geometry.dispose();
       inner.geometry.dispose();
       veil.geometry.dispose();
