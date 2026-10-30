@@ -162,7 +162,7 @@
 
 **Evento del ciclo.** Hacia el minuto 9, un pulso: el cielo cambia de color, el suelo vibra y las mordidas parecen "respirar". Al 13:30 nace el agujero negro.
 
-**Puzzle principal.** La **instalación del Contrapeso** (pasos ❓ en la historia) llegando con el reloj sincronizado y en el momento justo. Antes de eso, aprender a medir cuánto tiempo se puede estar cerca del Borde antes de que la marea impida moverse.
+**Puzzle principal.** La **instalación del Contrapeso** (✅ pasos en `CONTEXTO_HISTORIA.md` §9, Anthony 2026-10-29) llegando con el reloj sincronizado y en el momento justo. Antes de eso, aprender a medir cuánto tiempo se puede estar cerca del Borde antes de que la marea impida moverse.
 
 **Textos clave:**
 - La grabación del escéptico, con su advertencia.
@@ -294,3 +294,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-10-28 · Sesión 5 (Fase 7).** Anthony decide que el Laboratorio esté **dentro del Nudo, con la gravedad invertida**. Se propone (🟡) el Nudo como garganta plegada: cáscara negra por fuera, cavidad de 21 m por dentro con la semilla en el centro, Puerta plegada para entrar y siete zonas del Laboratorio en la cara interior. El Nudo entra en `sistema.json` (órbita 2350 m) como cuerpo oculto.
 - **2026-10-29 · Sesión 6 (Fase 9).** Anthony decide: la nave se llama **el Albatros II**; el prólogo abarca el Instituto **y la aldea**; el presupuesto de triángulos es orientativo, por encima están la calidad y que los modelos estén completos. Su pueblo, los Ool, está en `CONTEXTO_HISTORIA.md` §7.
 - **2026-10-29 · Sesión 6 (Fase 9 cerrada).** Se construye el prólogo según §9, con propuestas (🟡) para reaccionar: la Luna con el fragmento clavado de canto (mordida esférica, fecha tallada y un hilo de luz en el corte); el gusano se abre al examinarlo (un anillo de luz sobre el fragmento, las estrellas que se doblan, la vista que se estira y un zumbido), fundido a blanco y despertar frente a La Boca, con el blanco que sigue hasta que el sistema ajeno está cargado.
+- **2026-10-29 · Sesión 6 (Fase 10).** Anthony aprueba los pasos de la instalación del Contrapeso en la Sala del Motor de Cicatriz (ver `CONTEXTO_HISTORIA.md` §9) y el plan del epílogo: el Archivo de las Puertas y la vuelta a Hogar antes de la prueba mayor.

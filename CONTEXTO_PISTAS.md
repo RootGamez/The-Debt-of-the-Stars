@@ -206,7 +206,7 @@ Llegar aquí cuesta casi un ciclo entero (modo B ✅): cada minuto real son cinc
 | `lab.notas_investigadora` | Texto | Últimas notas de la investigadora | El Contrapeso está terminado pero sin probar; "un sistema joven ha empezado a llamar" (K4, K8) | `contrapeso.terminado`, `casa.prueba_llama` · H6, H7 |
 | `lab.notas_esceptico` | Texto | Notas del escéptico | Su advertencia completa y por qué nadie lo escuchó | `silencio.advertencia` · H4 |
 | `lab.orden_silencio` | Texto | La orden de callar | Firmada por el Consejo de Tránsito (❓ quién firma) | `silencio.orden` · H4 |
-| `lab.dormitorio` | Objeto | Dos camas, una sola usada | ❓ Destino de los tres que se quedaron (CONTEXTO_HISTORIA §4) | `silencio.uno_se_quedo` · H3, H4 |
+| `lab.dormitorio` | Objeto | Dos camas, una sola usada | ✅ Los tres murieron aquí, trabajando en tiempo lento hasta el final (CONTEXTO_HISTORIA §4) | `silencio.uno_se_quedo` · H3, H4 |
 | `lab.contrapeso` | Objeto (se coge) | El Contrapeso | Se lleva a Cicatriz **en el mismo ciclo** (los objetos no persisten) | — · H6 |
 | `lab.camara` | Objeto + texto | La Cámara (✅ está aquí) | Notas de quien la construyó, con su culpa (H1) | `bucle.camara`, `bucle.culpa` · H1 |
 
@@ -304,3 +304,4 @@ textos de ambiente sin peso en el grafo.
 - **2026-10-25 · Sesión 2 (Fase 4).** Se implementa el Registro: datos del grafo, lectura, hechos persistentes y reglas comprobadas por código. Textos de Umbral en borrador; el resto, esqueleto.
 - **2026-10-28 · Fase 7 (hito 7A).** Anthony aprueba el plan de la Fase 7: las grabaciones suenan al ritmo de su reloj (decisión 5 ✅) y el Laboratorio está dentro del Nudo, con la gravedad invertida. Se implementa el reproductor; la grabación del escéptico lleva un **borrador** (para probar la mecánica) que ya habla desde dentro del Nudo y de corregir unos 18° alejándose de la Brasa: Anthony lo reescribirá.
 - **2026-10-29 · Fase 9 (hito 9C).** Se propone (🟡) el tipo de fuente `charla`: la Directora habla y da la misión; la gente de casa tiene charlas de ambiente sin hechos. Textos en borrador para Anthony.
+- **2026-10-29 · Fase 10.** Anthony decide el destino de los tres que se quedaron (murieron en el laboratorio): `lab.dormitorio` lo cuenta. El epílogo usa K7 y K8 para elegir la boca y la decisión final es llevar o no los planos del Contrapeso.

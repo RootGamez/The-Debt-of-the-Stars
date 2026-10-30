@@ -1,7 +1,7 @@
 # CONTEXTO DE HISTORIA — Juego de bucle de tiempo
 
 **Título provisional:** por definir (ver preguntas abiertas)
-**Versión:** v1.7 (el pueblo del protagonista: los Ool)
+**Versión:** v1.8 (el final: la profecía autocumplida, el Contrapeso y los tres)
 **Última actualización:** 2026-10-29 · Sesión 6
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)
 
@@ -135,7 +135,7 @@ Esto es lo que *realmente* pasó. El jugador lo descubre poco a poco, en desorde
 
 **Qué aporta:** explica una civilización extinta en un mundo intacto y sin violencia; la salida era la trampa (ironía central); da una respuesta devastadora a la esperanza del Instituto de que estén vivos; y en el epílogo, el Archivo de las Puertas muestra cada boca por la que se fueron.
 
-**Los que se quedaron (❓ se decide más adelante):** solo tres personas: la investigadora, el escéptico y quien construyó la Cámara. Su destino puede ser:
+**Los que se quedaron (✅ opción 4, Anthony 2026-10-29):** solo tres personas: la investigadora, el escéptico y quien construyó la Cámara. Su destino podía ser:
 
 - **Opción 1, congelados en el horizonte.** Desde fuera se los ve detenidos en el borde del agujero negro. Dentro, para ellos, el tiempo sigue.
 - **Opción 3, ecos en la Cámara.** Cada uno vive un instante distinto de los 15 minutos y dejó mensajes en distintos puntos del ciclo.
@@ -143,17 +143,19 @@ Esto es lo que *realmente* pasó. El jugador lo descubre poco a poco, en desorde
 
 *(La opción 2 original, "se dispersaron por las Puertas", pasa a ser la propuesta principal para el pueblo.)*
 
+✅ **Decidido (Anthony, 2026-10-29): la opción 4.** La investigadora y el escéptico trabajaron en el tiempo lento del Laboratorio hasta el final (la cama usada, el reloj de mesa casi quieto) y quien construyó la Cámara se quedó con ellos. 🟡 En el Archivo de las Puertas sus nombres no están: no llegaron a cruzar.
+
 ### Finales (🟡)
 
 **Final A, evitarlo.**
 Condición: el jugador ha dominado el agujero negro con el Contrapeso y ha entendido la verdad completa (Registro completo). Elige correctamente *cuándo* volver (ver epílogo) y llega a casa antes de la prueba. Muestra pruebas y detiene el experimento. Coste (agridulce): quienes le creen no recuerdan lo que él vivió, porque ese viaje nunca ocurrió para ellos. Los Ausentes siguen extintos; solo salva a los suyos.
 
-**Final B, no poder evitarlo** (❓ elegir uno de estos tres motivos):
+**Final B, no poder evitarlo** (✅ la profecía autocumplida, Anthony 2026-10-29; los otros dos motivos quedan como referencia):
 1. *Llega tarde.* El desfase lo deja después de la prueba y la deuda ya está en marcha.
 2. *Nadie le cree.* Sin pruebas ni tiempo, lo toman por loco o por mentiroso. Su propio Instituto lleva años confiando en estos objetos.
 3. *Profecía autocumplida (la más original).* Vuelve con algo de los Ausentes "para ayudar", por ejemplo los planos del Contrapeso o un componente, y eso resulta ser **la pieza que le faltaba al Instituto** para hacer funcionar su Puerta de verdad. La cura era la enfermedad. Ahora tiene un sustento fuerte: el Instituto ya está reconstruyendo la tecnología a partir de objetos de los Ausentes.
 
-Qué decide el final (❓): el nivel de comprensión del Registro, una decisión última del jugador, o ambos.
+Qué decide el final (✅ **ambos**, Anthony 2026-10-29): la boca que se elige en el Archivo de las Puertas (entender K7 y K8) **y** una decisión última, llevar o no los planos del Contrapeso. Llevarlos es el final B. 🟡 Una boca equivocada no es un final: deja al explorador después de la prueba mayor ("llega tarde", una escena corta) o lo devuelve al Archivo.
 
 ### Licencias narrativas que hay que vigilar
 
@@ -264,7 +266,9 @@ Evitar el recurso de texto en espiral con traductor. Propuesta: los Ausentes dej
 
 ## 9. Epílogo (🟡 / ❓)
 
-- **Condición para activarlo:** dominar el agujero negro instalando el Contrapeso en lugar del motor de la maquinaria de Cicatriz (ver reglas del mecanismo, sección 4). Los pasos exactos son ❓ y deberían depender de relatividad (por ejemplo, llegar con el reloj del Contrapeso sincronizado).
+- **Condición para activarlo:** dominar el agujero negro instalando el Contrapeso en lugar del motor de la maquinaria de Cicatriz (ver reglas del mecanismo, sección 4).
+- ✅ **Los pasos** (Anthony, 2026-10-29): (1) se coge en el Banco del Laboratorio y viaja en el relicario de la nave (a pie, en brazos: sin correr); (2) lleva **su propio reloj**, que marca al ritmo del sitio donde está y se ve en el tablero como tercer reloj; (3) en la Sala del Motor, **antes de las 9:00**, se saca el motor viejo; (4) se corrige el desfase con **dos ruedas** hasta que su reloj coincide con el de la máquina; (5) durante el **pulso** (9:00) se encaja. Si el reloj no coincide, el pulso lo rechaza y hay que esperar al siguiente ciclo.
+- **Qué cambia al instalarlo** (🟡): el agujero negro nace igual a las 13:30, pero no crece ni se traga los mundos; entrar en él es la única salida.
 - **La entrada:** descenso hacia el horizonte con tensión creciente: mareas, cielo deformado, tiempo exterior acelerándose.
 - **El descubrimiento (🟡 propuesta):** dentro se encuentra **el Archivo de las Puertas**, un lugar fuera del tiempo normal donde pueden verse a la vez todas las bocas que se han abierto en todos los sistemas y todas las épocas. Hay cientos. Los Ausentes no fueron los primeros ni serán los últimos. Hay rastros de **otros viajeros** que también fueron arrastrados y lo intentaron; el último nombre en las paredes está en blanco, esperando el suyo. Y entre las bocas, la de su propio mundo: abierta, con su pueblo aún vivo, y otra aún cerrada que dice "pronto".
 - **Puzzle final:** hay varias bocas con tiempos distintos. Solo una lo deja en casa *antes* de la prueba. Elegirla exige entender los desfases.
@@ -300,10 +304,10 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 1. ❓ **Título** del juego y nombre del sistema ajeno.
 2. ❓ **Protagonista:** nombre, género, edad; ¿se le ve el rostro?
 3. ❓ **Cadena de causas del gusano:** filtraciones naturales (síntoma del fenómeno) más la prueba del Instituto. ¿Te convence que sean las dos cosas a la vez, tal como está en la cronología?
-4. ✅ **Cómo murieron los Ausentes:** resuelto, La Gran Partida. ❓ **Pendiente (más adelante):** destino de los tres que se quedaron (congelados en el horizonte, ecos en la Cámara o muertos en el laboratorio).
-5. ❓ **Final B:** ¿llega tarde, nadie le cree, o profecía autocumplida?
-6. ❓ **Qué decide el final:** Registro completo, una elección final, o ambos.
-7. ✅ **Cuándo se instala el Contrapeso:** durante el pulso de las 9:00. ❓ Falta: los pasos exactos (🟡 sacar primero el motor viejo; sincronizar su reloj) y de qué piezas está hecho.
+4. ✅ **Cómo murieron los Ausentes:** resuelto, La Gran Partida. ✅ **Los tres que se quedaron** murieron en el laboratorio (opción 4, Anthony 2026-10-29).
+5. ✅ **Final B:** la profecía autocumplida (Anthony, 2026-10-29).
+6. ✅ **Qué decide el final:** ambos, la boca que se elige y llevar o no los planos (Anthony, 2026-10-29).
+7. ✅ **Cuándo se instala el Contrapeso:** durante el pulso de las 9:00. ✅ **Los pasos** (Anthony, 2026-10-29): en §9. ❓ Falta: de qué piezas está hecho.
 8. ✅ **Justificación física** de que el agujero negro se trague el sistema (Anthony, 2026-10-28): **la deuda de la red se descarga en él**. Las Puertas están acopladas: al colapsar la garganta de la máquina de Cicatriz, el tiempo que debían todas las demás fluye por ella y la hace crecer. Crece deprisa al principio y se calma al final. ✅ **Nace en Cicatriz**, en la Sala del Motor; el Nudo es la semilla que llama.
 9. ❓ **Sabor cultural:** nombres, música e identidad de ambos pueblos (el del protagonista y los Ausentes).
 10. ❓ **Aspecto de los Ausentes:** humanos, parecidos a humanos o algo muy distinto.
@@ -344,3 +348,4 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-25 · Sesión 2 (grafo de pistas).** Se crea `CONTEXTO_PISTAS.md`: 7 hilos, 8 conclusiones esenciales y 47 fuentes. Claude propone el Nudo (la garganta de la primera Puerta) como masa que dobla la luz y frena el tiempo del Laboratorio, y que el Contrapeso solo pueda instalarse durante el pulso. Pendiente de confirmar.
 - **2026-10-25 · Sesión 2 (decisiones del grafo).** Anthony confirma el Nudo (garganta de la primera Puerta, semilla del agujero negro) como masa del Laboratorio, que el Contrapeso solo se instala durante el pulso de las 9:00 y que la Cámara está en el Laboratorio.
 - **2026-10-29 · Sesión 6 (Fase 9).** Anthony define el pueblo del protagonista: **los Ool** (aspecto en §7), con la Maestra del Instituto. La Maestra y la Directora son personas distintas; la nave se llama el Albatros II; el prólogo abarca el Instituto y la aldea.
+- **2026-10-29 · Sesión 6 (Fase 10).** Anthony acepta las propuestas del plan de la Fase 10: el final B es la **profecía autocumplida**; el final lo deciden **la boca que se elige y llevar o no los planos** del Contrapeso; los **pasos del Contrapeso** (cogerlo en el Laboratorio, su tercer reloj, sacar el motor viejo antes de las 9:00, las dos ruedas y encajarlo en el pulso); y los tres que se quedaron **murieron en el laboratorio** (opción 4).
