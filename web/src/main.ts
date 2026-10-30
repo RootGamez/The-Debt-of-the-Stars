@@ -7,6 +7,10 @@ import { createSoundtrack } from './audio/soundtrack';
 import { createCounterweightRig } from './game/counterweightRig';
 import type { Ending } from './game/epilogue';
 import { createEpilogueRig } from './game/epilogueRig';
+import { aimToward } from './game/aim';
+import { followCrossing, replay, toArchive } from './game/crossings';
+import { endingFromQuery, homeLook } from './game/homecoming';
+import { createHomecomingRig } from './game/homecomingRig';
 import { createFoldedPassage } from './game/foldedPassage';
 import { createTideEffects } from './game/tideEffects';
 import { insideCavity } from './physics/gravity';
@@ -25,7 +29,7 @@ import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
-import { browserStore, loadSave } from './core/save';
+import { browserStore, loadSave, markEndingSeen } from './core/save';
 import { createPrologueGate, WORMHOLE } from './game/prologue';
 import { Guide } from './game/guide';
 import { wormholeCenter } from './game/wormhole';
@@ -62,21 +66,9 @@ import { bodyPose } from './system/orbits';
 import { createDebugOverlay, type SystemSnapshot } from './ui/debugOverlay';
 import { createOrbitMap } from './ui/orbitMap';
 import { isTouchDevice } from './ui/pauseOverlay';
-import {
-  createArrivalLayer,
-  endArrivingPaint,
-  markCrossing,
-  sessionStore,
-  takeCrossing,
-} from './ui/arrival';
+import { createArrivalLayer, endArrivingPaint, sessionStore, takeCrossing } from './ui/arrival';
 import type { WorldRuntime } from './worlds/worldRuntime';
-import {
-  arrivalHref,
-  epilogueHref,
-  homecomingHref,
-  startWorld as firstWorld,
-  worldTitle,
-} from './worlds/worldSelection';
+import { startWorld as firstWorld, worldTitle } from './worlds/worldSelection';
 
 const NEAR_PLANE = 0.05;
 /** Desde aquí, durante este evento, la imagen del Nudo se ve con claridad (cronologia.json). */
@@ -135,9 +127,13 @@ async function start(): Promise<void> {
   // Una partida nueva empieza en casa (el prólogo); tras cruzar el gusano, en Umbral. `?mundo=` manda.
   const saved = loadSave(browserStore());
   if (saved.warning) console.warn(saved.warning);
+  // De vuelta a casa por una boca del Archivo (`?final=`): con A y B, el Hogar de antes, sin lo que aún no ha llegado.
+  const homecomingEnding = endingFromQuery(window.location.search);
+  const home = homecomingEnding ? homeLook(homecomingEnding) : undefined;
   // Una partida de una versión más nueva (que no se toca) ya pasó por casa: se empieza en Umbral.
   const { spec, startWorld, runtimes } = await loadSystem(
     firstWorld(window.location.search, saved.data.prologueDone || saved.readOnly),
+    home?.without,
   );
   // La nave espera donde diga su sistema: junto a La Boca o en el hangar del Instituto.
   const shipHome = spec?.ship !== undefined && runtimes.has(spec.ship) ? spec.ship : undefined;
@@ -169,10 +165,9 @@ async function start(): Promise<void> {
   const atmosphere = createAtmosphereView(scene);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   // Los Ool (en casa): respiran, sus filamentos laten y se giran hacia ti. Y los tuyos brillan al leer.
-  const ool = createOolView(
-    [...runtimes.values()].flatMap((r) => r.world.markers.characters),
-    reducedMotion,
-  );
+  const characters = [...runtimes.values()].flatMap((r) => r.world.markers.characters);
+  for (const { object } of characters) object.scale.multiplyScalar(home?.oolScale ?? 1);
+  const ool = createOolView(characters, reducedMotion);
   const filaments = createFilaments();
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
   const chronology = looping ? loadChronology(window.location.search) : quietChronology();
@@ -299,28 +294,7 @@ async function start(): Promise<void> {
     // Cruzado el gusano, el sistema ajeno se carga de nuevo con la página, detrás del fundido a blanco; cruzado el
     // horizonte estable, el Archivo de las Puertas, detrás del negro; cruzada una boca de casa, Hogar.
     onCross: (wasSaved) => {
-      // Sin dejar atrás en el historial la pantalla cubierta.
-      const cause = session.director.deathCause;
-      switch (cause) {
-        case 'horizonte':
-          markCrossing(sessionStore(), 'negro');
-          window.location.replace(epilogueHref(window.location.href));
-          return;
-        case 'boca':
-          markCrossing(sessionStore());
-          window.location.replace(
-            ending
-              ? homecomingHref(window.location.href, ending)
-              : epilogueHref(window.location.href),
-          );
-          return;
-        case 'gusano':
-          markCrossing(sessionStore());
-          window.location.replace(arrivalHref(window.location.href, wasSaved));
-          return;
-        default:
-          throw new Error(`Cruce sin ruta: ${String(cause)}`);
-      }
+      followCrossing(session.director.deathCause, ending, wasSaved);
     },
     skyDirection: arrivalSkyDirection(player),
     counterweightClock: () => counterweight?.play.clock,
@@ -359,6 +333,32 @@ async function start(): Promise<void> {
       },
     },
   );
+  // De vuelta en casa: la Directora cierra el viaje con la tarjeta del final.
+  const homecoming = homecomingEnding
+    ? createHomecomingRig({
+        ending: homecomingEnding,
+        freeze: () => {
+          game.ui?.closeReading();
+          game.ui?.setEnabled(false);
+          overlay.releasePointer();
+          overlay.setInert(true);
+        },
+        stepOutside: () => {
+          enterWorld(startWorld);
+          createArrivalLayer('negro').clear();
+        },
+        turnToMoon: (share) => {
+          const moon = systemScene.groupOf(WORMHOLE.world)?.getWorldPosition(new Vector3());
+          if (moon) aimToward(player, camera, moon, share);
+        },
+        markSeen: (seen) => {
+          const store = browserStore();
+          markEndingSeen(store, loadSave(store), seen);
+        },
+        replay,
+        backToArchive: toArchive,
+      })
+    : undefined;
   const startSources = sources.get(startWorld);
   if (!startSources) throw new Error(`Faltan las fuentes de ${startWorld}`);
   const ui = createReadingUi({
@@ -370,7 +370,7 @@ async function start(): Promise<void> {
     overlay,
     player,
     touch: isTouchDevice(),
-    actions: counterweight?.play.actions ?? epilogue?.play.actions,
+    actions: counterweight?.play.actions ?? epilogue?.play.actions ?? homecoming?.play.actions,
     readers: { ...counterweight?.readers, ...epilogue?.readers },
   });
   game.ui = ui;
@@ -395,7 +395,10 @@ async function start(): Promise<void> {
         })
       : undefined;
   game.flight = flight;
-  const canAct = (): boolean => overlay.playing && session.acceptsInput && !ui.blocking;
+  // Leyendo, muriendo o cerrado ya el viaje (la vuelta a casa), no se hace nada.
+  const free = (): boolean =>
+    session.acceptsInput && !ui.blocking && !(homecoming?.blocking ?? false);
+  const canAct = (): boolean => overlay.playing && free();
   function shipAction(action: 'board' | 'target' | 'stabilize'): void {
     if (flight && canAct()) flight.action(action, currentWorld.id, session.director.clock.t);
   }
@@ -485,15 +488,13 @@ async function start(): Promise<void> {
           ? blackHole.lens()?.position.clone()
           : systemScene.groupOf(target)?.getWorldPosition(new Vector3());
       if (!where || flight?.piloting) return false;
-      // La dirección en el marco del cuerpo: el giro va sobre su vertical y el cabeceo, aparte.
-      const local = where
-        .sub(camera.position)
-        .normalize()
-        .applyQuaternion(player.state.body.clone().invert());
-      const level = Math.hypot(local.x, local.z);
-      player.look(Math.atan2(-local.x, -local.z), Math.atan2(local.y, level) - player.pitch);
+      aimToward(player, camera, where);
       return true;
     };
+    window.__juego.homecoming = () =>
+      homecomingEnding && homecoming
+        ? { ending: homecomingEnding, phase: homecoming.phase, without: home?.without ?? [] }
+        : null;
     window.__juego.skipTo = (seconds) => {
       session.director.skip(seconds - session.director.clock.t);
       return session.director.clock.t;
@@ -525,7 +526,7 @@ async function start(): Promise<void> {
   let shipDeath: DeathCause | undefined;
   // El final del prólogo: el gusano junto al fragmento de la Luna (solo en casa).
   // (solo el prólogo: el Archivo de las Puertas tampoco tiene ciclo, pero no es casa)
-  const inPrologue = !looping && runtimes.has(WORMHOLE.world);
+  const inPrologue = !looping && runtimes.has(WORMHOLE.world) && !homecoming;
   const prologue = inPrologue ? createPrologueGate() : undefined;
   // La guía del prólogo: un aviso cada vez, hasta que se hace lo que pide.
   const guide = inPrologue ? new Guide() : undefined;
@@ -555,7 +556,7 @@ async function start(): Promise<void> {
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
     (dt) => {
-      const moving = overlay.playing && session.acceptsInput && !ui.blocking;
+      const moving = overlay.playing && free();
       if (flight?.piloting) {
         if (moving) shipDeath ??= flight.step(session.director.clock.t, input.flightKeys(), dt);
         else flight.hold();
@@ -579,7 +580,7 @@ async function start(): Promise<void> {
     (dt) => {
       const look = input.consumeLook();
       const timeRuns = overlay.playing && !ui.blocking; // leer o abrir el Registro detiene el ciclo
-      if (timeRuns && session.acceptsInput) {
+      if (timeRuns && free()) {
         if (flight?.piloting) flight.addLook(look.x, look.y);
         else player.look(-look.x * MOUSE_LOOK_SENSITIVITY, -look.y * MOUSE_LOOK_SENSITIVITY);
       }
@@ -717,6 +718,7 @@ async function start(): Promise<void> {
       );
       if (counterweight?.play.place === 'installed' && !stable) session.director.stabilize();
       epilogue?.update();
+      homecoming?.update(dt);
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);
       ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);

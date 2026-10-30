@@ -1,10 +1,11 @@
 // Carga lo que hace falta para jugar en un mundo: todos los mundos de su sistema (el ajeno, el de casa del
 // prólogo o el Archivo de las Puertas del epílogo) o, si no está en ninguno, solo ese. Cada mundo se prepara (gravedad, colisiones, aparición) ANTES de
-// colgarlo de la escena, para que sus posiciones sean las del modelo.
+// colgarlo de la escena, para que sus posiciones sean las del modelo. Sin las piezas `without` (el Hogar de antes).
 import homeData from '../data/sistema-hogar.json';
 import gatesData from '../data/sistema-puertas.json';
 import systemData from '../data/sistema.json';
 import { parseSystem, type SystemSpec } from '../system/systemData';
+import { leaveOut } from '../worlds/leaveOut';
 import { loadWorld } from '../worlds/loadWorld';
 import { createWorldRuntime, type WorldRuntime } from '../worlds/worldRuntime';
 import { WORLD_IDS } from '../worlds/worldSelection';
@@ -23,10 +24,15 @@ export function systemOf(world: string): SystemSpec | undefined {
     .find((system) => system.bodyOf(world));
 }
 
-export async function loadSystem(startWorld: string): Promise<LoadedSystem> {
+export async function loadSystem(
+  startWorld: string,
+  without: readonly string[] = [],
+): Promise<LoadedSystem> {
   const spec = systemOf(startWorld);
   const ids = spec ? spec.bodies.map((body) => body.world) : [startWorld];
-  const worlds = await Promise.all(ids.map((id) => loadWorld(id)));
+  const worlds = (await Promise.all(ids.map((id) => loadWorld(id)))).map((world) =>
+    leaveOut(world, without),
+  );
   const runtimes = new Map(worlds.map((world) => [world.info.id, createWorldRuntime(world)]));
   return { spec, startWorld, runtimes };
 }

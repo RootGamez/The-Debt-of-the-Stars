@@ -11,6 +11,8 @@ import os
 import random
 import sys
 
+import bpy
+
 SCRIPTS = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else r"D:\Proyectos\Juego\blender\scripts"
 sys.path.insert(0, SCRIPTS)
 import arte_comun as ac  # noqa: E402
@@ -40,6 +42,15 @@ class Luna(ac.Vestido):
         self.rng = random.Random(SEMILLA)
 
     def fragmento_grande(self):
+        """El fragmento clavado, con sus esquirlas, aparte (luna_Fragmento y su hilo de luz, luna_Fragmento_Luz): en
+        el Hogar de antes (Fase 10E) aún no ha llegado. Sus colisiones van en su propio COL_luna_Fragmento, hijo
+        del fragmento: el juego lo quita con él."""
+        frag, brillo, choque = ac.Malla(), ac.Malla(), ac.Colisiones()
+
+        def solido(color, crear, m, crear_col=None):
+            frag.pieza(color, crear, m)
+            choque.pieza(crear_col or crear, m)
+
         lat, lon = FRAGMENTO
         # De cara al norte del sitio (rumbo 20: por donde suele posarse la nave, viniendo de Hogar).
         lugar = self.p.lugar(lat, lon, rumbo=200, apoyo=2.2, hundir=0.7)
@@ -48,26 +59,26 @@ class Luna(ac.Vestido):
         losa = ac.Lugar(lugar.m((0, 0, 1.55), (0.22, 0.06, 0.0)))
         cara = -fondo / 2
         mordida = ((0.45, -0.7, 1.75), 1.05)  # arriba, en la arista de delante: una esfera perfecta
-        self.solido(ARENISCA, ac.fragmento([mordida, ((-1.45, -0.15, 0.35), 0.5)], 12, (ancho, fondo, alto)), losa.m())
+        solido(ARENISCA, ac.fragmento([mordida, ((-1.45, -0.15, 0.35), 0.5)], 12, (ancho, fondo, alto)), losa.m())
         # Estratos: franjas más oscuras de lado a lado (los Ausentes tallaban en capas).
         for z in (-1.35, -0.85, 0.15):
-            self.vista.pieza(ARENISCA_SOMBRA, ac.caja, losa.m((0, cara - 0.012, z), escala=(ancho * 0.97, 0.03, 0.1)))
+            frag.pieza(ARENISCA_SOMBRA, ac.caja, losa.m((0, cara - 0.012, z), escala=(ancho * 0.97, 0.03, 0.1)))
         # La fecha tallada: un aro de doce marcas de reloj (las de los cuartos, más largas) con su aguja y, debajo,
         # tres muescas. Es lo que dice que esta piedra es más antigua que las anteriores.
         cx, cz, r = -0.55, -0.15, 0.42
-        self.vista.pieza(PIZARRA_AUSENTES, ac.toro(r, 0.025, 28, 4), losa.m((cx, cara - 0.015, cz)))
+        frag.pieza(PIZARRA_AUSENTES, ac.toro(r, 0.025, 28, 4), losa.m((cx, cara - 0.015, cz)))
         for k in range(12):
             a = 2 * math.pi * k / 12
             largo = 0.16 if k % 3 == 0 else 0.08
-            self.vista.pieza(PIZARRA_AUSENTES, ac.caja, losa.m((cx + math.cos(a) * (r - 0.1), cara - 0.015, cz + math.sin(a) * (r - 0.1)),
+            frag.pieza(PIZARRA_AUSENTES, ac.caja, losa.m((cx + math.cos(a) * (r - 0.1), cara - 0.015, cz + math.sin(a) * (r - 0.1)),
                                                                (0, math.pi / 2 - a, 0), (0.035, 0.03, largo)))
-        self.vista.pieza(PIZARRA_AUSENTES, ac.caja, losa.m((cx + 0.1, cara - 0.02, cz + 0.08), (0, -0.9, 0), (0.03, 0.03, 0.3)))
+        frag.pieza(PIZARRA_AUSENTES, ac.caja, losa.m((cx + 0.1, cara - 0.02, cz + 0.08), (0, -0.9, 0), (0.03, 0.03, 0.3)))
         for k in range(3):
-            self.vista.pieza(PIZARRA_AUSENTES, ac.cilindro(0.04, 6), losa.m((cx - 0.15 + k * 0.15, cara - 0.015, cz - r - 0.18),
+            frag.pieza(PIZARRA_AUSENTES, ac.cilindro(0.04, 6), losa.m((cx - 0.15 + k * 0.15, cara - 0.015, cz - r - 0.18),
                                                                              (math.pi / 2, 0, 0), (1, 1, 0.03)))
         # El hilo de luz en el fondo de la mordida.
         (mx, my, mz), mr = mordida
-        self.luces.pieza(LUZ, ac.caja, losa.m((mx - 0.1, my + mr - 0.04, mz - 0.25), (0, 0.35, 0), (0.025, 0.02, 0.9)))
+        brillo.pieza(LUZ, ac.caja, losa.m((mx - 0.1, my + mr - 0.04, mz - 0.25), (0, 0.35, 0), (0.025, 0.02, 0.9)))
         # Esquirlas alrededor y la tierra removida donde se clavó.
         for k in range(16):
             a = self.rng.uniform(0, 2 * math.pi)
@@ -75,12 +86,19 @@ class Luna(ac.Vestido):
             s = self.rng.uniform(0.18, 0.42)
             medidas = (s * 1.6, s, s * 0.9)
             corte = [((self.rng.uniform(-0.3, 0.3) * s, -0.5 * s, 0.45 * s), 0.6 * s)]
-            self.solido(self.rng.choice((ARENISCA, ARENISCA_SOMBRA)), ac.fragmento(corte, 3, medidas),
+            solido(self.rng.choice((ARENISCA, ARENISCA_SOMBRA)), ac.fragmento(corte, 3, medidas),
                         lugar.m((math.cos(a) * d, math.sin(a) * d, s * 0.25), (self.rng.uniform(-0.4, 0.4), self.rng.uniform(-0.4, 0.4), a)))
         for k in range(8):
             a = 2 * math.pi * k / 8 + self.rng.uniform(-0.2, 0.2)
-            self.vista.pieza(ROCA_OSCURA, ac.bola(self.rng.uniform(0.5, 0.8), 1),
+            frag.pieza(ROCA_OSCURA, ac.bola(self.rng.uniform(0.5, 0.8), 1),
                              lugar.m((math.cos(a) * 1.9, math.sin(a) * 1.3, 0.05), (0, 0, a), (1.4, 0.6, 0.25)))
+        # En coordenadas del mundo: su origen es el del planeta.
+        piedra, _ = ac.objeto_suelto(self.p, "luna_Fragmento", frag, bpy.data.materials.get(f"M_Paleta_{MUNDO}"),
+                                     ac.matriz())
+        col = ac.colisiones(self.p, "COL_luna_Fragmento", choque)
+        col.parent = piedra
+        col.matrix_world = ac.matriz()
+        ac.objeto_suelto(self.p, "luna_Fragmento_Luz", brillo, ac.material_luces(f"M_Luces_{MUNDO}", LUZ), ac.matriz())
         self.marca("INT_fragmento_luna", lugar, (0.0, -1.7, 1.5))
         self.marca("SPAWN_Luna", lugar, (0.5, -7.0, 1.0), rumbo=200)  # mirando al fragmento
 
@@ -108,6 +126,7 @@ class Luna(ac.Vestido):
                 puestos += 1
 
     def lugares(self):
+        ac.borrar(["COL_luna_Fragmento", "luna_Fragmento", "luna_Fragmento_Luz"])
         self.fragmento_grande()
         self.suelo_lunar()
 

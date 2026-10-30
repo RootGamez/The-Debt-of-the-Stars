@@ -72,6 +72,15 @@ export function homecomingHref(href: string, ending: string): string {
   return url.toString();
 }
 
+/** "Volver a jugar" tras un final: sin mundo ni final, la partida sigue donde toque (en Umbral, ya cruzado el gusano). */
+export function replayHref(href: string): string {
+  const url = new URL(href);
+  url.hash = '';
+  url.searchParams.delete('mundo');
+  url.searchParams.delete(ENDING_PARAM);
+  return url.toString();
+}
+
 /** "umbral" → "Umbral". */
 export function worldTitle(id: string): string {
   return id.charAt(0).toUpperCase() + id.slice(1);

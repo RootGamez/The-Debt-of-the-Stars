@@ -1,14 +1,18 @@
 // Guardado entre ciclos. Lo único que persiste es el conocimiento (CONTEXTO_HISTORIA.md §8): el número de
-// ciclos, la lista de hechos descubiertos (Fase 4) y si ya se jugó el prólogo en casa (Fase 9, versión 2).
+// ciclos, la lista de hechos descubiertos (Fase 4), si ya se jugó el prólogo en casa (Fase 9, versión 2) y los
+// finales vistos (Fase 10, versión 3).
 // Lo leído de localStorage se trata como dato externo: se valida y, si está dañado o manipulado,
 // se descarta y se empieza de cero con un aviso. Sin almacenamiento (modo privado) se juega igual.
 
 export const SAVE_KEY = 'bucle-tiempo:partida';
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 export const MAX_LOOPS = 1_000_000;
 export const MAX_FACTS = 5000;
 /** Ids de hechos: "mundo.nombre" con letras, números, guiones y puntos. */
 const FACT_ID = /^[a-z0-9_.-]{1,64}$/i;
+/** Los finales que cuentan como vistos (la boca equivocada no es un final). */
+export const SEEN_ENDINGS = ['A', 'B'] as const;
+export type SeenEnding = (typeof SEEN_ENDINGS)[number];
 
 export interface SaveData {
   version: typeof SAVE_VERSION;
@@ -16,6 +20,8 @@ export interface SaveData {
   facts: readonly string[];
   /** Ya se cruzó el gusano: la partida empieza en Umbral, no en casa. */
   prologueDone: boolean;
+  /** Los finales que ya se han visto. */
+  endings: readonly SeenEnding[];
 }
 
 /** Lo mínimo de `Storage` que se usa (permite almacenamiento falso en los tests). */
@@ -33,7 +39,7 @@ export interface LoadResult {
 }
 
 export function freshSave(): SaveData {
-  return { version: SAVE_VERSION, loopsCompleted: 0, facts: [], prologueDone: false };
+  return { version: SAVE_VERSION, loopsCompleted: 0, facts: [], prologueDone: false, endings: [] };
 }
 
 /** `localStorage` si el navegador lo permite (puede lanzar en iframes o con cookies bloqueadas). */
@@ -48,15 +54,27 @@ export function browserStore(): KeyValueStore | null {
 /** Versión 1 (antes del prólogo): esas partidas empezaban ya en Umbral, así que lo dan por hecho. */
 function prologueOf(version: unknown, prologueDone: unknown): boolean | null {
   if (version === 1) return true;
-  if (version !== SAVE_VERSION || typeof prologueDone !== 'boolean') return null;
+  if ((version !== 2 && version !== SAVE_VERSION) || typeof prologueDone !== 'boolean') return null;
   return prologueDone;
+}
+
+function isSeenEnding(value: unknown): value is SeenEnding {
+  return (SEEN_ENDINGS as readonly unknown[]).includes(value);
+}
+
+/** Versiones 1 y 2 (antes de los finales): ninguno visto. */
+function endingsOf(version: unknown, endings: unknown): SeenEnding[] | null {
+  if (version !== SAVE_VERSION) return [];
+  if (!Array.isArray(endings) || !endings.every(isSeenEnding)) return null;
+  return [...new Set(endings)];
 }
 
 function validate(raw: unknown): SaveData | null {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
-  const { version, loopsCompleted, facts, prologueDone } = raw as Record<string, unknown>;
+  const { version, loopsCompleted, facts, prologueDone, endings } = raw as Record<string, unknown>;
   const prologue = prologueOf(version, prologueDone);
-  if (prologue === null) return null;
+  const seen = endingsOf(version, endings);
+  if (prologue === null || seen === null) return null;
   if (!Number.isInteger(loopsCompleted)) return null;
   const loops = loopsCompleted as number;
   if (loops < 0 || loops > MAX_LOOPS) return null;
@@ -67,6 +85,7 @@ function validate(raw: unknown): SaveData | null {
     loopsCompleted: loops,
     facts: [...new Set(facts)],
     prologueDone: prologue,
+    endings: seen,
   };
 }
 
@@ -142,7 +161,8 @@ export function saveProgress(store: KeyValueStore | null, data: SaveData): boole
   const facts = [...new Set([...data.facts, ...stored.data.facts])].slice(0, MAX_FACTS);
   const loopsCompleted = Math.max(stored.data.loopsCompleted, data.loopsCompleted);
   const prologueDone = data.prologueDone || stored.data.prologueDone;
-  return writeSave(store, { ...data, loopsCompleted, facts, prologueDone });
+  const endings = [...new Set([...stored.data.endings, ...data.endings])];
+  return writeSave(store, { ...data, loopsCompleted, facts, prologueDone, endings });
 }
 
 /**
@@ -156,6 +176,16 @@ export function markPrologueDone(
 ): boolean {
   if (loaded.readOnly) return false;
   return saveProgress(store, { ...loaded.data, loopsCompleted, prologueDone: true });
+}
+
+/** Al ver un final: lo guarda como visto, con lo demás que ya había. false si no se pudo. */
+export function markEndingSeen(
+  store: KeyValueStore | null,
+  loaded: LoadResult,
+  ending: SeenEnding,
+): boolean {
+  if (loaded.readOnly) return false;
+  return saveProgress(store, { ...loaded.data, endings: [ending] });
 }
 
 /**

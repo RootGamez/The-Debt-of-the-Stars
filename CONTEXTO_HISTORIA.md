@@ -1,7 +1,7 @@
 # CONTEXTO DE HISTORIA — Juego de bucle de tiempo
 
 **Título provisional:** por definir (ver preguntas abiertas)
-**Versión:** v1.9 (el epílogo jugable: el horizonte estable y las bocas de casa)
+**Versión:** v1.10 (los finales jugables: la vuelta a casa)
 **Última actualización:** 2026-10-30 · Fase 10
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)
 
@@ -156,6 +156,8 @@ Condición: el jugador ha dominado el agujero negro con el Contrapeso y ha enten
 3. *Profecía autocumplida (la más original).* Vuelve con algo de los Ausentes "para ayudar", por ejemplo los planos del Contrapeso o un componente, y eso resulta ser **la pieza que le faltaba al Instituto** para hacer funcionar su Puerta de verdad. La cura era la enfermedad. Ahora tiene un sustento fuerte: el Instituto ya está reconstruyendo la tecnología a partir de objetos de los Ausentes.
 
 Qué decide el final (✅ **ambos**, Anthony 2026-10-29): la boca que se elige en el Archivo de las Puertas (entender K7 y K8) **y** una decisión última, llevar o no los planos del Contrapeso. Llevarlos es el final B. 🟡 Una boca equivocada no es un final: deja al explorador después de la prueba mayor ("llega tarde", una escena corta) o lo devuelve al Archivo.
+
+🟡 **Cómo quedó (Fase 10, hito 10E).** Se vuelve a casa por la boca elegida. Con A y B es el Hogar de antes: la Sala de Fragmentos más vacía, el fragmento de la Luna aún no ha llegado y los Ool se ven algo más jóvenes. Hablar con la Directora cierra el viaje con una **tarjeta de final** (título, texto y un botón; los textos son de Anthony, hoy `[texto pendiente]`). En el final A, antes de la tarjeta, un corte a negro lleva a la plaza del Instituto y la vista sube hacia la Luna, limpia. En el B, la tarjeta llega al momento (le das los planos). Llegando tarde se ve el Hogar de siempre; su tarjeta lleva de vuelta al Archivo para elegir otra boca. A y B quedan guardados como vistos; "Volver a jugar" sigue la partida en Umbral con el Registro completo.
 
 ### Licencias narrativas que hay que vigilar
 
@@ -351,3 +353,4 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-29 · Sesión 6 (Fase 9).** Anthony define el pueblo del protagonista: **los Ool** (aspecto en §7), con la Maestra del Instituto. La Maestra y la Directora son personas distintas; la nave se llama el Albatros II; el prólogo abarca el Instituto y la aldea.
 - **2026-10-29 · Sesión 6 (Fase 10).** Anthony acepta las propuestas del plan de la Fase 10: el final B es la **profecía autocumplida**; el final lo deciden **la boca que se elige y llevar o no los planos** del Contrapeso; los **pasos del Contrapeso** (cogerlo en el Laboratorio, su tercer reloj, sacar el motor viejo antes de las 9:00, las dos ruedas y encajarlo en el pulso); y los tres que se quedaron **murieron en el laboratorio** (opción 4).
 - **2026-10-30 · Fase 10 (hito 10D, 🟡).** El epílogo se puede jugar: con el Contrapeso instalado se baja con la nave al horizonte estable (tira de la nave, la marea se nota, el reloj de Umbral se acelera) y al cruzarlo, fundido a negro, se despierta en el Archivo de las Puertas. Se proponen los números del puzzle de las bocas de casa (§9) y que los planos se puedan dejar. La boca y los planos ya deciden el final (A, B o "llega tarde"); las escenas de cada final son el hito siguiente.
+- **2026-10-30 · Fase 10 (hito 10E, 🟡).** Los finales se pueden jugar: la vuelta a casa por la boca elegida (el Hogar de antes con A y B; el de siempre si se llega tarde), la Directora que cierra el viaje con la tarjeta del final, la Luna sin fragmento en el final A y los finales vistos en el guardado. Los textos de las tarjetas y las escenas son de Anthony.

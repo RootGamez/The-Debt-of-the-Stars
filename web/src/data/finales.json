@@ -1,0 +1,17 @@
+{
+  "A": {
+    "titulo": "Final A",
+    "borrador": true,
+    "texto": ["[texto pendiente]"]
+  },
+  "B": {
+    "titulo": "Final B",
+    "borrador": true,
+    "texto": ["[texto pendiente]"]
+  },
+  "tarde": {
+    "titulo": "Llegas tarde",
+    "borrador": true,
+    "texto": ["[texto pendiente]"]
+  }
+}

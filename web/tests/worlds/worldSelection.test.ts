@@ -6,6 +6,7 @@ import {
   EPILOGUE_WORLD,
   homecomingHref,
   PROLOGUE_WORLD,
+  replayHref,
   startWorld,
   WORLD_IDS,
   worldFromQuery,
@@ -37,6 +38,12 @@ describe('the way to the Archivo de las Puertas through the stable horizon (Phas
   it('goes home through a mouth of the Archive with the ending it gave', () => {
     expect(homecomingHref('http://localhost:5180/?debug&mundo=puertas#x', 'A')).toBe(
       'http://localhost:5180/?debug=&mundo=hogar&final=A',
+    );
+  });
+
+  it('plays again after an ending without world or ending, keeping the rest of the address', () => {
+    expect(replayHref('http://localhost:5180/?debug&mundo=hogar&final=B#x')).toBe(
+      'http://localhost:5180/?debug=',
     );
   });
 });

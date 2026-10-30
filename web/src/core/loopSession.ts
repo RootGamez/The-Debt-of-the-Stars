@@ -168,6 +168,7 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
           loopsCompleted: director.loopsCompleted,
           facts,
           prologueDone: loaded.data.prologueDone,
+          endings: loaded.data.endings,
         });
       factsFailed = !ok;
       return ok;

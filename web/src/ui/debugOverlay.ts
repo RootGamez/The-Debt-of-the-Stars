@@ -110,6 +110,12 @@ declare global {
       nearHorizon?(radii: number): boolean;
       /** En el Archivo de las Puertas: si se llevan los planos del Contrapeso. null fuera de allí. */
       epilogue?(): { carryingPlans: boolean } | null;
+      /** De vuelta en casa (`?final=`): el final, en qué punto va el cierre y lo que aún no ha llegado. null si no. */
+      homecoming?(): {
+        ending: 'A' | 'B' | 'tarde';
+        phase: 'playing' | 'turning' | 'card';
+        without: readonly string[];
+      } | null;
       /** La marea donde estás y la tensión acumulada (0–1; a 1, muerte `marea`). */
       tide?(): { tide: number; strain: number };
       /**
