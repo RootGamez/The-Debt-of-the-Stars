@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { LETTERS, NOTEBOOK } from '../../src/data/puzzles';
+import { CONSOLE_CLOCKS, LETTERS, NOTEBOOK, ROUTE, TWINS } from '../../src/data/puzzles';
 import {
   checkLetters,
+  consoleReadings,
+  formatDrift,
   formatMinutes,
+  formatMinutesSeconds,
   lettersInOrder,
   notebook,
+  routeDrift,
+  slowestClock,
+  twins,
   umbralDay,
 } from '../../src/reading/puzzles';
 
@@ -65,5 +71,54 @@ describe('the letters that answer before being sent (Archivo)', () => {
     const days = LETTERS.map(umbralDay);
 
     expect(new Set(days).size).toBe(days.length);
+  });
+});
+
+describe('the twins diaries (Taller)', () => {
+  const book = twins(TWINS);
+
+  it('both note the same storm, the technician on an earlier day of his own', () => {
+    expect(book.stormTaller).toBe(17);
+    expect(book.lag.answer).toBe(3);
+    expect(book.lag.options).toEqual([3, 17, 20]);
+  });
+
+  it('three months on, the technician is much further behind: the lag grows with time', () => {
+    expect(book.last.answer).toBe(85);
+    // Las trampas: el atraso fijo de la tormenta (97), "van iguales" (100) y al revés (115).
+    expect(book.last.options).toEqual([85, 97, 100, 115]);
+  });
+});
+
+describe('the console of the control cabin (Taller)', () => {
+  it('runs every clock at its own rate from the same start', () => {
+    const readings = consoleReadings(CONSOLE_CLOCKS, 10);
+
+    expect(readings.find((r) => r.id === 'umbral')?.minutes).toBe(10);
+    expect(readings.find((r) => r.id === 'taller')?.minutes).toBeCloseTo(8.5);
+  });
+
+  it('shows one destination with no name whose clock barely moves: the slow site', () => {
+    expect(slowestClock(CONSOLE_CLOCKS)).toBe('sin_nombre');
+    expect(slowestClock([])).toBeUndefined();
+  });
+});
+
+describe('the blackboard of the Laboratorio', () => {
+  const route = routeDrift(ROUTE.legs, ROUTE.machineRate);
+
+  it('compares, leg by leg, what the Counterweight and the machine mark', () => {
+    expect(route.legs[0]).toEqual({ place: 'Laboratorio', counterweight: 2, machine: 6 });
+    expect(route.legs[1]).toEqual({ place: 'El vuelo', counterweight: 5, machine: 3 });
+  });
+
+  it('adds the legs: it arrives a minute behind the machine', () => {
+    expect(route.drift).toBe(-1);
+    // Las trampas: solo el Laboratorio (−4), el signo al revés (+1) y "en hora" (0).
+    expect(route.step.options).toEqual([-4, -1, 0, 1]);
+    expect(formatDrift(route.drift)).toBe('1:00 atrasado');
+    expect(formatDrift(0.5)).toBe('0:30 adelantado');
+    expect(formatDrift(0)).toBe('en hora');
+    expect(formatMinutesSeconds(3.4)).toBe('3:24');
   });
 });

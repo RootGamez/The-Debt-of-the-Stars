@@ -724,6 +724,27 @@ body {
   padding-left: 22px;
 }
 
+/* La consola de la Cabina (Fase 10): relojes que corren a su ritmo. */
+.puzzle-console {
+  margin: 4px 0 14px;
+  padding: 0;
+  list-style: none;
+  font-size: 16px;
+}
+
+.puzzle-console-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 0;
+  border-top: 1px solid rgb(232 220 196 / 12%);
+}
+
+.puzzle-console-time {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
 .puzzle-letter {
   display: flex;
   align-items: center;
