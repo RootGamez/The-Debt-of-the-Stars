@@ -75,5 +75,26 @@
       "clue_id": "cicatriz.borde",
       "kind": "observacion"
     }
+  },
+  {
+    "nombre": "INT_palanca",
+    "lat": 32.02,
+    "lon": 37.852,
+    "alto": 3.255,
+    "props": {
+      "clue_id": "cicatriz.palanca",
+      "kind": "objeto"
+    }
+  },
+  {
+    "nombre": "INT_cuna",
+    "lat": 32.03,
+    "lon": 40.0,
+    "alto": 2.863,
+    "props": {
+      "clue_id": "cicatriz.cuna",
+      "kind": "objeto"
+    },
+    "rumbo": 180
   }
 ]

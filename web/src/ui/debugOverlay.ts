@@ -3,6 +3,7 @@
 // Sin `?debug` y con el panel oculto no calcula nada.
 import { Vector3, type WebGLRenderer } from 'three';
 import type { Player } from '../core/player';
+import type { CounterweightSnapshot } from '../game/counterweightPlay';
 import type { ShipSnapshot } from '../game/shipFlight';
 import { gravityAt, type GravityWell } from '../physics/gravity';
 
@@ -99,10 +100,10 @@ declare global {
         debris: number;
       } | null;
       /**
-       * El Contrapeso: dónde está (`bench`, `carried`…), lo que marca su esfera (s) y si va en el relicario de la
-       * nave. null si el sistema no tiene el Laboratorio.
+       * El Contrapeso: dónde está (`bench`, `carried`, `cradle`, `installed`…), lo que marca su esfera (s), si va en
+       * el relicario de la nave, si el motor viejo está fuera y lo que marca la máquina (s). null sin el Laboratorio.
        */
-      counterweight?(): { place: string; clock: number; inShip: boolean } | null;
+      counterweight?(): CounterweightSnapshot | null;
       /** La marea donde estás y la tensión acumulada (0–1; a 1, muerte `marea`). */
       tide?(): { tide: number; strain: number };
       /**

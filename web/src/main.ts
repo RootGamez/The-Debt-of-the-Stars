@@ -166,11 +166,21 @@ async function start(): Promise<void> {
   const filaments = createFilaments();
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
   const chronology = looping ? loadChronology(window.location.search) : quietChronology();
-  // El Contrapeso espera en su Banco del Laboratorio; se coge, se lleva y su reloj va al tablero.
-  const counterweight = await createCounterweightRig(scene, runtimes, chronology);
-  const birthplace = sources
-    .get(BLACK_HOLE.world)
-    ?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
+  // A pie, la nave posada es un obstáculo más del mundo donde está; `ui` llega después (avisos del Contrapeso).
+  const game: { ui?: ReadingUi; flight?: ShipFlight } = {};
+  // El Contrapeso espera en su Banco del Laboratorio; se coge, se lleva (su reloj va al tablero) y se instala en
+  // la Sala del Motor de Cicatriz, en el núcleo de la máquina, donde nace el agujero negro.
+  const counterweight = await createCounterweightRig({
+    scene,
+    runtimes,
+    chronology,
+    notify: (message) => {
+      game.ui?.notify(message);
+    },
+  });
+  const birthplace =
+    counterweight?.core ??
+    sources.get(BLACK_HOLE.world)?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
   const blackHole = createBlackHoleView(
     systemScene.groupOf(BLACK_HOLE.world),
     birthplace,
@@ -188,8 +198,6 @@ async function start(): Promise<void> {
   let tideDeath: DeathCause | undefined;
   const hiddenWorld = spec?.bodies.find((body) => body.hidden)?.world;
 
-  // A pie, la nave posada es un obstáculo más del mundo donde está.
-  const game: { ui?: ReadingUi; flight?: ShipFlight } = {};
   const walking = new Map<string, MotorEnvironment>(
     [...runtimes].map(([id, runtime]) => [
       id,
@@ -307,6 +315,7 @@ async function start(): Promise<void> {
     player,
     touch: isTouchDevice(),
     actions: counterweight?.play.actions,
+    readers: counterweight?.readers,
   });
   game.ui = ui;
 
@@ -579,11 +588,13 @@ async function start(): Promise<void> {
             : undefined,
         star: sun.position,
       });
-      blackHole.update(t, camera, timeRuns ? dt : 0, finalApproach(fallen));
+      // Con el Contrapeso instalado nace igual, pero no crece ni se traga nada.
+      const { stable } = session.director;
+      blackHole.update(t, camera, timeRuns ? dt : 0, finalApproach(fallen), stable);
       const hole = blackHole.lens();
       absorption?.update({
         t,
-        hole,
+        hole: stable ? undefined : hole,
         reference: systemScene.referenceWorld,
         viewer: camera.position,
         dt: timeRuns ? dt : 0,
@@ -617,6 +628,7 @@ async function start(): Promise<void> {
         { t, carrierRate: session.director.rate, piloting },
         timeRuns ? dt : 0,
       );
+      if (counterweight?.play.place === 'installed' && !stable) session.director.stabilize();
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);
       ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);

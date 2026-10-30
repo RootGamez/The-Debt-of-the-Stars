@@ -24,11 +24,15 @@ export function growthFor(chronology: Chronology, hole: HoleGrowth = BLACK_HOLE)
   return { born: birth?.t ?? hole.born, end: chronology.duration, maxRadius: hole.maxRadius };
 }
 
-/** Radio del horizonte (m) en el instante `t` del reloj de Umbral; 0 antes de nacer. */
-export function blackHoleRadius(t: number, hole: HoleGrowth = BLACK_HOLE): number {
+/**
+ * Radio del horizonte (m) en el instante `t` del reloj de Umbral; 0 antes de nacer. `stable`: con el Contrapeso
+ * instalado nace igual pero no pasa de `BLACK_HOLE.stableRadius`.
+ */
+export function blackHoleRadius(t: number, hole: HoleGrowth = BLACK_HOLE, stable = false): number {
   if (!Number.isFinite(t) || t < hole.born) return 0;
   const progress = hole.end > hole.born ? Math.min(1, (t - hole.born) / (hole.end - hole.born)) : 1;
-  return hole.maxRadius * (1 - (1 - progress) ** 2);
+  const radius = hole.maxRadius * (1 - (1 - progress) ** 2);
+  return stable ? Math.min(radius, BLACK_HOLE.stableRadius) : radius;
 }
 
 /** El anillo de luz que se ve rodeando el horizonte (la esfera de fotones está a 1,5 radios). */

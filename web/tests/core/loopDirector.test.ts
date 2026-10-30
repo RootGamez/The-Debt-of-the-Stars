@@ -452,3 +452,38 @@ describe('at home, in the prologue (Phase 9)', () => {
     expect(saved).toEqual([]);
   });
 });
+
+describe('with the Counterweight installed (Phase 10)', () => {
+  it('nothing is swallowed any more, but the loop still ends', () => {
+    const { d } = director({ worldId: 'umbral' });
+    d.skip(70);
+
+    d.stabilize();
+    run(d, 25);
+
+    expect(d.stable).toBe(true);
+    expect(d.absorption).toBe(0);
+    expect(d.phase).toBe('playing');
+    run(d, 5.2);
+    expect(d.deathCause).toBe('fin');
+  });
+
+  it('ignores the front in open space too', () => {
+    const { d } = director({ worldId: undefined, engulfed: true });
+    d.stabilize();
+
+    run(d, 5);
+
+    expect(d.phase).toBe('playing');
+  });
+
+  it('starts every new loop unstable again', () => {
+    const { d } = director();
+    d.stabilize();
+    run(d, 100.1);
+
+    run(d, FADE_OUT_SECONDS + 0.1);
+
+    expect(d.stable).toBe(false);
+  });
+});

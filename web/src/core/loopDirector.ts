@@ -88,6 +88,11 @@ export class LoopDirector {
   saveFailed = false;
   /** Ids de los últimos eventos que empezaron, del más antiguo al más reciente. */
   readonly recentEvents: string[] = [];
+  /**
+   * El Contrapeso está instalado (Fase 10C): el agujero negro nace pero no se traga nada. El ciclo termina igual a
+   * las 15:00. Dura hasta el ciclo siguiente.
+   */
+  stable = false;
   private phaseTime = 0;
   private seenLandings = 0;
   private hasCrossed = false;
@@ -109,8 +114,14 @@ export class LoopDirector {
     return Math.max(MIN_RATE, this.locale().rate);
   }
 
+  /** El Contrapeso encajó: desde ahora y hasta el ciclo siguiente nada cae al agujero. */
+  stabilize(): void {
+    this.stable = true;
+  }
+
   /** Avance de la absorción del mundo (0 antes de empezar, 1 al terminar). */
   get absorption(): number {
+    if (this.stable) return 0;
     const { worldId, engulfed } = this.locale();
     if (worldId === undefined) return engulfed ? 1 : 0;
     return absorptionProgress(absorptionWindow(this.options.chronology, worldId), this.clock.t);
@@ -209,13 +220,17 @@ export class LoopDirector {
   private causeOfDeath(hardLanding: boolean): DeathCause | undefined {
     if (hardLanding) return 'caida';
     if (!this.looping) return undefined; // en casa no hay fin del ciclo ni absorción
-    const { worldId, engulfed } = this.locale();
-    if (worldId === undefined && engulfed) return 'absorcion';
-    const window =
-      worldId === undefined ? undefined : absorptionWindow(this.options.chronology, worldId);
-    if (window && this.clock.t >= window[1]) return 'absorcion';
+    if (!this.stable && this.swallowed()) return 'absorcion';
     if (this.clock.ended) return 'fin';
     return undefined;
+  }
+
+  /** Donde estás ya ha caído al agujero (en tu mundo, al final de su ventana; en el espacio, al pasar el frente). */
+  private swallowed(): boolean {
+    const { worldId, engulfed } = this.locale();
+    if (worldId === undefined) return engulfed;
+    const window = absorptionWindow(this.options.chronology, worldId);
+    return window !== undefined && this.clock.t >= window[1];
   }
 
   private fadeOut(realDt: number): DirectorUpdate {
@@ -232,6 +247,7 @@ export class LoopDirector {
     this.clock = createLoopClock(this.options.chronology.duration);
     this.seenLandings = 0;
     this.deathCause = undefined;
+    this.stable = false;
     this.enter('waking');
     return { changes: [], restart: true, crossed: false };
   }

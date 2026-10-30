@@ -1,13 +1,18 @@
 // Panel de los lectores de puzle (Fase 7, hito 7E): el cuaderno del turno (completar la última hora del
 // Archivo) y las cartas del Archivo (ordenarlas por cuándo se escribieron de verdad); desde la Fase 10, los tres
-// que enseñan la cuenta del Contrapeso (ui/clockPuzzles.ts). Diálogo accesible; todo entra como texto. La
-// lógica está en reading/puzzles.ts (con tests).
+// que enseñan la cuenta del Contrapeso (ui/clockPuzzles.ts) y los que trae el juego (las ruedas de la cuna, que
+// miran el Contrapeso en vivo: `CustomReaders`). Diálogo accesible; todo entra como texto. La lógica está en
+// reading/puzzles.ts (con tests).
 import { LETTERS, NOTEBOOK, type Letter } from '../data/puzzles';
 import type { PuzzleReader } from '../registry/clues';
 import type { OpenReading } from '../reading/readingSession';
 import { checkLetters, formatMinutes, lettersInOrder, notebook } from '../reading/puzzles';
 import { consoleBody, routeBody, twinsBody, type PuzzleBody } from './clockPuzzles';
 import { button, element } from './puzzleKit';
+
+/** Un lector que trae el juego: recibe la línea de estado y si ya se resolvió, y llama a `solve` al resolverlo. */
+export type CustomReader = (status: HTMLElement, solved: boolean, solve: () => void) => PuzzleBody;
+export type CustomReaders = Partial<Record<PuzzleReader, CustomReader>>;
 
 export interface PuzzlePanel {
   /** `onSolved` se llama una vez, al resolverlo. */
@@ -31,7 +36,11 @@ export function equivalence(rate: number): string {
   return `Un día allí son ${(1 / rate).toFixed(1)} en Umbral.`;
 }
 
-export function createPuzzlePanel(onClose: () => void, touch: boolean): PuzzlePanel {
+export function createPuzzlePanel(
+  onClose: () => void,
+  touch: boolean,
+  readers: CustomReaders = {},
+): PuzzlePanel {
   const backdrop = element('div', 'puzzle');
   backdrop.setAttribute('role', 'dialog');
   backdrop.setAttribute('aria-modal', 'true');
@@ -172,6 +181,8 @@ export function createPuzzlePanel(onClose: () => void, touch: boolean): PuzzlePa
   }
 
   function bodyFor(reader: PuzzleReader, solved: boolean, solve: () => void): PuzzleBody {
+    const custom = readers[reader];
+    if (custom) return custom(status, solved, solve);
     switch (reader) {
       case 'cartas':
         return { body: lettersBody(solved, solve) };
@@ -183,6 +194,8 @@ export function createPuzzlePanel(onClose: () => void, touch: boolean): PuzzlePa
         return routeBody(solved, status, solve);
       case 'cuaderno':
         return { body: notebookBody(solved, solve) };
+      case 'ruedas':
+        return { body: element('p', 'puzzle-hint', 'No hay nada que ajustar.') };
     }
   }
 
@@ -213,8 +226,9 @@ export function createPuzzlePanel(onClose: () => void, touch: boolean): PuzzlePa
       backdrop.hidden = false;
       open = true;
       (
-        card.querySelector<HTMLButtonElement>('.puzzle-choice, .puzzle-move:not(:disabled)') ??
-        close
+        card.querySelector<HTMLButtonElement>(
+          '.puzzle-choice, .puzzle-move:not(:disabled), .puzzle-wheel',
+        ) ?? close
       ).focus({
         preventScroll: true,
       });

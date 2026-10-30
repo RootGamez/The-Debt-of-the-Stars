@@ -44,6 +44,14 @@ describe('the size of the black hole', () => {
     expect(blackHoleRadius(5000)).toBeCloseTo(BLACK_HOLE.maxRadius);
     expect(blackHoleRadius(Number.NaN)).toBe(0);
   });
+
+  it('stays small once the Counterweight holds the network (Phase 10)', () => {
+    expect(blackHoleRadius(BLACK_HOLE.born - 1, BLACK_HOLE, true)).toBe(0);
+    expect(blackHoleRadius(BLACK_HOLE.end, BLACK_HOLE, true)).toBe(BLACK_HOLE.stableRadius);
+    expect(blackHoleRadius(BLACK_HOLE.born + 1, BLACK_HOLE, true)).toBeLessThanOrEqual(
+      BLACK_HOLE.stableRadius,
+    );
+  });
 });
 
 describe('the growth of the black hole in the chronology being played', () => {

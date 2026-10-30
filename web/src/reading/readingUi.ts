@@ -23,7 +23,7 @@ import { buildRegistryView } from '../registry/registryView';
 import { createInteractPrompt } from '../ui/interactPrompt';
 import { createNotice } from '../ui/notice';
 import type { PauseOverlay } from '../ui/pauseOverlay';
-import { createPuzzlePanel } from '../ui/puzzlePanel';
+import { createPuzzlePanel, type CustomReaders } from '../ui/puzzlePanel';
 import { createReadingPanel } from '../ui/readingPanel';
 import { createRecordingPanel } from '../ui/recordingPanel';
 import { createRegistryPanel } from '../ui/registryPanel';
@@ -42,19 +42,21 @@ export interface ReadingUiOptions {
   overlay: PauseOverlay;
   player: Player;
   touch: boolean;
-  /** Lo que se hace con algunas fuentes además de leerlas (coger el Contrapeso). */
+  /** Lo que se hace con algunas fuentes además de leerlas (coger el Contrapeso, tirar de la palanca…). */
   actions?: SourceActions;
+  /** Lectores de puzle que trae el juego (las ruedas de la cuna, que miran el Contrapeso en vivo). */
+  readers?: CustomReaders;
 }
 
-/**
- * Lo que se hace con una fuente además de leerla. Primero se lee: el verbo solo se ofrece cuando ya no da nada
- * nuevo (por ejemplo, examinar el Contrapeso y luego cogerlo).
- */
+/** Lo que se hace con una fuente además de leerla (por ejemplo, examinar el Contrapeso y luego cogerlo). */
 export interface SourceActions {
   /** Ya no está (se la llevaron): ni aviso ni rombo. */
   gone(id: string): boolean;
-  /** El verbo del aviso si ahora se hace algo con ella ("coger"), o undefined. */
-  verb(id: string): string | undefined;
+  /**
+   * El verbo del aviso si ahora se hace algo con ella ("coger"), o undefined para leerla. `unread`: aún da algo
+   * nuevo al leerla (lo normal es leerla primero).
+   */
+  verb(id: string, unread: boolean): string | undefined;
   run(id: string): void;
 }
 
@@ -89,6 +91,8 @@ export interface ReadingUi {
   /** Una grabación está sonando (para el murmullo), o null. */
   readonly listening: ListeningState | null;
   openRegistry(): void;
+  /** Un aviso breve, el mismo de "Anotado en el Registro". */
+  notify(message: string): void;
   /** Herramienta de depuración (`?debug`): coloca al jugador frente a una fuente. */
   teleportTo(clueId: string): boolean;
   snapshot(): RegistrySnapshot;
@@ -156,9 +160,13 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   const readingPanel = createReadingPanel(() => {
     closeReading();
   }, touch);
-  const puzzlePanel = createPuzzlePanel(() => {
-    closeReading();
-  }, touch);
+  const puzzlePanel = createPuzzlePanel(
+    () => {
+      closeReading();
+    },
+    touch,
+    options.readers,
+  );
   /** La grabación abierta: suena con el tiempo real aunque el ciclo esté detenido. */
   let playback: RecordingPlayback | null = null;
   let understoodShown = false;
@@ -264,9 +272,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     }
   }
 
-  /** El verbo que ofrece ahora una fuente en vez de su lectura, si ya no da nada nuevo. */
+  /** El verbo que ofrece ahora una fuente en vez de su lectura, si lo hay. */
   function actionOf(id: string): string | undefined {
-    return canGive(id) ? undefined : actions?.verb(id);
+    return actions?.verb(id, canGive(id));
   }
 
   function activate(): void {
@@ -372,6 +380,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       }
     },
     openRegistry,
+    notify(message) {
+      notice.show(message);
+    },
     get blocking() {
       return reading.frozen || registryPanel.isOpen;
     },

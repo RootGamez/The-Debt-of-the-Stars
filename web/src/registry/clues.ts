@@ -15,9 +15,17 @@ export const SOURCE_KINDS = [
 export type SourceKind = (typeof SOURCE_KINDS)[number];
 /**
  * Lectores de puzle (reading/puzzles.ts): el cuaderno de Umbral y las cartas del Archivo (Fase 7); los diarios de
- * los gemelos, la consola de la Cabina y la pizarra del Laboratorio (Fase 10).
+ * los gemelos, la consola de la Cabina y la pizarra del Laboratorio (Fase 10A); las ruedas de la cuna del núcleo
+ * (Fase 10C, las pone el juego: miran el Contrapeso en vivo).
  */
-export const PUZZLE_READERS = ['cuaderno', 'cartas', 'gemelos', 'cabina', 'pizarra'] as const;
+export const PUZZLE_READERS = [
+  'cuaderno',
+  'cartas',
+  'gemelos',
+  'cabina',
+  'pizarra',
+  'ruedas',
+] as const;
 export type PuzzleReader = (typeof PUZZLE_READERS)[number];
 
 const ID = /^[a-z0-9_.-]{1,64}$/i;

@@ -698,6 +698,7 @@ body {
 
 .puzzle-choice,
 .puzzle-move,
+.puzzle-wheel,
 .puzzle-check,
 .puzzle-close {
   min-height: 40px;
@@ -748,6 +749,34 @@ body {
 .puzzle-console-time {
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
   font-variant-numeric: tabular-nums;
+}
+
+/* Las ruedas de la cuna del núcleo (Fase 10C): minutos y segundos, para igualar los dos relojes. */
+.puzzle-wheels {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.puzzle-wheels[hidden] {
+  display: none;
+}
+
+.puzzle-wheel-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.puzzle-wheel {
+  min-width: 44px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.puzzle-wheel-name {
+  min-width: 80px;
+  text-align: center;
 }
 
 .puzzle-letter {

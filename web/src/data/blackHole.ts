@@ -13,6 +13,11 @@ export const BLACK_HOLE = {
   /** Radio del horizonte al final del ciclo. */
   maxRadius: 600,
   /**
+   * 🟡 Con el Contrapeso instalado (Fase 10C) nace igual, pero se queda de este tamaño en el núcleo de la máquina:
+   * no crece ni se traga nada, y se puede bajar a él con la nave.
+   */
+  stableRadius: 6,
+  /**
    * El palco (CONTEXTO_PLANETAS §7): el último mundo en caer, desde donde se ve el final entero. 🟡 Ahí la marea
    * del agujero se nota, pero no mata.
    */

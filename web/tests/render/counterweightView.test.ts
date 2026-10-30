@@ -1,9 +1,11 @@
-import { Group, Object3D, PerspectiveCamera, Scene, Vector3 } from 'three';
+import { Group, Object3D, PerspectiveCamera, Quaternion, Scene, Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
 import {
   createCounterweightView,
+  RISE_SECONDS,
   type CounterweightModel,
 } from '../../src/render/counterweightView';
+import type { Anchor } from '../../src/render/poseTween';
 
 function fakeModel(): CounterweightModel {
   const object = new Group();
@@ -12,26 +14,34 @@ function fakeModel(): CounterweightModel {
   return { object, rings: [{ object: ring, spin: 2 }] };
 }
 
+function anchor(parent: Object3D, x: number, scale = 1): Anchor {
+  return { parent, pose: { position: new Vector3(x, 0, 0), quaternion: new Quaternion(), scale } };
+}
+
 function setup() {
   const scene = new Scene();
-  const bench = new Object3D();
-  bench.position.set(5, 0, 0);
-  scene.add(bench);
+  const lab = new Object3D();
+  const cicatriz = new Object3D();
+  scene.add(lab, cicatriz);
   const camera = new PerspectiveCamera();
   camera.position.set(0, 1.6, 0);
   const model = fakeModel();
-  const view = createCounterweightView(model, scene);
-  view.anchorTo(bench);
-  return { scene, bench, camera, model, view };
+  const view = createCounterweightView(model, scene, {
+    bench: anchor(lab, 5),
+    cradle: anchor(cicatriz, 1),
+    core: anchor(cicatriz, 11, 2),
+  });
+  return { scene, lab, cicatriz, camera, model, view };
 }
 
 describe('the Counterweight view', () => {
-  it('sits on its anchor and its rings turn', () => {
-    const { bench, camera, model, view } = setup();
+  it('sits on its bench and its rings turn', () => {
+    const { lab, camera, model, view } = setup();
 
-    view.update('anchored', camera, 0.5);
+    view.update('bench', camera, 0.5);
 
-    expect(model.object.parent).toBe(bench);
+    expect(model.object.parent).toBe(lab);
+    expect(model.object.position.x).toBe(5);
     expect(model.object.visible).toBe(true);
     expect(model.rings[0]?.object.rotation.y).toBeCloseTo(1);
   });
@@ -51,14 +61,31 @@ describe('the Counterweight view', () => {
     expect(model.object.visible).toBe(false);
   });
 
-  it('goes back to its anchor, at its own size, after being carried', () => {
-    const { bench, camera, model, view } = setup();
+  it('rises slowly from the cradle into the core with the pulse, growing to the size of the hole', () => {
+    const { cicatriz, camera, model, view } = setup();
     view.update('held', camera, 0);
+    view.update('cradle', camera, 0);
+    expect(model.object.parent).toBe(cicatriz);
+    expect(model.object.position.x).toBe(1);
 
-    view.update('anchored', camera, 0);
+    view.update('core', camera, RISE_SECONDS / 2);
+    expect(model.object.position.x).toBeGreaterThan(1);
+    expect(model.object.position.x).toBeLessThan(11);
 
-    expect(model.object.parent).toBe(bench);
-    expect(model.object.position).toEqual(new Vector3());
-    expect(model.object.scale.x).toBe(1);
+    view.update('core', camera, RISE_SECONDS);
+    expect(model.object.position.x).toBeCloseTo(11);
+    expect(model.object.scale.x).toBeCloseTo(2);
+  });
+
+  it('is not shown where its world is missing', () => {
+    const scene = new Scene();
+    const lab = new Object3D();
+    scene.add(lab);
+    const model = fakeModel();
+    const view = createCounterweightView(model, scene, { bench: anchor(lab, 5) });
+
+    view.update('cradle', new PerspectiveCamera(), 0);
+
+    expect(model.object.visible).toBe(false);
   });
 });
