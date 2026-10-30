@@ -65,11 +65,14 @@ describe('where each crossing leads', () => {
   });
 
   it('plays again without world or ending, and goes back to the Archive from home', () => {
-    replay();
+    replay(true);
+    expect(session.get(ARRIVAL_KEY)).toBe('blanco');
+    replay(false);
     toArchive();
 
     expect(replaced).toEqual([
       'http://localhost:5180/?debug=',
+      'http://localhost:5180/?debug=&mundo=umbral',
       'http://localhost:5180/?debug=&mundo=puertas',
     ]);
   });

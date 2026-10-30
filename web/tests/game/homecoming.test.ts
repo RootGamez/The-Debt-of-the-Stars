@@ -18,6 +18,7 @@ describe('the way home from the Archive of the Gates', () => {
     expect(endingFromQuery('?mundo=hogar&final=C')).toBeUndefined();
     expect(endingFromQuery('?mundo=hogar&final=a')).toBeUndefined();
     expect(endingFromQuery('?mundo=hogar')).toBeUndefined();
+    expect(endingFromQuery('?mundo=Hogar&final=B')).toBe('B');
   });
 
   it('counts A and B as endings, and arriving late as not one', () => {

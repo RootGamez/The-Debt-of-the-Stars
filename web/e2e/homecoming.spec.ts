@@ -88,8 +88,15 @@ test('ending B is saved together with the endings already seen', async ({ page }
 
   await talkToTheDirector(page);
 
-  await expect(page.getByRole('dialog', { name: 'Final B' })).toBeVisible();
+  const card = page.getByRole('dialog', { name: 'Final B' });
+  await expect(card).toBeVisible();
   expect(await savedEndings(page)).toEqual(['A', 'B']);
+  // Ya no hay vuelta al juego: ni pausa ni Registro.
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('KeyR');
+  await expect(page.locator('.overlay')).toBeHidden();
+  await expect(page.locator('.registry')).toBeHidden();
+  await expect(card.getByRole('button', { name: 'Volver a jugar' })).toBeFocused();
   // Cerrado el viaje, no se anda.
   await page.keyboard.down('KeyW');
   await page.waitForTimeout(500);

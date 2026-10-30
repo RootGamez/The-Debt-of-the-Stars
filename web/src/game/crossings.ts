@@ -11,9 +11,10 @@ export function toArchive(): void {
   window.location.replace(epilogueHref(window.location.href));
 }
 
-/** "Volver a jugar" tras un final: sin mundo ni final, la partida sigue en Umbral. */
-export function replay(): void {
-  window.location.replace(replayHref(window.location.href));
+/** "Volver a jugar" tras un final: la partida sigue en Umbral (`saved`: el guardado recuerda el prólogo hecho). */
+export function replay(saved: boolean): void {
+  markCrossing(sessionStore());
+  window.location.replace(replayHref(window.location.href, saved));
 }
 
 /**

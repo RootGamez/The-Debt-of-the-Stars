@@ -42,8 +42,20 @@ describe('the way to the Archivo de las Puertas through the stable horizon (Phas
   });
 
   it('plays again after an ending without world or ending, keeping the rest of the address', () => {
-    expect(replayHref('http://localhost:5180/?debug&mundo=hogar&final=B#x')).toBe(
+    expect(replayHref('http://localhost:5180/?debug&mundo=hogar&final=B#x', true)).toBe(
       'http://localhost:5180/?debug=',
+    );
+  });
+
+  it('asks for Umbral when playing again if the save could not remember the prologue', () => {
+    expect(replayHref('http://localhost:5180/?mundo=hogar&final=A', false)).toBe(
+      'http://localhost:5180/?mundo=umbral',
+    );
+  });
+
+  it('goes back to the Archive without the ending of the way home', () => {
+    expect(epilogueHref('http://localhost:5180/?mundo=hogar&final=tarde')).toBe(
+      'http://localhost:5180/?mundo=puertas',
     );
   });
 });

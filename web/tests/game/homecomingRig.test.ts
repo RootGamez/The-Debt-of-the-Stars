@@ -8,7 +8,7 @@ import { showEndingCard } from '../../src/ui/endingCard';
 vi.mock('../../src/ui/endingCard', () => ({ showEndingCard: vi.fn() }));
 const shown = vi.mocked(showEndingCard);
 
-function rig(ending: Ending) {
+function rig(ending: Ending, { reducedMotion = false, canSave = true } = {}) {
   const calls = {
     freeze: 0,
     outside: 0,
@@ -28,8 +28,10 @@ function rig(ending: Ending) {
     turnToMoon: (share) => {
       calls.turns.push(share);
     },
+    reducedMotion,
     markSeen: (seen) => {
       calls.seen.push(seen);
+      return canSave;
     },
     replay: () => {
       calls.replay += 1;
@@ -62,6 +64,7 @@ describe('the end of the journey at home', () => {
     expect(calls.seen).toEqual(['B']);
     expect(calls.outside).toBe(0);
     expect(shown.mock.calls[0]?.[0].title).toBe('Final B');
+    expect(shown.mock.calls[0]?.[2]).toBeUndefined();
     expect(lastChoices().map((c) => c.label)).toEqual(['Volver a jugar']);
     lastChoices()[0]?.run();
     expect(calls.replay).toBe(1);
@@ -85,6 +88,21 @@ describe('the end of the journey at home', () => {
     expect(homecoming.phase).toBe('card');
     expect(calls.seen).toEqual(['A']);
     expect(shown).toHaveBeenCalledTimes(1);
+  });
+
+  it('turns at once with reduced motion', () => {
+    const { homecoming, calls } = rig('A', { reducedMotion: true });
+    homecoming.play.actions.run(DIRECTOR);
+    homecoming.update(0.5);
+
+    expect(calls.turns).toEqual([1]);
+  });
+
+  it('says so on the card when the ending could not be saved', () => {
+    const { homecoming } = rig('B', { canSave: false });
+    homecoming.play.actions.run(DIRECTOR);
+
+    expect(shown.mock.calls[0]?.[2]).toBe('No se ha podido guardar el final.');
   });
 
   it('arriving late is not an ending: nothing is saved and the card leads back to the Archive', () => {

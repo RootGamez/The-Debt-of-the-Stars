@@ -74,9 +74,12 @@ export function createArrivalLayer(color: ArrivalColor = 'blanco'): ArrivalLayer
       layer.addEventListener('transitionend', remove, { once: true });
       // Por si la transición no corre (estilos que las apagan): se quita igual al terminar su tiempo.
       window.setTimeout(remove, (ARRIVAL_FADE_SECONDS + REMOVE_MARGIN_SECONDS) * 1000);
-      // Un fotograma después, para que la transición arranque desde el blanco pintado.
+      // Dos fotogramas después, para que la transición arranque desde el blanco ya pintado (aunque la capa se
+      // acabe de crear, como en el corte a negro del final A).
       requestAnimationFrame(() => {
-        layer.classList.add('llegada-fuera');
+        requestAnimationFrame(() => {
+          layer.classList.add('llegada-fuera');
+        });
       });
     },
   };

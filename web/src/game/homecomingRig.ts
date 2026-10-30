@@ -22,8 +22,10 @@ export interface HomecomingRigOptions {
   stepOutside(): void;
   /** Gira la vista hacia la Luna una parte (0–1) de lo que falta. */
   turnToMoon(share: number): void;
-  /** Guarda el final como visto. */
-  markSeen(ending: SeenEnding): void;
+  /** Con movimiento reducido, la vista se pone de golpe mirando a la Luna. */
+  reducedMotion: boolean;
+  /** Guarda el final como visto; false si no se pudo. */
+  markSeen(ending: SeenEnding): boolean;
   replay: () => void;
   backToArchive: () => void;
 }
@@ -45,12 +47,13 @@ export function createHomecomingRig(options: HomecomingRigOptions): HomecomingRi
 
   function show(): void {
     phase = 'card';
-    if (isFinal(ending)) options.markSeen(ending);
+    const saved = !isFinal(ending) || options.markSeen(ending);
     showEndingCard(
       card,
       isFinal(ending)
         ? [{ label: 'Volver a jugar', run: options.replay }]
         : [{ label: 'Volver al Archivo', run: options.backToArchive }],
+      saved ? undefined : 'No se ha podido guardar el final.',
     );
   }
 
@@ -60,8 +63,8 @@ export function createHomecomingRig(options: HomecomingRigOptions): HomecomingRi
       show();
       return;
     }
-    options.stepOutside();
     phase = 'turning';
+    options.stepOutside();
   });
 
   return {
@@ -75,7 +78,7 @@ export function createHomecomingRig(options: HomecomingRigOptions): HomecomingRi
     update(dt) {
       if (phase !== 'turning' || !(dt > 0)) return;
       turned += dt;
-      options.turnToMoon(Math.min(1, TURN_RATE * dt));
+      options.turnToMoon(options.reducedMotion ? 1 : Math.min(1, TURN_RATE * dt));
       if (turned >= TURN_SECONDS) show();
     },
   };

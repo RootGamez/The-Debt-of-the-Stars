@@ -4,6 +4,8 @@
 import { Vector3, type WebGLRenderer } from 'three';
 import type { Player } from '../core/player';
 import type { CounterweightSnapshot } from '../game/counterweightPlay';
+import type { Ending } from '../game/epilogue';
+import type { HomecomingPhase } from '../game/homecomingRig';
 import type { ShipSnapshot } from '../game/shipFlight';
 import { gravityAt, type GravityWell } from '../physics/gravity';
 
@@ -111,11 +113,7 @@ declare global {
       /** En el Archivo de las Puertas: si se llevan los planos del Contrapeso. null fuera de allí. */
       epilogue?(): { carryingPlans: boolean } | null;
       /** De vuelta en casa (`?final=`): el final, en qué punto va el cierre y lo que aún no ha llegado. null si no. */
-      homecoming?(): {
-        ending: 'A' | 'B' | 'tarde';
-        phase: 'playing' | 'turning' | 'card';
-        without: readonly string[];
-      } | null;
+      homecoming?(): { ending: Ending; phase: HomecomingPhase; without: readonly string[] } | null;
       /** La marea donde estás y la tensión acumulada (0–1; a 1, muerte `marea`). */
       tide?(): { tide: number; strain: number };
       /**

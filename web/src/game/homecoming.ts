@@ -23,7 +23,7 @@ export const YOUNGER_OOL = 0.85;
 /** El final de la dirección, solo en Hogar y solo si es uno de los tres (la dirección no es de fiar). */
 export function endingFromQuery(search: string): Ending | undefined {
   const params = new URLSearchParams(search);
-  if (params.get('mundo') !== PROLOGUE_WORLD) return undefined;
+  if (params.get('mundo')?.toLowerCase() !== PROLOGUE_WORLD) return undefined;
   const value = params.get(ENDING_PARAM);
   return ENDINGS.find((ending) => ending === value);
 }

@@ -57,6 +57,7 @@ export function epilogueHref(href: string): string {
   const url = new URL(href);
   url.hash = '';
   url.searchParams.set('mundo', EPILOGUE_WORLD);
+  url.searchParams.delete(ENDING_PARAM);
   return url.toString();
 }
 
@@ -72,11 +73,12 @@ export function homecomingHref(href: string, ending: string): string {
   return url.toString();
 }
 
-/** "Volver a jugar" tras un final: sin mundo ni final, la partida sigue donde toque (en Umbral, ya cruzado el gusano). */
-export function replayHref(href: string): string {
-  const url = new URL(href);
-  url.hash = '';
-  url.searchParams.delete('mundo');
+/**
+ * "Volver a jugar" tras un final: sin mundo ni final, la partida sigue en Umbral (ya cruzado el gusano). Si el
+ * guardado no lo recuerda (`saved` false: sin almacenamiento), se pide Umbral en la dirección, como al cruzar.
+ */
+export function replayHref(href: string, saved: boolean): string {
+  const url = new URL(arrivalHref(href, saved));
   url.searchParams.delete(ENDING_PARAM);
   return url.toString();
 }

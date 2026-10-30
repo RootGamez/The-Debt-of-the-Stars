@@ -67,6 +67,7 @@ import { createDebugOverlay, type SystemSnapshot } from './ui/debugOverlay';
 import { createOrbitMap } from './ui/orbitMap';
 import { isTouchDevice } from './ui/pauseOverlay';
 import { createArrivalLayer, endArrivingPaint, sessionStore, takeCrossing } from './ui/arrival';
+import { lockGameKeys } from './ui/endingCard';
 import type { WorldRuntime } from './worlds/worldRuntime';
 import { startWorld as firstWorld, worldTitle } from './worlds/worldSelection';
 
@@ -342,6 +343,7 @@ async function start(): Promise<void> {
           game.ui?.setEnabled(false);
           overlay.releasePointer();
           overlay.setInert(true);
+          lockGameKeys();
         },
         stepOutside: () => {
           enterWorld(startWorld);
@@ -351,11 +353,14 @@ async function start(): Promise<void> {
           const moon = systemScene.groupOf(WORMHOLE.world)?.getWorldPosition(new Vector3());
           if (moon) aimToward(player, camera, moon, share);
         },
+        reducedMotion,
         markSeen: (seen) => {
           const store = browserStore();
-          markEndingSeen(store, loadSave(store), seen);
+          return markEndingSeen(store, loadSave(store), seen);
         },
-        replay,
+        replay: () => {
+          replay(loadSave(browserStore()).data.prologueDone);
+        },
         backToArchive: toArchive,
       })
     : undefined;
