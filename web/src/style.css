@@ -489,6 +489,36 @@ body {
   opacity: 0;
 }
 
+/* La guía del prólogo (Fase 9): un aviso cada vez, bajo los avisos del Registro. */
+.guia {
+  position: fixed;
+  left: 50%;
+  top: 64px;
+  max-width: min(620px, calc(100vw - 32px));
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgb(7 7 12 / 55%);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.guia.guia-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guia {
+    transition: none;
+  }
+}
+
 .reader,
 .recorder,
 .puzzle,

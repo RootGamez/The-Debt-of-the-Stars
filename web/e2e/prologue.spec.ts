@@ -40,6 +40,15 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   await play(page);
 
   expect(await page.evaluate(() => window.__juego?.warpTo?.('luna') ?? false)).toBe(true);
+  // Andar por la Luna no basta: se abre al examinar el fragmento.
+  await page.waitForTimeout(2500);
+  expect(await value(page, 'world')).toBe('luna');
+  expect(
+    await page.evaluate(() => window.__juego?.teleportTo?.('instituto.fragmento_luna') ?? false),
+  ).toBe(true);
+  await page.keyboard.press('KeyE');
+  await expect(page.locator('.reader')).toBeVisible();
+  await page.keyboard.press('KeyE');
 
   // Tras el fundido a blanco la página se carga de nuevo, ya en el sistema ajeno (sin `?mundo=`).
   await page.waitForURL(/debug=/, { timeout: 30_000 });
@@ -52,6 +61,8 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   await page.reload();
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
   expect(await value(page, 'world')).toBe('umbral');
+  // Lo que se aprendió en casa sigue en el Registro.
+  expect((await snapshot(page))?.registry.facts).toContain('casa.fragmento_antiguo');
 
   // Sin partida guardada ("Empezar de cero"), se vuelve a empezar en casa.
   await page.evaluate(() => {
@@ -131,4 +142,25 @@ test('climbing in the Albatros II the sky gives way to space', async ({ page }) 
   await expect
     .poll(async () => (await page.evaluate(() => window.__juego?.sky?.()))?.density)
     .toBe(0);
+});
+
+// Hito 9D: la guía del prólogo enseña una cosa cada vez y no repite lo aprendido.
+function guide(page: Page) {
+  return page.evaluate(() => window.__juego?.guide?.() ?? null);
+}
+
+test('the guide teaches one thing at a time and moves on once it is done', async ({ page }) => {
+  await newGame(page);
+  await play(page);
+
+  await expect.poll(async () => (await guide(page))?.shown).toBe('andar');
+  await page.keyboard.down('KeyW');
+  await expect.poll(async () => (await guide(page))?.shown, { timeout: 10_000 }).toBe('directora');
+  await page.keyboard.up('KeyW');
+
+  await talkTo(page, 'instituto.directora');
+  expect((await guide(page))?.shown).toBeNull(); // mientras hablas, no
+  await page.keyboard.press('KeyE');
+  await expect.poll(async () => (await guide(page))?.shown).toBe('registro');
+  expect((await guide(page))?.done).toEqual(['andar', 'directora']);
 });

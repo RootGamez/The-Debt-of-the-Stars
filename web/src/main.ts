@@ -23,7 +23,9 @@ import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
 import { browserStore, loadSave } from './core/save';
-import { createPrologueGate } from './game/prologue';
+import { createPrologueGate, WORMHOLE } from './game/prologue';
+import { Guide } from './game/guide';
+import { createGuideView } from './ui/guideView';
 import { Player } from './core/player';
 import { absorptionWindow, quietChronology, triggersAsEvents } from './core/timeline';
 import { createAbsorptionView } from './render/absorptionView';
@@ -365,6 +367,10 @@ async function start(): Promise<void> {
     window.__juego.blackHole = () => blackHole.snapshot();
     window.__juego.sky = () => ({ density: atmosphere.density });
     window.__juego.ool = () => ({ turns: ool.snapshot(), filaments: filaments.snapshot() });
+    window.__juego.guide = () => ({
+      shown: guideView?.shown ?? null,
+      done: [...(guide?.done ?? [])],
+    });
     window.__juego.absorption = () => absorption?.snapshot() ?? null;
     window.__juego.aimAt = (target) => {
       const where =
@@ -412,6 +418,13 @@ async function start(): Promise<void> {
   let shipDeath: DeathCause | undefined;
   // El final del prólogo: el gusano junto al fragmento de la Luna (solo en casa).
   const prologue = looping ? undefined : createPrologueGate();
+  // La guía del prólogo: un aviso cada vez, hasta que se hace lo que pide.
+  const guide = looping ? undefined : new Guide();
+  const guideView = guide ? createGuideView(isTouchDevice()) : undefined;
+  const guideFeet = new Vector3();
+  const moonCenter = new Vector3();
+  let walked = 0;
+  let registryOpened = false;
   let wormhole: DeathCause | undefined;
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
@@ -447,6 +460,7 @@ async function start(): Promise<void> {
           world: currentWorld.id,
           onFoot: !(flight?.piloting ?? false),
           running: timeRuns && session.acceptsInput,
+          knowsFragment: reading.known.has(WORMHOLE.fact),
         },
         dt,
       );
@@ -545,6 +559,34 @@ async function start(): Promise<void> {
       ui.update(performance.now() / 1000);
       ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);
       filaments.update(reading.current !== null, reading.known.size);
+      if (guide && guideView) {
+        // Lo andado (a pie y sin saltos grandes, que serían teletransportes de depuración).
+        if (!piloting) {
+          const step = guideFeet.distanceTo(player.state.position);
+          if (step < 1) walked += step;
+          guideFeet.copy(player.state.position);
+        }
+        if (ui.blocking && reading.current === null) registryOpened = true;
+        const moon = systemScene.groupOf(WORMHOLE.world);
+        const moonRadius = runtimes.get(WORMHOLE.world)?.world.info.radius;
+        guideView.update(
+          guide.current({
+            walked,
+            hasMission: reading.known.has('casa.mision_luna'),
+            knowsSomething: reading.known.size > 0,
+            registryOpened,
+            piloting,
+            targetingMoon: flight?.snapshot().target === WORMHOLE.world,
+            moonDistance:
+              moon && moonRadius !== undefined
+                ? moon.getWorldPosition(moonCenter).distanceTo(camera.position) - moonRadius
+                : undefined,
+            onMoon: !piloting && currentWorld.id === WORMHOLE.world,
+            sawFragment: reading.known.has(WORMHOLE.fact),
+          }),
+          overlay.playing && !ui.blocking,
+        );
+      }
       sight.update();
       touch?.update();
       debug.update(dt, overlay.playing);

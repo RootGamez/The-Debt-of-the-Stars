@@ -1,3 +1,20 @@
 [
-  { "nombre": "SPAWN_Prueba", "lat": 35, "lon": 10, "alto": 1.0, "props": {} }
+  {
+    "nombre": "SPAWN_Luna",
+    "lat": 28.976,
+    "lon": -98.432,
+    "alto": 0.977,
+    "props": {},
+    "rumbo": 200
+  },
+  {
+    "nombre": "INT_fragmento_luna",
+    "lat": 20.6,
+    "lon": -100.988,
+    "alto": 0.671,
+    "props": {
+      "clue_id": "instituto.fragmento_luna",
+      "kind": "objeto"
+    }
+  }
 ]

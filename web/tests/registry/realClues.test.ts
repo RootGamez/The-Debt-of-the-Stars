@@ -56,7 +56,7 @@ describe('the real clue data', () => {
     // Las grabaciones necesitan un borrador para que su mecánica se pueda probar (Fase 7); casa, para el
     // prólogo (Fase 9).
     const drafted = (s: { world: string; kind: string }) =>
-      s.world === 'umbral' || s.world === 'hogar' || s.kind === 'grabacion';
+      s.world === 'umbral' || s.world === 'hogar' || s.world === 'luna' || s.kind === 'grabacion';
     const readable = clues.sources.filter(drafted);
     const others = clues.sources.filter((s) => !drafted(s));
 

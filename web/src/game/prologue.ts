@@ -1,9 +1,9 @@
 // El final del prólogo (Fase 9): junto al fragmento de la Luna se abre el gusano y el fundido a blanco lleva al
-// sistema ajeno (core/loopDirector.ts, causa `gusano`). PROVISIONAL (hito 9A): basta con estar de pie en la Luna
-// un momento; en el hito 9E lo abrirá leer el fragmento, con su secuencia.
+// sistema ajeno (core/loopDirector.ts, causa `gusano`). Se abre un momento después de examinar el fragmento (hito
+// 9D), ya cerrada la lectura y a pie en la Luna; el hito 9E le pone su secuencia.
 
-/** Dónde se abre el gusano y cuánto hay que estar allí, a pie (s). */
-export const WORMHOLE = { world: 'luna', after: 2 } as const;
+/** Dónde se abre el gusano, qué hecho lo despierta (haber examinado el fragmento) y cuánto tarda después (s). */
+export const WORMHOLE = { world: 'luna', fact: 'casa.fragmento_antiguo', after: 1.5 } as const;
 
 export interface PrologueFrame {
   /** Mundo donde estás a pie. */
@@ -12,6 +12,8 @@ export interface PrologueFrame {
   onFoot: boolean;
   /** El tiempo del juego corre (sin pausa ni lectura). */
   running: boolean;
+  /** Ya sabes lo que despierta el gusano (has examinado el fragmento). */
+  knowsFragment: boolean;
 }
 
 export interface PrologueGate {
@@ -25,9 +27,9 @@ export function createPrologueGate(
   let there = 0;
   let open = false;
   return {
-    update({ world, onFoot, running }, dt) {
+    update({ world, onFoot, running, knowsFragment }, dt) {
       if (open) return false;
-      if (world !== gate.world || !onFoot) {
+      if (world !== gate.world || !onFoot || !knowsFragment) {
         there = 0;
         return false;
       }

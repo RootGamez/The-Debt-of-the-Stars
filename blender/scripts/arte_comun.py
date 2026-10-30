@@ -156,37 +156,57 @@ def arco(radio, grosor, desde=0.0, hasta=math.pi, lados=10, seccion=5):
     return crear
 
 
-def fragmento(cortes, divisiones=4):
-    """Caja de 1 m (centrada) con mordidas esféricas perfectas: `cortes` es una lista de (centro, radio) en el
-    marco de la caja; lo que queda dentro de cada esfera se lleva a su superficie. Así son los fragmentos de los
-    Ausentes que llegan a casa: piedra tallada con un borde cortado en curva perfecta."""
+def fragmento(cortes, divisiones=4, medidas=(1.0, 1.0, 1.0)):
+    """Caja (centrada) de `medidas` metros con mordidas esféricas perfectas: `cortes` es una lista de (centro, radio)
+    en el marco de la caja y en metros. Así son los fragmentos de los Ausentes que llegan a casa: piedra tallada con
+    un borde cortado en curva perfecta. Se restan esferas de verdad (booleana exacta de Blender), así que el corte
+    queda limpio; para que sea una esfera y no un elipsoide, la caja se hace ya a su tamaño en vez de escalarla.
+    (`divisiones` ya no se usa: se deja por los scripts antiguos.)"""
+    mx, my, mz = medidas
+
     def crear(bm):
-        # Se marcan los vértices que ya había (los envoltorios de bmesh no sirven para compararlos en un conjunto).
-        for v in bm.verts:
-            v.tag = True
-        res = bmesh.ops.create_cube(bm, size=1.0)
-        caras = {f for v in res["verts"] for f in v.link_faces}
-        aristas = list({e for f in caras for e in f.edges})
-        bmesh.ops.subdivide_edges(bm, edges=aristas, cuts=divisiones, use_grid_fill=True)
-        nuevos = [v for v in bm.verts if not v.tag]
-        for v in bm.verts:
-            v.tag = False
-        for v in nuevos:
-            # Hacia dentro de la caja desde las caras en que está el vértice: así la mordida hunde la piedra en
-            # vez de abrirle un labio hacia fuera (el contorno de la caja no cambia).
-            dentro = Vector([-1.0 if c > 0.499 else (1.0 if c < -0.499 else 0.0) for c in v.co])
-            if dentro.length < 1e-6:
-                continue
-            dentro.normalize()
-            for centro, radio in cortes:
-                c = Vector(centro)
-                d = v.co - c
-                if d.length >= radio:
-                    continue
-                # Raíz positiva de |v + t·dentro − c| = radio: donde la recta sale de la esfera.
-                b = d.dot(dentro)
-                t = -b + math.sqrt(max(0.0, b * b - (d.length_squared - radio * radio)))
-                v.co = v.co + dentro * min(t, 1.0)
+        escena = bpy.context.scene
+        caja = bmesh.new()
+        bmesh.ops.create_cube(caja, size=1.0)
+        for v in caja.verts:
+            v.co = Vector((v.co.x * mx, v.co.y * my, v.co.z * mz))
+        datos = bpy.data.meshes.new("_fragmento")
+        caja.to_mesh(datos)
+        caja.free()
+        obj = bpy.data.objects.new("_fragmento", datos)
+        escena.collection.objects.link(obj)
+        solvers = [i.identifier for i in bpy.types.BooleanModifier.bl_rna.properties["solver"].enum_items]
+        esferas = []
+        for i, (centro, radio) in enumerate(cortes):
+            bola_bm = bmesh.new()
+            try:
+                bmesh.ops.create_uvsphere(bola_bm, u_segments=40, v_segments=20, radius=radio)
+            except TypeError:
+                bmesh.ops.create_uvsphere(bola_bm, u_segments=40, v_segments=20, diameter=radio * 2)
+            bmesh.ops.translate(bola_bm, vec=Vector(centro), verts=bola_bm.verts)
+            bola_datos = bpy.data.meshes.new(f"_corte{i}")
+            bola_bm.to_mesh(bola_datos)
+            bola_bm.free()
+            bola = bpy.data.objects.new(f"_corte{i}", bola_datos)
+            escena.collection.objects.link(bola)
+            esferas.append(bola)
+            mod = obj.modifiers.new(f"corte{i}", "BOOLEAN")
+            mod.operation = "DIFFERENCE"
+            mod.object = bola
+            mod.solver = "EXACT" if "EXACT" in solvers else solvers[0]
+        evaluado = obj.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        resultado = evaluado.to_mesh()
+        nuevos = [bm.verts.new(v.co) for v in resultado.vertices]
+        for poligono in resultado.polygons:
+            try:
+                bm.faces.new([nuevos[i] for i in poligono.vertices])
+            except ValueError:
+                pass  # cara repetida
+        evaluado.to_mesh_clear()
+        for o in [obj] + esferas:
+            malla = o.data
+            bpy.data.objects.remove(o, do_unlink=True)
+            bpy.data.meshes.remove(malla)
         return {"verts": nuevos}
     return crear
 
