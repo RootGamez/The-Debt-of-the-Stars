@@ -23,7 +23,7 @@ WORLD = ARGS[0] if ARGS else "umbral"
 REPLACE = True
 # Mismas reglas que web/src/worlds/markers.ts, para fallar aquí y no en el navegador.
 NOMBRE_VALIDO = re.compile(r"^(SPAWN|PARK|INT|TRIG|COL|PASO)_[A-Za-z0-9_]+$")
-KINDS = ("texto", "grabacion", "objeto", "observacion")
+KINDS = ("texto", "grabacion", "objeto", "observacion", "charla")
 TRIGGER_RADIUS_DEFECTO = 5  # igual que DEFAULT_TRIGGER_RADIUS en markers.ts
 
 

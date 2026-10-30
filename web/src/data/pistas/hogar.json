@@ -5,10 +5,21 @@
     "tipo": "texto",
     "titulo": "Ficha de turnos de riego",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["partida.vida_normal"] },
+    "superficial": {
+      "texto": [
+        "Una ficha de barro cocido, de las primeras que el Instituto aprendió a leer. La Maestra la deja siempre a mano para los alumnos nuevos.",
+        "«Turnos de riego del cuarto creciente: los Aren, al alba. Los Tolu, a media mañana. Los Imre, al caer el sol».",
+        "Junto a cada turno, la misma marca pequeña, repetida."
+      ],
+      "hechos": ["partida.vida_normal"]
+    },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Ahora reconoces la marca pequeña: es la de las Puertas.",
+        "«Al alba, el riego; y luego, la Puerta». Cruzaban para ir a trabajar, para volver a comer, para visitar a alguien.",
+        "Cada riego, un viaje. Cada viaje, un poco más de deuda."
+      ],
       "hechos": ["deuda.uso_diario"]
     }
   },
@@ -18,10 +29,19 @@
     "tipo": "objeto",
     "titulo": "Fragmentos de bordes curvos",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["casa.fragmentos_curvos"] },
+    "superficial": {
+      "texto": [
+        "Dos piedras talladas, de dos llegadas distintas. Las dos tienen un borde liso y curvo, como si alguien hubiera sacado con una cuchara un trozo de esfera.",
+        "La cartela dice: «Corte de origen desconocido. Ninguna herramienta conocida lo deja así»."
+      ],
+      "hechos": ["casa.fragmentos_curvos"]
+    },
     "profunda": {
       "requiere": ["deuda.filtraciones"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "No son ruinas rotas. Son mordidas: el espacio de allá, arrancado en esferas perfectas por los gusanos pequeños que se abren cuando la deuda gotea.",
+        "Cada borde curvo es la huella de una boca que se abrió un instante."
+      ],
       "hechos": ["casa.bordes_son_mordidas"]
     }
   },
@@ -31,10 +51,19 @@
     "tipo": "objeto",
     "titulo": "El símbolo partido",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["casa.simbolo_partido"] },
+    "superficial": {
+      "texto": [
+        "Una losa clara con la mitad de abajo de un anillo de rayas, como las de un reloj, cortado por arriba en curva.",
+        "Nadie en el Instituto sabe qué significa. La Maestra dice que lo importante es lo que falta."
+      ],
+      "hechos": ["casa.simbolo_partido"]
+    },
     "profunda": {
       "requiere": ["casa.fragmentos_de_aqui"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "La otra mitad sigue allí, en la pared de una mordida de Cicatriz. Encajan raya con raya.",
+        "Esta piedra no viajó: se la arrancaron al mundo donde nace el agujero negro."
+      ],
       "hechos": ["casa.simbolo_encaja"]
     }
   },
@@ -44,10 +73,20 @@
     "tipo": "texto",
     "titulo": "Informe incompleto sobre la deuda",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["deuda.coste_energia"] },
+    "superficial": {
+      "texto": [
+        "Informe del Instituto, sin terminar: la traducción de una placa técnica de los Ausentes.",
+        "«Cada paso deja una deuda que…». Lo demás está roto.",
+        "Al margen, con letra de la Directora: «Coste de energía. Se compensa con el generador de la sala de pruebas»."
+      ],
+      "hechos": ["deuda.coste_energia"]
+    },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "No era energía. La deuda es de tiempo: cada paso separa un poco más los relojes de las dos bocas.",
+        "El margen sigue diciendo «se compensa». Nadie en casa sabe todavía con qué."
+      ],
       "hechos": ["deuda.es_de_tiempo"]
     }
   },
@@ -57,24 +96,154 @@
     "tipo": "objeto",
     "titulo": "La mesa de la Puerta pequeña",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["casa.pruebas_menores"] },
+    "superficial": {
+      "texto": [
+        "En la mesa del taller, un anillo de latón del tamaño de una mano, sujeto con pinzas y lleno de cables. A su lado, una pila de hojas: «Prueba menor 3: el anillo se abrió once segundos. Sin incidentes».",
+        "En la pizarra, rodeado tres veces: «Prueba mayor, dentro de cuarenta días»."
+      ],
+      "hechos": ["casa.pruebas_menores"]
+    },
     "profunda": {
       "requiere": ["deuda.es_de_tiempo"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Están reconstruyendo una Puerta con los planos que llegaron a trozos, y les falta justo la pieza que la mantiene estable.",
+        "Cuarenta días. Ese es el tiempo que tienes para volver."
+      ],
       "hechos": ["casa.prueba_plazo"]
     }
   },
   {
     "id": "instituto.directora",
     "mundo": "hogar",
-    "tipo": "texto",
-    "titulo": "La directora del Instituto",
+    "tipo": "charla",
+    "titulo": "La Directora",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["casa.mision_luna"] },
+    "superficial": {
+      "texto": [
+        "La Directora te espera junto a la ventana redonda, mirando la Luna.",
+        "«Ayer apareció allí el fragmento más grande de todos, clavado en el suelo. Quiero que lo veas tú antes que nadie: será tu primer vuelo oficial».",
+        "«El Albatros II está listo en el hangar. Ve, mira y vuelve a contármelo»."
+      ],
+      "hechos": ["casa.mision_luna"]
+    },
     "profunda": {
       "requiere": ["casa.prueba_plazo"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Habla de la prueba mayor como otros hablan de un hijo. Lleva años preparándola: es la que va a saludar a quienes dejaron todo esto.",
+        "Si alguien tiene que oír la verdad, es ella. Y es quien menos querrá oírla."
+      ],
       "hechos": ["casa.directora_dirige"]
+    }
+  },
+  {
+    "id": "instituto.maestra",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "La Maestra",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«¿Ya has leído la ficha de riego? Empieza siempre por ahí: lo de todos los días es lo que mejor se entiende».",
+        "«Leemos su lengua desde hace años y todavía no sabemos cómo se reían. Eso no viene en ninguna piedra».",
+        "«Ve a ver a la Directora antes de que se impaciente. Y vuelve a contármelo todo, ¿eh?»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "instituto.tecnico",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "El técnico del taller",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«El anillo pequeño ya aguanta abierto once segundos seguidos. ¡Once!».",
+        "«La Directora dice que en la prueba mayor saludaremos a quien hizo todo esto. Yo solo pido que no se nos funda el soporte»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "instituto.mecanica",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "La mecánica del hangar",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«El Albatros II está listo: depósitos llenos y el relicario vacío, esperando tu fragmento».",
+        "«Sube con F. Ahí dentro el tablero te lo va diciendo todo: apunta a la Luna con T y, si todo da vueltas, Z lo estabiliza».",
+        "«Y no la rayes. Es la única que tenemos»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "aldea.pozo",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "El vecino del pozo",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«Dicen que ayer cayó otra piedra de esas en la Luna. Más grande que una casa».",
+        "«Mi abuelo encontró una en el huerto, de las primeras. La usaba para sujetar la puerta. Ahora está en una vitrina»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "aldea.tejedora",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "La tejedora",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«Te remendé anoche el codo del traje. Que no se te vuelva a rasgar en la Luna».",
+        "«Cuando vuelvas, me cuentas de qué color es la luz allí arriba. Quiero teñir algo de ese color»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "aldea.cria",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "Una cría",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«¿Me traerás una piedra de la Luna? ¡Una pequeña! Prometo no enseñársela a nadie»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "aldea.pescador",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "El pescador",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«El mar está quieto como nunca. Mi abuela decía que, cuando el mar se calla, algo grande está escuchando»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "aldea.arbol",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "La vecina del árbol",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«Hoy todo el mundo ha salido a la plaza para verte despegar. Disimula, que si no se ponen nerviosos»."
+      ],
+      "hechos": []
     }
   }
 ]

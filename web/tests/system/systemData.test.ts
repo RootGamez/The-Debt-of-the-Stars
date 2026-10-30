@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import homeData from '../../src/data/sistema-hogar.json';
 import systemData from '../../src/data/sistema.json';
+import { systemOf } from '../../src/game/loadSystem';
+import { bodyPose } from '../../src/system/orbits';
 import { parseSystem } from '../../src/system/systemData';
 import { WORLD_IDS } from '../../src/worlds/worldSelection';
 import { loadBuiltWorld } from '../helpers/builtWorlds';
@@ -25,6 +28,19 @@ function withBody(patch: Record<string, unknown>) {
 }
 
 describe('parseSystem', () => {
+  it('reads where the ship waits and whether the loop runs (yes unless it says no)', () => {
+    expect(parseSystem(valid, WORLD_IDS)).toMatchObject({ ship: undefined, looping: true });
+    expect(parseSystem({ ...valid, nave: 'umbral', bucle: false }, WORLD_IDS)).toMatchObject({
+      ship: 'umbral',
+      looping: false,
+    });
+  });
+
+  it('rejects a ship waiting outside the system and a loop that is not true or false', () => {
+    expect(() => parseSystem({ ...valid, nave: 'archivo' }, WORLD_IDS)).toThrow(/nave/);
+    expect(() => parseSystem({ ...valid, bucle: 'no' }, WORLD_IDS)).toThrow(/bucle/);
+  });
+
   it('reads a valid system', () => {
     const system = parseSystem(valid, WORLD_IDS);
 
@@ -129,5 +145,42 @@ describe('the real system (sistema.json)', () => {
     const day = 1 / Math.abs(1 / taller.spin - 1 / taller.period);
 
     expect(day).toBeCloseTo(180, 6);
+  });
+});
+
+describe('the home system of the prologue (sistema-hogar.json)', () => {
+  const home = parseSystem(homeData, WORLD_IDS);
+
+  it('holds Hogar and its Luna, still, with the ship at home and no loop', () => {
+    expect(home.bodies.map((b) => b.world).sort()).toEqual(['hogar', 'luna']);
+    expect(home.bodies.every((b) => b.period === 0)).toBe(true);
+    expect(home.ship).toBe('hogar');
+    expect(home.looping).toBe(false);
+  });
+
+  it('puts the Luna a short flight away: clear of Hogar but under a kilometre', async () => {
+    const [hogar, luna] = [home.bodyOf('hogar'), home.bodyOf('luna')];
+    if (!hogar || !luna) throw new Error('faltan Hogar o la Luna');
+    const gap =
+      bodyPose(hogar, 0).position.distanceTo(bodyPose(luna, 0).position) -
+      (await radiusOf('hogar')) -
+      (await radiusOf('luna'));
+
+    expect(gap).toBeGreaterThan(300);
+    expect(gap).toBeLessThan(1000);
+  });
+
+  it('no world is in both systems', () => {
+    const alien = parseSystem(systemData, WORLD_IDS);
+    for (const world of WORLD_IDS) {
+      expect(Boolean(alien.bodyOf(world)) && Boolean(home.bodyOf(world))).toBe(false);
+    }
+    expect(systemOf('luna')?.looping).toBe(false);
+  });
+
+  it('every world is found in its own system, and the alien one keeps the ship at La Boca', () => {
+    expect(systemOf('hogar')?.looping).toBe(false);
+    expect(systemOf('umbral')?.ship).toBe('umbral');
+    expect(systemOf('umbral')?.looping).toBe(true);
   });
 });

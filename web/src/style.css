@@ -225,6 +225,66 @@ body {
   pointer-events: none;
 }
 
+/* El blanco del gusano sigue tras recargar (Fase 9E) y se aclara al estar el mundo: encima de todo. */
+.llegada {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: #fff3e2;
+  pointer-events: none;
+  transition-property: opacity;
+  transition-timing-function: ease-out;
+}
+
+.llegada-fuera {
+  opacity: 0;
+}
+
+/* Tus filamentos (Fase 9): un resplandor verde azulado en el borde de arriba mientras lees, y un latido al anotar. */
+.filamentos {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 11; /* por encima del fondo de la lectura */
+  height: 22vh;
+  opacity: 0;
+  background: radial-gradient(
+    ellipse 70% 100% at 50% 0%,
+    rgb(127 240 200 / 38%),
+    rgb(127 240 200 / 0%) 75%
+  );
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+.filamentos.leyendo {
+  opacity: 0.75;
+}
+
+.filamentos.late {
+  animation: latido-filamentos 1.4s ease-out;
+}
+
+@keyframes latido-filamentos {
+  0% {
+    opacity: 1;
+    filter: brightness(1.8);
+  }
+
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filamentos {
+    transition: none;
+  }
+
+  .filamentos.late {
+    animation: none;
+  }
+}
+
 /* Marea: los bordes de la pantalla se oscurecen y aparece la tensión acumulada. */
 .tide-vignette {
   position: fixed;
@@ -442,6 +502,36 @@ body {
 
 .notice:not(.notice-visible) {
   opacity: 0;
+}
+
+/* La guía del prólogo (Fase 9): un aviso cada vez, bajo los avisos del Registro. */
+.guia {
+  position: fixed;
+  left: 50%;
+  top: 64px;
+  max-width: min(620px, calc(100vw - 32px));
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgb(7 7 12 / 55%);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.guia.guia-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guia {
+    transition: none;
+  }
 }
 
 .reader,

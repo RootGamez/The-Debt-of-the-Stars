@@ -1,5 +1,6 @@
 // Une el director del ciclo (lógica pura) con el navegador: guardado, reloj doble, fundidos, efectos
-// del cielo y teclas de depuración. Lo cubren las pruebas de Playwright (e2e/loop.spec.ts).
+// del cielo y teclas de depuración. En casa (el prólogo) no hay ciclo ni reloj doble, y al cruzar el gusano se
+// guarda que el prólogo está hecho. Lo cubren las pruebas de Playwright (e2e/loop.spec.ts y prologue.spec.ts).
 import type { Light, Scene, Vector3 } from 'three';
 import { TIME_MODE } from '../data/loop';
 import { createLoopEffects } from '../render/loopEffects';
@@ -13,8 +14,10 @@ import {
   clearSave,
   isSaveErased,
   loadSave,
+  markPrologueDone,
   saveProgress,
   SAVE_VERSION,
+  type LoadResult,
 } from './save';
 import type { Chronology, TimelineEvent } from './timeline';
 
@@ -32,8 +35,14 @@ export interface LoopSessionOptions {
   player: Player;
   /** Dónde se ve el agujero negro en el cielo (provisional). */
   skyDirection: Vector3;
-  /** Al empezar un ciclo nuevo: reaparecer y reiniciar lo que haga falta. */
+  /** Al empezar un ciclo nuevo (o, en casa, tras un accidente): reaparecer y reiniciar lo que haga falta. */
   onRestart: () => void;
+  /** Si corre el ciclo (sí por defecto); en casa, en el prólogo, no. */
+  looping?: boolean;
+  /** El guardado ya leído (si no, se lee aquí). */
+  saved?: LoadResult;
+  /** Cuando el fundido del gusano cubre la pantalla: el prólogo ya está guardado como hecho. */
+  onCross?: (saved: boolean) => void;
 }
 
 export interface LoopSession {
@@ -59,15 +68,17 @@ export interface LoopSession {
 
 export function createLoopSession(options: LoopSessionOptions): LoopSession {
   const { scene, sun, chronology, locate, extraEvents, player, onRestart, skyDirection } = options;
+  const looping = options.looping !== false;
   const store = browserStore();
-  const loaded = loadSave(store);
-  if (loaded.warning) console.warn(loaded.warning);
+  const loaded = options.saved ?? loadSave(store);
+  if (!options.saved && loaded.warning) console.warn(loaded.warning);
 
   const director = new LoopDirector({
     chronology,
     locate,
     mode: TIME_MODE,
     extraEvents,
+    looping,
     save: loaded.data,
     // Partida de una versión más nueva: se juega sin guardar para no estropearla.
     persist: (data) => !loaded.readOnly && saveProgress(store, data),
@@ -101,6 +112,9 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
     );
   }
 
+  /** Guarda que el prólogo está hecho (con lo demás); false si no se pudo. */
+  const finishPrologue = (): boolean => markPrologueDone(store, loaded, director.loopsCompleted);
+
   return {
     director,
     get acceptsInput() {
@@ -111,6 +125,7 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
       if (playing) {
         const result = director.update(dt, player.state, forcedCause);
         if (result.restart) onRestart();
+        if (result.crossed) options.onCross?.(finishPrologue());
       } else {
         director.observe(player.state); // la física sigue en pausa: no juzgar esos aterrizajes
       }
@@ -118,7 +133,12 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
       activeEventIds = active.map((e) => e.id);
       effects.update(director.clock.t, active, director.absorption, playing ? dt : 0);
       fade.set(director.fade);
-      hud.update(director.clock.tau, director.clock.t, playing && director.phase !== 'dying');
+      // En casa no hay reloj doble: aparece por primera vez al despertar en Umbral.
+      hud.update(
+        director.clock.tau,
+        director.clock.t,
+        looping && playing && director.phase !== 'dying',
+      );
     },
     snapshot() {
       return {
@@ -144,6 +164,7 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
           version: SAVE_VERSION,
           loopsCompleted: director.loopsCompleted,
           facts,
+          prologueDone: loaded.data.prologueDone,
         });
       factsFailed = !ok;
       return ok;

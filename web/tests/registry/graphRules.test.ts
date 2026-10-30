@@ -265,6 +265,17 @@ describe('rule 6: readings', () => {
     expect(checkReadings(clues, []).join(' ')).toMatch(/umbral\.vacia/);
   });
 
+  it('lets the people at home just talk: a chat may give nothing and needs no deep reading', () => {
+    const clues = graph({
+      sources: [
+        source('umbral.a', 'umbral', ['a.uno']),
+        source('umbral.charla', 'umbral', [], { tipo: 'charla' }),
+      ],
+    });
+
+    expect(checkReadings(clues, []).join(' ')).not.toMatch(/umbral\.charla/);
+  });
+
   it('fails for a prologue source without deep reading', () => {
     const clues = graph({});
 

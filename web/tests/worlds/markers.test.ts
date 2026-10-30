@@ -35,6 +35,29 @@ function umbralScene(): Group {
   return scene;
 }
 
+describe('the Ool of a world (OOL_)', () => {
+  it('finds each one with the mesh that glows, and not that mesh as another one', () => {
+    const scene = new Group();
+    const maestra = mesh('OOL_maestra');
+    const luz = mesh('OOL_maestra_Luz');
+    maestra.add(luz);
+    scene.add(maestra, mesh('OOL_cria'));
+
+    const { characters } = collectMarkers(scene);
+
+    expect(characters.map((c) => c.id)).toEqual(['maestra', 'cria']);
+    expect(characters[0]?.glow).toBe(luz);
+    expect(characters[1]?.glow).toBeUndefined();
+  });
+
+  it('accepts chats among the interactions', () => {
+    const scene = new Group();
+    scene.add(node('INT_directora', { clue_id: 'instituto.directora', kind: 'charla' }));
+
+    expect(collectMarkers(scene).interactions[0]?.kind).toBe('charla');
+  });
+});
+
 describe('readWorldInfo', () => {
   it('reads radius, gravity and clock rate from the world root', () => {
     const info = readWorldInfo(umbralScene(), 'umbral');

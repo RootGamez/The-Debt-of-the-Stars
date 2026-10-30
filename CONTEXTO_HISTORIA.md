@@ -1,8 +1,8 @@
 # CONTEXTO DE HISTORIA — Juego de bucle de tiempo
 
 **Título provisional:** por definir (ver preguntas abiertas)
-**Versión:** v1.6 (el Nudo, la Cámara y la instalación del Contrapeso; reloj del jugador en el bucle; viajero, agujero de gusano, objetos de los Ausentes en casa, esperanza del Instituto, mecanismo del fenómeno y Laboratorio Oculto)
-**Última actualización:** 2026-10-25 · Sesión 2
+**Versión:** v1.7 (el pueblo del protagonista: los Ool)
+**Última actualización:** 2026-10-29 · Sesión 6
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)
 
 > Documento vivo. Es la fuente de verdad de la historia del juego: léelo entero antes de continuar el trabajo en cualquier sesión (con Claude o sin él) y actualízalo al final.
@@ -235,6 +235,7 @@ Evitar el recurso de texto en espiral con traductor. Propuesta: los Ausentes dej
 ## 7. Personajes (🟡 semillas)
 
 - **El protagonista.** Explorador joven en su primer vuelo, alumno del Instituto, sabe leer la lengua de los Ausentes. Nombre ❓, género ❓, edad ❓. Curioso, algo ingenuo. Su arco: de querer volver a casa a entender lo que hay que hacer por ella.
+- ✅ **Su pueblo: los Ool** (Anthony, 2026-10-29). Pequeños, redondeados, de aspecto tierno y extraterrestre, sin rasgos de animales de la Tierra: no tienen hocico, ni orejas, ni pelo común. Su cuerpo es de fibras como musgo, con puntos de bioluminiscencia; tienen dos ojos grandes y oscuros, manos y pies de cuatro dedos y **filamentos en la cabeza que se iluminan con las emociones o al leer**. El joven explorador viaja con un traje acolchado de tela pesada, remendado, "hecho con amor", y casco de burbuja. **La Maestra del Instituto** es una Ool mayor, con gafas redondas, bufanda, abrigo con dibujos, un libro y una bolsa. ✅ **La Maestra y la Directora son personas distintas.** La nave del Instituto es **el Albatros II**. (Lámina de referencia: "Propuesta 4: El Albatros II".)
 - **En el Instituto (prólogo y final).** 2 o 3 personajes cercanos (maestra o maestro, amistad, familia ❓) y **la persona que dirige el experimento** (a quien debe convencer en el final A, y que quizá sea quien más lo quiere).
 - **Las voces de los Ausentes.** Tres figuras a través de sus registros: la **investigadora** que persiguió la cura hasta el final, el **escéptico** que advirtió y no fue escuchado, y quien **construyó la Cámara**, con su culpa. Son los únicos "personajes" que el jugador llega a conocer de verdad, a través de lo que dejaron.
 
@@ -342,3 +343,4 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-25 · Sesión 2 (bucle).** Al planificar la Fase 3 aparece una contradicción entre "15 minutos reales" y el tiempo lento del Laboratorio. Anthony elige el modo B: el tiempo real es el del jugador y fuera corre más rápido en los mundos lentos. Se fijan como propuesta las formas de morir y el reloj doble.
 - **2026-10-25 · Sesión 2 (grafo de pistas).** Se crea `CONTEXTO_PISTAS.md`: 7 hilos, 8 conclusiones esenciales y 47 fuentes. Claude propone el Nudo (la garganta de la primera Puerta) como masa que dobla la luz y frena el tiempo del Laboratorio, y que el Contrapeso solo pueda instalarse durante el pulso. Pendiente de confirmar.
 - **2026-10-25 · Sesión 2 (decisiones del grafo).** Anthony confirma el Nudo (garganta de la primera Puerta, semilla del agujero negro) como masa del Laboratorio, que el Contrapeso solo se instala durante el pulso de las 9:00 y que la Cámara está en el Laboratorio.
+- **2026-10-29 · Sesión 6 (Fase 9).** Anthony define el pueblo del protagonista: **los Ool** (aspecto en §7), con la Maestra del Instituto. La Maestra y la Directora son personas distintas; la nave se llama el Albatros II; el prólogo abarca el Instituto y la aldea.

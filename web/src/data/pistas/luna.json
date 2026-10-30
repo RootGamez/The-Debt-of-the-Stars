@@ -5,10 +5,20 @@
     "tipo": "objeto",
     "titulo": "El fragmento de la Luna",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["casa.fragmento_antiguo"] },
+    "superficial": {
+      "texto": [
+        "El fragmento más grande que ha llegado nunca, clavado de canto en el polvo. Arriba tiene el borde cortado en curva perfecta, como las piedras de las vitrinas.",
+        "En la cara, un aro de marcas de reloj y tres muescas: una fecha, en la cuenta de los Ausentes. Según la Maestra te enseñó a leerlas, es más antigua que la de todas las piedras que llegaron antes.",
+        "En el fondo del corte hay un hilo de luz que no sale de ningún sitio."
+      ],
+      "hechos": ["casa.fragmento_antiguo"]
+    },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Llegó la última, pero viene de antes que ninguna.",
+        "Cada boca tiene su propio reloj: lo que sale por una puede venir de un tiempo distinto del de la otra."
+      ],
       "hechos": ["bocas.relojes_distintos"]
     }
   }

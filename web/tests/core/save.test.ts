@@ -4,6 +4,7 @@ import {
   freshSave,
   isSaveErased,
   loadSave,
+  markPrologueDone,
   MAX_FACTS,
   MAX_LOOPS,
   SAVE_KEY,
@@ -47,13 +48,41 @@ describe('loadSave', () => {
 
   it('reads back what was written', () => {
     const store = memoryStore();
-    writeSave(store, { version: SAVE_VERSION, loopsCompleted: 7, facts: ['umbral.placa'] });
+    writeSave(store, {
+      version: SAVE_VERSION,
+      loopsCompleted: 7,
+      facts: ['umbral.placa'],
+      prologueDone: true,
+    });
 
     expect(loadSave(store).data).toEqual({
       version: SAVE_VERSION,
       loopsCompleted: 7,
       facts: ['umbral.placa'],
+      prologueDone: true,
     });
+  });
+
+  it('a new game has not played the prologue yet', () => {
+    expect(freshSave().prologueDone).toBe(false);
+  });
+
+  it('reads a save from before the prologue (version 1) as one that already went through it', () => {
+    const store = memoryStore();
+    store.setItem(SAVE_KEY, JSON.stringify({ version: 1, loopsCompleted: 4, facts: ['a.b'] }));
+
+    expect(loadSave(store)).toEqual({
+      data: { version: SAVE_VERSION, loopsCompleted: 4, facts: ['a.b'], prologueDone: true },
+      readOnly: false,
+    });
+  });
+
+  it('rejects a version 2 save without a clear prologue flag', () => {
+    const store = memoryStore();
+    store.setItem(SAVE_KEY, JSON.stringify({ version: 2, loopsCompleted: 1, facts: [] }));
+
+    expect(loadSave(store).data).toEqual(freshSave());
+    expect(loadSave(store).warning).toBeDefined();
   });
 
   it.each([
@@ -150,10 +179,20 @@ describe('save safety (review fixes)', () => {
 });
 
 describe('saveProgress (two tabs never lose facts)', () => {
-  const progress = (loops: number, facts: string[]): SaveData => ({
+  const progress = (loops: number, facts: string[], prologueDone = false): SaveData => ({
     version: SAVE_VERSION,
     loopsCompleted: loops,
     facts,
+    prologueDone,
+  });
+
+  it('never forgets that the prologue was played, whichever tab saves last', () => {
+    const store = memoryStore();
+    saveProgress(store, progress(0, [], true));
+
+    saveProgress(store, progress(1, ['a.b']));
+
+    expect(loadSave(store).data.prologueDone).toBe(true);
   });
 
   it('keeps the facts another tab saved and adds the new ones', () => {
@@ -228,9 +267,9 @@ describe('saveProgress with a full store (review fixes)', () => {
   it('keeps the new facts even when the stored list is already at the limit', () => {
     const store = memoryStore();
     const junk = Array.from({ length: MAX_FACTS }, (_, i) => `junk.n${i}`);
-    writeSave(store, { version: SAVE_VERSION, loopsCompleted: 0, facts: junk });
+    writeSave(store, { ...freshSave(), facts: junk });
 
-    saveProgress(store, { version: SAVE_VERSION, loopsCompleted: 0, facts: ['a.uno'] });
+    saveProgress(store, { ...freshSave(), facts: ['a.uno'] });
 
     const saved = loadSave(store).data.facts;
     expect(saved).toContain('a.uno');
@@ -247,5 +286,25 @@ describe('isSaveErased', () => {
   it('is false for changes of the save and for other keys', () => {
     expect(isSaveErased({ key: SAVE_KEY, newValue: '{}' })).toBe(false);
     expect(isSaveErased({ key: 'otra-cosa', newValue: null })).toBe(false);
+  });
+});
+
+describe('markPrologueDone (crossing the wormhole)', () => {
+  it('saves the prologue as played, keeping the facts and loops already there', () => {
+    const store = memoryStore();
+    writeSave(store, { ...freshSave(), facts: ['casa.mision_luna'] });
+
+    expect(markPrologueDone(store, loadSave(store), 0)).toBe(true);
+
+    expect(loadSave(store).data).toMatchObject({ prologueDone: true, facts: ['casa.mision_luna'] });
+  });
+
+  it('cannot save without storage, and leaves a save from a newer version alone', () => {
+    expect(markPrologueDone(null, { data: freshSave(), readOnly: false }, 0)).toBe(false);
+
+    const newer = JSON.stringify({ version: SAVE_VERSION + 1, loopsCompleted: 3, facts: [] });
+    const store = memoryStore({ [SAVE_KEY]: newer });
+    expect(markPrologueDone(store, loadSave(store), 0)).toBe(false);
+    expect(store.data.get(SAVE_KEY)).toBe(newer);
   });
 });

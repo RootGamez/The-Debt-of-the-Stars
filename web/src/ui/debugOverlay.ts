@@ -84,6 +84,14 @@ declare global {
       blackHole?(): { radius: number; visible: boolean; span: number; approach: number };
       /** A pie, gira la vista hacia un mundo o hacia el agujero (`'agujero'`), para encuadrar capturas. */
       aimAt?(target: string): boolean;
+      /** El gusano de la Luna: si se ha abierto y cuánto (0–1). */
+      wormhole?(): { active: boolean; progress: number };
+      /** La guía del prólogo: el aviso a la vista y lo ya aprendido. */
+      guide?(): { shown: string | null; done: string[] };
+      /** Los Ool: cuánto se ha girado cada uno hacia ti (rad) y tus filamentos (si brillan, cuántas veces latieron). */
+      ool?(): { turns: Record<string, number>; filaments: { glowing: boolean; beats: number } };
+      /** El cielo de un mundo con aire: cuánto se ve (0 = el espacio, 1 = todo cielo). */
+      sky?(): { density: number };
       /** La absorción de los mundos: avance de cada uno (0–1), los ya tragados y los trozos que caen. */
       absorption?(): {
         progress: Record<string, number>;

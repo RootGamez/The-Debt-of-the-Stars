@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Juego de bucle de tiempo en el navegador" />
     <title>Bucle de tiempo</title>
+    <!-- Si se viene del gusano, la página nace ya en blanco, antes de que llegue el juego (src/ui/arrival.ts). -->
+    <style>
+      html.llegando,
+      html.llegando body {
+        background: #fff3e2;
+      }
+
+      html.llegando #status {
+        visibility: hidden;
+      }
+    </style>
+    <script>
+      try {
+        if (sessionStorage.getItem('bucle-tiempo:gusano') !== null) {
+          document.documentElement.classList.add('llegando');
+        }
+      } catch {
+        // Sin sesión: se despierta sin el blanco.
+      }
+    </script>
   </head>
   <body>
     <canvas id="game" aria-label="Vista del juego"></canvas>

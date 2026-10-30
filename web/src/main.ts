@@ -9,6 +9,10 @@ import { createTideEffects } from './game/tideEffects';
 import { insideCavity } from './physics/gravity';
 import { createInteriorLights } from './render/interiorLight';
 import { createLensView } from './render/lensView';
+import { createAtmosphereView } from './render/atmosphereView';
+import { createOolView } from './render/oolView';
+import { createFilaments } from './ui/filaments';
+import { ATMOSPHERES } from './data/atmospheres';
 import { createBlackHoleView } from './render/blackHoleView';
 import { growthFor } from './system/blackHole';
 import { BLACK_HOLE } from './data/blackHole';
@@ -18,8 +22,14 @@ import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
+import { browserStore, loadSave } from './core/save';
+import { createPrologueGate, WORMHOLE } from './game/prologue';
+import { Guide } from './game/guide';
+import { wormholeCenter } from './game/wormhole';
+import { createGuideView } from './ui/guideView';
+import { createWormholeView } from './render/wormholeView';
 import { Player } from './core/player';
-import { absorptionWindow, triggersAsEvents } from './core/timeline';
+import { absorptionWindow, quietChronology, triggersAsEvents } from './core/timeline';
 import { createAbsorptionView } from './render/absorptionView';
 import {
   FIELD_OF_VIEW,
@@ -48,12 +58,17 @@ import { bodyPose } from './system/orbits';
 import { createDebugOverlay, type SystemSnapshot } from './ui/debugOverlay';
 import { createOrbitMap } from './ui/orbitMap';
 import { isTouchDevice } from './ui/pauseOverlay';
+import {
+  createArrivalLayer,
+  endArrivingPaint,
+  markCrossing,
+  sessionStore,
+  takeCrossing,
+} from './ui/arrival';
 import type { WorldRuntime } from './worlds/worldRuntime';
-import { worldFromQuery, worldTitle } from './worlds/worldSelection';
+import { arrivalHref, startWorld as firstWorld, worldTitle } from './worlds/worldSelection';
 
 const NEAR_PLANE = 0.05;
-/** Mundo donde espera la nave al empezar cada ciclo (la llegada). */
-const SHIP_HOME = 'umbral';
 /** Desde aquí, durante este evento, la imagen del Nudo se ve con claridad (cronologia.json). */
 const OBSERVATORY = 'observatorio';
 const ALIGNMENT_EVENT = 'alineacion';
@@ -100,12 +115,24 @@ function runtimeOf(runtimes: ReadonlyMap<string, WorldRuntime>, id: string): Wor
 async function start(): Promise<void> {
   const canvas = requireElement('game', HTMLCanvasElement);
   const status = requireElement('status', HTMLParagraphElement);
+  // Si se viene del gusano, la pantalla sigue en blanco hasta que esté el mundo.
+  const arrival = takeCrossing(sessionStore()) ? createArrivalLayer() : undefined;
   const { renderer, scene, camera, sun, ambient } = createStage(canvas);
   setupCamera(camera);
   watchGraphicsContext(canvas, status);
 
-  const { spec, startWorld, runtimes } = await loadSystem(worldFromQuery(window.location.search));
-  const shipModel = spec && runtimes.has(SHIP_HOME) ? await loadShipModel() : undefined;
+  // Una partida nueva empieza en casa (el prólogo); tras cruzar el gusano, en Umbral. `?mundo=` manda.
+  const saved = loadSave(browserStore());
+  if (saved.warning) console.warn(saved.warning);
+  // Una partida de una versión más nueva (que no se toca) ya pasó por casa: se empieza en Umbral.
+  const { spec, startWorld, runtimes } = await loadSystem(
+    firstWorld(window.location.search, saved.data.prologueDone || saved.readOnly),
+  );
+  // La nave espera donde diga su sistema: junto a La Boca o en el hangar del Instituto.
+  const shipHome = spec?.ship !== undefined && runtimes.has(spec.ship) ? spec.ship : undefined;
+  const shipModel = shipHome ? await loadShipModel() : undefined;
+  // En casa no corre el ciclo: ni eventos, ni absorciones, ni reloj doble.
+  const looping = spec?.looping ?? true;
   const clues = loadClues();
   // Las fuentes salen de las marcas del modelo: se crean antes de colgar los mundos de la escena.
   const sources = new Map<string, WorldSources>(
@@ -127,8 +154,17 @@ async function start(): Promise<void> {
   // …y por fuera: su imagen en el cielo, girada hacia la Brasa, y las estrellas que dobla a su paso.
   // (el agujero negro dobla también las estrellas; con `?calidad=baja` no se dobla nada).
   const lens = createLensView(scene, sky, qualityFromQuery(window.location.search) === 'alta');
+  // El cielo de los mundos con aire (Hogar): tapa las estrellas en el suelo y se apaga al subir.
+  const atmosphere = createAtmosphereView(scene);
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Los Ool (en casa): respiran, sus filamentos laten y se giran hacia ti. Y los tuyos brillan al leer.
+  const ool = createOolView(
+    [...runtimes.values()].flatMap((r) => r.world.markers.characters),
+    reducedMotion,
+  );
+  const filaments = createFilaments();
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
-  const chronology = loadChronology(window.location.search);
+  const chronology = looping ? loadChronology(window.location.search) : quietChronology();
   const birthplace = sources
     .get(BLACK_HOLE.world)
     ?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
@@ -221,6 +257,14 @@ async function start(): Promise<void> {
       triggersAsEvents(r.world.markers.triggers, r.id),
     ),
     player,
+    looping,
+    saved,
+    // Cruzado el gusano, el sistema ajeno se carga de nuevo con la página, detrás del fundido a blanco.
+    onCross: (wasSaved) => {
+      // Sin dejar atrás en el historial la pantalla en blanco.
+      markCrossing(sessionStore());
+      window.location.replace(arrivalHref(window.location.href, wasSaved));
+    },
     skyDirection: arrivalSkyDirection(player),
     // Cada ciclo empieza en el mundo de llegada, a pie, con la nave esperando (y sin tensión de marea).
     onRestart: () => {
@@ -261,14 +305,14 @@ async function start(): Promise<void> {
   game.ui = ui;
 
   const flight =
-    spec && shipModel
+    spec && shipModel && shipHome
       ? createShipFlight({
           spec,
           runtimes,
           model: shipModel,
           systemScene,
           player,
-          homeWorld: SHIP_HOME,
+          homeWorld: shipHome,
           walkInto: enterWorld,
           setReadingEnabled: (enabled) => {
             ui.setEnabled(enabled);
@@ -334,6 +378,16 @@ async function start(): Promise<void> {
     window.__juego.lens = () => lens.snapshot();
     window.__juego.tide = () => tides.snapshot();
     window.__juego.blackHole = () => blackHole.snapshot();
+    window.__juego.sky = () => ({ density: atmosphere.density });
+    window.__juego.ool = () => ({ turns: ool.snapshot(), filaments: filaments.snapshot() });
+    window.__juego.wormhole = () => ({
+      active: wormholeView?.active ?? false,
+      progress: wormholeView?.progress ?? 0,
+    });
+    window.__juego.guide = () => ({
+      shown: guideView?.shown ?? null,
+      done: [...(guide?.done ?? [])],
+    });
     window.__juego.absorption = () => absorption?.snapshot() ?? null;
     window.__juego.aimAt = (target) => {
       const where =
@@ -379,6 +433,33 @@ async function start(): Promise<void> {
     dimStars(sky, light);
   }
   let shipDeath: DeathCause | undefined;
+  // El final del prólogo: el gusano junto al fragmento de la Luna (solo en casa).
+  const prologue = looping ? undefined : createPrologueGate();
+  // La guía del prólogo: un aviso cada vez, hasta que se hace lo que pide.
+  const guide = looping ? undefined : new Guide();
+  const guideView = guide ? createGuideView(isTouchDevice()) : undefined;
+  const guideFeet = new Vector3();
+  const moonCenter = new Vector3();
+  let walked = 0;
+  let registryOpened = false;
+  // El gusano junto al fragmento de la Luna: se abre, y al terminar llega el fundido a blanco de la Cámara.
+  const wormholeView = looping ? undefined : createWormholeView();
+  let crossingAsked = false;
+  function openWormhole(): void {
+    const fragment = sources
+      .get(WORMHOLE.world)
+      ?.interactables.find((i) => i.id === WORMHOLE.source);
+    const moon = systemScene.groupOf(WORMHOLE.world);
+    if (!wormholeView || !fragment || !moon) {
+      wormhole = 'gusano'; // sin la escena, directamente al fundido
+      return;
+    }
+    // Sobre el fragmento y un poco más allá, visto desde ti; cuelga de la Luna (su centro es su origen).
+    moon.updateWorldMatrix(true, false);
+    const eye = moon.worldToLocal(camera.position.clone());
+    wormholeView.start(moon, wormholeCenter(fragment.position, new Vector3(), eye));
+  }
+  let wormhole: DeathCause | undefined;
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
     (dt) => {
@@ -392,8 +473,10 @@ async function start(): Promise<void> {
     },
   );
   status.textContent = '';
+  arrival?.clear();
 
   const feet = new Vector3();
+  const airCenter = new Vector3();
   const body = new Quaternion();
   runFrameLoop(
     renderer,
@@ -407,8 +490,25 @@ async function start(): Promise<void> {
         if (flight?.piloting) flight.addLook(look.x, look.y);
         else player.look(-look.x * MOUSE_LOOK_SENSITIVITY, -look.y * MOUSE_LOOK_SENSITIVITY);
       }
-      session.update(dt, timeRuns, shipDeath ?? tideDeath);
-      if (timeRuns) shipDeath = tideDeath = undefined; // si el ciclo no corrió, la muerte espera
+      const opened = prologue?.update(
+        {
+          world: currentWorld.id,
+          onFoot: !(flight?.piloting ?? false),
+          running: timeRuns && session.acceptsInput,
+          knowsFragment: reading.known.has(WORMHOLE.fact),
+        },
+        dt,
+      );
+      if (opened) openWormhole();
+      if (wormholeView?.active) {
+        wormholeView.update(timeRuns ? dt : 0, camera.position);
+        if (wormholeView.progress >= 1 && !crossingAsked) {
+          crossingAsked = true;
+          wormhole = 'gusano';
+        }
+      }
+      session.update(dt, timeRuns, wormhole ?? shipDeath ?? tideDeath);
+      if (timeRuns) wormhole = shipDeath = tideDeath = undefined; // si el ciclo no corrió, espera
       for (const prop of eventProps) {
         prop.object.visible = session.activeEventIds.includes(prop.event);
       }
@@ -440,6 +540,11 @@ async function start(): Promise<void> {
         dt,
       );
       if (tideLethal && session.acceptsInput) tideDeath = 'marea';
+      // Al abrirse el gusano la vista se estira (después de la marea, que fija la de cada fotograma).
+      if (wormholeView && wormholeView.stretch > 0 && !reducedMotion) {
+        camera.fov *= 1 + wormholeView.stretch;
+        camera.updateProjectionMatrix();
+      }
       if (flight?.piloting) {
         flight.view(alpha, camera);
       } else {
@@ -453,6 +558,19 @@ async function start(): Promise<void> {
       const fallen = session.director.absorption;
       systemScene.update(t);
       lightFor(systemScene.referenceWorld, finalLight(fallen));
+      const airWorld = systemScene.referenceWorld;
+      const air = airWorld === undefined ? undefined : ATMOSPHERES[airWorld];
+      const airGroup = airWorld === undefined ? undefined : systemScene.groupOf(airWorld);
+      const airRadius =
+        airWorld === undefined ? undefined : runtimes.get(airWorld)?.world.info.radius;
+      atmosphere.update({
+        eye: camera.position,
+        world:
+          air && airGroup && airRadius !== undefined
+            ? { center: airGroup.getWorldPosition(airCenter), radius: airRadius, air }
+            : undefined,
+        star: sun.position,
+      });
       blackHole.update(t, camera, timeRuns ? dt : 0, finalApproach(fallen));
       const hole = blackHole.lens();
       absorption?.update({
@@ -469,12 +587,14 @@ async function start(): Promise<void> {
         aligned: session.activeEventIds.includes(ALIGNMENT_EVENT),
         inObservatory: systemScene.referenceWorld === OBSERVATORY,
         time: performance.now() / 1000,
-        hole,
+        hole: hole ?? wormholeView?.lens(),
       });
       soundtrack.update({
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,
         rate: session.director.rate,
-        events: session.activeEventIds,
+        events: wormholeView?.active
+          ? [...session.activeEventIds, 'gusano']
+          : session.activeEventIds,
         absorption: fallen,
         hole: blackHole.fill,
         phase: session.director.phase,
@@ -486,6 +606,36 @@ async function start(): Promise<void> {
       camera.updateMatrixWorld();
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);
+      ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);
+      filaments.update(reading.current !== null, reading.known.size);
+      if (guide && guideView) {
+        // Lo andado (a pie y sin saltos grandes, que serían teletransportes de depuración).
+        if (!piloting) {
+          const step = guideFeet.distanceTo(player.state.position);
+          if (step < 1) walked += step;
+          guideFeet.copy(player.state.position);
+        }
+        if (ui.blocking && reading.current === null) registryOpened = true;
+        const moon = systemScene.groupOf(WORMHOLE.world);
+        const moonRadius = runtimes.get(WORMHOLE.world)?.world.info.radius;
+        guideView.update(
+          guide.current({
+            walked,
+            hasMission: reading.known.has('casa.mision_luna'),
+            knowsSomething: reading.known.size > 0,
+            registryOpened,
+            piloting,
+            targetingMoon: flight?.snapshot().target === WORMHOLE.world,
+            moonDistance:
+              moon && moonRadius !== undefined
+                ? moon.getWorldPosition(moonCenter).distanceTo(camera.position) - moonRadius
+                : undefined,
+            onMoon: !piloting && currentWorld.id === WORMHOLE.world,
+            sawFragment: reading.known.has(WORMHOLE.fact),
+          }),
+          overlay.playing && !ui.blocking,
+        );
+      }
       sight.update();
       touch?.update();
       debug.update(dt, overlay.playing);
@@ -508,6 +658,9 @@ function setupCamera(camera: PerspectiveCamera): void {
 
 start().catch((error: unknown) => {
   console.error(error);
+  // Que se lea el aviso, sin el blanco del gusano.
+  endArrivingPaint();
+  document.querySelector('.llegada')?.remove();
   const status = document.getElementById('status');
   if (status) status.textContent = 'No se pudo cargar el mundo. Revisa la consola.';
 });

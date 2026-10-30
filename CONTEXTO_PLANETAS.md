@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.6
-**Última actualización:** 2026-10-28 · Sesión 5 (Laboratorio dentro del Nudo)
+**Versión:** v0.7
+**Última actualización:** 2026-10-29 · Sesión 6 (el prólogo: el Albatros II, el Instituto y la aldea)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -45,7 +45,7 @@
 ## 2. Convenciones de diseño (🟡)
 
 - **Escala:** 1 unidad de Blender = 1 metro. Con radios de 30 a 90 m se da la vuelta caminando en 1 a 2 minutos.
-- **Presupuesto de triángulos:** planeta 3 a 8 mil; props 50 a 500; nave 1 a 3 mil.
+- **Presupuesto de triángulos:** planeta 3 a 8 mil; props 50 a 500; nave 1 a 3 mil. ✅ **Es orientativo** (Anthony, 2026-10-29): se supera cuando haga falta para que los modelos sean **profesionales, bonitos y completos**; lo que manda es que el juego vaya fluido (se mide).
 - **Color:** de 8 a 12 colores por mundo, con una sola textura de paleta o vertex colors.
 - **Marcas en Blender:** prefijos `COL_` (colisión), `INT_` (interacción), `SPAWN_` (aparición) para colocar diálogos, triggers y puntos de inicio sin escribir coordenadas a mano.
 - **Plantilla de un mundo:** 1 entrada memorable, de 3 a 5 puntos de interés, 1 evento cronometrado, 1 puzzle principal, de 2 a 3 textos clave.
@@ -235,11 +235,15 @@
 
 > ✅ Decidido: el prólogo ocurre en un sitio donde se estudian los objetos de los Ausentes y donde ya saben leer su lengua.
 
-**Hogar (🟡, nombre ❓).** Un planeta templado, verde y ocre, cálido, vivo. Contraste fuerte con Umbral. En una colina está el **Instituto**.
+**Hogar (🟡, nombre ❓).** Un planeta templado, verde y ocre, cálido, vivo. Contraste fuerte con Umbral. En una colina está el **Instituto**; abajo, **la aldea** de los Ool, que también se recorre (✅ Anthony, 2026-10-29).
+
+**Cómo es Hogar (🟡, Fase 9).** El Instituto en la cima llana de una colina: la Sala de Fragmentos (una rotonda) y tres alas redondas —el aula de la Maestra, el taller de la Puerta pequeña y el despacho de la Directora— unidas por pasillos de aros y lona, con su plaza de entrada. Al este de la cima, el hangar del Albatros II. Abajo, en los prados del norte, la aldea con su árbol de musgo, y en la costa del este un embarcadero. Es el único mundo con aire: cielo de amanecer, la estrella baja al este.
+
+**Lenguaje de los Ool (🟡).** Redondeado, blando y hecho a mano: telas cosidas en gajos de colores sobre costillas de madera, puertas y ventanas redondeadas, musgo por todas partes y luz viva verde azulada (bulbos en tallos, frutos en los árboles). Nada de troncos ni chapa remachada. Junto a esto, los fragmentos de los Ausentes (arenisca y pizarra, cortados en curva perfecta) se ven ajenos.
 
 **La Luna (🟡, nombre ❓).** Gris azulada, con cráteres. En ella apareció el fragmento más grande hasta ahora, clavado en el suelo y con un borde cortado en curva perfecta.
 
-**La nave (🟡, nombre ❓).** La lanzadera del Instituto con la que el explorador hace su primer vuelo: pequeña, redondeada y amable, en los colores de Hogar (crema, ocre y verde), con una burbuja delantera para mirar, un relicario bajo la panza donde iba a traer el fragmento de la luna y un farol en el mástil. En el tablero lleva el **reloj doble**. Llega con él al sistema ajeno y en cada ciclo espera posada cerca de La Boca.
+**La nave: el Albatros II (✅ nombre, Anthony 2026-10-29; 🟡 el resto).** La lanzadera del Instituto con la que el explorador hace su primer vuelo: pequeña, redondeada y amable, en los colores de Hogar (crema, ocre y verde), con una burbuja delantera para mirar, un relicario bajo la panza donde iba a traer el fragmento de la luna y un farol en el mástil. En el tablero lleva el **reloj doble**. Llega con él al sistema ajeno y en cada ciclo espera posada cerca de La Boca.
 
 **Beats del prólogo (🟡, 10 a 15 minutos):**
 1. **El Instituto al amanecer.** Se enseña a caminar, interactuar y leer una ficha cotidiana en la lengua de los Ausentes.
@@ -273,7 +277,7 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 2. ✅ **Observatorio:** sí, como extra opcional (Anthony, 2026-10-25). El grafo de pistas no depende de él.
 3. ❓ **Clima y fauna:** ¿hay seres vivos o plantas en los mundos, o están completamente vacíos?
 4. ❓ **Cantidad de textos por mundo:** ¿unos 10 por mundo, o más?
-5. ❓ **Prólogo:** ¿una sola ubicación (el Instituto) o también la aldea?
+5. ✅ **Prólogo:** el Instituto **y la aldea**, entera y visitable (Anthony, 2026-10-29).
 6. ✅ **Cuerpos que se mueven:** los mundos orbitan **en rieles y en tiempo real** (Anthony, 2026-10-25): su posición es una fórmula del reloj del ciclo, sin simular gravedad entre ellos. Un periodo `0` en los datos deja un mundo quieto. Valores de partida 🟡 en `web/src/data/sistema.json`.
 7. ✅ Laboratorio Oculto: sitio aparte, lente gravitacional y ocultado por el Consejo (resuelto).
 
@@ -288,3 +292,5 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-10-27 · Sesión 4.** Se propone el aspecto de la nave (🟡): la lanzadera del Instituto, con el reloj doble en el tablero. La primera versión copiaba la nave de Outer Wilds y se descartó.
 - **2026-10-27 · Sesión 4 (Fase 6).** Se propone el lenguaje visual de los Ausentes (🟡 anillos y estratos) y Umbral se viste con sus siete lugares; el Mirador queda en el terminador, con la Brasa en el horizonte.
 - **2026-10-28 · Sesión 5 (Fase 7).** Anthony decide que el Laboratorio esté **dentro del Nudo, con la gravedad invertida**. Se propone (🟡) el Nudo como garganta plegada: cáscara negra por fuera, cavidad de 21 m por dentro con la semilla en el centro, Puerta plegada para entrar y siete zonas del Laboratorio en la cara interior. El Nudo entra en `sistema.json` (órbita 2350 m) como cuerpo oculto.
+- **2026-10-29 · Sesión 6 (Fase 9).** Anthony decide: la nave se llama **el Albatros II**; el prólogo abarca el Instituto **y la aldea**; el presupuesto de triángulos es orientativo, por encima están la calidad y que los modelos estén completos. Su pueblo, los Ool, está en `CONTEXTO_HISTORIA.md` §7.
+- **2026-10-29 · Sesión 6 (Fase 9 cerrada).** Se construye el prólogo según §9, con propuestas (🟡) para reaccionar: la Luna con el fragmento clavado de canto (mordida esférica, fecha tallada y un hilo de luz en el corte); el gusano se abre al examinarlo (un anillo de luz sobre el fragmento, las estrellas que se doblan, la vista que se estira y un zumbido), fundido a blanco y despertar frente a La Boca, con el blanco que sigue hasta que el sistema ajeno está cargado.

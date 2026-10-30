@@ -99,6 +99,7 @@ describe('promptLabel', () => {
     ['grabacion', 'escuchar'],
     ['objeto', 'examinar'],
     ['observacion', 'examinar'],
+    ['charla', 'hablar'],
   ] as const)('uses the right verb for %s', (kind, verb) => {
     expect(promptLabel(kind, false)).toBe(`E · ${verb}`);
     expect(promptLabel(kind, true)).toBe(verb.charAt(0).toUpperCase() + verb.slice(1));

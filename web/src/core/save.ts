@@ -1,10 +1,10 @@
-// Guardado entre ciclos. Lo único que persiste es el conocimiento (CONTEXTO_HISTORIA.md §8): por
-// ahora el número de ciclos y la lista de hechos descubiertos (se llena en la Fase 4).
+// Guardado entre ciclos. Lo único que persiste es el conocimiento (CONTEXTO_HISTORIA.md §8): el número de
+// ciclos, la lista de hechos descubiertos (Fase 4) y si ya se jugó el prólogo en casa (Fase 9, versión 2).
 // Lo leído de localStorage se trata como dato externo: se valida y, si está dañado o manipulado,
 // se descarta y se empieza de cero con un aviso. Sin almacenamiento (modo privado) se juega igual.
 
 export const SAVE_KEY = 'bucle-tiempo:partida';
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 export const MAX_LOOPS = 1_000_000;
 export const MAX_FACTS = 5000;
 /** Ids de hechos: "mundo.nombre" con letras, números, guiones y puntos. */
@@ -14,6 +14,8 @@ export interface SaveData {
   version: typeof SAVE_VERSION;
   loopsCompleted: number;
   facts: readonly string[];
+  /** Ya se cruzó el gusano: la partida empieza en Umbral, no en casa. */
+  prologueDone: boolean;
 }
 
 /** Lo mínimo de `Storage` que se usa (permite almacenamiento falso en los tests). */
@@ -31,7 +33,7 @@ export interface LoadResult {
 }
 
 export function freshSave(): SaveData {
-  return { version: SAVE_VERSION, loopsCompleted: 0, facts: [] };
+  return { version: SAVE_VERSION, loopsCompleted: 0, facts: [], prologueDone: false };
 }
 
 /** `localStorage` si el navegador lo permite (puede lanzar en iframes o con cookies bloqueadas). */
@@ -43,16 +45,29 @@ export function browserStore(): KeyValueStore | null {
   }
 }
 
+/** Versión 1 (antes del prólogo): esas partidas empezaban ya en Umbral, así que lo dan por hecho. */
+function prologueOf(version: unknown, prologueDone: unknown): boolean | null {
+  if (version === 1) return true;
+  if (version !== SAVE_VERSION || typeof prologueDone !== 'boolean') return null;
+  return prologueDone;
+}
+
 function validate(raw: unknown): SaveData | null {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
-  const { version, loopsCompleted, facts } = raw as Record<string, unknown>;
-  if (version !== SAVE_VERSION) return null;
+  const { version, loopsCompleted, facts, prologueDone } = raw as Record<string, unknown>;
+  const prologue = prologueOf(version, prologueDone);
+  if (prologue === null) return null;
   if (!Number.isInteger(loopsCompleted)) return null;
   const loops = loopsCompleted as number;
   if (loops < 0 || loops > MAX_LOOPS) return null;
   if (!Array.isArray(facts) || facts.length > MAX_FACTS) return null;
   if (!facts.every((f): f is string => typeof f === 'string' && FACT_ID.test(f))) return null;
-  return { version: SAVE_VERSION, loopsCompleted: loops, facts: [...new Set(facts)] };
+  return {
+    version: SAVE_VERSION,
+    loopsCompleted: loops,
+    facts: [...new Set(facts)],
+    prologueDone: prologue,
+  };
 }
 
 function fresh(warning?: string, readOnly = false): LoadResult {
@@ -114,8 +129,8 @@ export function clearSave(store: KeyValueStore | null): boolean {
 }
 
 /**
- * Guarda el progreso fusionándolo con lo que ya hay guardado: unión de hechos y el mayor número de
- * ciclos. Así dos pestañas abiertas a la vez no se pisan, y el director del ciclo (que solo conoce los
+ * Guarda el progreso fusionándolo con lo que ya hay guardado: unión de hechos, el mayor número de ciclos y
+ * el prólogo hecho si lo estaba en cualquiera de los dos. Así dos pestañas abiertas a la vez no se pisan, y el director del ciclo (que solo conoce los
  * ciclos) no borra los hechos que escribió la lectura. Una partida de una versión más nueva no se toca.
  */
 export function saveProgress(store: KeyValueStore | null, data: SaveData): boolean {
@@ -126,7 +141,21 @@ export function saveProgress(store: KeyValueStore | null, data: SaveData): boole
   // el final sacrifica lo viejo y no el progreso de ahora.
   const facts = [...new Set([...data.facts, ...stored.data.facts])].slice(0, MAX_FACTS);
   const loopsCompleted = Math.max(stored.data.loopsCompleted, data.loopsCompleted);
-  return writeSave(store, { ...data, loopsCompleted, facts });
+  const prologueDone = data.prologueDone || stored.data.prologueDone;
+  return writeSave(store, { ...data, loopsCompleted, facts, prologueDone });
+}
+
+/**
+ * Al cruzar el gusano: guarda que el prólogo está hecho, con lo demás que ya había. Devuelve false si no se pudo
+ * (sin almacenamiento, o una partida de una versión más nueva que no se toca).
+ */
+export function markPrologueDone(
+  store: KeyValueStore | null,
+  loaded: LoadResult,
+  loopsCompleted: number,
+): boolean {
+  if (loaded.readOnly) return false;
+  return saveProgress(store, { ...loaded.data, loopsCompleted, prologueDone: true });
 }
 
 /**

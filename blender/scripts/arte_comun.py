@@ -5,6 +5,7 @@
 #   <mundo>_Lugares      todo lo visible (una sola malla, la paleta del mundo: un draw call)
 #   <mundo>_Luces        lo que brilla (material emisivo)
 #   COL_<mundo>_Lugares  cajas y cilindros sencillos para caminar (oculto en el juego)
+# y, si las usa, <mundo>_LucesVivas: un segundo brillo de otro color (en Hogar, la luz viva de los Ool).
 # y los vuelve a crear desde cero cada vez (reproducible; no se edita el .blend a mano).
 import math
 
@@ -83,6 +84,130 @@ def toro(radio, grosor, lados=24, seccion=6):
             for j in range(seccion):
                 bm.faces.new((a[j], b[j], b[(j + 1) % seccion], a[(j + 1) % seccion]))
         return {"verts": verts}
+    return crear
+
+
+def torno(perfil, lados=16, desde=0.0, hasta=2 * math.pi, tapar=True):
+    """Superficie de revolución alrededor de Z: `perfil` es una lista de (radio, z) de abajo arriba. Con
+    `desde`/`hasta` (rad) sale un gajo; `tapar` cierra con un vértice los extremos de radio 0 (cúpulas, bulbos,
+    jarrones). Para casas redondas, techos de tela, faroles y troncos."""
+    def crear(bm):
+        completo = abs((hasta - desde) - 2 * math.pi) < 1e-6
+        n = lados if completo else lados + 1
+        filas = []
+        verts = []
+        for r, z in perfil:
+            if r <= 1e-6 and tapar:
+                v = bm.verts.new((0, 0, z))
+                verts.append(v)
+                filas.append([v] * n)
+                continue
+            fila = []
+            for i in range(n):
+                a = desde + (hasta - desde) * i / lados
+                v = bm.verts.new((math.cos(a) * r, math.sin(a) * r, z))
+                fila.append(v)
+                verts.append(v)
+            filas.append(fila)
+        for j in range(len(filas) - 1):
+            abajo, arriba = filas[j], filas[j + 1]
+            for i in range(lados):
+                i2 = (i + 1) % n
+                cara = [abajo[i], abajo[i2], arriba[i2], arriba[i]]
+                unicos = []
+                for v in cara:
+                    if v not in unicos:
+                        unicos.append(v)
+                if len(unicos) >= 3:
+                    bm.faces.new(unicos)
+        return {"verts": verts}
+    return crear
+
+
+def cupula(r, alto, lados=16, anillos=5, desde=0.0, hasta=2 * math.pi):
+    """Cúpula (cuarto de elipse girado) de radio `r` y altura `alto`, cerrada arriba y abierta abajo."""
+    perfil = [(r * math.cos(t), alto * math.sin(t))
+              for t in (math.pi / 2 * k / anillos for k in range(anillos))] + [(0.0, alto)]
+    return torno(perfil, lados, desde, hasta)
+
+
+def arco(radio, grosor, desde=0.0, hasta=math.pi, lados=10, seccion=5):
+    """Trozo de anillo en el plano XZ (como `toro`), de `desde` a `hasta` (rad, 0 = +X, π/2 = arriba): arcos de
+    puertas, costillas de cúpulas, aros."""
+    def crear(bm):
+        verts = []
+        anillos = []
+        for i in range(lados + 1):
+            a = desde + (hasta - desde) * i / lados
+            centro = Vector((math.cos(a) * radio, 0, math.sin(a) * radio))
+            radial = centro.normalized()
+            fila = []
+            for j in range(seccion):
+                b = 2 * math.pi * j / seccion
+                v = bm.verts.new(centro + radial * math.cos(b) * grosor + Vector((0, 1, 0)) * math.sin(b) * grosor)
+                fila.append(v)
+                verts.append(v)
+            anillos.append(fila)
+        for i in range(lados):
+            a, b = anillos[i], anillos[i + 1]
+            for j in range(seccion):
+                bm.faces.new((a[j], b[j], b[(j + 1) % seccion], a[(j + 1) % seccion]))
+        return {"verts": verts}
+    return crear
+
+
+def fragmento(cortes, divisiones=4, medidas=(1.0, 1.0, 1.0)):
+    """Caja (centrada) de `medidas` metros con mordidas esféricas perfectas: `cortes` es una lista de (centro, radio)
+    en el marco de la caja y en metros. Así son los fragmentos de los Ausentes que llegan a casa: piedra tallada con
+    un borde cortado en curva perfecta. Se restan esferas de verdad (booleana exacta de Blender), así que el corte
+    queda limpio; para que sea una esfera y no un elipsoide, la caja se hace ya a su tamaño en vez de escalarla.
+    (`divisiones` ya no se usa: se deja por los scripts antiguos.)"""
+    mx, my, mz = medidas
+
+    def crear(bm):
+        escena = bpy.context.scene
+        caja = bmesh.new()
+        bmesh.ops.create_cube(caja, size=1.0)
+        for v in caja.verts:
+            v.co = Vector((v.co.x * mx, v.co.y * my, v.co.z * mz))
+        datos = bpy.data.meshes.new("_fragmento")
+        caja.to_mesh(datos)
+        caja.free()
+        obj = bpy.data.objects.new("_fragmento", datos)
+        escena.collection.objects.link(obj)
+        solvers = [i.identifier for i in bpy.types.BooleanModifier.bl_rna.properties["solver"].enum_items]
+        esferas = []
+        for i, (centro, radio) in enumerate(cortes):
+            bola_bm = bmesh.new()
+            try:
+                bmesh.ops.create_uvsphere(bola_bm, u_segments=40, v_segments=20, radius=radio)
+            except TypeError:
+                bmesh.ops.create_uvsphere(bola_bm, u_segments=40, v_segments=20, diameter=radio * 2)
+            bmesh.ops.translate(bola_bm, vec=Vector(centro), verts=bola_bm.verts)
+            bola_datos = bpy.data.meshes.new(f"_corte{i}")
+            bola_bm.to_mesh(bola_datos)
+            bola_bm.free()
+            bola = bpy.data.objects.new(f"_corte{i}", bola_datos)
+            escena.collection.objects.link(bola)
+            esferas.append(bola)
+            mod = obj.modifiers.new(f"corte{i}", "BOOLEAN")
+            mod.operation = "DIFFERENCE"
+            mod.object = bola
+            mod.solver = "EXACT" if "EXACT" in solvers else solvers[0]
+        evaluado = obj.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        resultado = evaluado.to_mesh()
+        nuevos = [bm.verts.new(v.co) for v in resultado.vertices]
+        for poligono in resultado.polygons:
+            try:
+                bm.faces.new([nuevos[i] for i in poligono.vertices])
+            except ValueError:
+                pass  # cara repetida
+        evaluado.to_mesh_clear()
+        for o in [obj] + esferas:
+            malla = o.data
+            bpy.data.objects.remove(o, do_unlink=True)
+            bpy.data.meshes.remove(malla)
+        return {"verts": nuevos}
     return crear
 
 
@@ -275,15 +400,18 @@ class Vestido:
     """Reúne lo visible, las luces, las colisiones y las marcas de un mundo. Cada arte_<mundo>.py hereda,
     escribe sus lugares en `lugares()` y llama a `ejecutar()`."""
 
-    def __init__(self, mundo, color_luz, scripts, ambiente=None):
-        """`ambiente`: (intensidad, "#rrggbb") de la luz ambiente propia del mundo, o None para la general."""
+    def __init__(self, mundo, color_luz, scripts, ambiente=None, color_vivas="#7FF0C8"):
+        """`ambiente`: (intensidad, "#rrggbb") de la luz ambiente propia del mundo, o None para la general.
+        `color_vivas`: el del segundo brillo (`self.vivas`), si se usa."""
         self.mundo = mundo
+        self.color_vivas = color_vivas
         self.ambiente = ambiente
         self.color_luz = color_luz
         self.scripts = scripts
         self.planeta = Planeta(mundo)
         self.vista = Malla()
         self.luces = Malla()
+        self.vivas = Malla()
         self.col = Colisiones()
         self.marcas = {}
         self.extra = []  # objetos sueltos (EVT_…), además de las tres mallas
@@ -328,8 +456,9 @@ class Vestido:
         self.marcas[nombre] = (Vector(punto), rumbo)
 
     def construir(self):
-        borrar([f"{self.mundo}_Lugares", f"{self.mundo}_Luces", f"COL_{self.mundo}_Lugares"]
-               + [o.name for o in bpy.data.objects if o.name.startswith("EVT_")])
+        borrar([f"{self.mundo}_Lugares", f"{self.mundo}_Luces", f"{self.mundo}_LucesVivas",
+                f"COL_{self.mundo}_Lugares"]
+               + [o.name for o in bpy.data.objects if o.name.startswith(("EVT_", "OOL_"))])
         self.lugares()
         raiz = self.planeta.raiz
         for clave in ("ambient", "ambient_color"):
@@ -341,8 +470,14 @@ class Vestido:
         _, tris = objeto(self.planeta, f"{self.mundo}_Lugares", self.vista, paleta)
         _, tris_luz = objeto(self.planeta, f"{self.mundo}_Luces", self.luces,
                              material_luces(f"M_Luces_{self.mundo}", self.color_luz))
+        tris_vivas = 0
+        if self.vivas.piezas:
+            _, tris_vivas = objeto(self.planeta, f"{self.mundo}_LucesVivas", self.vivas,
+                                   material_luces(f"M_LucesVivas_{self.mundo}", self.color_vivas))
+        else:
+            self.vivas.bm.free()
         colisiones(self.planeta, f"COL_{self.mundo}_Lugares", self.col)
-        print(f"{self.mundo}: lugares {tris} triángulos, luces {tris_luz}")
+        print(f"{self.mundo}: lugares {tris} triángulos, luces {tris_luz}, luces vivas {tris_vivas}")
 
     def escribir_marcas(self):
         """Lleva las marcas a sus objetos: latitud, longitud y altura sobre el terreno."""
