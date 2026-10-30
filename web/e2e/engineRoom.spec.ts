@@ -1,64 +1,9 @@
 // Fase 10C: la Sala del Motor de Cicatriz. Con la palanca sale el motor viejo; el Contrapeso se pone en la cuna y
 // sus dos ruedas igualan su reloj con el de la máquina. El pulso de las 9:00 lo encaja (y el agujero negro ya no
 // traga nada) o lo rechaza si los relojes no coinciden.
-import { expect, test, type Page } from '@playwright/test';
-import { snapshot, startPlaying } from './helpers';
-
-async function counterweight(page: Page) {
-  return page.evaluate(() => window.__juego?.counterweight?.() ?? null);
-}
-
-async function standAt(page: Page, source: string): Promise<void> {
-  expect(await page.evaluate((id) => window.__juego?.teleportTo?.(id) ?? false, source)).toBe(true);
-}
-
-/** A las 5:00, para que el reloj del Contrapeso y el de la máquina no marquen lo mismo por casualidad. */
-async function intoTheCradle(page: Page): Promise<void> {
-  await startPlaying(page);
-  await page.evaluate(() => window.__juego?.skipTo?.(300));
-  await standAt(page, 'lab.notas_investigadora');
-  await expect(page.locator('.prompt')).toHaveText('E · leer');
-  await page.keyboard.press('KeyE');
-  await expect(page.locator('.reader-title')).toHaveText('Las notas de la investigadora');
-  await page.keyboard.press('KeyE');
-  // Las notas ya dicen que está terminado: el Contrapeso no tiene nada nuevo y se coge sin examinarlo.
-  await standAt(page, 'lab.contrapeso');
-  await expect(page.locator('.prompt')).toHaveText('E · coger');
-  await page.keyboard.press('KeyE');
-  await expect.poll(async () => (await counterweight(page))?.place).toBe('carried');
-
-  // También sabes ya que sustituye al motor viejo: la palanca se usa sin examinarla.
-  await standAt(page, 'cicatriz.palanca');
-  await expect(page.locator('.prompt')).toHaveText('E · tirar');
-  await page.keyboard.press('KeyE');
-  await expect.poll(async () => (await counterweight(page))?.motorOut).toBe(true);
-  await expect(page.locator('.notice')).toContainText('El motor viejo sale');
-
-  await standAt(page, 'cicatriz.cuna');
-  await expect(page.locator('.prompt')).toHaveText('E · poner');
-  await page.keyboard.press('KeyE');
-  await expect.poll(async () => (await counterweight(page))?.place).toBe('cradle');
-  await expect(page.locator('.clock-hud')).not.toContainText('Contrapeso'); // ya no lo llevas
-}
-
-async function openWheels(page: Page): Promise<void> {
-  await expect(page.locator('.prompt')).toHaveText('E · examinar');
-  await page.keyboard.press('KeyE');
-  await expect(page.locator('.puzzle-title')).toHaveText('La cuna del núcleo');
-}
-
-/** Gira las ruedas hasta que el Contrapeso marque lo que la máquina (en la cuna los dos van a la par). */
-async function matchClocks(page: Page): Promise<void> {
-  const state = await counterweight(page);
-  const gap = (state?.machine ?? 0) - (state?.clock ?? 0);
-  const sign = gap < 0 ? 'atrasar' : 'adelantar';
-  const minutes = Math.floor(Math.abs(gap) / 60);
-  const seconds = Math.round(Math.abs(gap) - minutes * 60);
-  for (let i = 0; i < minutes; i++)
-    await page.getByRole('button', { name: `Minutos: ${sign}` }).click();
-  for (let i = 0; i < seconds; i++)
-    await page.getByRole('button', { name: `Segundos: ${sign}` }).click();
-}
+import { expect, test } from '@playwright/test';
+import { counterweight, intoTheCradle, matchClocks, openWheels } from './counterweightSteps';
+import { snapshot } from './helpers';
 
 test('the pulse installs the Counterweight when both clocks match, and the hole stops growing', async ({
   page,

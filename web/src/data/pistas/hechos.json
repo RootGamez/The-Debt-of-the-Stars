@@ -351,5 +351,29 @@
     "hilos": ["H7"],
     "frase": "El sistema de casa ya figura en la red de las Puertas.",
     "enlaces": ["casa.prueba_llama", "bocas.relojes_distintos"]
+  },
+  {
+    "id": "puertas.otros_viajeros",
+    "hilos": ["H3"],
+    "frase": "Otros llegaron aquí antes que yo, por bocas de épocas distintas. La última fila del muro está en blanco.",
+    "enlaces": ["bocas.relojes_distintos"]
+  },
+  {
+    "id": "silencio.no_cruzaron",
+    "hilos": ["H5"],
+    "frase": "Los nombres de los tres del Laboratorio no están en el muro: no llegaron a cruzar.",
+    "enlaces": ["silencio.dos_investigadores"]
+  },
+  {
+    "id": "bocas.vuelta_antes",
+    "hilos": ["H7"],
+    "frase": "Contando el desfase, solo una de las bocas de casa me deja antes de la prueba mayor.",
+    "enlaces": ["bocas.relojes_distintos", "casa.prueba_llama"]
+  },
+  {
+    "id": "contrapeso.planos",
+    "hilos": ["H6"],
+    "frase": "En el Banco del Archivo quedan los planos del Contrapeso: con ellos se podría construir otro.",
+    "enlaces": ["contrapeso.sustituye_motor"]
   }
 ]

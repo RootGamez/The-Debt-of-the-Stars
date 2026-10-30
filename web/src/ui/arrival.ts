@@ -2,12 +2,18 @@
 // blanco. Para que el salto no se note, antes de recargar se apunta en la sesión de la pestaña que se viene del
 // gusano; al cargar, la pantalla sigue en blanco mientras llega el mundo y luego se aclara despacio. El primer
 // blanco lo pone un guion en línea de `index.html` (antes de que llegue este código), con la misma clave.
+// Tras cruzar el horizonte estable (Fase 10D) es lo mismo, pero en negro: se despierta en el Archivo de las Puertas.
 import type { KeyValueStore } from '../core/save';
 
 /** La clave de la sesión; `index.html` la lee también. */
 export const ARRIVAL_KEY = 'bucle-tiempo:gusano';
-/** La clase que `index.html` pone en `<html>` para nacer en blanco. */
+/** La clase que `index.html` pone en `<html>` para nacer en blanco… */
 export const ARRIVING_CLASS = 'llegando';
+/** …y la que añade para nacer en negro. */
+export const ARRIVING_DARK_CLASS = 'llegando-negro';
+
+/** De qué color es el fundido que se cruzó: blanco el del gusano, negro el del horizonte. */
+export type ArrivalColor = 'blanco' | 'negro';
 /** Lo que tarda en aclararse el blanco, ya cargado el mundo (s). */
 export const ARRIVAL_FADE_SECONDS = 2.5;
 /** Margen tras el fundido para quitar la capa aunque no llegue el final de la transición (s). */
@@ -21,29 +27,30 @@ export function sessionStore(): KeyValueStore | null {
   }
 }
 
-/** Antes de recargar: la próxima carga de esta pestaña viene del gusano. */
-export function markCrossing(store: KeyValueStore | null): void {
+/** Antes de recargar: la próxima carga de esta pestaña viene del gusano (o del horizonte, en negro). */
+export function markCrossing(store: KeyValueStore | null, color: ArrivalColor = 'blanco'): void {
   try {
-    store?.setItem(ARRIVAL_KEY, '1');
+    store?.setItem(ARRIVAL_KEY, color);
   } catch {
     // Sin sesión (modo privado estricto): se despierta sin el blanco, nada más.
   }
 }
 
-/** Al cargar: ¿se viene del gusano? Solo una vez (una recarga después ya no). */
-export function takeCrossing(store: KeyValueStore | null): boolean {
+/** Al cargar: ¿se viene de cruzar, y con qué color? Solo una vez (una recarga después ya no). */
+export function takeCrossing(store: KeyValueStore | null): ArrivalColor | undefined {
   try {
-    const crossed = store?.getItem(ARRIVAL_KEY) != null;
+    const crossed = store?.getItem(ARRIVAL_KEY) ?? null;
     store?.removeItem(ARRIVAL_KEY);
-    return crossed;
+    if (crossed === null) return undefined;
+    return crossed === 'negro' ? 'negro' : 'blanco';
   } catch {
-    return false;
+    return undefined;
   }
 }
 
-/** Quita el blanco de nacimiento de `index.html` (lo releva la capa, o hay que leer un aviso de error). */
+/** Quita el blanco (o el negro) de nacimiento de `index.html` (lo releva la capa, o hay que leer un aviso de error). */
 export function endArrivingPaint(): void {
-  document.documentElement.classList.remove(ARRIVING_CLASS);
+  document.documentElement.classList.remove(ARRIVING_CLASS, ARRIVING_DARK_CLASS);
 }
 
 export interface ArrivalLayer {
@@ -51,10 +58,10 @@ export interface ArrivalLayer {
   clear(): void;
 }
 
-/** El blanco del gusano, encima de todo, desde que arranca el juego hasta que esté el mundo. */
-export function createArrivalLayer(): ArrivalLayer {
+/** El blanco del gusano (o el negro del horizonte), encima de todo, desde que arranca el juego hasta que esté el mundo. */
+export function createArrivalLayer(color: ArrivalColor = 'blanco'): ArrivalLayer {
   const layer = document.createElement('div');
-  layer.className = 'llegada';
+  layer.className = color === 'negro' ? 'llegada llegada-negra' : 'llegada';
   layer.setAttribute('aria-hidden', 'true');
   layer.style.transitionDuration = `${ARRIVAL_FADE_SECONDS}s`;
   document.body.append(layer);

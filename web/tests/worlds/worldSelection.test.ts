@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   arrivalHref,
   DEFAULT_WORLD,
+  epilogueHref,
+  EPILOGUE_WORLD,
+  homecomingHref,
   PROLOGUE_WORLD,
   startWorld,
   WORLD_IDS,
@@ -20,6 +23,21 @@ describe('where the game starts', () => {
     expect(startWorld('?debug&mundo=umbral', false)).toBe('umbral');
     expect(startWorld('?mundo=hogar', true)).toBe('hogar');
     expect(startWorld('?mundo=marte', false)).toBe('hogar');
+  });
+});
+
+describe('the way to the Archivo de las Puertas through the stable horizon (Phase 10)', () => {
+  it('asks for the Archivo in the address, keeping the rest and dropping the fragment', () => {
+    expect(EPILOGUE_WORLD).toBe('puertas');
+    expect(epilogueHref('http://localhost:5180/?debug&mundo=umbral#x')).toBe(
+      'http://localhost:5180/?debug=&mundo=puertas',
+    );
+  });
+
+  it('goes home through a mouth of the Archive with the ending it gave', () => {
+    expect(homecomingHref('http://localhost:5180/?debug&mundo=puertas#x', 'A')).toBe(
+      'http://localhost:5180/?debug=&mundo=hogar&final=A',
+    );
   });
 });
 
@@ -57,7 +75,7 @@ describe('worldFromQuery', () => {
     expect(worldFromQuery('?mundo=marte')).toBe(DEFAULT_WORLD);
   });
 
-  it('knows the eight base worlds of CONTEXTO_PLANETAS.md', () => {
+  it('knows the eight base worlds of CONTEXTO_PLANETAS.md and the Archivo de las Puertas', () => {
     expect(WORLD_IDS).toEqual([
       'umbral',
       'archivo',
@@ -67,6 +85,7 @@ describe('worldFromQuery', () => {
       'laboratorio',
       'hogar',
       'luna',
+      'puertas',
     ]);
   });
 });

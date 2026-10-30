@@ -11,7 +11,7 @@ import random
 from mathutils import Vector, noise
 
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-WORLD = ARGS[0] if ARGS else "umbral"  # umbral, archivo, taller, cicatriz, observatorio, laboratorio, hogar, luna
+WORLD = ARGS[0] if ARGS else "umbral"  # umbral, archivo, taller, cicatriz, observatorio, laboratorio, hogar, luna, puertas
 SUBDIV = 5            # 5 ≈ 5.120 triángulos (presupuesto 3k–8k); un preset puede pedir más ("subdiv")
 # La colisión usa la misma resolución que el suelo visible: con menos, el jugador se hundiría o
 # flotaría entre vértices.
@@ -52,6 +52,10 @@ PRESETS = {
                   sea=0.42, massif=((0.74, 0.14, 0.66), 0.32, 0.1, "#88B058")),
     "luna": dict(radius=35, gravity=0.4, clock=1.00, relief=0.04, freq=1.3,
                  bands=[(0.0, "#4E5666"), (0.4, "#8A94A6"), (0.7, "#B4BCC8")], craters=12),
+    # 🟡 El Archivo de las Puertas (Fase 10D): fuera del tiempo, un planetoide oscuro y casi liso donde están de pie
+    # las bocas de todas las épocas. Su reloj no corre (no hay ciclo): `clock` solo por completar.
+    "puertas": dict(radius=30, gravity=0.5, clock=1.00, relief=0.025, freq=1.1,
+                    bands=[(0.0, "#0C0C14"), (0.4, "#161622"), (0.75, "#22222F")]),
 }
 
 

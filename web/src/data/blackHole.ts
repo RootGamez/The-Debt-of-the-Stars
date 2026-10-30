@@ -18,6 +18,12 @@ export const BLACK_HOLE = {
    */
   stableRadius: 6,
   /**
+   * 🟡 Bajar al horizonte estable (Fase 10D): a menos de `pullRange` radios tira de la nave hacia el centro, con
+   * `pullStrength` m/s² en el mismo horizonte (cae con el cuadrado de la distancia; se puede escapar).
+   */
+  pullRange: 4,
+  pullStrength: 8,
+  /**
    * El palco (CONTEXTO_PLANETAS §7): el último mundo en caer, desde donde se ve el final entero. 🟡 Ahí la marea
    * del agujero se nota, pero no mata.
    */

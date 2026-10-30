@@ -13,6 +13,7 @@ import {
   finalLight,
   frozenRate,
   holeTide,
+  horizonTide,
   skyFill,
   stretchedPoint,
 } from '../../src/system/absorption';
@@ -107,6 +108,14 @@ describe('the tide of the black hole on a world being swallowed', () => {
     expect(holeTide(0.3, true)).toBeGreaterThan(0);
     expect(holeTide(1, true)).toBeLessThanOrEqual(DAMAGE_FROM);
     expect(holeTide(0, true)).toBe(0);
+  });
+
+  it('near the stable horizon it grows as you get close, but never hurts (Phase 10)', () => {
+    expect(horizonTide(0)).toBe(0);
+    expect(horizonTide(0.5)).toBeGreaterThan(0);
+    expect(horizonTide(0.9)).toBeGreaterThan(horizonTide(0.5));
+    expect(horizonTide(1)).toBeLessThanOrEqual(DAMAGE_FROM);
+    expect(horizonTide(Number.NaN)).toBe(0);
   });
 
   it('the palco is the last world to fall: its window ends with the cycle', () => {

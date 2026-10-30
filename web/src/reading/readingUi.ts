@@ -91,6 +91,8 @@ export interface ReadingUi {
   /** Una grabación está sonando (para el murmullo), o null. */
   readonly listening: ListeningState | null;
   openRegistry(): void;
+  /** Cierra la lectura abierta, si la hay (al cruzar una boca del Archivo desde su lector). */
+  closeReading(): void;
   /** Un aviso breve, el mismo de "Anotado en el Registro". */
   notify(message: string): void;
   /** Herramienta de depuración (`?debug`): coloca al jugador frente a una fuente. */
@@ -380,6 +382,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       }
     },
     openRegistry,
+    closeReading() {
+      if (reading.frozen) closeReading();
+    },
     notify(message) {
       notice.show(message);
     },

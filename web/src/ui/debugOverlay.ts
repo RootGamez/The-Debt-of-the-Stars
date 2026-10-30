@@ -104,6 +104,12 @@ declare global {
        * el relicario de la nave, si el motor viejo está fuera y lo que marca la máquina (s). null sin el Laboratorio.
        */
       counterweight?(): CounterweightSnapshot | null;
+      /** El horizonte estable: su radio (m; 0 si no lo hay) y lo cerca que está quien mira (0–1). */
+      horizon?(): { radius: number; closeness: number };
+      /** Pilotando: la nave aparece quieta delante del horizonte estable, a `radii` radios de su centro. */
+      nearHorizon?(radii: number): boolean;
+      /** En el Archivo de las Puertas: si se llevan los planos del Contrapeso. null fuera de allí. */
+      epilogue?(): { carryingPlans: boolean } | null;
       /** La marea donde estás y la tensión acumulada (0–1; a 1, muerte `marea`). */
       tide?(): { tide: number; strain: number };
       /**

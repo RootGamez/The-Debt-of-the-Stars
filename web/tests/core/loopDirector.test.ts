@@ -487,3 +487,41 @@ describe('with the Counterweight installed (Phase 10)', () => {
     expect(d.stable).toBe(false);
   });
 });
+
+describe('crossing the stable horizon (Phase 10)', () => {
+  it('fades to black, says so once and does not count a loop', () => {
+    const { d, saved } = director();
+    d.stabilize();
+
+    d.update(0.1, QUIET, 'horizonte');
+    expect(d.phase).toBe('dying');
+    expect(d.deathCause).toBe('horizonte');
+    expect(d.fade.color).toBe('black');
+    let crossings = 0;
+    for (let i = 0; i < Math.round((FADE_OUT_SECONDS + 1) * 10); i++) {
+      const update = d.update(0.1, QUIET);
+      if (update.crossed) crossings++;
+      expect(update.restart).toBe(false);
+    }
+
+    expect(crossings).toBe(1);
+    expect(d.loopsCompleted).toBe(0);
+    expect(saved).toEqual([]);
+  });
+
+  it('lets you through a home mouth of the Archive, out of time, in white', () => {
+    const { d, saved } = director({ looping: false });
+
+    d.update(0.1, QUIET, 'boca');
+    expect(d.phase).toBe('dying');
+    expect(d.fade.color).toBe('white');
+    let crossings = 0;
+    for (let i = 0; i < Math.round((FADE_OUT_SECONDS + 1) * 10); i++) {
+      if (d.update(0.1, QUIET).crossed) crossings++;
+    }
+
+    expect(crossings).toBe(1);
+    expect(d.loopsCompleted).toBe(0);
+    expect(saved).toEqual([]);
+  });
+});

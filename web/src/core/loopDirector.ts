@@ -1,7 +1,9 @@
 // Director del ciclo: avanza los relojes, informa de los eventos de la cronología, decide cuándo se
 // muere (fin del ciclo, absorción del mundo o caída) y encadena fundido → reinicio → guardado.
 // En casa, en el prólogo (Fase 9), no hay ciclo: el reloj no corre, un accidente te devuelve a un sitio seguro
-// sin morir y el gusano (con el mismo fundido a blanco) lleva al sistema ajeno.
+// sin morir y el gusano (con el mismo fundido a blanco) lleva al sistema ajeno. Con el Contrapeso instalado
+// (Fase 10) nada se traga ningún mundo, y cruzar el horizonte estable (fundido a negro) lleva al epílogo; en el
+// Archivo de las Puertas tampoco hay ciclo, y una boca de casa lleva de vuelta a Hogar.
 // Lógica pura: main.ts aplica los efectos (fundidos, reaparecer al jugador, cielo).
 import { FADE_IN_SECONDS, FADE_OUT_SECONDS, FALL_DEATH_SPEED } from '../data/loop';
 import { absorptionProgress } from '../system/absorption';
@@ -35,9 +37,15 @@ export interface Locale {
 export type LoopPhase = 'playing' | 'dying' | 'waking';
 /**
  * `marea`: la tensión de la marea llegó al máximo (Fase 7, physics/tides.ts). `gusano` no es una muerte: es el
- * paso al sistema ajeno al final del prólogo, con el mismo fundido a blanco.
+ * paso al sistema ajeno al final del prólogo, con el mismo fundido a blanco. `horizonte` tampoco: es cruzar el
+ * horizonte estable (Fase 10) hacia el Archivo de las Puertas, con un fundido a negro; `boca`, cruzar una de las
+ * bocas de casa del Archivo de vuelta a Hogar, con el blanco del gusano.
  */
-export type DeathCause = 'fin' | 'absorcion' | 'caida' | 'choque' | 'calor' | 'marea' | 'gusano';
+export type DeathCause =
+  'fin' | 'absorcion' | 'caida' | 'choque' | 'calor' | 'marea' | 'gusano' | 'horizonte' | 'boca';
+
+/** Lo que no es una muerte sino un paso a otro sitio: no cuenta ciclo y la página se recarga allí. */
+const CROSSINGS: readonly DeathCause[] = ['gusano', 'horizonte', 'boca'];
 
 export interface Fade {
   color: 'white' | 'black' | 'none';
@@ -69,7 +77,10 @@ export interface DirectorUpdate {
   changes: EventChange[];
   /** true en el instante del reinicio: hay que reaparecer al jugador y reiniciar el mundo. */
   restart: boolean;
-  /** true una sola vez, cuando el fundido del gusano ha cubierto la pantalla: toca ir al sistema ajeno. */
+  /**
+   * true una sola vez, cuando el fundido de un paso (`gusano`, `horizonte`, `boca`: ver `deathCause`) ha cubierto
+   * la pantalla: toca ir al sistema ajeno, al Archivo de las Puertas o de vuelta a casa.
+   */
   crossed: boolean;
 }
 
@@ -129,7 +140,8 @@ export class LoopDirector {
 
   get fade(): Fade {
     if (this.phase === 'dying') {
-      return { color: 'white', amount: Math.min(1, this.phaseTime / FADE_OUT_SECONDS) };
+      const color = this.deathCause === 'horizonte' ? 'black' : 'white';
+      return { color, amount: Math.min(1, this.phaseTime / FADE_OUT_SECONDS) };
     }
     if (this.phase === 'waking') {
       return { color: 'black', amount: Math.max(0, 1 - this.phaseTime / FADE_IN_SECONDS) };
@@ -149,7 +161,7 @@ export class LoopDirector {
     }
     const cause = forcedCause ?? this.causeOfDeath(hardLanding);
     if (!cause) return { changes, restart: false, crossed: false };
-    if (!this.looping && cause !== 'gusano') {
+    if (!this.looping && !CROSSINGS.includes(cause)) {
       this.enter('waking'); // en casa nadie muere: un parpadeo a negro y de vuelta a un sitio seguro
       return RESCUED;
     }
@@ -236,8 +248,8 @@ export class LoopDirector {
   private fadeOut(realDt: number): DirectorUpdate {
     this.phaseTime += realDt;
     if (this.phaseTime < FADE_OUT_SECONDS) return NOTHING;
-    if (this.deathCause === 'gusano') {
-      // La pantalla se queda en blanco: quien llama se va al sistema ajeno (solo se avisa una vez).
+    if (this.deathCause && CROSSINGS.includes(this.deathCause)) {
+      // La pantalla se queda cubierta: quien llama se va al otro sitio (solo se avisa una vez).
       if (this.hasCrossed) return NOTHING;
       this.hasCrossed = true;
       return CROSSED;

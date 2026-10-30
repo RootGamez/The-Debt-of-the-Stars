@@ -1,8 +1,8 @@
 # CONTEXTO DE HISTORIA — Juego de bucle de tiempo
 
 **Título provisional:** por definir (ver preguntas abiertas)
-**Versión:** v1.8 (el final: la profecía autocumplida, el Contrapeso y los tres)
-**Última actualización:** 2026-10-29 · Sesión 6
+**Versión:** v1.9 (el epílogo jugable: el horizonte estable y las bocas de casa)
+**Última actualización:** 2026-10-30 · Fase 10
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)
 
 > Documento vivo. Es la fuente de verdad de la historia del juego: léelo entero antes de continuar el trabajo en cualquier sesión (con Claude o sin él) y actualízalo al final.
@@ -272,7 +272,8 @@ Evitar el recurso de texto en espiral con traductor. Propuesta: los Ausentes dej
 - **La entrada:** descenso hacia el horizonte con tensión creciente: mareas, cielo deformado, tiempo exterior acelerándose.
 - **El descubrimiento (🟡 propuesta):** dentro se encuentra **el Archivo de las Puertas**, un lugar fuera del tiempo normal donde pueden verse a la vez todas las bocas que se han abierto en todos los sistemas y todas las épocas. Hay cientos. Los Ausentes no fueron los primeros ni serán los últimos. Hay rastros de **otros viajeros** que también fueron arrastrados y lo intentaron; el último nombre en las paredes está en blanco, esperando el suyo. Y entre las bocas, la de su propio mundo: abierta, con su pueblo aún vivo, y otra aún cerrada que dice "pronto".
 - **Puzzle final:** hay varias bocas con tiempos distintos. Solo una lo deja en casa *antes* de la prueba. Elegirla exige entender los desfases.
-- **Decisión final:** qué lleva (o no) de vuelta. Ver Final B.3.
+  - 🟡 **Cómo quedó (Fase 10, hito 10D):** cuatro bocas de casa. Al otro lado de cada una se ve un día de Hogar, contado desde que despegó; se llega a ese día **corrido por el desfase** de la boca (K7) y la prueba mayor es **el día 40** (K8). La Sala de Fragmentos llena se ve el día 2 pero se llega el 46; Hogar al anochecer, el 38 pero se llega el 50; el Instituto más joven, 400 días antes de despegar, y se llega 120 días antes: es la única que deja antes. La cuarta está tapada ("pronto"). La trampa: las tres abiertas *se ven* antes de la prueba. Sin K7 el atril solo enseña lo que se ve; sin K8, no dice cuándo es la prueba. Cruzar pide confirmación: no hay vuelta.
+- **Decisión final:** qué lleva (o no) de vuelta. Ver Final B.3. 🟡 Los planos del Contrapeso esperan en un Banco del Archivo: se cogen y se pueden dejar hasta cruzar.
 
 ---
 
@@ -349,3 +350,4 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-25 · Sesión 2 (decisiones del grafo).** Anthony confirma el Nudo (garganta de la primera Puerta, semilla del agujero negro) como masa del Laboratorio, que el Contrapeso solo se instala durante el pulso de las 9:00 y que la Cámara está en el Laboratorio.
 - **2026-10-29 · Sesión 6 (Fase 9).** Anthony define el pueblo del protagonista: **los Ool** (aspecto en §7), con la Maestra del Instituto. La Maestra y la Directora son personas distintas; la nave se llama el Albatros II; el prólogo abarca el Instituto y la aldea.
 - **2026-10-29 · Sesión 6 (Fase 10).** Anthony acepta las propuestas del plan de la Fase 10: el final B es la **profecía autocumplida**; el final lo deciden **la boca que se elige y llevar o no los planos** del Contrapeso; los **pasos del Contrapeso** (cogerlo en el Laboratorio, su tercer reloj, sacar el motor viejo antes de las 9:00, las dos ruedas y encajarlo en el pulso); y los tres que se quedaron **murieron en el laboratorio** (opción 4).
+- **2026-10-30 · Fase 10 (hito 10D, 🟡).** El epílogo se puede jugar: con el Contrapeso instalado se baja con la nave al horizonte estable (tira de la nave, la marea se nota, el reloj de Umbral se acelera) y al cruzarlo, fundido a negro, se despierta en el Archivo de las Puertas. Se proponen los números del puzzle de las bocas de casa (§9) y que los planos se puedan dejar. La boca y los planos ya deciden el final (A, B o "llega tarde"); las escenas de cada final son el hito siguiente.

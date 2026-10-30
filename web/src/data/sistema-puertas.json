@@ -1,0 +1,15 @@
+{
+  "_fuente": "Plan de la Fase 10, hito 10D (🟡). El Archivo de las Puertas, fuera de cualquier sistema y fuera del tiempo: un solo cuerpo quieto (periodo 0), sin ciclo (\"bucle\": false) y sin nave (se llega cruzando el horizonte estable y se sale por una de las bocas de casa). La estrella queda lejos y pequeña: la luz del Archivo es la de sus bocas.",
+  "bucle": false,
+  "estrella": { "radio": 40 },
+  "cuerpos": [
+    {
+      "mundo": "puertas",
+      "orbita": 6000,
+      "periodo": 0,
+      "fase": 0,
+      "rotacion": "bloqueada",
+      "faseRotacion": 0.5
+    }
+  ]
+}

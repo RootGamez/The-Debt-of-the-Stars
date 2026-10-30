@@ -127,6 +127,15 @@ export function holeTide(progress: number, palco = false): number {
   return palco ? Math.min(tide, DAMAGE_FROM) : tide;
 }
 
+/**
+ * La marea junto al horizonte estable (Fase 10D) según lo cerca que se está (`horizonCloseness`, 0–1): se nota cada
+ * vez más, pero no mata (no pasa de donde empieza a hacer daño, como en el palco).
+ */
+export function horizonTide(closeness: number): number {
+  const c = unit(closeness);
+  return c > 0 ? Math.min(DAMAGE_FROM, HOLE_TIDE_FROM * c + DAMAGE_FROM * c * c) : 0;
+}
+
 /** Cuánto ha caído hacia el agujero quien está en el mundo que se traga (0–1): con el resto de su mundo. */
 export function finalApproach(progress: number): number {
   return fallAmount(unit(progress));

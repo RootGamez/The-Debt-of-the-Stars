@@ -35,6 +35,33 @@ export function blackHoleRadius(t: number, hole: HoleGrowth = BLACK_HOLE, stable
   return stable ? Math.min(radius, BLACK_HOLE.stableRadius) : radius;
 }
 
+/**
+ * Cómo marca el tiempo junto al horizonte estable (Fase 10D), como factor del ritmo del sitio: √(1 − r/d), que
+ * tiende a 0 en el horizonte (fuera pasa todo) y a 1 lejos. Sin agujero (radio 0), 1.
+ */
+export function horizonRate(distance: number, radius: number): number {
+  if (!(radius > 0) || !Number.isFinite(distance)) return 1;
+  if (distance <= radius) return 0;
+  return Math.sqrt(1 - radius / distance);
+}
+
+/** Lo cerca que se está del horizonte estable: 0 a `pullRange` radios o más, 1 en el horizonte. */
+export function horizonCloseness(distance: number, radius: number): number {
+  if (!(radius > 0) || !Number.isFinite(distance)) return 0;
+  const range = BLACK_HOLE.pullRange * radius;
+  if (distance >= range) return 0;
+  return Math.min(1, (range - distance) / (range - radius));
+}
+
+/** Cuánto tira el horizonte estable de la nave (m/s²) a `distance` de su centro: nada a `pullRange` radios. */
+export function horizonPull(distance: number, radius: number): number {
+  const closeness = horizonCloseness(distance, radius);
+  if (closeness <= 0) return 0;
+  const near = radius / Math.max(distance, radius);
+  // Con el cuadrado de la distancia, y apagándose suave hacia el borde de su alcance.
+  return BLACK_HOLE.pullStrength * near * near * Math.min(1, closeness * 2);
+}
+
 /** El anillo de luz que se ve rodeando el horizonte (la esfera de fotones está a 1,5 radios). */
 export function photonRingRadius(horizon: number): number {
   return horizon * 1.5;

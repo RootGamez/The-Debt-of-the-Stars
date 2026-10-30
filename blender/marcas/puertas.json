@@ -1,0 +1,40 @@
+[
+  {
+    "nombre": "SPAWN_Puertas",
+    "lat": 62.94,
+    "lon": -0.0,
+    "alto": 0.677,
+    "props": {},
+    "rumbo": 180.0
+  },
+  {
+    "nombre": "INT_rastros",
+    "lat": 46.908,
+    "lon": 57.487,
+    "alto": 1.14,
+    "props": {
+      "clue_id": "puertas.rastros",
+      "kind": "texto"
+    }
+  },
+  {
+    "nombre": "INT_bocas",
+    "lat": 38.857,
+    "lon": -0.0,
+    "alto": 1.326,
+    "props": {
+      "clue_id": "puertas.bocas",
+      "kind": "objeto"
+    }
+  },
+  {
+    "nombre": "INT_planos",
+    "lat": 39.033,
+    "lon": -11.616,
+    "alto": 1.79,
+    "props": {
+      "clue_id": "puertas.planos",
+      "kind": "objeto"
+    }
+  }
+]

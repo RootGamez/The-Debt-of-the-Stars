@@ -11,11 +11,14 @@ export const WORLD_IDS = [
   'laboratorio',
   'hogar',
   'luna',
+  'puertas',
 ] as const;
 
 export type WorldId = (typeof WORLD_IDS)[number];
 
 export const DEFAULT_WORLD: WorldId = 'umbral';
+/** El Archivo de las Puertas, tras cruzar el horizonte estable (Fase 10D). */
+export const EPILOGUE_WORLD: WorldId = 'puertas';
 /** Donde empieza una partida nueva: en casa, el prólogo (Fase 9). */
 export const PROLOGUE_WORLD: WorldId = 'hogar';
 
@@ -43,6 +46,29 @@ export function arrivalHref(href: string, saved: boolean): string {
   url.hash = ''; // con un fragmento, ir a la misma dirección no recargaría la página
   url.searchParams.delete('mundo');
   if (!saved) url.searchParams.set('mundo', DEFAULT_WORLD);
+  return url.toString();
+}
+
+/**
+ * Adónde ir al cruzar el horizonte estable: al Archivo de las Puertas. Va en la dirección (`?mundo=`), no en el
+ * guardado: recargar allí sigue allí, y cerrar el juego vuelve a empezar el ciclo en Umbral.
+ */
+export function epilogueHref(href: string): string {
+  const url = new URL(href);
+  url.hash = '';
+  url.searchParams.set('mundo', EPILOGUE_WORLD);
+  return url.toString();
+}
+
+/** El final con el que se vuelve a casa por una boca del Archivo (`?final=`, Fase 10). */
+export const ENDING_PARAM = 'final';
+
+/** Adónde ir al cruzar una boca de casa: a Hogar, con el final que salió de la boca y de los planos. */
+export function homecomingHref(href: string, ending: string): string {
+  const url = new URL(href);
+  url.hash = '';
+  url.searchParams.set('mundo', PROLOGUE_WORLD);
+  url.searchParams.set(ENDING_PARAM, ending);
   return url.toString();
 }
 

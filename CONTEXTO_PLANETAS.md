@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.8
-**Última actualización:** 2026-10-30 · Fase 10 (la Sala del Motor en uso)
+**Versión:** v0.9
+**Última actualización:** 2026-10-30 · Fase 10 (el Archivo de las Puertas)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -257,7 +257,24 @@
 
 ---
 
-## 10. Orden sugerido de exploración (🟡, no obligatorio)
+## 10. El Archivo de las Puertas — el epílogo (🟡, Fase 10)
+
+Ver `CONTEXTO_HISTORIA.md` §9 (epílogo) y los finales. Es un mundo aparte (`puertas`), **fuera de cualquier sistema
+y fuera del tiempo**: sin ciclo, sin reloj doble y sin nave.
+
+| Aspecto | Propuesta |
+|---|---|
+| **Cómo se llega** | Con el Contrapeso instalado, el agujero negro nace en el núcleo de la máquina de Cicatriz y se queda en 6 m. Solo se llega con la nave: a menos de 4 radios tira de ella hacia el centro (suave: se puede escapar), la marea se nota pero no mata y el tiempo del sitio cae (el reloj de Umbral se acelera en el tablero). Al cruzar el horizonte, fundido a **negro** (no cuenta ciclo) y se despierta en el Archivo |
+| **Forma** | Planetoide oscuro y casi liso de 30 m, gravedad 0,5, cielo negro con estrellas |
+| **Las bocas** | Anillos de pie por todo el planetoide y otros flotando en el cielo, cada uno con una vista encendida de su lado: cientos, dice la historia; aquí unas cuarenta dan la idea |
+| **El muro de los rastros** | Un muro curvo con filas de signos de quienes llegaron antes, cada fila en otra escritura (puntos, rayas, cuñas, aros, ganchos, rombos); la última fila, lisa y más clara: en blanco, esperando |
+| **Las bocas de casa** | En una terraza frente a la llegada, cuatro bocas en arco, cada una con su reloj tallado en una estela: la Sala de Fragmentos llena, el Instituto más joven, Hogar al anochecer y una tapada con una losa ("pronto"). Delante, un atril para leerlas |
+| **El Banco** | Como el del Laboratorio, con los planos del Contrapeso enrollados encima: se cogen y se dejan |
+| **Arte** | Unos 22.500 triángulos; cada vista de las bocas de casa tiene su propio brillo (el resto de luces del mundo, uno solo) |
+
+---
+
+## 11. Orden sugerido de exploración (🟡, no obligatorio)
 
 1. **Umbral:** aprender el reloj doble y ver la primera pista.
 2. **Archivo y Taller**, en cualquier orden: dónde y por qué.
@@ -271,7 +288,7 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 
 ---
 
-## 11. Preguntas abiertas de planetas
+## 12. Preguntas abiertas de planetas
 
 1. ❓ **Nombres definitivos** de los mundos, la estrella, la luna y el sistema de origen.
 2. ✅ **Observatorio:** sí, como extra opcional (Anthony, 2026-10-25). El grafo de pistas no depende de él.
@@ -283,7 +300,7 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 
 ---
 
-## 12. Bitácora
+## 13. Bitácora
 
 - **2026-10-24 · Sesión 1.** Primer diseño de los mundos: Umbral, Archivo, Taller, Cicatriz, Observatorio, Laboratorio Oculto y el sistema de origen con los beats del prólogo.
 - **2026-10-24 · Sesión 1 (laboratorio).** Se confirma que el laboratorio es un sitio aparte, escondido por lente gravitacional.
@@ -296,3 +313,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-10-29 · Sesión 6 (Fase 9 cerrada).** Se construye el prólogo según §9, con propuestas (🟡) para reaccionar: la Luna con el fragmento clavado de canto (mordida esférica, fecha tallada y un hilo de luz en el corte); el gusano se abre al examinarlo (un anillo de luz sobre el fragmento, las estrellas que se doblan, la vista que se estira y un zumbido), fundido a blanco y despertar frente a La Boca, con el blanco que sigue hasta que el sistema ajeno está cargado.
 - **2026-10-29 · Sesión 6 (Fase 10).** Anthony aprueba los pasos de la instalación del Contrapeso en la Sala del Motor de Cicatriz (ver `CONTEXTO_HISTORIA.md` §9) y el plan del epílogo: el Archivo de las Puertas y la vuelta a Hogar antes de la prueba mayor.
 - **2026-10-30 · Fase 10 (hito 10C, 🟡).** La Sala del Motor en uso: el motor viejo es una pieza que sale del núcleo con la palanca, la cuna con sus dos ruedas recibe el Contrapeso y el pulso de las 9:00 lo encaja si los relojes coinciden. Instalado, el agujero negro nace pero se queda pequeño (6 m) y no se traga ningún mundo.
+- **2026-10-30 · Fase 10 (hito 10D, 🟡).** Nueva §10: el Archivo de las Puertas como mundo propio fuera del tiempo (las bocas, el muro de los rastros con su última fila en blanco, las cuatro bocas de casa con su atril y el Banco con los planos) y cómo se llega cruzando el horizonte estable con la nave. Las secciones siguientes se renumeran.

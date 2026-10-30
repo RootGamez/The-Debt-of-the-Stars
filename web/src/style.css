@@ -241,6 +241,10 @@ body {
   transition-timing-function: ease-out;
 }
 
+.llegada-negra {
+  background: #000;
+}
+
 .llegada-fuera {
   opacity: 0;
 }
@@ -692,6 +696,10 @@ body {
   margin: 0 0 10px;
 }
 
+.puzzle-choices[hidden] {
+  display: none;
+}
+
 .puzzle-choices .puzzle-hint {
   width: 100%;
 }
@@ -749,6 +757,29 @@ body {
 .puzzle-console-time {
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
   font-variant-numeric: tabular-nums;
+}
+
+/* Las bocas de casa del Archivo de las Puertas (Fase 10D): lo que se ve al otro lado, su desfase y elegir. */
+.puzzle-mouths {
+  margin: 4px 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.puzzle-mouth {
+  padding: 8px 0;
+  border-top: 1px solid rgb(232 220 196 / 12%);
+}
+
+.puzzle-mouth-view {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.puzzle-mouth-note {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 /* Las ruedas de la cuna del núcleo (Fase 10C): minutos y segundos, para igualar los dos relojes. */
