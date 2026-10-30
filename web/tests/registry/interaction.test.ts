@@ -4,6 +4,7 @@ import {
   insideRadius,
   nearestInteractable,
   promptLabel,
+  verbLabel,
   type Interactable,
 } from '../../src/registry/interaction';
 
@@ -103,5 +104,12 @@ describe('promptLabel', () => {
   ] as const)('uses the right verb for %s', (kind, verb) => {
     expect(promptLabel(kind, false)).toBe(`E · ${verb}`);
     expect(promptLabel(kind, true)).toBe(verb.charAt(0).toUpperCase() + verb.slice(1));
+  });
+});
+
+describe('verbLabel', () => {
+  it('shows any verb with its key on a computer and capitalised on a touch screen', () => {
+    expect(verbLabel('coger', false)).toBe('E · coger');
+    expect(verbLabel('coger', true)).toBe('Coger');
   });
 });

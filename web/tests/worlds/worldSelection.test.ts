@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   arrivalHref,
   DEFAULT_WORLD,
+  epilogueHref,
+  EPILOGUE_WORLD,
+  homecomingHref,
   PROLOGUE_WORLD,
+  replayHref,
   startWorld,
   WORLD_IDS,
   worldFromQuery,
@@ -20,6 +24,39 @@ describe('where the game starts', () => {
     expect(startWorld('?debug&mundo=umbral', false)).toBe('umbral');
     expect(startWorld('?mundo=hogar', true)).toBe('hogar');
     expect(startWorld('?mundo=marte', false)).toBe('hogar');
+  });
+});
+
+describe('the way to the Archivo de las Puertas through the stable horizon (Phase 10)', () => {
+  it('asks for the Archivo in the address, keeping the rest and dropping the fragment', () => {
+    expect(EPILOGUE_WORLD).toBe('puertas');
+    expect(epilogueHref('http://localhost:5180/?debug&mundo=umbral#x')).toBe(
+      'http://localhost:5180/?debug=&mundo=puertas',
+    );
+  });
+
+  it('goes home through a mouth of the Archive with the ending it gave', () => {
+    expect(homecomingHref('http://localhost:5180/?debug&mundo=puertas#x', 'A')).toBe(
+      'http://localhost:5180/?debug=&mundo=hogar&final=A',
+    );
+  });
+
+  it('plays again after an ending without world or ending, keeping the rest of the address', () => {
+    expect(replayHref('http://localhost:5180/?debug&mundo=hogar&final=B#x', true)).toBe(
+      'http://localhost:5180/?debug=',
+    );
+  });
+
+  it('asks for Umbral when playing again if the save could not remember the prologue', () => {
+    expect(replayHref('http://localhost:5180/?mundo=hogar&final=A', false)).toBe(
+      'http://localhost:5180/?mundo=umbral',
+    );
+  });
+
+  it('goes back to the Archive without the ending of the way home', () => {
+    expect(epilogueHref('http://localhost:5180/?mundo=hogar&final=tarde')).toBe(
+      'http://localhost:5180/?mundo=puertas',
+    );
   });
 });
 
@@ -57,7 +94,7 @@ describe('worldFromQuery', () => {
     expect(worldFromQuery('?mundo=marte')).toBe(DEFAULT_WORLD);
   });
 
-  it('knows the eight base worlds of CONTEXTO_PLANETAS.md', () => {
+  it('knows the eight base worlds of CONTEXTO_PLANETAS.md and the Archivo de las Puertas', () => {
     expect(WORLD_IDS).toEqual([
       'umbral',
       'archivo',
@@ -67,6 +104,7 @@ describe('worldFromQuery', () => {
       'laboratorio',
       'hogar',
       'luna',
+      'puertas',
     ]);
   });
 });

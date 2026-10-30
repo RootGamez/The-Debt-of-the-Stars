@@ -129,6 +129,21 @@ export const WORLD_SOUNDSCAPES: Readonly<Record<string, Soundscape>> = {
     },
     tones: [{ frequency: 196, gain: 0.01, type: 'sine' }],
   },
+  // 🟡 El Archivo de las Puertas (Fase 10D), fuera del tiempo: aire quieto y un acorde que no termina de resolver.
+  puertas: {
+    noise: {
+      filter: 'lowpass',
+      frequency: 200,
+      q: 0.6,
+      gain: 0.02,
+      swell: { hz: 0.03, depth: 0.7 },
+    },
+    tones: [
+      { frequency: 110, gain: 0.012, type: 'sine' },
+      { frequency: 164.8, gain: 0.008, type: 'sine', detune: 6 },
+      { frequency: 246.9, gain: 0.004, type: 'sine' },
+    ],
+  },
   espacio: OPEN_SPACE_SOUND,
 };
 

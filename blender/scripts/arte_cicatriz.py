@@ -31,6 +31,8 @@ INCANDESCENTE = "#FF7A20"
 ARENISCA = "#B8A27A"
 PAPEL = "#E4D8C0"
 LUZ = "#FFB070"
+# Del centro del Contrapeso (contrapeso.glb) a la base de su pie (generar_contrapeso.py).
+CONTRAPESO_BAJO = 0.425
 
 
 def mordidas(radio=80, semilla=1, cantidad=14, minimo=0.18, maximo=0.45):
@@ -81,7 +83,8 @@ class Cicatriz(ac.Vestido):
             self.solido(NEGRO, ac.caja, lugar.m((x, 0, top + 1.4), escala=(2.4, 2.4, 2.8)))
         # El núcleo: el motor viejo dentro de una coraza que, con el pulso, gira y se abre.
         self.solido(NEGRO, ac.cilindro(1.2, 10), lugar.m((0, 0, top + 1.2), escala=(1, 1, 1.6)))
-        self.vista.pieza(HUMO, ac.cilindro(0.9, 10), lugar.m((0, 0, centro), (math.pi / 2, 0, 0), (1, 1, 2.6)))
+        self.motor_viejo(lugar, centro, top)
+        self.cuna(lugar, top)
 
         def coraza(m):
             for lado in (-1, 1):
@@ -118,6 +121,52 @@ class Cicatriz(ac.Vestido):
         self.marca("INT_sala_motor", lugar, (0, -6.0, top + 1.6))
         self.marca("INT_bitacora", lugar, (consola[0], consola[1] - 1.0, top + 1.3))
         self.marca("INT_lista_mundos", lugar, (panel[0], panel[1] - 1.0, top + 1.6))
+
+    def motor_viejo(self, lugar, centro, top):
+        """El motor viejo, aparte (Fase 10C): con la palanca sale del núcleo y queda tumbado en el suelo, en
+        cicatriz_MotorFuera. Su origen es el centro del núcleo: ahí encaja el Contrapeso."""
+        motor = ac.Malla()
+        motor.pieza(HUMO, ac.cilindro(0.9, 10), ac.matriz(rot=(math.pi / 2, 0, 0), escala=(1, 1, 2.6)))
+        for y in (-0.8, 0.8):
+            motor.pieza(OXIDO, ac.toro(0.93, 0.07, 16, 4), ac.matriz((0, y, 0)))
+        for y in (-1.33, 1.33):
+            motor.pieza(NEGRO, ac.cilindro(0.6, 10), ac.matriz((0, y, 0), (math.pi / 2, 0, 0), (1, 1, 0.1)))
+        for k in range(6):
+            a = 2 * math.pi * k / 6
+            motor.pieza(HUMO_CLARO, ac.caja, ac.matriz((math.cos(a) * 0.9, 0, math.sin(a) * 0.9), (0, -a, 0), (0.08, 1.2, 0.12)))
+        ac.objeto_suelto(self.p, "cicatriz_MotorViejo", motor, self.paleta, lugar.m((0, 0, centro)))
+        fuera = bpy.data.objects.new("cicatriz_MotorFuera", None)
+        fuera.empty_display_type = "ARROWS"
+        bpy.data.collections[MUNDO].objects.link(fuera)
+        fuera.parent = self.p.raiz
+        fuera.matrix_world = lugar.m((-4.6, -8.2, top + 0.9), (0, 0, math.pi / 2))
+        # La palanca que lo saca, en una consola a la derecha de la cuna.
+        palanca = (2.6, -7.9)
+        self.solido(NEGRO, ac.caja, lugar.m((palanca[0], palanca[1], top + 0.5), escala=(0.9, 0.6, 1.0)))
+        self.vista.pieza(OXIDO, ac.caja, lugar.m((palanca[0], palanca[1], top + 1.02), escala=(0.7, 0.4, 0.04)))
+        self.vista.pieza(OXIDO_CLARO, ac.cilindro(0.04, 6),
+                         lugar.m((palanca[0], palanca[1] - 0.15, top + 1.3), (0.45, 0, 0), (1, 1, 0.6)))
+        self.luces.pieza(INCANDESCENTE, ac.bola(0.07, 1), lugar.m((palanca[0], palanca[1] - 0.29, top + 1.58)))
+        self.marca("INT_palanca", lugar, (palanca[0], palanca[1] - 0.7, top + 1.25))
+
+    def cuna(self, lugar, top):
+        """La cuna del núcleo (Fase 10C): una peana entre dos soportes donde se pone el Contrapeso, y en su cara
+        dos ruedas (minutos y segundos) para ajustar su reloj. Con el pulso, lo que hay en ella sube al núcleo."""
+        y = -8.6
+        self.solido(OXIDO, ac.caja, lugar.m((0, y, top + 0.45), escala=(1.4, 1.0, 0.9)))
+        self.vista.pieza(NEGRO, ac.caja, lugar.m((0, y, top + 0.9), escala=(1.5, 1.1, 0.04)))
+        self.vista.pieza(ARENISCA, ac.cilindro(0.32, 12), lugar.m((0, y, top + 0.93), escala=(1, 1, 0.03)))
+        for dx in (-0.62, 0.62):
+            self.vista.pieza(OXIDO_CLARO, ac.caja, lugar.m((dx, y, top + 1.1), escala=(0.08, 0.5, 0.36)))
+        # Las dos ruedas en la cara de delante, con radios y el cubo encendido.
+        for x in (-0.32, 0.32):
+            frente = y - 0.52
+            self.vista.pieza(NEGRO, ac.toro(0.17, 0.03, 16, 4), lugar.m((x, frente, top + 0.5)))
+            for k in range(4):
+                self.vista.pieza(HUMO_CLARO, ac.caja, lugar.m((x, frente, top + 0.5), (0, math.pi / 4 * k, 0), (0.3, 0.03, 0.025)))
+            self.luces.pieza(INCANDESCENTE, ac.cilindro(0.045, 8), lugar.m((x, frente - 0.01, top + 0.5), (math.pi / 2, 0, 0), (1, 1, 0.05)))
+        self.vista.pieza(ARENISCA, ac.caja, lugar.m((0, y - 0.51, top + 0.78), escala=(0.5, 0.02, 0.12)))
+        self.marca("INT_cuna", lugar, (0, y, top + 0.93 + CONTRAPESO_BAJO), rumbo=180)
 
     def mordida_con_pared(self, lat, lon):
         """En el fondo de una mordida, una pared tallada con medio símbolo: un anillo partido con marcas."""
@@ -186,6 +235,7 @@ class Cicatriz(ac.Vestido):
 
     def lugares(self):
         ac.borrar([o.name for o in bpy.data.objects if o.name.startswith("ANIM_")])
+        ac.borrar(["cicatriz_MotorViejo", "cicatriz_MotorFuera"])
         cortes = mordidas(radio=int(self.p.radio))
         self.sala_motor()
         # La pared del símbolo, en la mordida cercana al ecuador al oeste; el Borde, en la más grande de esa zona.

@@ -7,6 +7,9 @@ import {
   diskRadii,
   growthFor,
   holeEinstein,
+  horizonCloseness,
+  horizonPull,
+  horizonRate,
   photonRingRadius,
 } from '../../src/system/blackHole';
 
@@ -43,6 +46,14 @@ describe('the size of the black hole', () => {
     expect(blackHoleRadius(BLACK_HOLE.end)).toBeCloseTo(BLACK_HOLE.maxRadius);
     expect(blackHoleRadius(5000)).toBeCloseTo(BLACK_HOLE.maxRadius);
     expect(blackHoleRadius(Number.NaN)).toBe(0);
+  });
+
+  it('stays small once the Counterweight holds the network (Phase 10)', () => {
+    expect(blackHoleRadius(BLACK_HOLE.born - 1, BLACK_HOLE, true)).toBe(0);
+    expect(blackHoleRadius(BLACK_HOLE.end, BLACK_HOLE, true)).toBe(BLACK_HOLE.stableRadius);
+    expect(blackHoleRadius(BLACK_HOLE.born + 1, BLACK_HOLE, true)).toBeLessThanOrEqual(
+      BLACK_HOLE.stableRadius,
+    );
   });
 });
 
@@ -104,5 +115,35 @@ describe('what surrounds the horizon', () => {
 
     expect(disk.inner).toBeGreaterThan(photonRingRadius(100));
     expect(disk.outer).toBeGreaterThan(disk.inner);
+  });
+});
+
+describe('near the stable horizon (Phase 10)', () => {
+  const R = BLACK_HOLE.stableRadius;
+
+  it('slows time down more and more as you get close, and stops it at the horizon', () => {
+    expect(horizonRate(100 * R, R)).toBeGreaterThan(0.99);
+    expect(horizonRate(2 * R, R)).toBeCloseTo(Math.SQRT1_2);
+    expect(horizonRate(1.1 * R, R)).toBeLessThan(0.35);
+    expect(horizonRate(R, R)).toBe(0);
+    expect(horizonRate(10, 0)).toBe(1); // sin agujero
+    expect(horizonRate(Number.NaN, R)).toBe(1);
+  });
+
+  it('pulls only within its reach, harder the closer you are', () => {
+    const reach = BLACK_HOLE.pullRange * R;
+
+    expect(horizonPull(reach + 1, R)).toBe(0);
+    expect(horizonPull(3 * R, R)).toBeGreaterThan(0);
+    expect(horizonPull(1.5 * R, R)).toBeGreaterThan(horizonPull(3 * R, R));
+    expect(horizonPull(R, R)).toBeCloseTo(BLACK_HOLE.pullStrength);
+    expect(horizonPull(R, 0)).toBe(0);
+  });
+
+  it('measures how close you are, from its reach to the horizon', () => {
+    expect(horizonCloseness(BLACK_HOLE.pullRange * R, R)).toBe(0);
+    expect(horizonCloseness(R, R)).toBe(1);
+    expect(horizonCloseness(0, R)).toBe(1);
+    expect(horizonCloseness(2.5 * R, R)).toBeCloseTo(0.5);
   });
 });

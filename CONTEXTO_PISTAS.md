@@ -1,7 +1,7 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.5
-**Última actualización:** 2026-10-28 · Fase 7 (grabaciones)
+**Versión:** v0.7
+**Última actualización:** 2026-10-30 · Fase 10 (el Archivo de las Puertas)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
 > Este documento dice **qué se puede aprender, dónde y en qué orden**. Es el puente entre la historia y el
@@ -186,6 +186,8 @@ final se entiende como aviso.
 | `cicatriz.lista_mundos` | Texto | Siempre | La lista de mundos conectados a la red, con huecos | Cada boca tiene su hora anotada y no coinciden (K7); un hueco lleva el símbolo del sistema del protagonista | `bocas.relojes_distintos`, `casa.en_la_red` · H2, H7 |
 | `cicatriz.primera_puerta` | Observación | Siempre | Ruina del primer anillo | Su garganta se cerró mal: ahí empezó el Nudo (sección 3) | `nudo.origen` · H2, H5 |
 | `cicatriz.borde` | Observación | Siempre; más fuerte cerca de 13:30 | Un acantilado frente al cielo | Las estrellas se deforman alrededor de un punto oscuro: el Nudo dobla la luz (K2); a las 13:30 nace el agujero negro | `lab.imagen_desplazada`, `nudo.existe` · H2, H5 |
+| `cicatriz.palanca` 🟡 | Objeto | Antes del pulso (9:00) | La palanca que saca el motor viejo del núcleo ("E · tirar") | — | `contrapeso.sustituye_motor` · H6 |
+| `cicatriz.cuna` 🟡 | Objeto (lector `ruedas`) | Siempre; se usa con el Contrapeso | La cuna frente al núcleo, con dos ruedas (minutos y segundos) y el reloj de la máquina al lado del suyo | Igualar los dos relojes: lo que pide el pulso para encajarlo (K5, se anota al igualarlos) | `contrapeso.reloj` · H6 |
 
 ### 5.6 Observatorio — el cielo limpio (reloj 1,15; ✅ existe, opcional)
 
@@ -206,14 +208,24 @@ Llegar aquí cuesta casi un ciclo entero (modo B ✅): cada minuto real son cinc
 | `lab.notas_investigadora` | Texto | Últimas notas de la investigadora | El Contrapeso está terminado pero sin probar; "un sistema joven ha empezado a llamar" (K4, K8) | `contrapeso.terminado`, `casa.prueba_llama` · H6, H7 |
 | `lab.notas_esceptico` | Texto | Notas del escéptico | Su advertencia completa y por qué nadie lo escuchó | `silencio.advertencia` · H4 |
 | `lab.orden_silencio` | Texto | La orden de callar | Firmada por el Consejo de Tránsito (❓ quién firma) | `silencio.orden` · H4 |
-| `lab.dormitorio` | Objeto | Dos camas, una sola usada | ❓ Destino de los tres que se quedaron (CONTEXTO_HISTORIA §4) | `silencio.uno_se_quedo` · H3, H4 |
+| `lab.dormitorio` | Objeto | Dos camas, una sola usada | ✅ Los tres murieron aquí, trabajando en tiempo lento hasta el final (CONTEXTO_HISTORIA §4) | `silencio.uno_se_quedo` · H3, H4 |
 | `lab.contrapeso` | Objeto (se coge) | El Contrapeso | Se lleva a Cicatriz **en el mismo ciclo** (los objetos no persisten) | — · H6 |
 | `lab.camara` | Objeto + texto | La Cámara (✅ está aquí) | Notas de quien la construyó, con su culpa (H1) | `bucle.camara`, `bucle.culpa` · H1 |
 
 ### 5.8 Epílogo — el Archivo de las Puertas
 
-Fuera del bucle, dentro del agujero negro. No da hechos nuevos para el Registro: **usa** K7 y K8 para elegir la
-boca de salida (puzzle final). Ver `CONTEXTO_HISTORIA.md` §9.
+Fuera del bucle, dentro del agujero negro. **Usa** K7 y K8 para elegir la boca de salida (puzzle final). Ver
+`CONTEXTO_HISTORIA.md` §9.
+
+🟡 **Propuesta de la Fase 10 (hito 10D):** antes decía que no daba hechos nuevos, pero la regla 6 pide que cada
+fuente dé algo. Sus tres fuentes dan hechos **de cierre**: completan hilos (H3, H5, H6, H7) y ninguna conclusión
+los necesita. Textos `[texto pendiente]` para Anthony.
+
+| Fuente | Tipo | Superficial | Profunda | Hecho(s) · hilo |
+|---|---|---|---|---|
+| `puertas.rastros` 🟡 | Texto | El muro curvo con filas de signos de quienes llegaron antes, cada fila en otra escritura; la última, en blanco | (con `silencio.dos_investigadores`) Los nombres de los tres del Laboratorio no están: no llegaron a cruzar | `puertas.otros_viajeros` · H3; `silencio.no_cruzaron` · H5 |
+| `puertas.bocas` 🟡 | Objeto (lector `bocas`) | Las cuatro bocas de casa y lo que se ve al otro lado (una cerrada: "pronto"); con K7, su desfase; con K8, el día de la prueba | (con `bocas.relojes_distintos`) Se anota al cruzar por la que deja antes de la prueba | `bocas.vuelta_antes` · H7 |
+| `puertas.planos` 🟡 | Objeto ("E · coger" / "E · dejar") | Los planos del Contrapeso en el Banco; llevarlos o no es la decisión última | — | `contrapeso.planos` · H6 |
 
 ---
 
@@ -254,10 +266,11 @@ fuentes en Taller y Archivo además del Laboratorio, así que no depende de lleg
 | Umbral | 8 | 3 |
 | Archivo | 7 | 4 |
 | Taller | 8 | 5 |
-| Cicatriz | 7 | 5 |
+| Cicatriz | 9 | 5 |
 | Observatorio (opcional) | 3 | 1 |
 | Laboratorio | 7 | 2 |
-| **Total** | **47** | |
+| Epílogo (Archivo de las Puertas) 🟡 | 3 | 0 (usa K7 y K8) |
+| **Total** | **52** | |
 
 Está por debajo de las ~10 fuentes por mundo de la pregunta 4 de `CONTEXTO_PLANETAS.md`: deja hueco para
 textos de ambiente sin peso en el grafo.
@@ -286,15 +299,15 @@ textos de ambiente sin peso en el grafo.
 
 ## 11. Cómo quedó implementado (Fase 4)
 
-- Los hilos, hechos, conclusiones y las 47 fuentes están transcritos en `web/src/data/pistas/` (58 hechos).
+- Los hilos, hechos, conclusiones y las 52 fuentes (47 del primer grafo + 2 de la Sala del Motor y 3 del Archivo de las Puertas, Fase 10) están transcritos en `web/src/data/pistas/` (60 hechos).
 - **Cada hecho se asigna a la lectura superficial o a la profunda** de su fuente en los datos (la tabla de §5 no lo distinguía siempre). Criterio: la profunda da lo que explica lo oculto. Los datos son la referencia; corrígelos ahí.
 - **Conclusiones con alternativas:** K5 (reloj) y K8 (prueba mayor) se desbloquean con *cualquiera* de varios hechos por grupo; K3 requiere K1, K2 y KC.
 - El Registro muestra cada hecho bajo su **primer hilo**, con su frase y enlaces "ver también", pero **no el lugar** donde se aprendió (no se guarda; solo se guardan los hechos).
 - Los rumores y las conclusiones se **calculan** a partir de los hechos; la partida guardada solo tiene hechos y ciclos.
 - Reglas del grafo comprobadas por código: 1 (≥ 2 fuentes por hecho esencial y ≥ 2 mundos por conclusión), 2 (sin depender solo del Observatorio ni del prólogo), 3 (cada mundo da un "dónde" y un "por qué"), 4 (todo alcanzable, sin esperas circulares), 5 (marcas y fuentes se corresponden; hoy solo Umbral), 6 (cada fuente da algo; el prólogo tiene lectura profunda) y 7 (K3 se logra sin entrar al Laboratorio).
 - **Grabaciones (Fase 7):** cada fuente de tipo grabación lleva `reloj`, el ritmo con que se grabó (0,20 la del escéptico). Se oye con una rueda de velocidad: se entiende cuando velocidad × reloj ≈ 1 (±15 %); si no, las palabras salen arrastradas (lenta) o tragadas (rápida). La lectura superficial es lo que se oye al pulsarla; la profunda es lo que dice, frase a frase. **Lo profundo se anota al oírla entera a la velocidad buena**, sepa lo que sepa el jugador: entenderla es la llave. El `requiere` de los datos sigue diciendo qué ayuda a encontrar esa velocidad (lo usan las reglas del grafo). Mientras no haya voces de verdad suena un murmullo sintetizado.
-- **Charlas (Fase 9, 🟡):** tipo de fuente `charla` para la gente de casa ("E · hablar"). La Directora es una charla del grafo (da la misión y su lectura profunda); la Maestra, el técnico, la mecánica y los vecinos de la aldea tienen charlas de ambiente sin hechos, que no cuentan entre las 47 fuentes ni para las reglas del grafo.
-- **Lectores de puzle (Fase 7):** `umbral.cuaderno` (completar la última hora del Archivo) y `archivo.cartas` (ordenar las cartas por cuándo se escribieron en días de Umbral) llevan `lector`. Lo que dan se anota **al resolverlos**, no al abrirlos. `taller.gemelos`, `taller.cabina` y `lab.pizarra` tendrán su lector en la Fase 10.
+- **Charlas (Fase 9, 🟡):** tipo de fuente `charla` para la gente de casa ("E · hablar"). La Directora es una charla del grafo (da la misión y su lectura profunda); la Maestra, el técnico, la mecánica y los vecinos de la aldea tienen charlas de ambiente sin hechos, que no cuentan entre las fuentes ni para las reglas del grafo.
+- **Lectores de puzle (Fase 7):** `umbral.cuaderno` (completar la última hora del Archivo) y `archivo.cartas` (ordenar las cartas por cuándo se escribieron en días de Umbral) llevan `lector`. Lo que dan se anota **al resolverlos**, no al abrirlos. Desde la Fase 10 también `taller.gemelos`, `taller.cabina`, `lab.pizarra`, `cicatriz.cuna` (sus dos ruedas igualan el reloj del Contrapeso con el de la máquina) y `puertas.bocas` (elegir la boca de casa: lo que da se anota al cruzar por la buena).
 
 ## 12. Bitácora
 
@@ -304,3 +317,6 @@ textos de ambiente sin peso en el grafo.
 - **2026-10-25 · Sesión 2 (Fase 4).** Se implementa el Registro: datos del grafo, lectura, hechos persistentes y reglas comprobadas por código. Textos de Umbral en borrador; el resto, esqueleto.
 - **2026-10-28 · Fase 7 (hito 7A).** Anthony aprueba el plan de la Fase 7: las grabaciones suenan al ritmo de su reloj (decisión 5 ✅) y el Laboratorio está dentro del Nudo, con la gravedad invertida. Se implementa el reproductor; la grabación del escéptico lleva un **borrador** (para probar la mecánica) que ya habla desde dentro del Nudo y de corregir unos 18° alejándose de la Brasa: Anthony lo reescribirá.
 - **2026-10-29 · Fase 9 (hito 9C).** Se propone (🟡) el tipo de fuente `charla`: la Directora habla y da la misión; la gente de casa tiene charlas de ambiente sin hechos. Textos en borrador para Anthony.
+- **2026-10-29 · Fase 10.** Anthony decide el destino de los tres que se quedaron (murieron en el laboratorio): `lab.dormitorio` lo cuenta. El epílogo usa K7 y K8 para elegir la boca y la decisión final es llevar o no los planos del Contrapeso.
+- **2026-10-30 · Fase 10 (hito 10C, 🟡).** Dos fuentes nuevas en la Sala del Motor de Cicatriz: `cicatriz.palanca` ("E · tirar": saca el motor viejo antes del pulso) y `cicatriz.cuna` (lector `ruedas`: igualar el reloj del Contrapeso con el de la máquina; da `contrapeso.reloj` al igualarlos si ya se sabe qué es). Textos `[texto pendiente]` para Anthony.
+- **2026-10-30 · Fase 10 (hito 10D, 🟡).** El Archivo de las Puertas tiene tres fuentes (`puertas.rastros`, `puertas.bocas` con el lector `bocas`, `puertas.planos`) y cuatro hechos de cierre (`puertas.otros_viajeros`, `silencio.no_cruzaron`, `bocas.vuelta_antes`, `contrapeso.planos`). Cambia la línea de §5.8 que decía que el epílogo no daba hechos (regla 6). Total: 52 fuentes y 60 hechos.

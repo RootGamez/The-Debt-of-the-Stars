@@ -17,7 +17,7 @@ import os
 import random
 import sys
 
-import bpy  # noqa: F401  (lo usa arte_comun)
+import bpy
 from mathutils import Matrix, Vector
 
 SCRIPTS = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else r"D:\Proyectos\Juego\blender\scripts"
@@ -99,6 +99,8 @@ class Hogar(ac.Vestido):
         self.p = self.planeta
         self.rng = random.Random(SEMILLA)
         self.ocupado = []  # (lat, lon, radio en m): donde no crece nada suelto
+        # Las piedras de las vitrinas "piedra", aparte (Fase 10E): en el Hogar de antes aún no han llegado.
+        self.vitrinas_llenas = ac.Malla()
 
     # ---- Piezas pequeñas ------------------------------------------------------------------------
 
@@ -418,9 +420,9 @@ class Hogar(ac.Vestido):
             self.marca("INT_simbolo_partido", sala, (x + math.cos(mira) * 0.85, y + math.sin(mira) * 0.85, top + 1.2))
         else:
             cortes = [((self.rng.uniform(-0.6, 0.6), self.rng.uniform(-0.4, 0.4), 0.6), self.rng.uniform(0.4, 0.7))]
-            self.vista.pieza(self.rng.choice((ARENISCA, ARENISCA_SOMBRA, PIEDRA_CLARA)), ac.fragmento(cortes, 3),
-                             sala.m((x, y, top + 1.12), (0, 0, mira + self.rng.uniform(-0.5, 0.5)),
-                                    (self.rng.uniform(0.3, 0.45), 0.25, self.rng.uniform(0.25, 0.4))))
+            self.vitrinas_llenas.pieza(self.rng.choice((ARENISCA, ARENISCA_SOMBRA, PIEDRA_CLARA)), ac.fragmento(cortes, 3),
+                                       sala.m((x, y, top + 1.12), (0, 0, mira + self.rng.uniform(-0.5, 0.5)),
+                                              (self.rng.uniform(0.3, 0.45), 0.25, self.rng.uniform(0.25, 0.4))))
 
     def simbolo_partido(self, sala, x, y, z, mira):
         """Losa de los Ausentes con la mitad de abajo de un anillo de marcas de reloj, cortada arriba en curva:
@@ -1154,7 +1156,11 @@ class Hogar(ac.Vestido):
     # ---- Todo ----------------------------------------------------------------------------------
 
     def lugares(self):
+        ac.borrar(["hogar_FragmentosVitrinas"])
         self.instituto()
+        # En coordenadas del mundo: su origen es el del planeta.
+        ac.objeto_suelto(self.p, "hogar_FragmentosVitrinas", self.vitrinas_llenas,
+                         bpy.data.materials.get(f"M_Paleta_{MUNDO}"), ac.matriz())
         self.hangar()
         self.aldea()
         self.embarcadero()

@@ -183,4 +183,12 @@ describe('the home system of the prologue (sistema-hogar.json)', () => {
     expect(systemOf('umbral')?.ship).toBe('umbral');
     expect(systemOf('umbral')?.looping).toBe(true);
   });
+
+  it('keeps the Archive of the Gates out of time: no loop and no ship', () => {
+    const gates = systemOf('puertas');
+
+    expect(gates?.looping).toBe(false);
+    expect(gates?.ship).toBeUndefined();
+    expect(gates?.bodies.map((b) => b.world)).toEqual(['puertas']);
+  });
 });

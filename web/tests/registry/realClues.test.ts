@@ -20,7 +20,7 @@ describe('the real clue data', () => {
     expect(chats.length - (clues.sources.length - graph.length)).toBe(1); // solo la Directora da hechos
   });
 
-  it('contains the 7 threads, the 9 conclusions and the 47 sources of CONTEXTO_PISTAS.md', () => {
+  it('contains the 7 threads, the 9 conclusions and the 52 sources of CONTEXTO_PISTAS.md', () => {
     expect(clues.threads.map((t) => t.id)).toEqual(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7']);
     expect(clues.conclusions.map((c) => c.id)).toEqual([
       'K1',
@@ -33,7 +33,7 @@ describe('the real clue data', () => {
       'K7',
       'K8',
     ]);
-    expect(graph).toHaveLength(47);
+    expect(graph).toHaveLength(52);
   });
 
   it('spreads the sources over the places of the document', () => {
@@ -46,9 +46,10 @@ describe('the real clue data', () => {
       umbral: 8,
       archivo: 7,
       taller: 8,
-      cicatriz: 7,
+      cicatriz: 9,
       observatorio: 3,
       laboratorio: 7,
+      puertas: 3,
     });
   });
 

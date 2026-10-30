@@ -218,6 +218,11 @@ body {
   color: var(--muted);
 }
 
+/* El reloj del Contrapeso (Fase 10), mientras lo llevas: ámbar, como su núcleo. */
+.clock-hud-counterweight {
+  color: #ffc070;
+}
+
 .fade {
   position: fixed;
   inset: 0;
@@ -236,8 +241,87 @@ body {
   transition-timing-function: ease-out;
 }
 
+.llegada-negra {
+  background: #000;
+}
+
 .llegada-fuera {
   opacity: 0;
+}
+
+/* La tarjeta del final (Fase 10E): encima de todo, abajo, para que la escena (la Luna del final A) siga a la vista. */
+.ending {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px 16px 8vh;
+  background: linear-gradient(rgb(7 7 12 / 0%) 35%, rgb(7 7 12 / 82%));
+  animation: ending-in 2.5s ease-out both;
+}
+
+.ending-card {
+  box-sizing: border-box;
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 16px - 8vh);
+  overflow-y: auto;
+  padding: 28px 32px;
+  border: 1px solid rgb(232 220 196 / 25%);
+  border-radius: 12px;
+  background: #11101a;
+  color: var(--text);
+  line-height: 1.7;
+  text-align: center;
+}
+
+.ending-title {
+  margin: 0 0 12px;
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+.ending-text {
+  margin: 0 0 12px;
+  font-size: 17px;
+}
+
+.ending-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.ending-choice {
+  min-height: 44px;
+  padding: 8px 20px;
+  border: 1px solid rgb(232 220 196 / 55%);
+  border-radius: 8px;
+  background: rgb(7 7 12 / 50%);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.ending-choice:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+@keyframes ending-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ending {
+    animation: none;
+  }
 }
 
 /* Tus filamentos (Fase 9): un resplandor verde azulado en el borde de arriba mientras lees, y un latido al anotar. */
@@ -687,12 +771,17 @@ body {
   margin: 0 0 10px;
 }
 
+.puzzle-choices[hidden] {
+  display: none;
+}
+
 .puzzle-choices .puzzle-hint {
   width: 100%;
 }
 
 .puzzle-choice,
 .puzzle-move,
+.puzzle-wheel,
 .puzzle-check,
 .puzzle-close {
   min-height: 40px;
@@ -722,6 +811,78 @@ body {
 .puzzle-letters {
   margin: 0 0 12px;
   padding-left: 22px;
+}
+
+/* La consola de la Cabina (Fase 10): relojes que corren a su ritmo. */
+.puzzle-console {
+  margin: 4px 0 14px;
+  padding: 0;
+  list-style: none;
+  font-size: 16px;
+}
+
+.puzzle-console-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 0;
+  border-top: 1px solid rgb(232 220 196 / 12%);
+}
+
+.puzzle-console-time {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Las bocas de casa del Archivo de las Puertas (Fase 10D): lo que se ve al otro lado, su desfase y elegir. */
+.puzzle-mouths {
+  margin: 4px 0 14px;
+  padding: 0;
+  list-style: none;
+}
+
+.puzzle-mouth {
+  padding: 8px 0;
+  border-top: 1px solid rgb(232 220 196 / 12%);
+}
+
+.puzzle-mouth-view {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.puzzle-mouth-note {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Las ruedas de la cuna del núcleo (Fase 10C): minutos y segundos, para igualar los dos relojes. */
+.puzzle-wheels {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.puzzle-wheels[hidden] {
+  display: none;
+}
+
+.puzzle-wheel-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.puzzle-wheel {
+  min-width: 44px;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.puzzle-wheel-name {
+  min-width: 80px;
+  text-align: center;
 }
 
 .puzzle-letter {

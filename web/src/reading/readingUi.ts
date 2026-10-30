@@ -3,15 +3,18 @@
 // que se presencian. La lógica está en readingSession.ts, interaction.ts y registryView.ts (con
 // tests); esto lo cubren las pruebas de Playwright (e2e/reading.spec.ts).
 import { Vector3, type PerspectiveCamera } from 'three';
+import { EYE_HEIGHT } from '../data/movement';
 import type { Player } from '../core/player';
 import type { LoopSession } from '../core/loopSession';
 import { surfaceUp } from '../physics/gravity';
 import { lookAlong } from '../physics/surfaceFrame';
 import type { Clues } from '../registry/clues';
 import {
+  INTERACT_RANGE,
   insideRadius,
   nearestInteractable,
   promptLabel,
+  verbLabel,
   type Interactable,
 } from '../registry/interaction';
 import { canGiveNew } from '../registry/knowledge';
@@ -20,7 +23,7 @@ import { buildRegistryView } from '../registry/registryView';
 import { createInteractPrompt } from '../ui/interactPrompt';
 import { createNotice } from '../ui/notice';
 import type { PauseOverlay } from '../ui/pauseOverlay';
-import { createPuzzlePanel } from '../ui/puzzlePanel';
+import { createPuzzlePanel, type CustomReaders } from '../ui/puzzlePanel';
 import { createReadingPanel } from '../ui/readingPanel';
 import { createRecordingPanel } from '../ui/recordingPanel';
 import { createRegistryPanel } from '../ui/registryPanel';
@@ -39,6 +42,22 @@ export interface ReadingUiOptions {
   overlay: PauseOverlay;
   player: Player;
   touch: boolean;
+  /** Lo que se hace con algunas fuentes además de leerlas (coger el Contrapeso, tirar de la palanca…). */
+  actions?: SourceActions;
+  /** Lectores de puzle que trae el juego (las ruedas de la cuna, que miran el Contrapeso en vivo). */
+  readers?: CustomReaders;
+}
+
+/** Lo que se hace con una fuente además de leerla (por ejemplo, examinar el Contrapeso y luego cogerlo). */
+export interface SourceActions {
+  /** Ya no está (se la llevaron): ni aviso ni rombo. */
+  gone(id: string): boolean;
+  /**
+   * El verbo del aviso si ahora se hace algo con ella ("coger"), o undefined para leerla. `unread`: aún da algo
+   * nuevo al leerla (lo normal es leerla primero).
+   */
+  verb(id: string, unread: boolean): string | undefined;
+  run(id: string): void;
 }
 
 export interface RegistrySnapshot {
@@ -72,6 +91,10 @@ export interface ReadingUi {
   /** Una grabación está sonando (para el murmullo), o null. */
   readonly listening: ListeningState | null;
   openRegistry(): void;
+  /** Cierra la lectura abierta, si la hay (al cruzar una boca del Archivo desde su lector). */
+  closeReading(): void;
+  /** Un aviso breve, el mismo de "Anotado en el Registro". */
+  notify(message: string): void;
   /** Herramienta de depuración (`?debug`): coloca al jugador frente a una fuente. */
   teleportTo(clueId: string): boolean;
   snapshot(): RegistrySnapshot;
@@ -82,12 +105,42 @@ export interface ReadingUi {
 const TELEPORT_DISTANCE = 1.4;
 /** Paso máximo de una grabación por fotograma (s): tras un tirón no salta frases enteras. */
 const MAX_PLAYBACK_STEP = 0.1;
-const GROUND_PROBE = 3;
+/** Alturas desde las que se busca el suelo junto a la fuente: baja primero, para no caer sobre un tejado. */
+const GROUND_PROBES = [1.2, 3] as const;
 const GROUND_PROBE_DEPTH = 40;
+/** Desde dónde se puede leer al teletransportarse: los ojos a esta fracción del alcance, como mucho. */
+const TELEPORT_REACH = 0.9;
 
 export function createReadingUi(options: ReadingUiOptions): ReadingUi {
-  const { camera, clues, reading, loop, overlay, player, touch } = options;
+  const { camera, clues, reading, loop, overlay, player, touch, actions } = options;
   let current = options.sources;
+
+  /**
+   * Suelo a un paso de una fuente desde el que se alcanza a leerla (no en el tejado de su sala ni encima de un
+   * mueble): prueba a los cuatro lados y desde poca altura primero. Si ninguno vale, el primer suelo que encuentre.
+   */
+  function groundBeside(position: Vector3): Vector3 | null {
+    const up = surfaceUp(position, current.well);
+    const down = up.clone().negate();
+    const side = new Vector3()
+      .crossVectors(up, Math.abs(up.y) > 0.9 ? new Vector3(1, 0, 0) : new Vector3(0, 1, 0))
+      .normalize();
+    let fallback: Vector3 | null = null;
+    for (let turn = 0; turn < 4; turn++) {
+      const spot = position.clone().addScaledVector(side, TELEPORT_DISTANCE);
+      for (const probe of GROUND_PROBES) {
+        const above = spot.clone().addScaledVector(up, probe);
+        const distance = current.collision.raycast(above, down, GROUND_PROBE_DEPTH);
+        if (distance === null) continue;
+        const feet = above.addScaledVector(up, -distance);
+        const eye = feet.clone().addScaledVector(up, EYE_HEIGHT);
+        if (eye.distanceTo(position) <= INTERACT_RANGE * TELEPORT_REACH) return feet;
+        fallback ??= feet;
+      }
+      side.applyAxisAngle(up, Math.PI / 2);
+    }
+    return fallback;
+  }
   const abort = new AbortController();
   const lineOf = (id: string): string => clues.facts.get(id)?.line ?? id;
 
@@ -109,9 +162,13 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   const readingPanel = createReadingPanel(() => {
     closeReading();
   }, touch);
-  const puzzlePanel = createPuzzlePanel(() => {
-    closeReading();
-  }, touch);
+  const puzzlePanel = createPuzzlePanel(
+    () => {
+      closeReading();
+    },
+    touch,
+    options.readers,
+  );
   /** La grabación abierta: suena con el tiempo real aunque el ciclo esté detenido. */
   let playback: RecordingPlayback | null = null;
   let understoodShown = false;
@@ -217,9 +274,17 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     }
   }
 
+  /** El verbo que ofrece ahora una fuente en vez de su lectura, si lo hay. */
+  function actionOf(id: string): string | undefined {
+    return actions?.verb(id, canGive(id));
+  }
+
   function activate(): void {
     if (reading.frozen) closeReading();
-    else if (canInteract() && target) openReading(target.id);
+    else if (canInteract() && target) {
+      if (actionOf(target.id) !== undefined) actions?.run(target.id);
+      else openReading(target.id);
+    }
   }
 
   function openRegistry(): void {
@@ -263,14 +328,16 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   function findTarget(): Interactable | undefined {
     available.length = 0;
     for (const item of current.interactables) {
-      if (reading.isAvailable(item.id, loop.activeEventIds)) available.push(item);
+      if (reading.isAvailable(item.id, loop.activeEventIds) && !actions?.gone(item.id)) {
+        available.push(item);
+      }
     }
     camera.getWorldDirection(forward);
     return canInteract() ? nearestInteractable(camera.position, forward, available) : undefined;
   }
 
   function wantsMarker(id: string): boolean {
-    if (!reading.isAvailable(id, loop.activeEventIds)) return false;
+    if (!reading.isAvailable(id, loop.activeEventIds) || actions?.gone(id)) return false;
     return canGive(id) || !seen.has(id);
   }
 
@@ -289,7 +356,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       if (overlay.playing && loop.director.phase === 'playing' && !reading.frozen) witnessEvents();
       target = findTarget();
       const kind = target ? clues.sourceById.get(target.id)?.kind : undefined;
-      if (target && kind) prompt.show(promptLabel(kind, touch));
+      const verb = target ? actionOf(target.id) : undefined;
+      if (target && verb !== undefined) prompt.show(verbLabel(verb, touch));
+      else if (target && kind) prompt.show(promptLabel(kind, touch));
       else prompt.hide();
       current.markers.update(timeSeconds, camera.position, wantsMarker);
     },
@@ -313,6 +382,12 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       }
     },
     openRegistry,
+    closeReading() {
+      if (reading.frozen) closeReading();
+    },
+    notify(message) {
+      notice.show(message);
+    },
     get blocking() {
       return reading.frozen || registryPanel.isOpen;
     },
@@ -324,16 +399,15 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     teleportTo(clueId) {
       const item = current.interactables.find((i) => i.id === clueId);
       if (!item) return false;
+      const feet = groundBeside(item.position);
+      if (!feet) throw new WorldDataError(`No hay suelo junto a ${clueId}`);
       const up = surfaceUp(item.position, current.well);
-      const side = new Vector3()
-        .crossVectors(up, Math.abs(up.y) > 0.9 ? new Vector3(1, 0, 0) : new Vector3(0, 1, 0))
-        .normalize();
-      const spot = item.position.clone().addScaledVector(side, TELEPORT_DISTANCE);
-      const above = spot.clone().addScaledVector(up, GROUND_PROBE);
-      const distance = current.collision.raycast(above, up.clone().negate(), GROUND_PROBE_DEPTH);
-      if (distance === null) throw new WorldDataError(`No hay suelo junto a ${clueId}`);
-      const feet = above.addScaledVector(up, -distance);
-      player.moveTo(feet, lookAlong(up, item.position.clone().sub(feet)));
+      const toItem = item.position.clone().sub(feet);
+      player.moveTo(feet, lookAlong(up, toItem));
+      // Y la mira: una fuente baja (un diario en un estante) queda si no fuera del cono de mirada.
+      const rise = toItem.dot(up) - EYE_HEIGHT;
+      const across = toItem.addScaledVector(up, -toItem.dot(up)).length();
+      player.look(0, Math.atan2(rise, across));
       return true;
     },
     snapshot() {

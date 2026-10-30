@@ -45,3 +45,55 @@ export const LETTERS: readonly Letter[] = [
   { id: 'archivista', title: 'Nota del archivista', clock: 'el Archivo', rate: 0.8, day: 16 },
   { id: 'informe', title: 'Informe archivado', clock: 'el Archivo', rate: 0.8, day: 8 },
 ];
+
+// Fase 10 (hito 10A): los tres lectores que enseñan la cuenta del Contrapeso.
+
+export interface TwinsConfig {
+  /** El reloj del técnico (el Taller, 0,85: su órbita rapidísima lo atrasa). */
+  rate: number;
+  /** Día de Umbral en que los dos diarios anotan la misma tormenta. */
+  stormDay: number;
+  /** Día de Umbral de la última página de la hermana: lo que hay que llevar al diario del técnico. */
+  lastDay: number;
+}
+
+/** Los diarios de los gemelos: la hermana en Umbral, el técnico en el Taller, los mismos tres meses. */
+export const TWINS: TwinsConfig = { rate: 0.85, stormDay: 20, lastDay: 100 };
+
+export interface ConsoleClock {
+  id: string;
+  /** Rótulo en la consola (el sitio lento no tiene nombre: solo un número de ruta). */
+  label: string;
+  /** Ritmo respecto a Umbral (CONTEXTO_PLANETAS.md). */
+  rate: number;
+}
+
+/** La consola de la Cabina de Control: el reloj del Taller frente a los de los otros destinos, en vivo. */
+export const CONSOLE_CLOCKS: readonly ConsoleClock[] = [
+  { id: 'taller', label: 'Taller', rate: 0.85 },
+  { id: 'umbral', label: 'Umbral', rate: 1 },
+  { id: 'archivo', label: 'Archivo', rate: 0.8 },
+  { id: 'cicatriz', label: 'Cicatriz', rate: 0.6 },
+  { id: 'sin_nombre', label: 'Ruta 7 (sin nombre)', rate: 0.2 },
+];
+
+/** Minutos de Umbral que corren en la consola por cada segundo real (para que la deriva se vea enseguida). */
+export const CONSOLE_MINUTES_PER_SECOND = 1;
+
+export interface RouteLeg {
+  place: string;
+  /** Minutos de Umbral que pasa allí el Contrapeso. */
+  minutes: number;
+  /** Ritmo del reloj de ese sitio. */
+  rate: number;
+}
+
+/** La pizarra del Laboratorio: un viaje de ejemplo del Contrapeso hasta la máquina, que marcha a 0,60. */
+export const ROUTE = {
+  machineRate: 0.6,
+  legs: [
+    { place: 'Laboratorio', minutes: 10, rate: 0.2 },
+    { place: 'El vuelo', minutes: 5, rate: 1 },
+    { place: 'Taller', minutes: 4, rate: 0.85 },
+  ] satisfies RouteLeg[],
+} as const;

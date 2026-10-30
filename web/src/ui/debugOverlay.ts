@@ -3,6 +3,9 @@
 // Sin `?debug` y con el panel oculto no calcula nada.
 import { Vector3, type WebGLRenderer } from 'three';
 import type { Player } from '../core/player';
+import type { CounterweightSnapshot } from '../game/counterweightPlay';
+import type { Ending } from '../game/epilogue';
+import type { HomecomingPhase } from '../game/homecomingRig';
 import type { ShipSnapshot } from '../game/shipFlight';
 import { gravityAt, type GravityWell } from '../physics/gravity';
 
@@ -98,6 +101,19 @@ declare global {
         swallowed: string[];
         debris: number;
       } | null;
+      /**
+       * El Contrapeso: dónde está (`bench`, `carried`, `cradle`, `installed`…), lo que marca su esfera (s), si va en
+       * el relicario de la nave, si el motor viejo está fuera y lo que marca la máquina (s). null sin el Laboratorio.
+       */
+      counterweight?(): CounterweightSnapshot | null;
+      /** El horizonte estable: su radio (m; 0 si no lo hay) y lo cerca que está quien mira (0–1). */
+      horizon?(): { radius: number; closeness: number };
+      /** Pilotando: la nave aparece quieta delante del horizonte estable, a `radii` radios de su centro. */
+      nearHorizon?(radii: number): boolean;
+      /** En el Archivo de las Puertas: si se llevan los planos del Contrapeso. null fuera de allí. */
+      epilogue?(): { carryingPlans: boolean } | null;
+      /** De vuelta en casa (`?final=`): el final, en qué punto va el cierre y lo que aún no ha llegado. null si no. */
+      homecoming?(): { ending: Ending; phase: HomecomingPhase; without: readonly string[] } | null;
       /** La marea donde estás y la tensión acumulada (0–1; a 1, muerte `marea`). */
       tide?(): { tide: number; strain: number };
       /**

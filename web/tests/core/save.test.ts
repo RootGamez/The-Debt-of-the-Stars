@@ -4,6 +4,7 @@ import {
   freshSave,
   isSaveErased,
   loadSave,
+  markEndingSeen,
   markPrologueDone,
   MAX_FACTS,
   MAX_LOOPS,
@@ -53,6 +54,7 @@ describe('loadSave', () => {
       loopsCompleted: 7,
       facts: ['umbral.placa'],
       prologueDone: true,
+      endings: ['B'],
     });
 
     expect(loadSave(store).data).toEqual({
@@ -60,6 +62,7 @@ describe('loadSave', () => {
       loopsCompleted: 7,
       facts: ['umbral.placa'],
       prologueDone: true,
+      endings: ['B'],
     });
   });
 
@@ -72,9 +75,36 @@ describe('loadSave', () => {
     store.setItem(SAVE_KEY, JSON.stringify({ version: 1, loopsCompleted: 4, facts: ['a.b'] }));
 
     expect(loadSave(store)).toEqual({
-      data: { version: SAVE_VERSION, loopsCompleted: 4, facts: ['a.b'], prologueDone: true },
+      data: {
+        version: SAVE_VERSION,
+        loopsCompleted: 4,
+        facts: ['a.b'],
+        prologueDone: true,
+        endings: [],
+      },
       readOnly: false,
     });
+  });
+
+  it('reads a save from before the endings (version 2) as one that has seen none', () => {
+    const store = memoryStore();
+    const v2 = { version: 2, loopsCompleted: 3, facts: ['a.b'], prologueDone: false };
+    store.setItem(SAVE_KEY, JSON.stringify(v2));
+
+    expect(loadSave(store).data).toEqual({ ...v2, version: SAVE_VERSION, endings: [] });
+  });
+
+  it.each([
+    ['without endings', undefined],
+    ['with something that is not an ending', ['tarde']],
+    ['with endings that are not a list', 'A'],
+  ])('rejects a version 3 save %s', (_name, endings) => {
+    const store = memoryStore();
+    const raw = { version: 3, loopsCompleted: 1, facts: [], prologueDone: true, endings };
+    store.setItem(SAVE_KEY, JSON.stringify(raw));
+
+    expect(loadSave(store).data).toEqual(freshSave());
+    expect(loadSave(store).warning).toBeDefined();
   });
 
   it('rejects a version 2 save without a clear prologue flag', () => {
@@ -184,6 +214,7 @@ describe('saveProgress (two tabs never lose facts)', () => {
     loopsCompleted: loops,
     facts,
     prologueDone,
+    endings: [],
   });
 
   it('never forgets that the prologue was played, whichever tab saves last', () => {
@@ -305,6 +336,31 @@ describe('markPrologueDone (crossing the wormhole)', () => {
     const newer = JSON.stringify({ version: SAVE_VERSION + 1, loopsCompleted: 3, facts: [] });
     const store = memoryStore({ [SAVE_KEY]: newer });
     expect(markPrologueDone(store, loadSave(store), 0)).toBe(false);
+    expect(store.data.get(SAVE_KEY)).toBe(newer);
+  });
+});
+
+describe('markEndingSeen (reaching an ending)', () => {
+  it('adds the ending to the ones already seen, keeping everything else', () => {
+    const store = memoryStore();
+    writeSave(store, { ...freshSave(), loopsCompleted: 5, facts: ['a.b'], endings: ['A'] });
+
+    expect(markEndingSeen(store, loadSave(store), 'B')).toBe(true);
+    expect(markEndingSeen(store, loadSave(store), 'B')).toBe(true);
+
+    expect(loadSave(store).data).toMatchObject({
+      loopsCompleted: 5,
+      facts: ['a.b'],
+      endings: ['A', 'B'],
+    });
+  });
+
+  it('cannot save without storage, and leaves a save from a newer version alone', () => {
+    expect(markEndingSeen(null, { data: freshSave(), readOnly: false }, 'A')).toBe(false);
+
+    const newer = JSON.stringify({ version: SAVE_VERSION + 1, loopsCompleted: 3, facts: [] });
+    const store = memoryStore({ [SAVE_KEY]: newer });
+    expect(markEndingSeen(store, loadSave(store), 'A')).toBe(false);
     expect(store.data.get(SAVE_KEY)).toBe(newer);
   });
 });

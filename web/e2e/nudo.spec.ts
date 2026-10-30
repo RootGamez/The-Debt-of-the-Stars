@@ -49,12 +49,13 @@ test('inside the Nudo you stand on the inner face, with the head toward the cent
 test('the sources of the laboratory can be read inside the Nudo', async ({ page }) => {
   await enterNudo(page);
 
-  expect(await page.evaluate(() => window.__juego?.teleportTo?.('lab.pizarra') ?? false)).toBe(
-    true,
-  );
+  // (La pizarra se lee con su lector de puzle: e2e/puzzles.spec.ts.)
+  expect(
+    await page.evaluate(() => window.__juego?.teleportTo?.('lab.notas_esceptico') ?? false),
+  ).toBe(true);
   await expect(page.locator('.prompt')).toHaveText('E · leer');
   await page.keyboard.press('KeyE');
-  await expect(page.locator('.reader-title')).toHaveText('La pizarra');
+  await expect(page.locator('.reader-title')).toHaveText('Las notas del escéptico');
 });
 
 test('the folded gate takes you out to the shell and back in', async ({ page }) => {

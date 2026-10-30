@@ -452,3 +452,76 @@ describe('at home, in the prologue (Phase 9)', () => {
     expect(saved).toEqual([]);
   });
 });
+
+describe('with the Counterweight installed (Phase 10)', () => {
+  it('nothing is swallowed any more, but the loop still ends', () => {
+    const { d } = director({ worldId: 'umbral' });
+    d.skip(70);
+
+    d.stabilize();
+    run(d, 25);
+
+    expect(d.stable).toBe(true);
+    expect(d.absorption).toBe(0);
+    expect(d.phase).toBe('playing');
+    run(d, 5.2);
+    expect(d.deathCause).toBe('fin');
+  });
+
+  it('ignores the front in open space too', () => {
+    const { d } = director({ worldId: undefined, engulfed: true });
+    d.stabilize();
+
+    run(d, 5);
+
+    expect(d.phase).toBe('playing');
+  });
+
+  it('starts every new loop unstable again', () => {
+    const { d } = director();
+    d.stabilize();
+    run(d, 100.1);
+
+    run(d, FADE_OUT_SECONDS + 0.1);
+
+    expect(d.stable).toBe(false);
+  });
+});
+
+describe('crossing the stable horizon (Phase 10)', () => {
+  it('fades to black, says so once and does not count a loop', () => {
+    const { d, saved } = director();
+    d.stabilize();
+
+    d.update(0.1, QUIET, 'horizonte');
+    expect(d.phase).toBe('dying');
+    expect(d.deathCause).toBe('horizonte');
+    expect(d.fade.color).toBe('black');
+    let crossings = 0;
+    for (let i = 0; i < Math.round((FADE_OUT_SECONDS + 1) * 10); i++) {
+      const update = d.update(0.1, QUIET);
+      if (update.crossed) crossings++;
+      expect(update.restart).toBe(false);
+    }
+
+    expect(crossings).toBe(1);
+    expect(d.loopsCompleted).toBe(0);
+    expect(saved).toEqual([]);
+  });
+
+  it('lets you through a home mouth of the Archive, out of time, in white', () => {
+    const { d, saved } = director({ looping: false });
+
+    d.update(0.1, QUIET, 'boca');
+    expect(d.phase).toBe('dying');
+    expect(d.fade.color).toBe('white');
+    let crossings = 0;
+    for (let i = 0; i < Math.round((FADE_OUT_SECONDS + 1) * 10); i++) {
+      if (d.update(0.1, QUIET).crossed) crossings++;
+    }
+
+    expect(crossings).toBe(1);
+    expect(d.loopsCompleted).toBe(0);
+    expect(saved).toEqual([]);
+  });
+});

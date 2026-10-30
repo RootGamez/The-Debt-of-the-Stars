@@ -1,9 +1,18 @@
 // Panel de los lectores de puzle (Fase 7, hito 7E): el cuaderno del turno (completar la última hora del
-// Archivo) y las cartas del Archivo (ordenarlas por cuándo se escribieron de verdad). Diálogo accesible; todo
-// entra como texto. La lógica está en reading/puzzles.ts (con tests).
+// Archivo) y las cartas del Archivo (ordenarlas por cuándo se escribieron de verdad); desde la Fase 10, los tres
+// que enseñan la cuenta del Contrapeso (ui/clockPuzzles.ts) y los que trae el juego (las ruedas de la cuna, que
+// miran el Contrapeso en vivo, y las bocas de casa del Archivo: `CustomReaders`). Diálogo accesible; todo entra como texto. La lógica está en
+// reading/puzzles.ts (con tests).
 import { LETTERS, NOTEBOOK, type Letter } from '../data/puzzles';
+import type { PuzzleReader } from '../registry/clues';
 import type { OpenReading } from '../reading/readingSession';
 import { checkLetters, formatMinutes, lettersInOrder, notebook } from '../reading/puzzles';
+import { consoleBody, routeBody, twinsBody, type PuzzleBody } from './clockPuzzles';
+import { button, element } from './puzzleKit';
+
+/** Un lector que trae el juego: recibe la línea de estado y si ya se resolvió, y llama a `solve` al resolverlo. */
+export type CustomReader = (status: HTMLElement, solved: boolean, solve: () => void) => PuzzleBody;
+export type CustomReaders = Partial<Record<PuzzleReader, CustomReader>>;
 
 export interface PuzzlePanel {
   /** `onSolved` se llama una vez, al resolverlo. */
@@ -13,24 +22,6 @@ export interface PuzzlePanel {
   hide(): void;
   readonly isOpen: boolean;
   dispose(): void;
-}
-
-function element<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  className: string,
-  text?: string,
-): HTMLElementTagNameMap[K] {
-  const node = document.createElement(tag);
-  node.className = className;
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
-
-function button(text: string, className: string, label?: string): HTMLButtonElement {
-  const node = element('button', className, text);
-  node.type = 'button';
-  if (label) node.setAttribute('aria-label', label);
-  return node;
 }
 
 /** "4 días allí son 5 en Umbral": el ritmo de un reloj como una comparación, sin fórmulas. */
@@ -45,7 +36,11 @@ export function equivalence(rate: number): string {
   return `Un día allí son ${(1 / rate).toFixed(1)} en Umbral.`;
 }
 
-export function createPuzzlePanel(onClose: () => void, touch: boolean): PuzzlePanel {
+export function createPuzzlePanel(
+  onClose: () => void,
+  touch: boolean,
+  readers: CustomReaders = {},
+): PuzzlePanel {
   const backdrop = element('div', 'puzzle');
   backdrop.setAttribute('role', 'dialog');
   backdrop.setAttribute('aria-modal', 'true');
@@ -60,6 +55,7 @@ export function createPuzzlePanel(onClose: () => void, touch: boolean): PuzzlePa
   status.setAttribute('role', 'status');
   const noted = element('div', 'puzzle-noted');
   let open = false;
+  let stopBody: (() => void) | undefined;
 
   function notebookBody(solved: boolean, onSolved: () => void): HTMLElement {
     const book = notebook(NOTEBOOK);
@@ -184,6 +180,27 @@ export function createPuzzlePanel(onClose: () => void, touch: boolean): PuzzlePa
     return body;
   }
 
+  function bodyFor(reader: PuzzleReader, solved: boolean, solve: () => void): PuzzleBody {
+    const custom = readers[reader];
+    if (custom) return custom(status, solved, solve);
+    switch (reader) {
+      case 'cartas':
+        return { body: lettersBody(solved, solve) };
+      case 'gemelos':
+        return twinsBody(solved, status, solve);
+      case 'cabina':
+        return consoleBody(solved, status, solve);
+      case 'pizarra':
+        return routeBody(solved, status, solve);
+      case 'cuaderno':
+        return { body: notebookBody(solved, solve) };
+      case 'ruedas':
+        return { body: element('p', 'puzzle-hint', 'No hay nada que ajustar.') };
+      case 'bocas':
+        return { body: element('p', 'puzzle-hint', 'Todas las bocas están quietas.') };
+    }
+  }
+
   return {
     show(reading, onSolved) {
       const title = element('h2', 'puzzle-title', reading.title);
@@ -203,20 +220,17 @@ export function createPuzzlePanel(onClose: () => void, touch: boolean): PuzzlePa
       const parts: HTMLElement[] = [title];
       if (reading.draft) parts.push(element('p', 'puzzle-tag', 'Texto provisional'));
       for (const paragraph of reading.text) parts.push(element('p', 'puzzle-text', paragraph));
-      parts.push(
-        reading.puzzle?.reader === 'cartas'
-          ? lettersBody(solved, solve)
-          : notebookBody(solved, solve),
-        status,
-        noted,
-        close,
-      );
+      stopBody?.();
+      const { body, stop } = bodyFor(reading.puzzle?.reader ?? 'cuaderno', solved, solve);
+      stopBody = stop;
+      parts.push(body, status, noted, close);
       card.replaceChildren(...parts);
       backdrop.hidden = false;
       open = true;
       (
-        card.querySelector<HTMLButtonElement>('.puzzle-choice, .puzzle-move:not(:disabled)') ??
-        close
+        card.querySelector<HTMLButtonElement>(
+          '.puzzle-choice, .puzzle-move:not(:disabled), .puzzle-wheel',
+        ) ?? close
       ).focus({
         preventScroll: true,
       });
@@ -231,6 +245,8 @@ export function createPuzzlePanel(onClose: () => void, touch: boolean): PuzzlePa
       noted.replaceChildren(element('p', 'puzzle-noted-title', 'Anotado en el Registro'), list);
     },
     hide() {
+      stopBody?.();
+      stopBody = undefined;
       backdrop.hidden = true;
       open = false;
     },
@@ -238,6 +254,7 @@ export function createPuzzlePanel(onClose: () => void, touch: boolean): PuzzlePa
       return open;
     },
     dispose() {
+      stopBody?.();
       backdrop.remove();
     },
   };

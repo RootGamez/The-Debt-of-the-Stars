@@ -41,6 +41,8 @@ export interface ShipFlightOptions {
   setReadingEnabled(enabled: boolean): void;
   /** Pantalla táctil: las sugerencias nombran botones en vez de teclas. */
   touch: boolean;
+  /** Lo que tira además de la gravedad de su mundo (el horizonte estable, Fase 10D): se suma a `target` (m/s²). */
+  pull?: (frame: string, position: Vector3, target: Vector3) => void;
 }
 
 export interface ShipSnapshot {
@@ -89,6 +91,8 @@ export interface ShipFlight {
   standAtHatch(onFootWorld: string): boolean;
   /** Depuración (`?debug`): la nave, pilotada, aparece quieta a esa altura sobre un mundo. */
   warpTo(world: string, altitude: number): boolean;
+  /** Depuración (`?debug`): la nave, pilotada, aparece quieta en `position` (marco de `world`) mirando a `toward`. */
+  placeAt(world: string, position: Vector3, toward: Vector3): boolean;
 }
 
 /** Segundos que se muestran los controles tras despegar. */
@@ -260,6 +264,7 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
       const runtime = runtimeOf(runtimes, ship.frame);
       // En el marco de un mundo su centro es el origen: solo cuenta su gravedad.
       gravityAt(ship.state.position, [runtime.well], gravity);
+      options.pull?.(ship.frame, ship.state.position, gravity);
       environment.up = up.copy(ship.state.position).normalize();
       environment.altitude = altitudeOf(ship.frame);
     }
@@ -468,20 +473,33 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
       if (!boarding.isPiloting || !spec.bodyOf(world)) return false;
       const runtime = runtimeOf(runtimes, world);
       up.copy(runtime.spawn.feet).normalize();
-      ship.state.position
-        .copy(up)
+      const position = up
+        .clone()
         .multiplyScalar(runtime.world.info.radius + ship.radius + altitude);
-      ship.state.velocity.set(0, 0, 0);
-      ship.state.angularVelocity.set(0, 0, 0);
-      ship.state.orientation.copy(lookAlong(up, forwardOf(runtime.spawn.body, seat)));
-      ship.landed = false;
-      ship.frame = world;
-      ship.syncPrevious();
-      attach();
-      systemScene.setReference(world);
+      place(world, position, lookAlong(up, forwardOf(runtime.spawn.body, seat)));
+      return true;
+    },
+    placeAt(world, position, toward) {
+      if (!boarding.isPiloting || !spec.bodyOf(world)) return false;
+      up.copy(position).normalize();
+      const forward = toward.clone().sub(position);
+      place(world, position, lookAlong(up, forward.addScaledVector(up, -forward.dot(up))));
       return true;
     },
   };
+
+  /** Deja la nave quieta en un sitio (depuración). */
+  function place(world: string, position: Vector3, orientation: Quaternion): void {
+    ship.state.position.copy(position);
+    ship.state.velocity.set(0, 0, 0);
+    ship.state.angularVelocity.set(0, 0, 0);
+    ship.state.orientation.copy(orientation);
+    ship.landed = false;
+    ship.frame = world;
+    ship.syncPrevious();
+    attach();
+    systemScene.setReference(world);
+  }
 
   function groundOf(world: string | undefined) {
     if (!world) return undefined;

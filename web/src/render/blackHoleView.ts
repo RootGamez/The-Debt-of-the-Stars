@@ -28,8 +28,11 @@ const DISK_SPIN = 0.05;
 const DISK_TILT = 1.15;
 
 export interface BlackHoleView {
-  /** `approach`: cuánto ha caído hacia él quien mira (0–1, `finalApproach`); cuanto más, más cerca se dibuja. */
-  update(t: number, camera: Camera, dt: number, approach?: number): void;
+  /**
+   * `approach`: cuánto ha caído hacia él quien mira (0–1, `finalApproach`); cuanto más, más cerca se dibuja.
+   * `stable`: el Contrapeso está instalado (nace, pero no crece).
+   */
+  update(t: number, camera: Camera, dt: number, approach?: number, stable?: boolean): void;
   /** Radio (m), si se ve, su radio aparente desde quien mira (rad) y cuánto se ha acercado (0–1). */
   snapshot(): { radius: number; visible: boolean; span: number; approach: number };
   /** Cuánto ocupa en el cielo de quien mira (0–1, `skyFill`); 0 si aún no ha nacido. */
@@ -116,8 +119,8 @@ export function createBlackHoleView(
   let approached = 0;
 
   return {
-    update(t, camera, dt, approach = 0) {
-      radius = blackHoleRadius(t, growth);
+    update(t, camera, dt, approach = 0, stable = false) {
+      radius = blackHoleRadius(t, growth, stable);
       approached = approach;
       root.visible = world !== undefined && radius > 0;
       if (!world || !root.visible) {

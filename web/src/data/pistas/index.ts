@@ -12,6 +12,7 @@ import hogar from './hogar.json';
 import laboratorio from './laboratorio.json';
 import luna from './luna.json';
 import observatorio from './observatorio.json';
+import puertas from './puertas.json';
 import taller from './taller.json';
 import umbral from './umbral.json';
 
@@ -31,6 +32,7 @@ const SOURCE_FILES: readonly (readonly unknown[])[] = [
   cicatriz,
   observatorio,
   laboratorio,
+  puertas,
 ];
 
 export function chronologyEventIds(): string[] {

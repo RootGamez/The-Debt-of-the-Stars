@@ -101,5 +101,27 @@
       "texto": ["[texto pendiente]"],
       "hechos": ["lab.imagen_desplazada"]
     }
+  },
+  {
+    "id": "cicatriz.palanca",
+    "mundo": "cicatriz",
+    "tipo": "objeto",
+    "titulo": "La palanca del núcleo",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.sustituye_motor"] }
+  },
+  {
+    "id": "cicatriz.cuna",
+    "mundo": "cicatriz",
+    "tipo": "objeto",
+    "lector": "ruedas",
+    "titulo": "La cuna del núcleo",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "profunda": {
+      "requiere": ["contrapeso.que_es"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["contrapeso.reloj"]
+    }
   }
 ]

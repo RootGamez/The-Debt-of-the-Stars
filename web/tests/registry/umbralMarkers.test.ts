@@ -17,6 +17,7 @@ const BUILT_WORLDS = [
   'laboratorio',
   'hogar',
   'luna',
+  'puertas',
 ];
 
 async function load(world: string) {

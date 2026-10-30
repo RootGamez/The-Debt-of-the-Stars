@@ -1,0 +1,46 @@
+[
+  {
+    "id": "puertas.rastros",
+    "mundo": "puertas",
+    "tipo": "texto",
+    "titulo": "El muro de los rastros",
+    "borrador": true,
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["puertas.otros_viajeros"]
+    },
+    "profunda": {
+      "requiere": ["silencio.dos_investigadores"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["silencio.no_cruzaron"]
+    }
+  },
+  {
+    "id": "puertas.bocas",
+    "mundo": "puertas",
+    "tipo": "objeto",
+    "lector": "bocas",
+    "titulo": "Las bocas de casa",
+    "borrador": true,
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": []
+    },
+    "profunda": {
+      "requiere": ["bocas.relojes_distintos"],
+      "texto": ["[texto pendiente]"],
+      "hechos": ["bocas.vuelta_antes"]
+    }
+  },
+  {
+    "id": "puertas.planos",
+    "mundo": "puertas",
+    "tipo": "objeto",
+    "titulo": "Los planos del Contrapeso",
+    "borrador": true,
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["contrapeso.planos"]
+    }
+  }
+]

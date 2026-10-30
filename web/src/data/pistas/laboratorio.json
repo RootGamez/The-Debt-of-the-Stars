@@ -3,6 +3,7 @@
     "id": "lab.pizarra",
     "mundo": "laboratorio",
     "tipo": "texto",
+    "lector": "pizarra",
     "titulo": "La pizarra",
     "borrador": true,
     "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
