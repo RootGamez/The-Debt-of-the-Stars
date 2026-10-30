@@ -59,6 +59,7 @@ const VERBS: Record<SourceKind, string> = {
   objeto: 'examinar',
   observacion: 'examinar',
   evento: 'observar',
+  charla: 'hablar',
 };
 
 /** Texto del aviso: "E · leer" en PC, "Leer" en el botón táctil. */

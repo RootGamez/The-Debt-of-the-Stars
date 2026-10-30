@@ -23,6 +23,7 @@ from mathutils import Matrix, Vector
 SCRIPTS = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else r"D:\Proyectos\Juego\blender\scripts"
 sys.path.insert(0, SCRIPTS)
 import arte_comun as ac  # noqa: E402
+import ool  # noqa: E402
 
 MUNDO = "hogar"
 SEMILLA = 9
@@ -66,13 +67,13 @@ R_SUELO = 125.0  # radio aproximado del suelo en la colina, para pasar metros a 
 
 # ---- Dónde está cada cosa (lat, lon) ---------------------------------------------------------------
 INSTITUTO = (47.0, 8.0)      # la Sala de Fragmentos, en la cima llana de la colina
-PLAZA_ENTRADA = (42.2, 8.0)  # delante de la puerta sur
+PLAZA_ENTRADA = (41.0, 8.0)  # delante de la puerta sur
 HANGAR = (42.0, 22.0)        # la plataforma del Albatros II, al este de la cima
 ALDEA = (67.0, -2.0)         # la plaza de la aldea, en los prados del norte
 EMBARCADERO = (65.5, 30.0)   # en la costa del este
-CAMINO_ALDEA = [(43.6, 3.0), (44.6, -1.5), (47.0, -5.0), (50.0, -8.0), (53.5, -9.5), (57.5, -9.0),
+CAMINO_ALDEA = [(41.3, 4.3), (43.0, 0.5), (44.6, -1.5), (47.0, -5.0), (50.0, -8.0), (53.5, -9.5), (57.5, -9.0),
                 (61.0, -7.0), (64.0, -4.5)]
-CAMINO_HANGAR = [(43.0, 11.0), (42.6, 14.5), (42.3, 17.0)]
+CAMINO_HANGAR = [(41.2, 11.7), (41.7, 14.5), (42.0, 16.8)]
 CAMINO_EMBARCADERO = [(67.0, 4.0), (66.8, 10.0), (66.5, 16.0), (66.2, 22.0), (65.8, 27.0)]
 
 
@@ -210,18 +211,30 @@ class Hogar(ac.Vestido):
                     rr = r + cara * (grosor / 2 + 0.02)
                     self.vista.pieza(col, ac.caja, lugar.m((math.cos(a) * rr, math.sin(a) * rr, z), (0, 0, a),
                                                            (0.04, largo * rr / r, alto_banda)))
-        for ang, ancho in puertas:
-            a = math.radians(ang)
+        def real(lista):
+            """Cada hueco tal como queda (centro en rad, medio ancho en rad): los muros van a trozos enteros."""
+            huecos = []
+            for ang, ancho in lista:
+                c = math.radians(ang)
+                fuera = [((i + 0.5) * paso - c + math.pi) % (2 * math.pi) - math.pi for i in range(n)
+                         if hueco((i + 0.5) * paso, [(ang, ancho)])]
+                if fuera:
+                    lo, hi = min(fuera) - paso / 2, max(fuera) + paso / 2
+                    huecos.append((c + (lo + hi) / 2, (hi - lo) / 2))
+            return huecos
+
+        for a, medio in real(puertas):
             for cara in (-1, 1):
                 rr = r + cara * (grosor / 2 + 0.04)
                 for lado in (-1, 1):
-                    b = a + lado * (ancho / 2 + 0.06) / r
+                    # Las jambas, justo en el borde del muro: tapan la rendija entre muro y hueco.
+                    b = a + lado * medio
                     self.vista.pieza(marco, ac.caja, lugar.m((math.cos(b) * rr, math.sin(b) * rr, z0 + alto_puerta / 2),
-                                                             (0, 0, b), (0.08, 0.16, alto_puerta)))
+                                                             (0, 0, b), (0.08, 0.18, alto_puerta)))
                 self.vista.pieza(marco, ac.caja, lugar.m((math.cos(a) * rr, math.sin(a) * rr, z0 + alto_puerta + 0.08),
-                                                         (0, 0, a), (0.08, ancho + 0.3, 0.16)))
-        for ang, ancho in ventanas:
-            a = math.radians(ang)
+                                                         (0, 0, a), (0.08, 2 * medio * r + 0.3, 0.16)))
+        for a, medio in real(ventanas):
+            ancho = 2 * medio * r
             lo, hi = ventana
             for cara in (-1, 1):
                 rr = r + cara * (grosor / 2 + 0.03)
@@ -256,14 +269,27 @@ class Hogar(ac.Vestido):
             self.vista.pieza(OCRE_OSCURO, ac.cono(r * 0.16, 0.0, 10), lugar.m((0, 0, top + 0.6), escala=(1, 1, 0.45)))
             self.vista.pieza(LATON, ac.bola(0.1, 1), lugar.m((0, 0, top + 0.86)))
 
+    def zocalo(self, lugar, r, top, color=PIEDRA, falda=0.85, subida=0.5, hondo=2.4):
+        """Base redonda de piedra con la cara de arriba en `top` y una falda en cuesta (unos 30°) alrededor: quien
+        anda no sube escalones de más de 10 cm, pero sí cuestas, así que se sube a cualquier suelo alto por donde
+        sea. Lo de abajo queda enterrado."""
+        self.solido(color, ac.torno([(0.0, top - hondo), (r + falda, top - hondo), (r + falda, top - subida), (r, top), (0.0, top)], 28),
+                    lugar.m((0, 0, 0)))
+
     def sala(self, lugar, r, alto, color_muro, colores_techo, puertas, ventanas, alto_techo=None, suelo=CREMA_SOMBRA,
              gajos=12, top=0.3, ventana=(1.3, 2.4)):
-        """Una sala redonda completa: zócalo de piedra, suelo, muro con huecos y cúpula de tela."""
-        self.solido(PIEDRA, ac.cilindro(r + 0.55, 24), lugar.m((0, 0, top - 1.2), escala=(1, 1, 2.4)))
+        """Una sala redonda completa: zócalo de piedra con su falda, suelo, muro con huecos y cúpula de tela."""
+        self.zocalo(lugar, r + 0.55, top)
         self.vista.pieza(PIEDRA_CLARA, ac.cilindro(r + 0.6, 24), lugar.m((0, 0, top - 0.06), escala=(1, 1, 0.1)))
         self.vista.pieza(suelo, ac.cilindro(r - 0.1, 24), lugar.m((0, 0, top + 0.01), escala=(1, 1, 0.02)))
         self.muro_redondo(lugar, r, alto, color_muro, puertas, ventanas, z0=top, ventana=ventana)
         self.techo_tela(lugar, r + 0.45, top + alto, alto_techo or r * 0.7, colores_techo, gajos)
+
+    def cordon(self, lugar, x, y, abajo, base_cupula, radio_cupula, alto_cupula):
+        """Cordón de una lámpara colgada, desde su remate (`abajo`) hasta la tela de la cúpula sobre (x, y)."""
+        rho = min(math.hypot(x, y), radio_cupula * 0.99)
+        arriba = base_cupula + alto_cupula * math.sqrt(1 - (rho / radio_cupula) ** 2)
+        self.vista.pieza(MADERA_OSCURA, ac.cilindro(0.015, 4), lugar.m((x, y, (abajo + arriba) / 2), escala=(1, 1, arriba - abajo)))
 
     def pasillo(self, a, b, ancho=2.2, alto=2.7, colores=(CREMA, OCRE)):
         """Pasillo cubierto entre dos puertas (puntos del suelo, en el marco del mundo): suelo, aros de madera y lona."""
@@ -335,8 +361,9 @@ class Hogar(ac.Vestido):
         for r in (4.9, 3.55, 2.25):
             self.anillo_suelo(sala, r, 0.04, top + 0.045, MADERA_OSCURA, 40)
         # El fragmento más grande hasta hoy, sobre un pedestal redondo, con dos mordidas.
-        self.solido(MADERA_OSCURA, ac.torno([(0.0, 0.0), (0.9, 0.0), (0.95, 0.15), (0.7, 0.25), (0.65, 0.75), (0.85, 0.85), (0.0, 0.85)], 16),
-                    sala.m((0, 0, top)), ac.cilindro(0.85, 10))
+        self.vista.pieza(MADERA_OSCURA, ac.torno([(0.0, 0.0), (0.9, 0.0), (0.95, 0.15), (0.7, 0.25), (0.65, 0.75), (0.85, 0.85), (0.0, 0.85)], 16),
+                         sala.m((0, 0, top)))
+        self.col.pieza(ac.cilindro(0.88, 10), sala.m((0, 0, top + 0.425), escala=(1, 1, 0.85)))
         # Las mordidas dan hacia la puerta sur, para que se vean al entrar.
         self.vista.pieza(ARENISCA, ac.fragmento([((0.3, -0.55, 0.45), 0.55), ((-0.62, -0.25, -0.15), 0.42)], 6),
                          sala.m((0, 0, top + 1.45), (0, 0, 0.25), (1.3, 0.55, 1.2)))
@@ -356,7 +383,7 @@ class Hogar(ac.Vestido):
         for k in range(4):
             a = 2 * math.pi * k / 4 + math.pi / 4
             x, y = math.cos(a) * 3.3, math.sin(a) * 3.3
-            self.vista.pieza(MADERA_OSCURA, ac.cilindro(0.015, 4), sala.m((x, y, top + 4.4), escala=(1, 1, 2.0)))
+            self.cordon(sala, x, y, top + 3.38, top + 3.6, R + 0.45, 4.6)
             self.vista.pieza(TELA_MOSTAZA, ac.torno([(0.0, -0.3), (0.25, -0.24), (0.3, -0.08), (0.18, 0.05), (0.0, 0.08)], 10),
                              sala.m((x, y, top + 3.3)))
             self.luces.pieza(LUZ, ac.bola(0.13, 1), sala.m((x, y, top + 3.1)))
@@ -469,8 +496,9 @@ class Hogar(ac.Vestido):
         self.vista.pieza(MADERA_OSCURA, ac.cilindro(0.02, 4), lugar.m((dx - 0.55, dy + 0.2, top + 0.98), escala=(1, 1, 0.45)))
         self.vista.pieza(TELA_MOSTAZA, ac.cono(0.16, 0.06, 10), lugar.m((dx - 0.55, dy + 0.2, top + 1.22), escala=(1, 1, 0.16)))
         self.luces.pieza(LUZ, ac.bola(0.06, 1), lugar.m((dx - 0.55, dy + 0.2, top + 1.12)))
-        self.cojin(lugar, dx + 0.45, dy + 0.75, top, TELA_ROSA, 0.38)
         self.marca("INT_ficha", lugar, (dx - 0.55, dy - 0.75, top + 1.15))
+        # La Maestra, detrás de su mesa, mirando a la sala.
+        self.ool("maestra", "maestra", lugar, dx + 0.35, dy + 0.7, top, (0.0, 0.0), 11, "INT_maestra")
         # Plantas de musgo con brotes vivos.
         for a in (math.radians(20), math.radians(-20)):
             x, y = math.cos(a) * (R - 0.6), math.sin(a) * (R - 0.6)
@@ -528,7 +556,7 @@ class Hogar(ac.Vestido):
         for k in range(5):
             b = a + (k - 2) * 0.28
             self.solido(LATON, ac.cilindro(0.03, 6), lugar.m((math.cos(b) * 2.3, math.sin(b) * 2.3, top + 0.4), escala=(1, 1, 0.8)))
-        self.vista.pieza(TELA_ROJA, ac.arco(2.3, 0.02, a - 0.56, a + 0.56, 10, 3), lugar.m((0, 0, top + 0.78), (math.pi / 2, 0, 0)))
+        self.vista.pieza(TELA_ROJA, ac.arco(2.3, 0.02, -a - 0.56, -a + 0.56, 10, 3), lugar.m((0, 0, top + 0.78), (math.pi / 2, 0, 0)))
         # Pared de herramientas y estantes con frascos.
         a = math.radians(-80)
         r = R - 0.3
@@ -555,10 +583,12 @@ class Hogar(ac.Vestido):
         for cx, cy, s in ((-3.2, -3.0, 0.7), (-2.6, -3.6, 0.5), (-3.7, -2.2, 0.55)):
             self.solido(MADERA_CLARA, ac.caja, lugar.m((cx, cy, top + s / 2), (0, 0, 0.3 * cx), (s, s, s)))
             self.vista.pieza(MADERA_OSCURA, ac.caja, lugar.m((cx, cy, top + s / 2), (0, 0, 0.3 * cx), (s * 1.02, s * 0.15, s * 1.02)))
-        self.vista.pieza(MADERA_OSCURA, ac.cilindro(0.015, 4), lugar.m((0, 0, top + 3.0), escala=(1, 1, 1.6)))
+        self.cordon(lugar, 0, 0, top + 2.23, top + 3.1, R + 0.45, 3.6)
         self.vista.pieza(TELA_AZUL, ac.torno([(0.0, -0.3), (0.3, -0.22), (0.35, -0.05), (0.2, 0.06), (0.0, 0.08)], 10), lugar.m((0, 0, top + 2.15)))
         self.luces.pieza(LUZ, ac.bola(0.14, 1), lugar.m((0, 0, top + 1.95)))
         self.marca("INT_mesa_puerta", lugar, (-1.25, -0.6, top + 1.2))
+        # El técnico, al otro lado de la mesa, con el anillo delante.
+        self.ool("tecnico", "tecnico", lugar, 0.95, 1.3, top, (0.0, 0.0), 13, "INT_tecnico")
 
     def despacho(self, lugar, top):
         """El despacho de la Directora: la ventana redonda grande, su mesa curva con el informe y un planetario de
@@ -609,7 +639,8 @@ class Hogar(ac.Vestido):
             self.vivas.pieza(VIVA, ac.bola(0.04, 1), lugar.m((px + 0.2 * math.cos(k * 2.1), py + 0.2 * math.sin(k * 2.1), top + 1.2 + 0.1 * k)))
         self.vista.pieza(TELA_MOSTAZA, ac.cilindro(1.3, 16), lugar.m((0, 0.3, top + 0.03), escala=(1, 1, 0.01)))
         self.marca("INT_informe_deuda", lugar, (ix, iy - 0.75, top + 1.15))
-        self.marca("INT_directora", lugar, (-0.9, 2.6, top + 1.2))
+        # La Directora, entre su mesa y la ventana de la Luna, mirando a la puerta.
+        self.ool("directora", "directora", lugar, -0.7, 2.95, top, (0.0, -4.5), 12, "INT_directora")
 
     def entrada(self, sala, top, R):
         """El pórtico de la puerta sur (postes, toldo curvo y el emblema del Instituto) y la plaza de entrada."""
@@ -625,13 +656,11 @@ class Hogar(ac.Vestido):
         self.vista.pieza(LATON, ac.toro(0.45, 0.06, 20, 5), sala.m((0, -R - 0.25, top + 3.15)))
         self.vista.pieza(MUSGO, ac.cilindro(0.38, 16), sala.m((0, -R - 0.22, top + 3.15), (math.pi / 2, 0, 0), (1, 1, 0.05)))
         self.vivas.pieza(VIVA, ac.bola(0.08, 1), sala.m((0, -R - 0.3, top + 3.15)))
-        for k in range(4):
-            self.solido(PIEDRA_CLARA, ac.caja, sala.m((0, -R - 0.6 - k * 0.5, top - 0.08 - k * 0.0), escala=(3.0, 0.5, 0.16)))
         # La plaza de entrada.
         plaza = self.p.lugar(*PLAZA_ENTRADA, rumbo=0, apoyo=5.5, tomar=ac.media)
         self.reservar(PLAZA_ENTRADA, 8)
         pt = 0.15
-        self.solido(PIEDRA, ac.cilindro(5.8, 28), plaza.m((0, 0, pt - 0.8), escala=(1, 1, 1.6)))
+        self.zocalo(plaza, 5.8, pt)
         self.vista.pieza(PIEDRA_CLARA, ac.cilindro(5.6, 28), plaza.m((0, 0, pt + 0.005), escala=(1, 1, 0.02)))
         for r, col in ((4.2, OCRE), (2.6, CREMA_SOMBRA)):
             self.anillo_suelo(plaza, r, 0.06, pt + 0.02, col, 36)
@@ -653,13 +682,30 @@ class Hogar(ac.Vestido):
         for k in range(4):
             self.vista.pieza(PAPEL, ac.caja, plaza.m((-3.15 + k * 0.3, -4.1 + k * 0.13, pt + 1.35 + 0.12 * (k % 2)), (0, 0.08 * (k - 1.5), 0.5),
                                                      (0.24, 0.02, 0.3)))
-        self.marca("SPAWN_Instituto", plaza, (0, -2.6, pt + 1.0), rumbo=0)
+        self.marca("SPAWN_Instituto", plaza, (0, 3.2, pt + 1.0), rumbo=0)  # entre el huerto y la puerta, mirándola
+
+    def ool(self, nombre, variante, lugar, x, y, z, hacia, semilla, marca=None):
+        """Un Ool de pie en (x, y, z) del lugar, mirando hacia el punto `hacia` (x, y): su objeto OOL_<nombre> con
+        lo que brilla en OOL_<nombre>_Luz (el juego los hace respirar y girarse), una columna para no atravesarlo
+        y, si habla, su marca INT_ delante de la cara."""
+        dx, dy = hacia[0] - x, hacia[1] - y
+        giro = math.atan2(-dx, dy)
+        vista, vivas = ac.Malla(), ac.Malla()
+        ool.construir(vista, vivas, ac.Lugar(Matrix.Identity(4)), variante, semilla)
+        paleta = bpy.data.materials.get(f"M_Paleta_{MUNDO}")
+        cuerpo, _ = ac.objeto_suelto(self.p, f"OOL_{nombre}", vista, paleta, lugar.base @ ac.matriz((x, y, z), (0, 0, giro)))
+        luz, _ = ac.objeto(self.p, f"OOL_{nombre}_Luz", vivas, ac.material_luces(f"M_LucesVivas_{MUNDO}", VIVA))
+        luz.parent = cuerpo
+        self.col.pieza(ac.cilindro(0.42, 8), lugar.m((x, y, z + 0.8), escala=(1, 1, 1.6)))
+        if marca:
+            norma = math.hypot(dx, dy) or 1.0
+            self.marca(marca, lugar, (x + dx / norma * 0.45, y + dy / norma * 0.45, z + 1.3))
 
     def banco(self, lugar, x, y, z, rot):
         self.solido(MADERA, ac.caja, lugar.m((x, y, z + 0.45), (0, 0, rot), (1.6, 0.45, 0.08)))
         self.vista.pieza(MADERA_OSCURA, ac.caja, lugar.m((x, y, z + 0.22), (0, 0, rot), (1.3, 0.35, 0.44)))
         c, s = math.cos(rot), math.sin(rot)
-        self.vista.pieza(MADERA, ac.caja, lugar.m((x - s * 0.22, y + c * 0.22, z + 0.75), (0.25, 0, rot), (1.6, 0.06, 0.4)))
+        self.vista.pieza(MADERA, ac.caja, lugar.m((x - s * 0.22, y + c * 0.22, z + 0.75), (-0.25, 0, rot), (1.6, 0.06, 0.4)))
 
     # ---- El hangar -----------------------------------------------------------------------------
 
@@ -669,7 +715,7 @@ class Hogar(ac.Vestido):
         lugar = self.p.lugar(*HANGAR, rumbo=0, apoyo=6.5, tomar=ac.media)
         self.reservar(HANGAR, 12)
         top = 0.3
-        self.solido(PIEDRA, ac.cilindro(6.6, 28), lugar.m((0, 0, top - 1.5), escala=(1, 1, 3.0)))
+        self.zocalo(lugar, 6.6, top, hondo=3.0)
         self.vista.pieza(PIEDRA_CLARA, ac.cilindro(6.4, 28), lugar.m((0, 0, top + 0.005), escala=(1, 1, 0.02)))
         self.anillo_suelo(lugar, 4.2, 0.18, top + 0.02, OCRE, 40)
         self.anillo_suelo(lugar, 2.0, 0.06, top + 0.02, CREMA, 32)
@@ -681,13 +727,11 @@ class Hogar(ac.Vestido):
             x, y = math.cos(a) * 6.1, math.sin(a) * 6.1
             self.solido(PIEDRA_OSCURA, ac.cilindro(0.18, 8), lugar.m((x, y, top + 0.15), escala=(1, 1, 0.3)))
             self.luces.pieza(LUZ, ac.bola(0.12, 1), lugar.m((x, y, top + 0.36), escala=(1, 1, 0.6)))
-        # Escalones hacia el camino del Instituto (al oeste).
-        for k in range(3):
-            self.solido(PIEDRA_CLARA, ac.caja, lugar.m((-6.9 - k * 0.45, 0, top - 0.15 - k * 0.12), escala=(0.5, 2.4, 0.3)))
         # El cobertizo, al norte de la plataforma.
         cob = self.p.lugar(*desplazar(*HANGAR, 0.0, 9.0), rumbo=0, apoyo=3.5, tomar=ac.media)
-        ct = 0.2
+        ct = 0.1
         self.solido(PIEDRA, ac.caja, cob.m((0, 0, ct - 0.8), escala=(7.0, 4.2, 1.6)))
+        self.rampa(cob, 0, -2.1, ct, 0, -1, PIEDRA_CLARA, ancho=6.8)
         self.vista.pieza(MADERA_CLARA, ac.caja, cob.m((0, 0, ct + 0.01), escala=(6.8, 4.0, 0.02)))
         for k, x in enumerate((-3.0, 0.0, 3.0)):
             self.vista.pieza(MADERA, ac.arco(2.1, 0.1, 0, math.pi, 12, 5), cob.m((x, 0.4, ct + 1.2), (0, 0, math.pi / 2), (1, 1, 1.2)))
@@ -712,13 +756,16 @@ class Hogar(ac.Vestido):
         self.vista.pieza(PIEDRA_OSCURA, ac.caja, cob.m((-0.3, 1.5, ct + 0.98), (0, 0, 0.3), (0.4, 0.25, 0.12)))
         self.taza(cob, 0.15, 1.4, ct + 0.92)
         for bx, by, col in ((2.2, 1.4, TELA_ROJA), (2.75, 1.1, OCRE), (2.5, 0.4, TELA_AZUL)):
-            self.solido(col, ac.torno([(0.0, 0.0), (0.3, 0.0), (0.34, 0.15), (0.35, 0.45), (0.34, 0.75), (0.3, 0.9), (0.0, 0.9)], 10),
-                        cob.m((bx, by, ct)), ac.cilindro(0.33, 8))
+            self.vista.pieza(col, ac.torno([(0.0, 0.0), (0.3, 0.0), (0.34, 0.15), (0.35, 0.45), (0.34, 0.75), (0.3, 0.9), (0.0, 0.9)], 10),
+                             cob.m((bx, by, ct)))
+            self.col.pieza(ac.cilindro(0.35, 8), cob.m((bx, by, ct + 0.45), escala=(1, 1, 0.9)))
             self.vista.pieza(MADERA_OSCURA, ac.toro(0.345, 0.02, 12, 3), cob.m((bx, by, ct + 0.25), (math.pi / 2, 0, 0)))
             self.vista.pieza(MADERA_OSCURA, ac.toro(0.345, 0.02, 12, 3), cob.m((bx, by, ct + 0.65), (math.pi / 2, 0, 0)))
         for cx, cy, s in ((-2.6, 0.3, 0.6), (-2.1, -0.4, 0.45)):
             self.solido(MADERA_CLARA, ac.caja, cob.m((cx, cy, ct + s / 2), (0, 0, 0.4), (s, s, s)))
         self.farol(cob, 3.2, -0.9, ct)
+        # La mecánica, delante de su banco, mirando a la plataforma.
+        self.ool("mecanica", "mecanica", cob, 0.7, 0.6, ct, (0.7, -4.0), 14, "INT_mecanica")
         # La grúa y la manga de viento, del lado de la plataforma.
         self.solido(MADERA_OSCURA, ac.cilindro(0.14, 8), lugar.m((-4.8, 5.4, top + 2.4), escala=(1, 1, 4.8)))
         self.vista.pieza(MADERA_OSCURA, ac.caja, lugar.m((-3.6, 5.0, top + 4.7), (0, 0, -0.35), (2.6, 0.18, 0.18)))
@@ -744,7 +791,7 @@ class Hogar(ac.Vestido):
         if puerta_abierta:
             self.casa_por_dentro(lugar, r, alto, muro, techo)
         else:
-            self.solido(muro, ac.torno(perfil + [(0.0, alto)], 16), lugar.m((0, 0, 0)), ac.cilindro(r, 10))
+            self.vista.pieza(muro, ac.torno(perfil + [(0.0, alto)], 16), lugar.m((0, 0, 0)))
             self.col.pieza(ac.cilindro(r, 10), lugar.m((0, 0, alto / 2), escala=(1, 1, alto)))
             # Puerta redonda de tablas, con su aro y su pomo (por fuera del abombado del muro).
             cara = r * 1.08
@@ -827,7 +874,7 @@ class Hogar(ac.Vestido):
         self.vista.pieza(TELA_ROJA, ac.bola(0.025, 1), lugar.m((px - math.cos(a) * 0.04, py - math.sin(a) * 0.04, top + 1.72)))
         self.vista.pieza(TELA_ROJA, ac.cilindro(1.0, 14), lugar.m((0.2, 0.2, top + 0.03), escala=(1, 1, 0.01)))
         self.vista.pieza(TELA_MOSTAZA, ac.cilindro(0.7, 14), lugar.m((0.2, 0.2, top + 0.04), escala=(1, 1, 0.01)))
-        self.vista.pieza(MADERA_OSCURA, ac.cilindro(0.015, 4), lugar.m((0, 0, alto + 0.6), escala=(1, 1, 1.0)))
+        self.cordon(lugar, 0, 0, alto + 0.01, 0.2 + alto, R + 0.45, 2.0)
         self.vista.pieza(TELA_MOSTAZA, ac.torno([(0.0, -0.22), (0.2, -0.16), (0.24, -0.04), (0.14, 0.04), (0.0, 0.06)], 10), lugar.m((0, 0, alto - 0.05)))
         self.luces.pieza(LUZ, ac.bola(0.1, 1), lugar.m((0, 0, alto - 0.22)))
 
@@ -838,14 +885,15 @@ class Hogar(ac.Vestido):
         plaza = self.p.lugar(lat, lon, rumbo=0, apoyo=6.0, tomar=ac.media)
         self.reservar(ALDEA, 9)
         pt = 0.1
-        self.solido(PIEDRA, ac.cilindro(6.4, 28), plaza.m((0, 0, pt - 0.8), escala=(1, 1, 1.6)))
+        self.zocalo(plaza, 6.4, pt)
         self.vista.pieza(PIEDRA_CLARA, ac.cilindro(6.2, 28), plaza.m((0, 0, pt + 0.005), escala=(1, 1, 0.02)))
         for r in (5.0, 3.4):
             self.anillo_suelo(plaza, r, 0.07, pt + 0.02, OCRE if r > 4 else CREMA_SOMBRA, 40)
         self.arbol_de_musgo(plaza, pt)
         # El pozo.
         wx, wy = 3.6, 2.4
-        self.solido(PIEDRA, ac.torno([(0.0, 0.0), (0.85, 0.0), (0.9, 0.7), (0.75, 0.75), (0.0, 0.75)], 14), plaza.m((wx, wy, pt)), ac.cilindro(0.85, 10))
+        self.vista.pieza(PIEDRA, ac.torno([(0.0, 0.0), (0.85, 0.0), (0.9, 0.7), (0.75, 0.75), (0.0, 0.75)], 14), plaza.m((wx, wy, pt)))
+        self.col.pieza(ac.cilindro(0.9, 10), plaza.m((wx, wy, pt + 0.375), escala=(1, 1, 0.75)))
         self.vista.pieza("#2A4A6A", ac.cilindro(0.72, 14), plaza.m((wx, wy, pt + 0.7), escala=(1, 1, 0.02)))
         for lado in (-1, 1):
             self.vista.pieza(MADERA, ac.cilindro(0.06, 6), plaza.m((wx + lado * 0.8, wy, pt + 1.2), escala=(1, 1, 1.0)))
@@ -869,6 +917,10 @@ class Hogar(ac.Vestido):
             self.casa_en(ang, 14.5 + (k % 2) * 1.5, 100 + k)
         self.casa_en(-45, 14.5, 7, puerta_abierta=True)
         self.taller_de_telas(plaza)
+        # Vecinos que han salido a la plaza a verte despegar.
+        self.ool("vecino_pozo", "vecino_1", plaza, 2.5, 1.1, pt, (0.5, -4.0), 21, "INT_pozo")
+        self.ool("vecina_arbol", "vecino_2", plaza, -2.4, -1.4, pt, (-4.0, -6.0), 22, "INT_arbol")
+        self.ool("cria", "cria_1", plaza, 1.3, -2.5, pt, (-0.5, -7.0), 23, "INT_cria")
 
     def casa_en(self, angulo, distancia_m, semilla, puerta_abierta=False):
         lat, lon = ALDEA
@@ -891,8 +943,8 @@ class Hogar(ac.Vestido):
     def arbol_de_musgo(self, plaza, pt):
         """El árbol grande de la plaza: tronco retorcido, copa de bolas de musgo con frutos de luz viva y un banco
         redondo alrededor."""
-        self.solido(MADERA_OSCURA, ac.torno([(1.0, 0.0), (0.7, 0.4), (0.55, 1.5), (0.6, 2.6), (0.75, 3.4), (0.4, 4.2), (0.0, 4.4)], 12),
-                    plaza.m((0, 0, pt)), ac.cilindro(0.6, 8))
+        self.vista.pieza(MADERA_OSCURA, ac.torno([(1.0, 0.0), (0.7, 0.4), (0.55, 1.5), (0.6, 2.6), (0.75, 3.4), (0.4, 4.2), (0.0, 4.4)], 12),
+                         plaza.m((0, 0, pt)))
         self.col.pieza(ac.cilindro(0.6, 8), plaza.m((0, 0, pt + 2.0), escala=(1, 1, 4.0)))
         for k in range(5):
             b = 2 * math.pi * k / 5
@@ -928,6 +980,7 @@ class Hogar(ac.Vestido):
         for x in (-2.8, 2.8):
             for y in (-1.8, 1.8):
                 self.solido(MADERA, ac.cilindro(0.1, 6), lugar.m((x, y, top + 1.4), escala=(1, 1, 2.8)))
+        self.rampa(lugar, 0, 2.0, top, 0, 1, MADERA_CLARA, ancho=5.0)
         # Toldo de tiras cosidas de colores.
         for k in range(7):
             self.vista.pieza((TELA_ROJA, CREMA, TELA_MOSTAZA, CREMA, TELA_AZUL, CREMA, TELA_VERDE)[k], ac.caja,
@@ -941,7 +994,8 @@ class Hogar(ac.Vestido):
         self.vista.pieza(TELA_ROJA, ac.caja, lugar.m((tx, ty + 0.05, top + 0.85), (0.35, 0, 0), (1.4, 0.02, 0.75)))
         for k in range(9):
             self.vista.pieza(TELA_MOSTAZA, ac.caja, lugar.m((tx - 0.65 + k * 0.16, ty - 0.05, top + 1.25), (0.35, 0, 0), (0.02, 0.01, 0.55)))
-        self.cojin(lugar, tx, ty - 0.9, top, TELA_VERDE, 0.32)
+        # La tejedora, detrás del telar, de cara a la plaza.
+        self.ool("tejedora", "vecino_3", lugar, tx, ty - 0.85, top, (tx, 6.0), 24, "INT_tejedora")
         # Rollos de tela.
         for k, col in enumerate((TELA_AZUL, TELA_ROSA, OCRE, TELA_VERDE)):
             self.vista.pieza(col, ac.cilindro(0.2, 10), lugar.m((1.6, -1.0 + k * 0.45, top + 0.22), (math.pi / 2, 0, 0.1 * k), (1, 1, 1.2)))
@@ -967,6 +1021,7 @@ class Hogar(ac.Vestido):
         mar = 120 * (1 + (0.42 * 2 - 1) * 0.05)
         top = (mar + 0.9) - base
         largo = 11.0
+        self.rampa(lugar, 0, -0.25, top + 0.05, 0, -1, MADERA, ancho=2.0)
         for k in range(int(largo / 0.5)):
             y = k * 0.5
             self.solido((MADERA, MADERA_CLARA)[k % 2], ac.caja, lugar.m((0, y, top), escala=(2.0, 0.45, 0.1)))
@@ -978,9 +1033,11 @@ class Hogar(ac.Vestido):
             bx, by = lado * 2.4, 6.0 + lado
             self.vista.pieza(MADERA, ac.torno([(0.0, -0.35), (0.8, -0.25), (1.0, 0.1), (1.05, 0.2), (0.0, 0.2)], 12),
                              lugar.m((bx, by, top - 0.55), escala=(1.0, 1.5, 1.0)))
-            self.vista.pieza(col, ac.toro(1.0, 0.07, 16, 4), lugar.m((bx, by, top - 0.36), (math.pi / 2, 0, 0), (1, 1.5, 1)))
+            self.vista.pieza(col, ac.toro(1.0, 0.07, 16, 4), lugar.m((bx, by, top - 0.36), (math.pi / 2, 0, 0), (1, 1, 1.5)))
             self.vista.pieza(MADERA_CLARA, ac.caja, lugar.m((bx, by, top - 0.45), escala=(1.6, 0.25, 0.06)))
         self.farol(lugar, 0.8, largo - 0.4, top + 0.05)
+        # El pescador, al final del muelle, mirando a quien llega.
+        self.ool("pescador", "vecino_4", lugar, -0.3, largo - 1.6, top + 0.05, (-0.3, 0.0), 25, "INT_pescador")
 
     # ---- Caminos y vegetación ------------------------------------------------------------------
 
@@ -1019,8 +1076,8 @@ class Hogar(ac.Vestido):
     def arbol(self, punto, s):
         lugar = self.p.lugar(*punto, rumbo=self.rng.uniform(0, 360), apoyo=0.5, hundir=0.25)
         alto = 3.2 * s
-        self.solido(MADERA_OSCURA, ac.torno([(0.35 * s, 0.0), (0.27 * s, alto * 0.35), (0.2 * s, alto * 0.75), (0.13 * s, alto)], 7),
-                    lugar.m((0, 0, 0)), ac.cilindro(0.28 * s, 6))
+        self.vista.pieza(MADERA_OSCURA, ac.torno([(0.35 * s, 0.0), (0.27 * s, alto * 0.35), (0.2 * s, alto * 0.75), (0.13 * s, alto)], 7),
+                         lugar.m((0, 0, 0)))
         self.col.pieza(ac.cilindro(0.28 * s, 6), lugar.m((0, 0, alto / 2), escala=(1, 1, alto)))
         colores = self.rng.choice(((MUSGO, MUSGO_OSCURO), (HOJA, MUSGO_CLARO), (MUSGO_OSCURO, HOJA), ("#7AA05A", MUSGO)))
         brilla = self.rng.random() < 0.35

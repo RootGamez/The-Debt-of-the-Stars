@@ -1,13 +1,17 @@
 // Lee las marcas de juego que vienen de Blender dentro del glTF de un mundo.
 // Convención (ver CLAUDE.md): COL_ colisión, INT_ interacción, SPAWN_ aparición del jugador,
 // PARK_ dónde espera la nave al empezar cada ciclo, TRIG_ evento, EVT_ algo que solo se ve durante un
-// evento de la cronología (por ejemplo, el haz de la ranura del Archivo), ANIM_ pieza que gira y PASO_
-// anillo de una Puerta plegada (se cruza uno y se sale por su gemelo).
+// evento de la cronología (por ejemplo, el haz de la ranura del Archivo), ANIM_ pieza que gira, PASO_
+// anillo de una Puerta plegada (se cruza uno y se sale por su gemelo) y OOL_<quién> un Ool (Fase 9), con lo que
+// brilla en su hijo OOL_<quién>_Luz.
 // Las propiedades personalizadas de Blender llegan como userData (export_extras).
 import type { Mesh, Object3D } from 'three';
 
-export const INTERACTION_KINDS = ['texto', 'grabacion', 'objeto', 'observacion'] as const;
+export const INTERACTION_KINDS = ['texto', 'grabacion', 'objeto', 'observacion', 'charla'] as const;
 export type InteractionKind = (typeof INTERACTION_KINDS)[number];
+
+/** Sufijo del hijo de un Ool con lo que brilla (sus filamentos). */
+const GLOW_SUFFIX = '_Luz';
 
 // Mismo valor que el tamaño por defecto de los TRIG_ en blender/scripts/marcas.py.
 const DEFAULT_TRIGGER_RADIUS = 5;
@@ -57,6 +61,14 @@ export interface WorldMarkers {
   animated: AnimatedPart[];
   /** Puertas plegadas (PASO_, propiedad `destino` = el anillo gemelo): se cruza una y se sale por la otra. */
   gates: GateMarker[];
+  /** Los Ool del mundo (OOL_<quién>), con la malla de lo que brilla si la tienen. */
+  characters: CharacterMarker[];
+}
+
+export interface CharacterMarker {
+  id: string;
+  object: Object3D;
+  glow: Mesh | undefined;
 }
 
 export interface GateMarker {
@@ -200,6 +212,7 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
     eventProps: [],
     animated: [],
     gates: [],
+    characters: [],
   };
   const colliderRoots: Object3D[] = [];
 
@@ -228,6 +241,13 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
       object.visible = false;
     } else if (name.startsWith('PASO_')) {
       markers.gates.push({ name, object, target: requireString(object, 'destino') });
+    } else if (name.startsWith('OOL_') && !name.endsWith(GLOW_SUFFIX)) {
+      const glow = object.getObjectByName(`${name}${GLOW_SUFFIX}`);
+      markers.characters.push({
+        id: name.slice('OOL_'.length),
+        object,
+        glow: glow && isMesh(glow) ? glow : undefined,
+      });
     }
   });
   const gateNames = new Set(markers.gates.map((g) => g.name));

@@ -3,7 +3,15 @@
 // Como cualquier dato externo, se validan al cargar y se falla con un mensaje claro y el id afectado.
 import { WorldDataError } from '../worlds/markers';
 
-export const SOURCE_KINDS = ['texto', 'grabacion', 'objeto', 'observacion', 'evento'] as const;
+/** `charla`: alguien que habla (Fase 9); puede no dar ningún hecho (vecinos de la aldea). */
+export const SOURCE_KINDS = [
+  'texto',
+  'grabacion',
+  'objeto',
+  'observacion',
+  'evento',
+  'charla',
+] as const;
 export type SourceKind = (typeof SOURCE_KINDS)[number];
 /** Lectores de puzle (Fase 7): el cuaderno de Umbral y las cartas del Archivo (reading/puzzles.ts). */
 export const PUZZLE_READERS = ['cuaderno', 'cartas'] as const;

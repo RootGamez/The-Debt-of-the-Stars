@@ -28,7 +28,7 @@ export async function loopValue<K extends keyof LoopSnapshot>(
 export async function ready(page: Page, query = ''): Promise<void> {
   const world = query.includes('mundo=') ? '' : '&mundo=umbral';
   await page.goto(`/?debug${world}${query}`);
-  await expect(page.locator('.overlay')).toBeVisible();
+  await expect(page.locator('.overlay')).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
 }
 

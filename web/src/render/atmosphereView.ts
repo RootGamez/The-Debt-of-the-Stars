@@ -43,7 +43,7 @@ void main() {
   vec3 sky = mix(uHorizon, uZenith, smoothstep(0.0, 0.55, h));
   float low = 1.0 - smoothstep(0.0, 0.6, h);
   sky = mix(sky, uGlow, clamp(pow(s, 6.0) * 0.7 * low + pow(s, 48.0) * 0.6, 0.0, 1.0));
-  vec3 color = h < 0.0 ? mix(uHorizon, uGround, smoothstep(0.0, -0.3, h)) : sky;
+  vec3 color = h < 0.0 ? mix(uHorizon, uGround, smoothstep(0.0, 0.3, -h)) : sky;
   gl_FragColor = vec4(color, uDensity);
   #include <colorspace_fragment>
 }`;

@@ -115,8 +115,8 @@
   {
     "id": "instituto.directora",
     "mundo": "hogar",
-    "tipo": "texto",
-    "titulo": "La directora del Instituto",
+    "tipo": "charla",
+    "titulo": "La Directora",
     "borrador": true,
     "superficial": {
       "texto": [
@@ -133,6 +133,117 @@
         "Si alguien tiene que oír la verdad, es ella. Y es quien menos querrá oírla."
       ],
       "hechos": ["casa.directora_dirige"]
+    }
+  },
+  {
+    "id": "instituto.maestra",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "La Maestra",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«¿Ya has leído la ficha de riego? Empieza siempre por ahí: lo de todos los días es lo que mejor se entiende».",
+        "«Leemos su lengua desde hace años y todavía no sabemos cómo se reían. Eso no viene en ninguna piedra».",
+        "«Ve a ver a la Directora antes de que se impaciente. Y vuelve a contármelo todo, ¿eh?»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "instituto.tecnico",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "El técnico del taller",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«El anillo pequeño ya aguanta abierto once segundos seguidos. ¡Once!».",
+        "«La Directora dice que en la prueba mayor saludaremos a quien hizo todo esto. Yo solo pido que no se nos funda el soporte»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "instituto.mecanica",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "La mecánica del hangar",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«El Albatros II está listo: depósitos llenos y el relicario vacío, esperando tu fragmento».",
+        "«Sube con F. Ahí dentro el tablero te lo va diciendo todo: apunta a la Luna con T y, si todo da vueltas, Z lo estabiliza».",
+        "«Y no la rayes. Es la única que tenemos»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "aldea.pozo",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "El vecino del pozo",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«Dicen que ayer cayó otra piedra de esas en la Luna. Más grande que una casa».",
+        "«Mi abuelo encontró una en el huerto, de las primeras. La usaba para sujetar la puerta. Ahora está en una vitrina»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "aldea.tejedora",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "La tejedora",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«Te remendé anoche el codo del traje. Que no se te vuelva a rasgar en la Luna».",
+        "«Cuando vuelvas, me cuentas de qué color es la luz allí arriba. Quiero teñir algo de ese color»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "aldea.cria",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "Una cría",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«¿Me traerás una piedra de la Luna? ¡Una pequeña! Prometo no enseñársela a nadie»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "aldea.pescador",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "El pescador",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«El mar está quieto como nunca. Mi abuela decía que, cuando el mar se calla, algo grande está escuchando»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "aldea.arbol",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "La vecina del árbol",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«Hoy todo el mundo ha salido a la plaza para verte despegar. Disimula, que si no se ponen nerviosos»."
+      ],
+      "hechos": []
     }
   }
 ]

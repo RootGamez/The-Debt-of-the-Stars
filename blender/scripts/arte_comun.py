@@ -172,11 +172,21 @@ def fragmento(cortes, divisiones=4):
         for v in bm.verts:
             v.tag = False
         for v in nuevos:
+            # Hacia dentro de la caja desde las caras en que está el vértice: así la mordida hunde la piedra en
+            # vez de abrirle un labio hacia fuera (el contorno de la caja no cambia).
+            dentro = Vector([-1.0 if c > 0.499 else (1.0 if c < -0.499 else 0.0) for c in v.co])
+            if dentro.length < 1e-6:
+                continue
+            dentro.normalize()
             for centro, radio in cortes:
                 c = Vector(centro)
                 d = v.co - c
-                if d.length < radio:
-                    v.co = c + (d.normalized() if d.length > 1e-6 else Vector((0, 0, 1))) * radio
+                if d.length >= radio:
+                    continue
+                # Raíz positiva de |v + t·dentro − c| = radio: donde la recta sale de la esfera.
+                b = d.dot(dentro)
+                t = -b + math.sqrt(max(0.0, b * b - (d.length_squared - radio * radio)))
+                v.co = v.co + dentro * min(t, 1.0)
         return {"verts": nuevos}
     return crear
 
@@ -428,7 +438,7 @@ class Vestido:
     def construir(self):
         borrar([f"{self.mundo}_Lugares", f"{self.mundo}_Luces", f"{self.mundo}_LucesVivas",
                 f"COL_{self.mundo}_Lugares"]
-               + [o.name for o in bpy.data.objects if o.name.startswith("EVT_")])
+               + [o.name for o in bpy.data.objects if o.name.startswith(("EVT_", "OOL_"))])
         self.lugares()
         raiz = self.planeta.raiz
         for clave in ("ambient", "ambient_color"):

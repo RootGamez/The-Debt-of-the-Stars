@@ -10,6 +10,8 @@ import { insideCavity } from './physics/gravity';
 import { createInteriorLights } from './render/interiorLight';
 import { createLensView } from './render/lensView';
 import { createAtmosphereView } from './render/atmosphereView';
+import { createOolView } from './render/oolView';
+import { createFilaments } from './ui/filaments';
 import { ATMOSPHERES } from './data/atmospheres';
 import { createBlackHoleView } from './render/blackHoleView';
 import { growthFor } from './system/blackHole';
@@ -141,6 +143,12 @@ async function start(): Promise<void> {
   const lens = createLensView(scene, sky, qualityFromQuery(window.location.search) === 'alta');
   // El cielo de los mundos con aire (Hogar): tapa las estrellas en el suelo y se apaga al subir.
   const atmosphere = createAtmosphereView(scene);
+  // Los Ool (en casa): respiran, sus filamentos laten y se giran hacia ti. Y los tuyos brillan al leer.
+  const ool = createOolView(
+    [...runtimes.values()].flatMap((r) => r.world.markers.characters),
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+  const filaments = createFilaments();
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
   const chronology = looping ? loadChronology(window.location.search) : quietChronology();
   const birthplace = sources
@@ -356,6 +364,7 @@ async function start(): Promise<void> {
     window.__juego.tide = () => tides.snapshot();
     window.__juego.blackHole = () => blackHole.snapshot();
     window.__juego.sky = () => ({ density: atmosphere.density });
+    window.__juego.ool = () => ({ turns: ool.snapshot(), filaments: filaments.snapshot() });
     window.__juego.absorption = () => absorption?.snapshot() ?? null;
     window.__juego.aimAt = (target) => {
       const where =
@@ -534,6 +543,8 @@ async function start(): Promise<void> {
       camera.updateMatrixWorld();
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);
+      ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);
+      filaments.update(reading.current !== null, reading.known.size);
       sight.update();
       touch?.update();
       debug.update(dt, overlay.playing);

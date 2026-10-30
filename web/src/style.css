@@ -225,6 +225,51 @@ body {
   pointer-events: none;
 }
 
+/* Tus filamentos (Fase 9): un resplandor verde azulado en el borde de arriba mientras lees, y un latido al anotar. */
+.filamentos {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 11; /* por encima del fondo de la lectura */
+  height: 22vh;
+  opacity: 0;
+  background: radial-gradient(
+    ellipse 70% 100% at 50% 0%,
+    rgb(127 240 200 / 38%),
+    rgb(127 240 200 / 0%) 75%
+  );
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+.filamentos.leyendo {
+  opacity: 0.75;
+}
+
+.filamentos.late {
+  animation: latido-filamentos 1.4s ease-out;
+}
+
+@keyframes latido-filamentos {
+  0% {
+    opacity: 1;
+    filter: brightness(1.8);
+  }
+
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filamentos {
+    transition: none;
+  }
+
+  .filamentos.late {
+    animation: none;
+  }
+}
+
 /* Marea: los bordes de la pantalla se oscurecen y aparece la tensión acumulada. */
 .tide-vignette {
   position: fixed;

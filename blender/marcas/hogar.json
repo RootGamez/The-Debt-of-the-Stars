@@ -1,9 +1,9 @@
 [
   {
     "nombre": "SPAWN_Instituto",
-    "lat": 41.028,
+    "lat": 42.442,
     "lon": 8.0,
-    "alto": 1.178,
+    "alto": 1.198,
     "props": {},
     "rumbo": 0
   },
@@ -66,12 +66,92 @@
   },
   {
     "nombre": "INT_directora",
-    "lat": 53.896,
-    "lon": 7.314,
-    "alto": 1.528,
+    "lat": 53.852,
+    "lon": 7.499,
+    "alto": 1.628,
     "props": {
       "clue_id": "instituto.directora",
-      "kind": "texto"
+      "kind": "charla"
+    }
+  },
+  {
+    "nombre": "INT_maestra",
+    "lat": 47.881,
+    "lon": -0.113,
+    "alto": 1.622,
+    "props": {
+      "clue_id": "instituto.maestra",
+      "kind": "charla"
+    }
+  },
+  {
+    "nombre": "INT_tecnico",
+    "lat": 47.42,
+    "lon": 17.528,
+    "alto": 1.602,
+    "props": {
+      "clue_id": "instituto.tecnico",
+      "kind": "charla"
+    }
+  },
+  {
+    "nombre": "INT_mecanica",
+    "lat": 46.192,
+    "lon": 22.455,
+    "alto": 1.384,
+    "props": {
+      "clue_id": "instituto.mecanica",
+      "kind": "charla"
+    }
+  },
+  {
+    "nombre": "INT_pozo",
+    "lat": 67.295,
+    "lon": 0.841,
+    "alto": 1.238,
+    "props": {
+      "clue_id": "aldea.pozo",
+      "kind": "charla"
+    }
+  },
+  {
+    "nombre": "INT_tejedora",
+    "lat": 65.964,
+    "lon": 15.047,
+    "alto": 1.393,
+    "props": {
+      "clue_id": "aldea.tejedora",
+      "kind": "charla"
+    }
+  },
+  {
+    "nombre": "INT_cria",
+    "lat": 65.625,
+    "lon": -0.712,
+    "alto": 1.711,
+    "props": {
+      "clue_id": "aldea.cria",
+      "kind": "charla"
+    }
+  },
+  {
+    "nombre": "INT_pescador",
+    "lat": 65.3,
+    "lon": 40.153,
+    "alto": 2.481,
+    "props": {
+      "clue_id": "aldea.pescador",
+      "kind": "charla"
+    }
+  },
+  {
+    "nombre": "INT_arbol",
+    "lat": 66.115,
+    "lon": -4.954,
+    "alto": 1.753,
+    "props": {
+      "clue_id": "aldea.arbol",
+      "kind": "charla"
     }
   }
 ]

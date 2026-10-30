@@ -3,9 +3,21 @@ import { loadClues } from '../../src/data/pistas';
 
 describe('the real clue data', () => {
   const clues = loadClues();
+  /** Las fuentes del grafo: todas menos las charlas de ambiente (gente de casa que solo habla). */
+  const graph = clues.sources.filter(
+    (s) => !(s.kind === 'charla' && s.surface.facts.length === 0 && !s.deep),
+  );
 
   it('loads and validates without errors', () => {
     expect(clues.sources.length).toBeGreaterThan(0);
+  });
+
+  it('gives voice to the people at home: chats, some of them only small talk', () => {
+    const chats = clues.sources.filter((s) => s.kind === 'charla');
+
+    expect(chats.map((s) => s.id)).toContain('instituto.directora');
+    expect(chats.every((s) => s.world === 'hogar')).toBe(true);
+    expect(chats.length - (clues.sources.length - graph.length)).toBe(1); // solo la Directora da hechos
   });
 
   it('contains the 7 threads, the 9 conclusions and the 47 sources of CONTEXTO_PISTAS.md', () => {
@@ -21,12 +33,12 @@ describe('the real clue data', () => {
       'K7',
       'K8',
     ]);
-    expect(clues.sources).toHaveLength(47);
+    expect(graph).toHaveLength(47);
   });
 
   it('spreads the sources over the places of the document', () => {
     const perWorld = new Map<string, number>();
-    for (const s of clues.sources) perWorld.set(s.world, (perWorld.get(s.world) ?? 0) + 1);
+    for (const s of graph) perWorld.set(s.world, (perWorld.get(s.world) ?? 0) + 1);
 
     expect(Object.fromEntries(perWorld)).toEqual({
       hogar: 6,

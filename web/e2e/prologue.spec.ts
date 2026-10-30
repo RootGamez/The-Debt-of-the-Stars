@@ -7,7 +7,7 @@ import { loopValue, snapshot, value } from './helpers';
 /** Partida nueva, sin elegir mundo: como la abriría un jugador. */
 async function newGame(page: Page): Promise<void> {
   await page.goto('/?debug');
-  await expect(page.locator('.overlay')).toBeVisible();
+  await expect(page.locator('.overlay')).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
 }
 
@@ -60,4 +60,75 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   await page.reload();
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
   expect(await value(page, 'world')).toBe('hogar');
+});
+
+// Hito 9C: los Ool. Con la Directora se habla (y da la misión); los vecinos solo charlan. Al leer o hablar,
+// tus filamentos brillan en el borde de arriba de la pantalla.
+async function talkTo(page: Page, clueId: string): Promise<void> {
+  expect(await page.evaluate((id) => window.__juego?.teleportTo?.(id) ?? false, clueId)).toBe(true);
+  await expect(page.locator('.prompt')).toContainText('hablar');
+  await page.keyboard.press('KeyE');
+  await expect(page.locator('.reader')).toBeVisible();
+}
+
+function ool(page: Page) {
+  return page.evaluate(() => window.__juego?.ool?.() ?? null);
+}
+
+test('the Directora gives you the mission and your filaments glow while she talks', async ({
+  page,
+}) => {
+  await newGame(page);
+  await play(page);
+
+  await talkTo(page, 'instituto.directora');
+  await expect(page.locator('.reader')).toContainText('La Directora');
+  await expect.poll(async () => (await ool(page))?.filaments.glowing).toBe(true);
+  await page.keyboard.press('KeyE');
+  await expect(page.locator('.reader')).toBeHidden();
+
+  expect((await snapshot(page))?.registry.facts).toContain('casa.mision_luna');
+  expect((await ool(page))?.filaments.beats).toBeGreaterThan(0);
+  expect((await ool(page))?.filaments.glowing).toBe(false);
+  expect(Object.keys((await ool(page))?.turns ?? {})).toContain('directora');
+});
+
+test('the people of the village just talk: nothing goes into the Registro', async ({ page }) => {
+  await newGame(page);
+  await play(page);
+
+  await talkTo(page, 'aldea.cria');
+  await page.keyboard.press('KeyE');
+  await expect(page.locator('.reader')).toBeHidden();
+
+  expect((await snapshot(page))?.registry.facts).toEqual([]);
+});
+
+// Revisión del 9B: los suelos altos tienen falda; desde donde despiertas se entra andando, sin saltar.
+test('from where you wake up you walk into the Instituto without jumping', async ({ page }) => {
+  await newGame(page);
+  await play(page);
+
+  await page.keyboard.down('KeyW');
+  await page.waitForTimeout(1500);
+  const speed = await value(page, 'speed');
+  const takeoffs = await value(page, 'takeoffs');
+  await page.keyboard.up('KeyW');
+
+  expect(speed).toBeGreaterThan(2); // pasado el umbral, sigue andando
+  expect(takeoffs).toBe(0);
+});
+
+test('climbing in the Albatros II the sky gives way to space', async ({ page }) => {
+  await newGame(page);
+  await play(page);
+  expect(await page.evaluate(() => window.__juego?.toShip?.() ?? false)).toBe(true);
+  await page.keyboard.press('KeyF');
+  await expect.poll(async () => (await snapshot(page))?.ship?.piloting).toBe(true);
+
+  expect(await page.evaluate(() => window.__juego?.shipTo?.('hogar', 250) ?? false)).toBe(true);
+
+  await expect
+    .poll(async () => (await page.evaluate(() => window.__juego?.sky?.()))?.density)
+    .toBe(0);
 });
