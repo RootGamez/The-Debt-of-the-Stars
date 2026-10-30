@@ -64,6 +64,10 @@ const VERBS: Record<SourceKind, string> = {
 
 /** Texto del aviso: "E · leer" en PC, "Leer" en el botón táctil. */
 export function promptLabel(kind: SourceKind, touch: boolean): string {
-  const verb = VERBS[kind];
+  return verbLabel(VERBS[kind], touch);
+}
+
+/** El aviso de cualquier verbo ("coger"): "E · coger" en PC, "Coger" en el botón táctil. */
+export function verbLabel(verb: string, touch: boolean): string {
   return touch ? verb.charAt(0).toUpperCase() + verb.slice(1) : `E · ${verb}`;
 }

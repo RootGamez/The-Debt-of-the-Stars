@@ -14,6 +14,7 @@ import {
   insideRadius,
   nearestInteractable,
   promptLabel,
+  verbLabel,
   type Interactable,
 } from '../registry/interaction';
 import { canGiveNew } from '../registry/knowledge';
@@ -41,6 +42,20 @@ export interface ReadingUiOptions {
   overlay: PauseOverlay;
   player: Player;
   touch: boolean;
+  /** Lo que se hace con algunas fuentes además de leerlas (coger el Contrapeso). */
+  actions?: SourceActions;
+}
+
+/**
+ * Lo que se hace con una fuente además de leerla. Primero se lee: el verbo solo se ofrece cuando ya no da nada
+ * nuevo (por ejemplo, examinar el Contrapeso y luego cogerlo).
+ */
+export interface SourceActions {
+  /** Ya no está (se la llevaron): ni aviso ni rombo. */
+  gone(id: string): boolean;
+  /** El verbo del aviso si ahora se hace algo con ella ("coger"), o undefined. */
+  verb(id: string): string | undefined;
+  run(id: string): void;
 }
 
 export interface RegistrySnapshot {
@@ -91,7 +106,7 @@ const GROUND_PROBE_DEPTH = 40;
 const TELEPORT_REACH = 0.9;
 
 export function createReadingUi(options: ReadingUiOptions): ReadingUi {
-  const { camera, clues, reading, loop, overlay, player, touch } = options;
+  const { camera, clues, reading, loop, overlay, player, touch, actions } = options;
   let current = options.sources;
 
   /**
@@ -249,9 +264,17 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     }
   }
 
+  /** El verbo que ofrece ahora una fuente en vez de su lectura, si ya no da nada nuevo. */
+  function actionOf(id: string): string | undefined {
+    return canGive(id) ? undefined : actions?.verb(id);
+  }
+
   function activate(): void {
     if (reading.frozen) closeReading();
-    else if (canInteract() && target) openReading(target.id);
+    else if (canInteract() && target) {
+      if (actionOf(target.id) !== undefined) actions?.run(target.id);
+      else openReading(target.id);
+    }
   }
 
   function openRegistry(): void {
@@ -295,14 +318,16 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   function findTarget(): Interactable | undefined {
     available.length = 0;
     for (const item of current.interactables) {
-      if (reading.isAvailable(item.id, loop.activeEventIds)) available.push(item);
+      if (reading.isAvailable(item.id, loop.activeEventIds) && !actions?.gone(item.id)) {
+        available.push(item);
+      }
     }
     camera.getWorldDirection(forward);
     return canInteract() ? nearestInteractable(camera.position, forward, available) : undefined;
   }
 
   function wantsMarker(id: string): boolean {
-    if (!reading.isAvailable(id, loop.activeEventIds)) return false;
+    if (!reading.isAvailable(id, loop.activeEventIds) || actions?.gone(id)) return false;
     return canGive(id) || !seen.has(id);
   }
 
@@ -321,7 +346,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       if (overlay.playing && loop.director.phase === 'playing' && !reading.frozen) witnessEvents();
       target = findTarget();
       const kind = target ? clues.sourceById.get(target.id)?.kind : undefined;
-      if (target && kind) prompt.show(promptLabel(kind, touch));
+      const verb = target ? actionOf(target.id) : undefined;
+      if (target && verb !== undefined) prompt.show(verbLabel(verb, touch));
+      else if (target && kind) prompt.show(promptLabel(kind, touch));
       else prompt.hide();
       current.markers.update(timeSeconds, camera.position, wantsMarker);
     },

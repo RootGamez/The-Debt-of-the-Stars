@@ -4,6 +4,7 @@ import './style.css';
 import { Quaternion, Timer, Vector3, type PerspectiveCamera, type WebGLRenderer } from 'three';
 import { loadChronology } from './core/chronology';
 import { createSoundtrack } from './audio/soundtrack';
+import { createCounterweightRig } from './game/counterweightRig';
 import { createFoldedPassage } from './game/foldedPassage';
 import { createTideEffects } from './game/tideEffects';
 import { insideCavity } from './physics/gravity';
@@ -165,6 +166,8 @@ async function start(): Promise<void> {
   const filaments = createFilaments();
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
   const chronology = looping ? loadChronology(window.location.search) : quietChronology();
+  // El Contrapeso espera en su Banco del Laboratorio; se coge, se lleva y su reloj va al tablero.
+  const counterweight = await createCounterweightRig(scene, runtimes, chronology);
   const birthplace = sources
     .get(BLACK_HOLE.world)
     ?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
@@ -266,11 +269,13 @@ async function start(): Promise<void> {
       window.location.replace(arrivalHref(window.location.href, wasSaved));
     },
     skyDirection: arrivalSkyDirection(player),
+    counterweightClock: () => counterweight?.play.clock,
     // Cada ciclo empieza en el mundo de llegada, a pie, con la nave esperando (y sin tensión de marea).
     onRestart: () => {
       game.flight?.reset();
       enterWorld(startWorld);
       tides.reset();
+      counterweight?.play.reset();
     },
   });
   const reading = new ReadingSession(clues, session.savedFacts, (facts) =>
@@ -301,6 +306,7 @@ async function start(): Promise<void> {
     overlay,
     player,
     touch: isTouchDevice(),
+    actions: counterweight?.play.actions,
   });
   game.ui = ui;
 
@@ -389,6 +395,7 @@ async function start(): Promise<void> {
       done: [...(guide?.done ?? [])],
     });
     window.__juego.absorption = () => absorption?.snapshot() ?? null;
+    window.__juego.counterweight = () => counterweight?.play.snapshot() ?? null;
     window.__juego.aimAt = (target) => {
       const where =
         target === 'agujero'
@@ -468,7 +475,8 @@ async function start(): Promise<void> {
         if (moving) shipDeath ??= flight.step(session.director.clock.t, input.flightKeys(), dt);
         else flight.hold();
       } else {
-        player.step(moving ? tides.slow(input.intent()) : IDLE_INTENT, dt);
+        const intent = tides.slow(input.intent());
+        player.step(moving ? (counterweight?.play.limit(intent) ?? intent) : IDLE_INTENT, dt);
       }
     },
   );
@@ -604,6 +612,11 @@ async function start(): Promise<void> {
         recording: ui.listening,
       });
       camera.updateMatrixWorld();
+      counterweight?.update(
+        camera,
+        { t, carrierRate: session.director.rate, piloting },
+        timeRuns ? dt : 0,
+      );
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       ui.update(performance.now() / 1000);
       ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);

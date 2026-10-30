@@ -52,6 +52,8 @@ INVESTIGADORA = (22.0, 28.0)
 DORMITORIO = (22.0, -28.0)
 CAMARA = (58.0, 0.0)
 MUELLE = (-72.0, 0.0)  # por fuera, en la cáscara
+# Del centro del Contrapeso (contrapeso.glb) a la base de su pie (generar_contrapeso.py).
+CONTRAPESO_BAJO = 0.425
 
 
 def norte_este(arriba):
@@ -209,13 +211,11 @@ class Laboratorio(ac.Vestido):
         lugar = self.dentro(BANCO, rumbo_dentro(BANCO, SALA), 5.5, 4.0)
         z = 0.15
         self.mesa(lugar, 0, -0.4, ancho=3.6, fondo=1.1)
-        # El artilugio a medias: un anillo en dos soportes, el motor tumbado, piezas sueltas y cables.
-        for dx in (-0.55, 0.55):
+        # El Contrapeso terminado (modelo aparte, contrapeso.glb: se coge y se lleva) sobre su peana, entre dos
+        # soportes; al lado, un prototipo tumbado del motor, piezas sueltas y cables.
+        for dx in (-0.6, 0.6):
             self.vista.pieza(GRIS, ac.caja, lugar.m((dx, -0.4, z + 1.0), escala=(0.08, 0.5, 0.34)))
-        self.vista.pieza(ARENISCA, ac.toro(0.62, 0.07, 18, 4), lugar.m((0, -0.4, z + 1.65)))
-        for k in range(8):
-            a = 2 * math.pi * k / 8
-            self.vista.pieza(AMBAR if k == 0 else PIZARRA, ac.caja, lugar.m((math.cos(a) * 0.62, -0.32, z + 1.65 + math.sin(a) * 0.62), (0, math.pi / 2 - a, 0), (0.05, 0.04, 0.14)))
+        self.vista.pieza(PIZARRA, ac.cilindro(0.3, 12), lugar.m((0, -0.4, z + 0.83), escala=(1, 1, 0.02)))
         self.vista.pieza(GRIS, ac.cilindro(0.28, 10), lugar.m((-1.2, -0.4, z + 1.0), (0, math.pi / 2, 0), (1, 1, 0.9)))
         self.vista.pieza(LATON, ac.cilindro(0.18, 8), lugar.m((-1.2, -0.4, z + 1.0), (0, math.pi / 2, 0), (1, 1, 1.05)))
         for k in range(4):
@@ -226,7 +226,8 @@ class Laboratorio(ac.Vestido):
         self.vista.pieza(GRIS_OSCURO, ac.toro(0.25, 0.05, 10, 4), lugar.m((1.95, 1.0, z + 0.12), (math.pi / 2, 0, 0)))
         self.solido(SELLO, ac.caja, lugar.m((-1.8, 1.0, z + 0.18), (0, 0, 0.4), (0.6, 0.3, 0.3)))
         self.farol(lugar, 2.3, -1.4)
-        self.marca("INT_contrapeso", lugar, (0, 0.8, z + 1.2))
+        # La marca es el propio Contrapeso: su centro, mirando hacia la Sala (por donde se llega).
+        self.marca("INT_contrapeso", lugar, (0, -0.4, z + 0.84 + CONTRAPESO_BAJO), rumbo=rumbo_dentro(BANCO, SALA))
 
     def escritorio_esceptico(self):
         lugar = self.dentro(ESCEPTICO, rumbo_dentro(ESCEPTICO, SALA), 4.5, 4.0)

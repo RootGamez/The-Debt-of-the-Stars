@@ -43,6 +43,8 @@ export interface LoopSessionOptions {
   saved?: LoadResult;
   /** Cuando el fundido del gusano cubre la pantalla: el prólogo ya está guardado como hecho. */
   onCross?: (saved: boolean) => void;
+  /** Lo que marca el Contrapeso si lo llevas (el tercer reloj del tablero); undefined si no. */
+  counterweightClock?: () => number | undefined;
 }
 
 export interface LoopSession {
@@ -138,6 +140,7 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
         director.clock.tau,
         director.clock.t,
         looping && playing && director.phase !== 'dying',
+        options.counterweightClock?.(),
       );
     },
     snapshot() {

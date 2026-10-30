@@ -218,6 +218,11 @@ body {
   color: var(--muted);
 }
 
+/* El reloj del Contrapeso (Fase 10), mientras lo llevas: ámbar, como su núcleo. */
+.clock-hud-counterweight {
+  color: #ffc070;
+}
+
 .fade {
   position: fixed;
   inset: 0;

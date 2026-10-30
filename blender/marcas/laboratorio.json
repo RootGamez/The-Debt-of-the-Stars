@@ -53,14 +53,15 @@
   },
   {
     "nombre": "INT_contrapeso",
-    "lat": -10.63,
-    "lon": 39.727,
-    "alto": 1.477,
+    "lat": -9.678,
+    "lon": 43.137,
+    "alto": 1.49,
     "dentro": true,
     "props": {
       "clue_id": "lab.contrapeso",
       "kind": "objeto"
-    }
+    },
+    "rumbo": 105.93
   },
   {
     "nombre": "INT_notas_esceptico",
