@@ -1,9 +1,14 @@
-// El final del prólogo (Fase 9): junto al fragmento de la Luna se abre el gusano y el fundido a blanco lleva al
-// sistema ajeno (core/loopDirector.ts, causa `gusano`). Se abre un momento después de examinar el fragmento (hito
-// 9D), ya cerrada la lectura y a pie en la Luna; el hito 9E le pone su secuencia.
+// El final del prólogo (Fase 9): junto al fragmento de la Luna se abre el gusano (su secuencia: game/wormhole.ts) y
+// el fundido a blanco lleva al sistema ajeno (core/loopDirector.ts, causa `gusano`). Se abre un momento después de
+// examinar el fragmento, ya cerrada la lectura y a pie en la Luna.
 
 /** Dónde se abre el gusano, qué hecho lo despierta (haber examinado el fragmento) y cuánto tarda después (s). */
-export const WORMHOLE = { world: 'luna', fact: 'casa.fragmento_antiguo', after: 1.5 } as const;
+export const WORMHOLE = {
+  world: 'luna',
+  source: 'instituto.fragmento_luna',
+  fact: 'casa.fragmento_antiguo',
+  after: 1.5,
+} as const;
 
 export interface PrologueFrame {
   /** Mundo donde estás a pie. */

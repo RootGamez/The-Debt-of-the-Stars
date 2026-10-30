@@ -84,6 +84,8 @@ declare global {
       blackHole?(): { radius: number; visible: boolean; span: number; approach: number };
       /** A pie, gira la vista hacia un mundo o hacia el agujero (`'agujero'`), para encuadrar capturas. */
       aimAt?(target: string): boolean;
+      /** El gusano de la Luna: si se ha abierto y cuánto (0–1). */
+      wormhole?(): { active: boolean; progress: number };
       /** La guía del prólogo: el aviso a la vista y lo ya aprendido. */
       guide?(): { shown: string | null; done: string[] };
       /** Los Ool: cuánto se ha girado cada uno hacia ti (rad) y tus filamentos (si brillan, cuántas veces latieron). */

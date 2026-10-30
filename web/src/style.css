@@ -225,6 +225,21 @@ body {
   pointer-events: none;
 }
 
+/* El blanco del gusano sigue tras recargar (Fase 9E) y se aclara al estar el mundo: encima de todo. */
+.llegada {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: #fff3e2;
+  pointer-events: none;
+  transition-property: opacity;
+  transition-timing-function: ease-out;
+}
+
+.llegada-fuera {
+  opacity: 0;
+}
+
 /* Tus filamentos (Fase 9): un resplandor verde azulado en el borde de arriba mientras lees, y un latido al anotar. */
 .filamentos {
   position: fixed;

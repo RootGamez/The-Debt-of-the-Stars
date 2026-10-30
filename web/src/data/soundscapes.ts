@@ -174,6 +174,16 @@ export const EVENT_SOUNDS: Readonly<Record<string, Soundscape>> = {
       { frequency: 1760, gain: 0.01, type: 'sine', detune: 9 },
     ],
   },
+  // El gusano que se abre junto al fragmento de la Luna (Fase 9E, no es de la cronología): un zumbido que sube
+  // y tiembla; luego, el silencio del fundido a blanco.
+  gusano: {
+    noise: { filter: 'bandpass', frequency: 900, q: 2, gain: 0.05, swell: { hz: 0.9, depth: 0.5 } },
+    tones: [
+      { frequency: 110, gain: 0.08, type: 'sine' },
+      { frequency: 220.5, gain: 0.05, type: 'triangle', detune: 12 },
+      { frequency: 440, gain: 0.02, type: 'sine', swell: { hz: 2.2, depth: 0.6 } },
+    ],
+  },
   // La secuencia de la fábrica: el ritmo se acelera.
   secuencia_fabrica: {
     noise: { filter: 'highpass', frequency: 2000, q: 0.6, gain: 0.03 },

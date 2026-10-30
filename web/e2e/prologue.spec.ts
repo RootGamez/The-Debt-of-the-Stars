@@ -1,6 +1,6 @@
 // Fase 9 (hito 9A): una partida nueva empieza en casa, en el Instituto de Hogar, donde no corre el ciclo; el
-// Albatros II espera en el hangar. Junto al fragmento de la Luna se abre el gusano (provisional: basta con estar
-// de pie en la Luna) y se despierta en Umbral; desde entonces la partida empieza allí.
+// Albatros II espera en el hangar. Al examinar el fragmento de la Luna se abre allí el gusano (hito 9E) y tras el
+// fundido a blanco se despierta en Umbral; desde entonces la partida empieza allí.
 import { expect, test, type Page } from '@playwright/test';
 import { loopValue, snapshot, value } from './helpers';
 
@@ -49,18 +49,30 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   await page.keyboard.press('KeyE');
   await expect(page.locator('.reader')).toBeVisible();
   await page.keyboard.press('KeyE');
+  // Un momento después se abre el gusano delante del fragmento (hito 9E).
+  await expect
+    .poll(async () => (await page.evaluate(() => window.__juego?.wormhole?.()))?.active, {
+      timeout: 10_000,
+    })
+    .toBe(true);
 
-  // Tras el fundido a blanco la página se carga de nuevo, ya en el sistema ajeno (sin `?mundo=`).
+  // Tras el fundido a blanco la página se carga de nuevo, ya en el sistema ajeno (sin `?mundo=`): el blanco
+  // sigue mientras llega el mundo y luego se aclara.
   await page.waitForURL(/debug=/, { timeout: 30_000 });
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
+  await expect(page.locator('.llegada')).toHaveCount(0, { timeout: 10_000 });
   expect(await value(page, 'world')).toBe('umbral');
   expect(await loopValue(page, 'loops')).toBe(0);
+  // El primer despertar frente a La Boca: aparece el reloj de Umbral.
+  await play(page);
+  await expect(page.locator('.clock-hud')).toBeVisible();
   expect((await page.evaluate(() => window.__juego?.sky?.()))?.density).toBe(0); // Umbral no tiene aire
   expect(new URL(page.url()).searchParams.has('mundo')).toBe(false);
 
   await page.reload();
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
   expect(await value(page, 'world')).toBe('umbral');
+  await expect(page.locator('.llegada')).toHaveCount(0); // recargar ya no viene del gusano
   // Lo que se aprendió en casa sigue en el Registro.
   expect((await snapshot(page))?.registry.facts).toContain('casa.fragmento_antiguo');
 
