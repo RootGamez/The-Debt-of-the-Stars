@@ -2,7 +2,7 @@
 // Albatros II espera en el hangar. Al examinar el fragmento de la Luna se abre allí el gusano (hito 9E) y tras el
 // fundido a blanco se despierta en Umbral; desde entonces la partida empieza allí.
 import { expect, test, type Page } from '@playwright/test';
-import { loopValue, snapshot, value } from './helpers';
+import { closeReader, loopValue, snapshot, value } from './helpers';
 
 /** Partida nueva, sin elegir mundo: como la abriría un jugador. */
 async function newGame(page: Page): Promise<void> {
@@ -49,7 +49,7 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   ).toBe(true);
   await page.keyboard.press('KeyE');
   await expect(page.locator('.reader')).toBeVisible();
-  await page.keyboard.press('KeyE');
+  await closeReader(page);
   // Un momento después se abre el gusano delante del fragmento (hito 9E).
   await expect
     .poll(async () => (await page.evaluate(() => window.__juego?.wormhole?.()))?.active, {
@@ -122,8 +122,7 @@ test('the Directora gives you the mission and your filaments glow while she talk
   await talkTo(page, 'instituto.directora');
   await expect(page.locator('.reader')).toContainText('La Directora');
   await expect.poll(async () => (await ool(page))?.filaments.glowing).toBe(true);
-  await page.keyboard.press('KeyE');
-  await expect(page.locator('.reader')).toBeHidden();
+  await closeReader(page);
 
   expect((await snapshot(page))?.registry.facts).toContain('casa.mision_luna');
   expect((await ool(page))?.filaments.beats).toBeGreaterThan(0);
@@ -136,8 +135,7 @@ test('the people of the village just talk: nothing goes into the Registro', asyn
   await play(page);
 
   await talkTo(page, 'aldea.cria');
-  await page.keyboard.press('KeyE');
-  await expect(page.locator('.reader')).toBeHidden();
+  await closeReader(page);
 
   expect((await snapshot(page))?.registry.facts).toEqual([]);
 });

@@ -1,7 +1,7 @@
 // Fase 10B: el Contrapeso. Espera en su Banco del Laboratorio: primero se examina y luego se coge; en brazos su
 // reloj se suma al tablero, viaja en el relicario de la nave y vuelve a su Banco con cada ciclo.
 import { expect, test, type Page } from '@playwright/test';
-import { loopValue, startPlaying } from './helpers';
+import { closeReader, loopValue, startPlaying } from './helpers';
 
 async function counterweight(page: Page) {
   return page.evaluate(() => window.__juego?.counterweight?.() ?? null);
@@ -14,7 +14,7 @@ async function pickUp(page: Page): Promise<void> {
   await expect(page.locator('.prompt')).toHaveText('E · examinar');
   await page.keyboard.press('KeyE');
   await expect(page.locator('.reader-title')).toHaveText('El Contrapeso');
-  await page.keyboard.press('KeyE');
+  await closeReader(page);
   await expect(page.locator('.prompt')).toHaveText('E · coger');
   await page.keyboard.press('KeyE');
   await expect.poll(async () => (await counterweight(page))?.place).toBe('carried');

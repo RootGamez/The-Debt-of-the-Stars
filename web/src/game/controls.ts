@@ -1,6 +1,7 @@
 // Los controles del jugador: ratón, teclado, táctil y la pantalla de pausa.
 import { InputController } from '../core/inputController';
 import type { LoopSession } from '../core/loopSession';
+import type { TextSettings } from '../typewriter/textPreferences';
 import { createPauseOverlay, isTouchDevice, type PauseOverlay } from '../ui/pauseOverlay';
 import { createTouchControls, type TouchControls } from '../ui/touchControls';
 
@@ -14,6 +15,7 @@ export function createControls(
   title: string,
   session: LoopSession,
   openRegistry: () => void,
+  text: { settings: TextSettings; onLetterSample: () => void },
   shipControls?: TouchShipControls,
 ): { input: InputController; overlay: PauseOverlay; touch?: TouchControls } {
   const input = new InputController(canvas);
@@ -30,6 +32,8 @@ export function createControls(
       savingWorks: () => session.savingWorks,
       onResetProgress: () => session.resetProgress(),
       onOpenRegistry: openRegistry,
+      settings: text.settings,
+      onLetterSample: text.onLetterSample,
     },
   );
   input.dragLookEnabled = () => overlay.dragLook;

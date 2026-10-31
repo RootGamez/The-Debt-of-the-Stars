@@ -1,6 +1,12 @@
 // Arranque del juego: mundos → sistema → nave → jugador → controles → ciclo → bucle de render.
 // Cada pieza vive en su módulo; aquí solo se conectan.
+import '@fontsource/caveat/latin-500.css';
+import '@fontsource/caveat/latin-700.css';
+import '@fontsource/alegreya/latin-400.css';
+import '@fontsource/alegreya/latin-400-italic.css';
+import '@fontsource/alegreya/latin-700.css';
 import './style.css';
+import './ui/theme.css';
 import { Quaternion, Timer, Vector3, type PerspectiveCamera, type WebGLRenderer } from 'three';
 import { loadChronology } from './core/chronology';
 import { createSoundtrack } from './audio/soundtrack';
@@ -68,6 +74,19 @@ import { createOrbitMap } from './ui/orbitMap';
 import { isTouchDevice } from './ui/pauseOverlay';
 import { createArrivalLayer, endArrivingPaint, sessionStore, takeCrossing } from './ui/arrival';
 import { lockGameKeys } from './ui/endingCard';
+import { createPlaceCard } from './ui/placeCard';
+import { createWorldDiscovery } from './ui/worldDiscovery';
+import { createTextSettings } from './typewriter/textPreferences';
+import { voicePitch } from './typewriter/speech';
+import {
+  displayName,
+  needsNaming,
+  officialName,
+  shipLabel,
+  withDiscovery,
+  worldWhere,
+  type WorldNames,
+} from './worlds/worldLog';
 import type { WorldRuntime } from './worlds/worldRuntime';
 import { startWorld as firstWorld, worldTitle } from './worlds/worldSelection';
 
@@ -128,6 +147,12 @@ async function start(): Promise<void> {
   // Una partida nueva empieza en casa (el prólogo); tras cruzar el gusano, en Umbral. `?mundo=` manda.
   const saved = loadSave(browserStore());
   if (saved.warning) console.warn(saved.warning);
+  // La velocidad del texto y el sonido de letras (Configuración, en la pausa); y, con `?calidad=baja`, sin brillos.
+  const textSettings = createTextSettings(browserStore());
+  const quality = qualityFromQuery(window.location.search);
+  document.documentElement.classList.toggle('calidad-baja', quality === 'baja');
+  // Saltar a un mundo con `?mundo=` es para probar: no se pide nombre a ningún mundo al llegar.
+  const exploring = !new URLSearchParams(window.location.search).has('mundo');
   // De vuelta a casa por una boca del Archivo (`?final=`): con A y B, el Hogar de antes, sin lo que aún no ha llegado.
   const homecomingEnding = endingFromQuery(window.location.search);
   const home = homecomingEnding ? homeLook(homecomingEnding) : undefined;
@@ -161,7 +186,7 @@ async function start(): Promise<void> {
   const passage = createFoldedPassage();
   // …y por fuera: su imagen en el cielo, girada hacia la Brasa, y las estrellas que dobla a su paso.
   // (el agujero negro dobla también las estrellas; con `?calidad=baja` no se dobla nada).
-  const lens = createLensView(scene, sky, qualityFromQuery(window.location.search) === 'alta');
+  const lens = createLensView(scene, sky, quality === 'alta');
   // El cielo de los mundos con aire (Hogar): tapa las estrellas en el suelo y se apaga al subir.
   const atmosphere = createAtmosphereView(scene);
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -305,6 +330,7 @@ async function start(): Promise<void> {
       enterWorld(startWorld);
       tides.reset();
       counterweight?.play.reset();
+      arrive(startWorld);
     },
   });
   const reading = new ReadingSession(clues, session.savedFacts, (facts) =>
@@ -320,12 +346,42 @@ async function start(): Promise<void> {
       mouthCross = 'boca';
     },
   });
+  // El sonido se sintetiza (sin archivos) y arranca con el primer gesto del jugador.
+  const soundtrack = createSoundtrack();
+  // La bitácora de mundos: los nombres que el jugador les puso (se guardan con la partida).
+  let worldNames: WorldNames = session.savedWorlds;
+  const discovery = createWorldDiscovery(
+    () => document.querySelector<HTMLElement>('.hud-book') ?? undefined,
+  );
+  const place = createPlaceCard();
+  /** Al despertar o aterrizar: el cartel con su nombre, o, la primera vez, ponerle uno. */
+  function arrive(id: string): void {
+    if (exploring && needsNaming(worldNames, id)) {
+      overlay.releasePointer();
+      discovery.open(id, officialName(id), (name) => {
+        worldNames = withDiscovery(worldNames, id, name, session.director.loopsCompleted);
+        session.saveWorld(id, name);
+        overlay.recapturePointer();
+        game.ui?.notify(`Pegado en la bitácora: ${name}`);
+        place.show(name, name === officialName(id) ? worldWhere(id) : officialName(id));
+      });
+      return;
+    }
+    const name = displayName(worldNames, id);
+    place.show(name, name === officialName(id) ? worldWhere(id) : officialName(id));
+  }
   const { input, overlay, touch } = createControls(
     canvas,
     worldTitle(startWorld),
     session,
     () => {
       game.ui?.openRegistry();
+    },
+    {
+      settings: textSettings,
+      onLetterSample: () => {
+        soundtrack.blip(voicePitch(undefined));
+      },
     },
     {
       isPiloting: () => game.flight?.piloting ?? false,
@@ -377,6 +433,12 @@ async function start(): Promise<void> {
     touch: isTouchDevice(),
     actions: counterweight?.play.actions ?? epilogue?.play.actions ?? homecoming?.play.actions,
     readers: { ...counterweight?.readers, ...epilogue?.readers },
+    settings: textSettings,
+    reducedMotion,
+    worldNames: () => worldNames,
+    onLetters: (pitch) => {
+      soundtrack.blip(pitch);
+    },
   });
   game.ui = ui;
 
@@ -389,7 +451,11 @@ async function start(): Promise<void> {
           systemScene,
           player,
           homeWorld: shipHome,
-          walkInto: enterWorld,
+          walkInto: (world) => {
+            enterWorld(world);
+            arrive(world);
+          },
+          nameOf: (world) => shipLabel(worldNames, world),
           pull: (frame, position, target) => {
             horizon.pull(frame, position, target);
           },
@@ -402,7 +468,7 @@ async function start(): Promise<void> {
   game.flight = flight;
   // Leyendo, muriendo o cerrado ya el viaje (la vuelta a casa), no se hace nada.
   const free = (): boolean =>
-    session.acceptsInput && !ui.blocking && !(homecoming?.blocking ?? false);
+    session.acceptsInput && !ui.blocking && !discovery.isOpen && !(homecoming?.blocking ?? false);
   const canAct = (): boolean => overlay.playing && free();
   function shipAction(action: 'board' | 'target' | 'stabilize'): void {
     if (flight && canAct()) flight.action(action, currentWorld.id, session.director.clock.t);
@@ -432,8 +498,6 @@ async function start(): Promise<void> {
     return { reference: systemScene.referenceWorld ?? null, bodies: positions };
   }
   const orbitMap = spec ? createOrbitMap(spec, systemSnapshot) : undefined;
-  // El sonido se sintetiza (sin archivos) y arranca con el primer gesto del jugador.
-  const soundtrack = createSoundtrack();
   if (window.__juego) {
     window.__juego.teleportTo = (clueId) => {
       if (flight?.piloting) return false;
@@ -574,6 +638,7 @@ async function start(): Promise<void> {
   status.textContent = '';
   arrival?.clear();
 
+  let awoke = false;
   const feet = new Vector3();
   const airCenter = new Vector3();
   const body = new Quaternion();
@@ -584,7 +649,13 @@ async function start(): Promise<void> {
     },
     (dt) => {
       const look = input.consumeLook();
-      const timeRuns = overlay.playing && !ui.blocking; // leer o abrir el Registro detiene el ciclo
+      // Leer, abrir el Registro o nombrar un mundo detiene el ciclo.
+      const timeRuns = overlay.playing && !ui.blocking && !discovery.isOpen;
+      // El primer despertar de la partida: el cartel del mundo (o ponerle nombre).
+      if (overlay.playing && !awoke) {
+        awoke = true;
+        arrive(currentWorld.id);
+      }
       if (timeRuns && free()) {
         if (flight?.piloting) flight.addLook(look.x, look.y);
         else player.look(-look.x * MOUSE_LOOK_SENSITIVITY, -look.y * MOUSE_LOOK_SENSITIVITY);

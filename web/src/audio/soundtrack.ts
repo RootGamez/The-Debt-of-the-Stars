@@ -22,6 +22,8 @@ export interface Soundtrack {
     levels: Record<string, number>;
   };
   update(input: Omit<MixInput, 'muted'>): void;
+  /** La voz de letras de un texto que se escribe (no suena en silencio). */
+  blip(frequency: number): void;
   dispose(): void;
 }
 
@@ -77,6 +79,9 @@ export function createSoundtrack(engine: AudioEngine = createAudioEngine()): Sou
     update(input) {
       last = computeMix({ ...input, muted });
       engine.update(last);
+    },
+    blip(frequency) {
+      if (!muted) engine.blip(frequency);
     },
     dispose() {
       abort.abort();

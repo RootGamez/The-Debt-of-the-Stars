@@ -35,6 +35,13 @@
   </head>
   <body>
     <canvas id="game" aria-label="Vista del juego"></canvas>
+    <!-- El trazo tembloroso de lo dibujado a mano en el HUD (src/ui/theme.css). -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
+      <filter id="wobble">
+        <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="4" />
+        <feDisplacementMap in="SourceGraphic" scale="2.6" />
+      </filter>
+    </svg>
     <p id="status" role="status">Cargando…</p>
     <script type="module" src="/src/main.ts"></script>
   </body>

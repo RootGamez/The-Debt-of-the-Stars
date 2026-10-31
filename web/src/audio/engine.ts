@@ -16,6 +16,11 @@ const RELEASE_AFTER = 4;
 const PULSE_LOOKAHEAD = 0.25;
 const NOISE_SECONDS = 2;
 const SILENCE = 0.0001;
+/** La voz de letras: volumen, ataque y duración (s), y cuánto varía el tono de una letra a otra. */
+const BLIP_LEVEL = 0.05;
+const BLIP_ATTACK = 0.008;
+const BLIP_LENGTH = 0.07;
+const BLIP_WOBBLE = 0.14;
 
 export interface AudioEngine {
   /** Voces vivas (sonando o apagándose). */
@@ -28,6 +33,11 @@ export interface AudioEngine {
   unlock(): void;
   /** Una vez por fotograma. */
   update(mix: Mix): void;
+  /**
+   * Un «bip» corto de la voz de letras (plan del HUD, decisión 6), con el tono `frequency` (Hz). Va directo al
+   * volumen general: el silencio (M) también lo calla, pero no lo apaga el filtro de leer.
+   */
+  blip(frequency: number): void;
   /** Pestaña oculta: el audio se detiene con el tiempo del juego. */
   suspend(): void;
   resume(): void;
@@ -306,6 +316,21 @@ export function createAudioEngine(createContext: () => AudioContext = defaultCon
           voices.delete(id);
         }
       }
+    },
+    blip(frequency) {
+      if (!context || !master || context.state !== 'running') return;
+      const now = context.currentTime;
+      const tone = context.createOscillator();
+      const level = context.createGain();
+      tone.type = 'triangle';
+      tone.frequency.value = frequency * (1 + (Math.random() - 0.5) * BLIP_WOBBLE);
+      level.gain.setValueAtTime(SILENCE, now);
+      level.gain.exponentialRampToValueAtTime(BLIP_LEVEL, now + BLIP_ATTACK);
+      level.gain.exponentialRampToValueAtTime(SILENCE, now + BLIP_LENGTH);
+      tone.connect(level);
+      level.connect(master);
+      tone.start(now);
+      tone.stop(now + BLIP_LENGTH + 0.01);
     },
     suspend() {
       heldBack = true;

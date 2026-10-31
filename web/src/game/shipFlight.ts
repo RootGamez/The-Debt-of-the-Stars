@@ -43,6 +43,8 @@ export interface ShipFlightOptions {
   touch: boolean;
   /** Lo que tira además de la gravedad de su mundo (el horizonte estable, Fase 10D): se suma a `target` (m/s²). */
   pull?: (frame: string, position: Vector3, target: Vector3) => void;
+  /** El nombre del objetivo en el tablero (el que le puso el jugador, con el oficial al lado). */
+  nameOf?: (world: string) => string;
 }
 
 export interface ShipSnapshot {
@@ -354,7 +356,7 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
     toward.subVectors(targetPosition, ship.state.position);
     projected.copy(targetPosition).project(camera);
     return {
-      name: target.name,
+      name: options.nameOf?.(id) ?? target.name,
       distance: Math.max(0, toward.length() - runtimeOf(runtimes, id).world.info.radius),
       closing: closingSpeed(toward, relative),
       marker: placeMarker(projected, MARKER_MARGIN),

@@ -15,14 +15,19 @@ import {
   isSaveErased,
   loadSave,
   markPrologueDone,
+  markWorldNamed,
   saveProgress,
   SAVE_VERSION,
   type LoadResult,
+  type SaveData,
 } from './save';
 import type { Chronology, TimelineEvent } from './timeline';
 
 /** Con `?debug`, `[` y `]` saltan esta fracción del ciclo (1 min de 15). */
 const DEBUG_SKIP_FRACTION = 1 / 15;
+
+/** Los eventos que se marcan en los anillos del reloj doble. */
+const CLOCK_MARKS: readonly string[] = ['cielo_rojo', 'agujero_negro'];
 
 export interface LoopSessionOptions {
   scene: Scene;
@@ -57,6 +62,10 @@ export interface LoopSession {
   snapshot(): LoopSnapshot;
   /** Hechos guardados (sin filtrar: la sesión de lectura descarta los que ya no existen). */
   readonly savedFacts: readonly string[];
+  /** Los mundos nombrados al cargar la partida (la bitácora). */
+  readonly savedWorlds: SaveData['worlds'];
+  /** Pega un mundo recién nombrado en la bitácora guardada (con el ciclo actual); false si no se pudo. */
+  saveWorld(world: string, name: string): boolean;
   /** Guarda los hechos (fusionados con lo guardado); false si no se pudo. */
   saveFacts(facts: readonly string[]): boolean;
   /** Ids de los eventos en curso, recalculados una vez por fotograma. */
@@ -89,7 +98,9 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
   let activeEventIds: readonly string[] = [];
   const savingWorks = (): boolean =>
     store !== null && !loaded.readOnly && !director.saveFailed && !factsFailed;
-  const hud = createClockHud();
+  // Los anillos del reloj marcan las horas grandes: el cielo rojo de las 9:00 y el agujero de las 13:30.
+  const marks = chronology.events.filter((e) => CLOCK_MARKS.includes(e.id)).map((e) => e.t);
+  const hud = createClockHud(chronology.duration, marks);
   const fade = createFadeLayer();
   const effects = createLoopEffects(scene, sun, skyDirection);
 
@@ -169,9 +180,14 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
           facts,
           prologueDone: loaded.data.prologueDone,
           endings: loaded.data.endings,
+          worlds: {},
         });
       factsFailed = !ok;
       return ok;
+    },
+    savedWorlds: loaded.data.worlds,
+    saveWorld(world, name) {
+      return markWorldNamed(store, loaded, world, name, director.loopsCompleted);
     },
     get activeEventIds() {
       return activeEventIds;
