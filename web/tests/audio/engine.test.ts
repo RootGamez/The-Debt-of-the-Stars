@@ -174,3 +174,28 @@ describe('the audio engine', () => {
     expect(engine.voiceCount).toBe(0);
   });
 });
+
+describe('the voice of the letters', () => {
+  it('stays silent until the audio is unlocked and then plays a short tone', async () => {
+    let oscillators = 0;
+    const context = fakeContext();
+    const counting = new Proxy(context, {
+      get(target, key) {
+        if (key === 'createOscillator') {
+          oscillators++;
+        }
+        return Reflect.get(target, key) as unknown;
+      },
+    });
+    const engine = createAudioEngine(() => counting);
+
+    engine.blip(300);
+    expect(oscillators).toBe(0);
+
+    engine.unlock();
+    await Promise.resolve();
+    engine.blip(300);
+
+    expect(oscillators).toBe(1);
+  });
+});

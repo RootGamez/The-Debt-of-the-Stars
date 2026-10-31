@@ -4,7 +4,7 @@
 // planos deciden el final (`?final=`).
 import { expect, test, type Page } from '@playwright/test';
 import { installCounterweight, standAt } from './counterweightSteps';
-import { ready, snapshot, startPlaying } from './helpers';
+import { closeReader, ready, snapshot, startPlaying } from './helpers';
 
 const SAVE_KEY = 'bucle-tiempo:partida';
 
@@ -91,7 +91,7 @@ test('the Archive is out of time: no loop, the plans are taken and left, and the
   await expect(page.locator('.prompt')).toHaveText('E · examinar');
   await page.keyboard.press('KeyE');
   await expect(page.locator('.reader-title')).toHaveText('Los planos del Contrapeso');
-  await page.keyboard.press('KeyE');
+  await closeReader(page);
   expect((await snapshot(page))?.registry.facts).toContain('contrapeso.planos');
   await expect(page.locator('.prompt')).toHaveText('E · coger');
   await page.keyboard.press('KeyE');

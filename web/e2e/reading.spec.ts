@@ -2,7 +2,7 @@
 // aprendido sobrevive a morir y a recargar. `teleportTo` (solo con ?debug) coloca al jugador frente a
 // una fuente; el resto es juego normal con teclado.
 import { expect, test, type Page } from '@playwright/test';
-import { loopValue, snapshot, startPlaying } from './helpers';
+import { closeReader, loopValue, snapshot, startPlaying } from './helpers';
 
 async function facts(page: Page): Promise<string[]> {
   return (await snapshot(page))?.registry.facts ?? [];
@@ -18,11 +18,6 @@ async function readSource(page: Page, clueId: string): Promise<void> {
   await goTo(page, clueId);
   await page.keyboard.press('KeyE');
   await expect(page.locator('.reader')).toBeVisible();
-}
-
-async function closeReader(page: Page): Promise<void> {
-  await page.keyboard.press('KeyE');
-  await expect(page.locator('.reader')).toBeHidden();
 }
 
 /** El cuaderno del turno es un puzle (Fase 7): se anota al completar la última hora del Archivo. */

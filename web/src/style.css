@@ -1,8 +1,21 @@
 :root {
   color-scheme: dark;
   --bg: #07070c;
-  --text: #e8dcc4;
-  --muted: #8a8070;
+  /* Fichas del Cuaderno vivo (docs/plan-hud-cuaderno-vivo.md): papel de fibra oscuro, tinta luminosa verde de
+     los filamentos, ámbar para títulos y nombres, lápiz para lo secundario. ui/theme.css pone el resto. */
+  --night-rgb: 21 33 27;
+  --ink-rgb: 207 248 226;
+  --amber-rgb: 246 195 122;
+  --glow-rgb: 166 240 201;
+  --paper: #17241d;
+  --night: #15211b;
+  --ink: #cff8e2;
+  --glow: #a6f0c9;
+  --amber: #f6c37a;
+  --pencil: #9cc2b2;
+  --danger: #f2a08a;
+  --text: var(--ink);
+  --muted: var(--pencil);
 }
 
 * {
@@ -45,7 +58,7 @@ body {
   justify-content: center;
   gap: 12px;
   padding: 16px;
-  background: rgb(7 7 12 / 55%);
+  background: rgb(var(--night-rgb) / 55%);
   color: var(--text);
   text-align: center;
   cursor: pointer;
@@ -104,7 +117,7 @@ body {
   left: 0;
   width: 112px;
   height: 112px;
-  border: 2px solid rgb(232 220 196 / 40%);
+  border: 2px solid rgb(var(--ink-rgb) / 40%);
   border-radius: 50%;
 }
 
@@ -119,7 +132,7 @@ body {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgb(232 220 196 / 45%);
+  background: rgb(var(--ink-rgb) / 45%);
 }
 
 .touch-jump {
@@ -128,9 +141,9 @@ body {
   bottom: 32px;
   width: 76px;
   height: 76px;
-  border: 2px solid rgb(232 220 196 / 50%);
+  border: 2px solid rgb(var(--ink-rgb) / 50%);
   border-radius: 50%;
-  background: rgb(7 7 12 / 35%);
+  background: rgb(var(--night-rgb) / 35%);
   color: var(--text);
   font: inherit;
   font-size: 13px;
@@ -148,9 +161,9 @@ body {
   right: 16px;
   min-width: 64px;
   height: 44px;
-  border: 2px solid rgb(232 220 196 / 50%);
+  border: 2px solid rgb(var(--ink-rgb) / 50%);
   border-radius: 22px;
-  background: rgb(7 7 12 / 35%);
+  background: rgb(var(--night-rgb) / 35%);
   color: var(--text);
   font: inherit;
   font-size: 13px;
@@ -172,9 +185,9 @@ body {
 .touch-ship-action {
   min-width: 56px;
   min-height: 44px;
-  border: 2px solid rgb(232 220 196 / 50%);
+  border: 2px solid rgb(var(--ink-rgb) / 50%);
   border-radius: 22px;
-  background: rgb(7 7 12 / 65%);
+  background: rgb(var(--night-rgb) / 65%);
   color: var(--text);
   font: inherit;
   font-size: 12px;
@@ -200,7 +213,7 @@ body {
   margin: 0;
   padding: 6px 14px;
   border-radius: 14px;
-  background: rgb(7 7 12 / 35%);
+  background: rgb(var(--night-rgb) / 35%);
   color: var(--text);
   font:
     14px/1.2 ui-monospace,
@@ -258,7 +271,7 @@ body {
   align-items: flex-end;
   justify-content: center;
   padding: 16px 16px 8vh;
-  background: linear-gradient(rgb(7 7 12 / 0%) 35%, rgb(7 7 12 / 82%));
+  background: linear-gradient(rgb(var(--night-rgb) / 0%) 35%, rgb(var(--night-rgb) / 82%));
   animation: ending-in 2.5s ease-out both;
 }
 
@@ -268,9 +281,9 @@ body {
   max-height: calc(100dvh - 16px - 8vh);
   overflow-y: auto;
   padding: 28px 32px;
-  border: 1px solid rgb(232 220 196 / 25%);
+  border: 1px solid rgb(var(--ink-rgb) / 25%);
   border-radius: 12px;
-  background: #11101a;
+  background: var(--paper);
   color: var(--text);
   line-height: 1.7;
   text-align: center;
@@ -299,9 +312,9 @@ body {
 .ending-choice {
   min-height: 44px;
   padding: 8px 20px;
-  border: 1px solid rgb(232 220 196 / 55%);
+  border: 1px solid rgb(var(--ink-rgb) / 55%);
   border-radius: 8px;
-  background: rgb(7 7 12 / 50%);
+  background: rgb(var(--night-rgb) / 50%);
   color: var(--text);
   font: inherit;
   cursor: pointer;
@@ -389,7 +402,7 @@ body {
   gap: 8px;
   padding: 4px 12px;
   border-radius: 12px;
-  background: rgb(7 7 12 / 45%);
+  background: rgb(var(--night-rgb) / 45%);
   transform: translateX(-50%);
   pointer-events: none;
 }
@@ -412,13 +425,13 @@ body {
   height: 6px;
   overflow: hidden;
   border-radius: 3px;
-  background: rgb(232 220 196 / 15%);
+  background: rgb(var(--ink-rgb) / 15%);
 }
 
 .tide-fill {
   width: 0;
   height: 100%;
-  background: linear-gradient(90deg, #e0c98a, #ff6a3a);
+  background: linear-gradient(90deg, var(--amber), #ff6a3a);
 }
 
 /* Mira graduada (tecla G): anillos cada 10° y marcas cada 2°. */
@@ -434,21 +447,21 @@ body {
 .sight line,
 .sight-ring {
   fill: none;
-  stroke: rgb(232 220 196 / 55%);
+  stroke: rgb(var(--ink-rgb) / 55%);
   stroke-width: 1;
 }
 
 .sight-ring {
-  stroke: rgb(232 220 196 / 30%);
+  stroke: rgb(var(--ink-rgb) / 30%);
   stroke-dasharray: 4 6;
 }
 
 .sight-dot {
-  fill: rgb(224 201 138 / 85%);
+  fill: rgb(var(--amber-rgb) / 85%);
 }
 
 .sight-label {
-  fill: rgb(232 220 196 / 70%);
+  fill: rgb(var(--ink-rgb) / 70%);
   font:
     12px system-ui,
     sans-serif;
@@ -464,7 +477,7 @@ body {
     circle,
     rgb(232 240 230 / 95%) 0%,
     rgb(120 150 140 / 70%) 45%,
-    rgb(7 7 12 / 0%) 80%
+    rgb(var(--night-rgb) / 0%) 80%
   );
   pointer-events: none;
 }
@@ -512,9 +525,9 @@ body {
 .overlay-actions button {
   min-height: 40px;
   padding: 8px 14px;
-  border: 1px solid rgb(232 220 196 / 45%);
+  border: 1px solid rgb(var(--ink-rgb) / 45%);
   border-radius: 8px;
-  background: rgb(7 7 12 / 50%);
+  background: rgb(var(--night-rgb) / 50%);
   color: var(--text);
   font: inherit;
   cursor: pointer;
@@ -522,7 +535,7 @@ body {
 
 .overlay-actions button.danger {
   border-color: #d97a5a;
-  color: #f2b8a2;
+  color: var(--danger);
 }
 
 .overlay-loops {
@@ -532,12 +545,12 @@ body {
 
 .overlay-actions button.primary {
   min-width: 140px;
-  border-color: rgb(232 220 196 / 80%);
+  border-color: rgb(var(--ink-rgb) / 80%);
   font-size: 16px;
 }
 
 .overlay-warning {
-  color: #f2b8a2;
+  color: var(--danger);
 }
 
 .prompt {
@@ -547,7 +560,7 @@ body {
   margin: 0;
   padding: 6px 14px;
   border-radius: 14px;
-  background: rgb(7 7 12 / 55%);
+  background: rgb(var(--night-rgb) / 55%);
   color: var(--text);
   font-size: 15px;
   letter-spacing: 0.03em;
@@ -557,7 +570,7 @@ body {
 
 .prompt-button {
   min-height: 44px;
-  border: 1px solid rgb(232 220 196 / 60%);
+  border: 1px solid rgb(var(--ink-rgb) / 60%);
   font: inherit;
   pointer-events: auto;
   cursor: pointer;
@@ -575,7 +588,7 @@ body {
   margin: 0;
   padding: 8px 14px;
   border-radius: 10px;
-  background: rgb(7 7 12 / 70%);
+  background: rgb(var(--night-rgb) / 70%);
   color: var(--text);
   font-size: 14px;
   line-height: 1.5;
@@ -597,7 +610,7 @@ body {
   margin: 0;
   padding: 8px 16px;
   border-radius: 10px;
-  background: rgb(7 7 12 / 55%);
+  background: rgb(var(--night-rgb) / 55%);
   color: var(--text);
   font-size: 15px;
   line-height: 1.5;
@@ -629,7 +642,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgb(7 7 12 / 72%);
+  background: rgb(var(--night-rgb) / 72%);
 }
 
 .registry {
@@ -652,9 +665,9 @@ body {
   max-height: calc(100vh - 32px);
   overflow-y: auto;
   padding: 24px 28px;
-  border: 1px solid rgb(232 220 196 / 25%);
+  border: 1px solid rgb(var(--ink-rgb) / 25%);
   border-radius: 12px;
-  background: #11101a;
+  background: var(--paper);
   color: var(--text);
   line-height: 1.7;
 }
@@ -688,7 +701,7 @@ body {
 .reader-noted-title,
 .recorder-noted-title {
   margin: 16px 0 4px;
-  color: #e0c98a;
+  color: var(--amber);
   font-size: 13px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -715,9 +728,9 @@ body {
   margin-top: 16px;
   min-height: 40px;
   padding: 8px 18px;
-  border: 1px solid rgb(232 220 196 / 55%);
+  border: 1px solid rgb(var(--ink-rgb) / 55%);
   border-radius: 8px;
-  background: rgb(7 7 12 / 50%);
+  background: rgb(var(--night-rgb) / 50%);
   color: var(--text);
   font: inherit;
   cursor: pointer;
@@ -759,7 +772,7 @@ body {
 
 .puzzle-cell {
   padding: 3px 22px 3px 0;
-  border-top: 1px solid rgb(232 220 196 / 12%);
+  border-top: 1px solid rgb(var(--ink-rgb) / 12%);
   font-variant-numeric: tabular-nums;
 }
 
@@ -786,9 +799,9 @@ body {
 .puzzle-close {
   min-height: 40px;
   padding: 6px 14px;
-  border: 1px solid rgb(232 220 196 / 45%);
+  border: 1px solid rgb(var(--ink-rgb) / 45%);
   border-radius: 8px;
-  background: rgb(7 7 12 / 50%);
+  background: rgb(var(--night-rgb) / 50%);
   color: var(--text);
   font: inherit;
   cursor: pointer;
@@ -826,7 +839,7 @@ body {
   justify-content: space-between;
   gap: 16px;
   padding: 4px 0;
-  border-top: 1px solid rgb(232 220 196 / 12%);
+  border-top: 1px solid rgb(var(--ink-rgb) / 12%);
 }
 
 .puzzle-console-time {
@@ -843,7 +856,7 @@ body {
 
 .puzzle-mouth {
   padding: 8px 0;
-  border-top: 1px solid rgb(232 220 196 / 12%);
+  border-top: 1px solid rgb(var(--ink-rgb) / 12%);
 }
 
 .puzzle-mouth-view {
@@ -910,7 +923,7 @@ body {
 
 .puzzle-noted-title {
   margin: 12px 0 4px;
-  color: #e0c98a;
+  color: var(--amber);
   font-size: 13px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -928,8 +941,8 @@ body {
   overflow-y: auto;
   margin: 4px 0 16px;
   padding: 12px 16px;
-  border-left: 2px solid rgb(224 201 138 / 45%);
-  background: rgb(7 7 12 / 45%);
+  border-left: 2px solid rgb(var(--amber-rgb) / 45%);
+  background: rgb(var(--night-rgb) / 45%);
   font-family: Georgia, 'Times New Roman', serif;
   font-size: 17px;
   font-style: italic;
@@ -977,15 +990,15 @@ body {
 .recorder-wheel {
   flex: 1;
   min-width: 0;
-  accent-color: #e0c98a;
+  accent-color: var(--amber);
 }
 
 .recorder-step {
   min-width: 40px;
   min-height: 40px;
-  border: 1px solid rgb(232 220 196 / 45%);
+  border: 1px solid rgb(var(--ink-rgb) / 45%);
   border-radius: 8px;
-  background: rgb(7 7 12 / 50%);
+  background: rgb(var(--night-rgb) / 50%);
   color: var(--text);
   font: inherit;
   font-size: 18px;
@@ -1003,13 +1016,13 @@ body {
   height: 8px;
   overflow: hidden;
   border-radius: 4px;
-  background: rgb(232 220 196 / 12%);
+  background: rgb(var(--ink-rgb) / 12%);
 }
 
 .recorder-meter-fill {
   width: 0;
   height: 100%;
-  background: linear-gradient(90deg, #8a6a3a, #e0c98a);
+  background: linear-gradient(90deg, #8a6a3a, var(--amber));
   transition: width 0.15s linear;
 }
 
@@ -1033,7 +1046,7 @@ body {
 
 .registry-known-title {
   margin: 8px 0 4px;
-  color: #e0c98a;
+  color: var(--amber);
   font-size: 15px;
   font-weight: 400;
 }
@@ -1045,7 +1058,7 @@ body {
 .registry-thread {
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid rgb(232 220 196 / 14%);
+  border-top: 1px solid rgb(var(--ink-rgb) / 14%);
 }
 
 .registry-question {
@@ -1103,7 +1116,7 @@ body {
   gap: 2px;
   padding: 8px 14px;
   border-radius: 14px;
-  background: rgb(7 7 12 / 65%);
+  background: rgb(var(--night-rgb) / 65%);
   font:
     13px/1.3 ui-monospace,
     monospace;
@@ -1129,7 +1142,7 @@ body {
   margin: 0;
   padding: 6px 14px;
   border-radius: 14px;
-  background: rgb(7 7 12 / 65%);
+  background: rgb(var(--night-rgb) / 65%);
   font:
     14px/1.2 ui-monospace,
     monospace;
@@ -1144,7 +1157,7 @@ body {
   width: 22px;
   height: 22px;
   margin: -11px 0 0 -11px;
-  border: 2px solid rgb(232 220 196 / 80%);
+  border: 2px solid rgb(var(--ink-rgb) / 80%);
   transform: rotate(45deg);
 }
 
@@ -1167,7 +1180,7 @@ body {
   content: '';
   position: absolute;
   inset: 3px 0 3px 4px;
-  background: rgb(232 220 196 / 85%);
+  background: rgb(var(--ink-rgb) / 85%);
   clip-path: polygon(0 0, 100% 50%, 0 100%);
 }
 
@@ -1178,7 +1191,7 @@ body {
   margin: 0;
   padding: 6px 14px;
   border-radius: 14px;
-  background: rgb(7 7 12 / 65%);
+  background: rgb(var(--night-rgb) / 65%);
   color: var(--text);
   font-size: 14px;
   letter-spacing: 0.03em;
@@ -1194,7 +1207,7 @@ body {
   margin: 0;
   padding: 6px 14px;
   border-radius: 14px;
-  background: rgb(7 7 12 / 55%);
+  background: rgb(var(--night-rgb) / 55%);
   color: var(--text);
   font-size: 15px;
   letter-spacing: 0.03em;

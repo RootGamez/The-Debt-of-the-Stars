@@ -1,0 +1,1370 @@
+/* El Cuaderno vivo (docs/plan-hud-cuaderno-vivo.md, propuesta D): el cuaderno artesanal de la propuesta A (papel
+   crema rasgado, cinta, letra a mano) con la luz de los Ool de la B. El papel es mate: lo único que brilla es la
+   tinta (y, sobre el mundo, los anillos del reloj y el aviso de E). Va después de style.css, cuyas fichas de color
+   (:root) son las del HUD sobre el mundo; dentro del papel se redefinen para la tinta oscura que brilla.
+   Con «reducir movimiento» no se anima nada; con `?calidad=baja` (html.calidad-baja) se apagan brillos y filtros. */
+
+:root {
+  --f-hand: 'Caveat', 'Segoe Print', cursive;
+  --f-body: 'Alegreya', Georgia, serif;
+  --fiber-noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012 .5' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5  0 0 0 0 .9  0 0 0 0 .7  0 0 0 .16 0'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+  --photo-paper: #f7f1e1;
+  /* El papel del cuaderno (propuesta A) y la tinta que se escribe en él. */
+  --paper-a: #efe3c8;
+  --paper-noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .32  0 0 0 0 .22  0 0 0 0 .1  0 0 0 .13 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --paper-ruled: rgb(70 100 150 / 18%);
+  --leather: #5a3a24;
+  --tape: rgb(246 238 214 / 70%);
+  --ink-on-paper: #0f5442;
+  --ink-on-paper-rgb: 15 84 66;
+  --amber-on-paper: #9a4a12;
+  --pencil-on-paper: #6d6559;
+  --danger-on-paper: #a3311f;
+  --counterweight: #d9b8ff;
+  --on-glow: #102018;
+  /* Bordes rasgados: arriba (tiras y diálogos) y por los cuatro lados (hojas). */
+  --torn-top: polygon(
+    0 3%,
+    3% 0,
+    9% 2%,
+    17% 0,
+    26% 2.5%,
+    36% 0.5%,
+    47% 2%,
+    58% 0,
+    70% 2%,
+    81% 0.5%,
+    90% 2.5%,
+    97% 0,
+    100% 3%,
+    100% 100%,
+    0 100%
+  );
+  --torn-sheet: polygon(
+    0 1.2%,
+    4% 0,
+    12% 0.8%,
+    22% 0,
+    35% 0.9%,
+    48% 0.2%,
+    61% 1%,
+    74% 0,
+    86% 0.8%,
+    100% 0,
+    99.4% 30%,
+    100% 62%,
+    99.5% 100%,
+    84% 99.2%,
+    70% 100%,
+    55% 99.3%,
+    40% 100%,
+    25% 99.4%,
+    10% 100%,
+    0 99.2%,
+    0.6% 60%
+  );
+  /* Botón dibujado a mano: un óvalo algo torcido. */
+  --hand-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+html,
+body {
+  font-family: var(--f-body);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+/* ---------- Animaciones compartidas ---------- */
+@keyframes inkGlow {
+  from {
+    opacity: 0;
+    filter: blur(1.6px);
+    text-shadow:
+      0 0 12px rgb(var(--glow-rgb)),
+      0 0 4px rgb(var(--glow-rgb));
+  }
+}
+@keyframes write {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes bob {
+  50% {
+    transform: translateY(3px);
+  }
+}
+@keyframes breathe {
+  50% {
+    box-shadow:
+      0 0 20px rgb(var(--glow-rgb) / 80%),
+      inset 0 0 10px rgb(var(--glow-rgb) / 50%);
+  }
+}
+@keyframes talkGlow {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) rotate(-0.6deg);
+  }
+}
+@keyframes stripIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+@keyframes bars {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes bookIn {
+  from {
+    opacity: 0;
+    transform: translateY(6%) rotateX(18deg);
+  }
+}
+@keyframes bookPulse {
+  50% {
+    transform: scale(1.18);
+  }
+}
+@keyframes placeIn {
+  0% {
+    opacity: 0;
+  }
+  15%,
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes dscIn {
+  from {
+    opacity: 0;
+    transform: translateY(4%) rotate(3deg);
+  }
+}
+@keyframes develop {
+  from {
+    filter: brightness(2.8) saturate(0) blur(3px);
+  }
+  60% {
+    filter: brightness(1.25) saturate(0.6) blur(0.6px);
+  }
+}
+
+/* ---------- La tinta que se escribe sola (ui/ink.ts) ---------- */
+.ink-w {
+  white-space: nowrap;
+}
+.ink-c {
+  opacity: 0;
+}
+.ink-c.on {
+  opacity: 1;
+  animation: inkGlow 0.7s ease-out;
+}
+.ink-c.ya {
+  animation: none;
+}
+
+/* ---------- Papel: hojas, tiras y botones a mano ---------- */
+.overlay-page,
+.reader-sheet,
+.recorder-card,
+.puzzle-card,
+.ending-card,
+.discover {
+  position: relative;
+  border: 0;
+  border-radius: 0;
+  background: var(--paper-a) var(--paper-noise);
+  color: var(--ink);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 60%);
+}
+/* Dentro del papel, la tinta es oscura y su halo es la luz de los Ool. */
+.overlay-page,
+.reader-sheet,
+.reader-strip,
+.recorder-card,
+.puzzle-card,
+.ending-card,
+.discover,
+.notice,
+.guia,
+.registry-face.paper,
+.registry-cover-label {
+  --ink: var(--ink-on-paper);
+  --ink-rgb: var(--ink-on-paper-rgb);
+  --text: var(--ink-on-paper);
+  --amber: var(--amber-on-paper);
+  --pencil: var(--pencil-on-paper);
+  --muted: var(--pencil-on-paper);
+  --danger: var(--danger-on-paper);
+  --glow: var(--ink-on-paper);
+  --halo: 0 0 3px rgb(var(--glow-rgb)), 0 0 10px rgb(var(--glow-rgb) / 70%);
+  --halo-amber: 0 0 3px rgb(var(--amber-rgb)), 0 0 10px rgb(var(--amber-rgb) / 60%);
+}
+.reader-sheet,
+.recorder-card,
+.puzzle-card,
+.ending-card {
+  clip-path: var(--torn-sheet);
+}
+/* La cinta que sujeta la hoja. */
+.overlay-page::before,
+.reader-sheet::before,
+.recorder-card::before,
+.puzzle-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 96px;
+  height: 18px;
+  transform: translateX(-50%) rotate(-2deg);
+  background: var(--tape);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+  pointer-events: none;
+}
+
+.overlay-actions button,
+.overlay-choices button,
+.reader-close,
+.recorder-close,
+.registry-close,
+.puzzle-close,
+.discover-save,
+.ending-choice,
+.registry-turn {
+  border: 1.5px solid rgb(var(--ink-rgb) / 60%);
+  border-radius: var(--hand-radius);
+  background: transparent;
+  color: var(--ink);
+  font: 600 21px/1 var(--f-hand);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s,
+    background 0.2s;
+}
+.overlay-actions button:hover,
+.overlay-choices button:hover,
+.reader-close:hover,
+.recorder-close:hover,
+.registry-close:hover,
+.puzzle-close:hover,
+.discover-save:hover,
+.ending-choice:hover,
+.registry-turn:hover:not(:disabled) {
+  background: rgb(var(--glow-rgb) / 10%);
+  box-shadow: 0 0 12px rgb(var(--glow-rgb) / 35%);
+}
+
+/* ---------- Pausa y Configuración ---------- */
+.overlay {
+  background: radial-gradient(ellipse at 50% 45%, rgb(var(--night-rgb) / 30%), rgb(4 9 7 / 82%));
+}
+.overlay-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: min(580px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: 36px 32px 26px;
+  transform: rotate(-0.6deg);
+  clip-path: var(--torn-sheet);
+  cursor: default;
+}
+.overlay strong {
+  font: 700 clamp(42px, 7vw, 62px)/1 var(--f-hand);
+  letter-spacing: 0;
+  color: var(--amber);
+  text-shadow: var(--halo-amber);
+}
+.overlay span {
+  font: 500 22px/1.2 var(--f-hand);
+  color: var(--ink);
+}
+.overlay small {
+  font: 15px/1.5 var(--f-body);
+  color: var(--pencil);
+}
+.overlay-actions button {
+  min-height: 44px;
+  padding: 8px 18px;
+}
+.overlay-actions button.primary {
+  font-size: 23px;
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper-a);
+  box-shadow: 0 0 10px rgb(var(--glow-rgb) / 70%);
+}
+.overlay-actions button.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.overlay-loops {
+  color: var(--pencil);
+}
+.overlay-choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+}
+.overlay-choices legend {
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 0;
+  text-align: center;
+  font: 700 22px/1 var(--f-hand);
+  color: var(--amber);
+}
+.overlay-choices button {
+  min-height: 44px;
+  padding: 8px 16px;
+}
+.overlay-choices button.chosen {
+  border-color: var(--ink);
+  background: rgb(var(--glow-rgb) / 30%);
+  box-shadow: 0 0 10px rgb(var(--glow-rgb) / 70%);
+  color: var(--ink);
+}
+
+/* ---------- Lecturas: la hoja pegada con cinta ---------- */
+.reader {
+  align-items: flex-start;
+  padding-top: max(8vh, 28px);
+  background: radial-gradient(ellipse at 50% 40%, rgb(0 0 0 / 30%), rgb(0 0 0 / 72%));
+  cursor: pointer;
+}
+.reader-sheet {
+  width: min(640px, 100%);
+  max-height: calc(100dvh - 12vh);
+  padding: 32px 36px 22px;
+  transform: rotate(-0.6deg);
+  animation: sheetIn 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+  line-height: 1.5;
+}
+.reader-title,
+.recorder-title,
+.puzzle-title,
+.ending-title {
+  margin: 0 0 10px;
+  font: 700 32px/1.05 var(--f-hand);
+  letter-spacing: 0;
+  color: var(--amber);
+  text-shadow: var(--halo-amber);
+}
+.reader-tag {
+  font: 600 18px/1.2 var(--f-hand);
+  color: var(--pencil);
+}
+.reader-text {
+  display: none;
+  margin: 0 0 0.7em;
+  font: 400 19px/1.55 var(--f-body);
+  text-shadow: var(--halo);
+  transition: opacity 0.4s;
+}
+.reader-text.is-current,
+.reader-sheet .reader-text.is-past {
+  display: block;
+}
+.reader-text.is-past {
+  opacity: 0.62;
+}
+.reader-notes {
+  opacity: 0;
+}
+.reader-notes:empty {
+  display: none;
+}
+.reader-notes.is-written {
+  opacity: 1;
+  transition: opacity 0.4s;
+}
+.reader-noted-title {
+  margin: 14px 0 4px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--pencil);
+  font: 700 20px/1 var(--f-hand);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--amber);
+}
+.reader-noted {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.reader-noted-item,
+.reader-hint {
+  font: 500 22px/1.2 var(--f-hand);
+  color: var(--ink);
+  text-shadow: var(--halo);
+  clip-path: inset(0 100% 0 0);
+}
+.reader-hint {
+  margin: 8px 0 0;
+  font-size: 19px;
+  color: var(--pencil);
+}
+.reader-notes.is-written .reader-noted-item,
+.reader-notes.is-written .reader-hint {
+  animation: write 1.5s steps(28) 0.15s forwards;
+}
+.reader-foot {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+.reader-next {
+  font-size: 22px;
+  color: var(--amber);
+  opacity: 0;
+  text-shadow: 0 0 6px rgb(var(--amber-rgb) / 70%);
+}
+.reader.is-ready .reader-next {
+  opacity: 1;
+  animation: bob 1s ease-in-out infinite;
+}
+.reader-close {
+  min-height: 44px;
+  margin-top: 0;
+  padding: 6px 18px;
+}
+
+/* ---------- Charlas: la tira de papel rasgado, abajo, con bandas de cine ---------- */
+.reader--charla {
+  align-items: flex-end;
+  padding: 0 16px max(10vh, 64px);
+  background: linear-gradient(to top, rgb(0 0 0 / 55%), transparent 50%);
+}
+.reader--charla::before,
+.reader--charla::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 7vh;
+  background: #000;
+  animation: bars 0.45s ease both;
+  pointer-events: none;
+}
+.reader--charla::before {
+  top: 0;
+  transform-origin: top;
+}
+.reader--charla::after {
+  bottom: 0;
+  transform-origin: bottom;
+}
+.reader-strip {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 20px;
+  align-items: start;
+  width: min(880px, 100%);
+  max-height: 48vh;
+  overflow-y: auto;
+  padding: 24px 28px 18px;
+  border: 0;
+  border-radius: 0;
+  background: var(--paper-a) var(--paper-noise);
+  color: var(--ink);
+  box-shadow: 0 -4px 20px rgb(0 0 0 / 45%);
+  clip-path: var(--torn-top);
+  animation: stripIn 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.reader-portrait {
+  width: clamp(64px, 10vw, 104px);
+  aspect-ratio: 1;
+}
+.reader-portrait svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: url(#wobble);
+}
+.reader-body {
+  min-width: 0;
+}
+.reader-strip .reader-title {
+  margin-bottom: 6px;
+  font-size: 28px;
+}
+.reader-strip.is-narration .reader-title {
+  visibility: hidden;
+}
+.reader-strip .reader-text {
+  min-height: 3.1em;
+  margin: 0;
+}
+.reader-strip .reader-text.is-past {
+  display: none;
+}
+.reader-strip.is-narration .reader-text {
+  font-style: italic;
+  color: rgb(var(--ink-rgb) / 88%);
+}
+.portrait-ool .body {
+  fill: rgb(var(--glow-rgb) / 8%);
+  stroke: var(--ink);
+  stroke-width: 2.2;
+}
+.portrait-ool .eye {
+  fill: var(--ink);
+}
+.portrait-ool .shine {
+  fill: var(--paper-a);
+}
+.portrait-ool .fil {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.8;
+  filter: drop-shadow(0 0 2px rgb(var(--glow-rgb)));
+}
+.portrait-ool .tip {
+  fill: var(--amber);
+  filter: drop-shadow(0 0 3px rgb(var(--amber-rgb)));
+}
+.portrait-ool .acc {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.8;
+}
+.portrait-ool .hatch {
+  stroke: var(--pencil);
+  stroke-width: 0.9;
+  opacity: 0.6;
+}
+.portrait-ool .dot {
+  fill: var(--glow);
+}
+.reader-portrait.is-talking .fil,
+.reader-portrait.is-talking .tip {
+  animation: talkGlow 0.45s ease-in-out infinite alternate;
+}
+
+/* ---------- Grabadora y puzles: también hojas ---------- */
+.recorder,
+.puzzle {
+  background: radial-gradient(ellipse at 50% 40%, rgb(0 0 0 / 30%), rgb(0 0 0 / 72%));
+}
+.recorder-card,
+.puzzle-card {
+  padding: 32px 36px 24px;
+  transform: rotate(-0.4deg);
+  animation: sheetIn 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.recorder-text,
+.puzzle-text {
+  font-size: 19px;
+}
+.puzzle-notebook {
+  font-family: var(--f-hand);
+  font-size: 22px;
+}
+.recorder-noted-title,
+.puzzle-noted-title {
+  font: 700 20px/1 var(--f-hand);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ---------- El Registro: un libro con hojas que giran ---------- */
+.registry {
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 45%, rgb(0 0 0 / 40%), rgb(0 0 0 / 82%));
+}
+.registry-book {
+  position: relative;
+  flex: none;
+  container-type: inline-size;
+  perspective: 2400px;
+  touch-action: none;
+  user-select: none;
+  animation: bookIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.registry-shift {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+.registry-leaf {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  cursor: grab;
+}
+.registry-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.registry-face.back {
+  transform: rotateY(180deg);
+}
+.registry-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.registry-face.front::after {
+  background: linear-gradient(
+    to right,
+    rgb(0 0 0 / calc(0.14 + var(--shade, 0) * 0.3)),
+    transparent 16%,
+    transparent 70%,
+    rgb(0 0 0 / calc(var(--shade, 0) * 0.35))
+  );
+}
+.registry-face.back::after {
+  background: linear-gradient(
+    to left,
+    rgb(0 0 0 / calc(0.14 + var(--shade, 0) * 0.3)),
+    transparent 16%,
+    transparent 70%,
+    rgb(0 0 0 / calc(var(--shade, 0) * 0.35))
+  );
+}
+.registry-face.paper {
+  background-color: var(--paper-a);
+  background-image:
+    var(--paper-noise),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(2.3cqi - 1px),
+      var(--paper-ruled) calc(2.3cqi - 1px),
+      var(--paper-ruled) 2.3cqi
+    );
+  background-position:
+    0 0,
+    0 4.6cqi;
+  color: var(--ink);
+}
+.registry-face.cover {
+  background-color: var(--leather);
+  background-image: var(--paper-noise), linear-gradient(135deg, #6b452b, #4a2e1c);
+  color: #e9d7b4;
+}
+.registry-face.front.cover {
+  border-radius: 0 8px 8px 0;
+}
+.registry-face.back.cover {
+  border-radius: 8px 0 0 8px;
+}
+.registry-page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 5.5cqi 4.6cqi 4.6cqi 5cqi;
+  font: 500 max(15px, 2.05cqi)/1.15 var(--f-hand);
+}
+.back .registry-page {
+  padding: 5.5cqi 5cqi 4.6cqi 4.6cqi;
+}
+.registry-page h3 {
+  margin: 0;
+  font: 700 1.35em/1.05 var(--f-hand);
+  color: var(--amber);
+  text-shadow: var(--halo-amber);
+  text-wrap: balance;
+}
+.registry-page [data-sigue='true']::after {
+  content: ' (sigue)';
+  font-size: 0.7em;
+  color: var(--pencil);
+}
+.registry-page ul {
+  display: grid;
+  gap: 0.45em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.registry-count,
+.registry-summary {
+  margin: 0;
+  font-size: 0.82em;
+  color: var(--pencil);
+}
+.registry-fact {
+  position: relative;
+  padding-left: 0.9em;
+  text-shadow: var(--halo);
+}
+.registry-fact::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 0.32em;
+  height: 0.32em;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 6px rgb(var(--glow-rgb));
+}
+.registry-rumor {
+  color: var(--pencil);
+}
+.registry-also {
+  margin: 0.15em 0 0;
+  font-size: 0.75em;
+  color: var(--pencil);
+}
+.registry-related {
+  padding-left: 0.6em !important;
+  border-left: 1px solid var(--pencil);
+  font-size: 0.85em;
+  color: rgb(var(--ink-rgb) / 80%);
+}
+.registry-known-item {
+  color: var(--amber);
+  text-shadow: var(--halo-amber);
+}
+.registry-empty {
+  color: var(--pencil);
+}
+.registry-doodle {
+  width: 55%;
+  margin-top: auto;
+  align-self: center;
+  fill: none;
+  stroke: rgb(var(--ink-rgb) / 75%);
+  stroke-width: 1.2;
+  filter: url(#wobble) drop-shadow(0 0 2px rgb(var(--glow-rgb)));
+}
+.registry-doodle circle {
+  fill: var(--glow);
+  stroke: none;
+}
+.registry-page-number {
+  position: absolute;
+  bottom: 2.4cqi;
+  font-size: 0.8em;
+  opacity: 0.55;
+}
+.front .registry-page-number {
+  right: 3.4cqi;
+}
+.back .registry-page-number {
+  left: 3.4cqi;
+}
+.registry-cover-label {
+  margin: auto;
+  padding: 1em 1.4em;
+  text-align: center;
+  background: var(--paper-a) var(--paper-noise);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 35%);
+  transform: rotate(-2deg);
+}
+.registry-title {
+  margin: 0;
+  font: 700 2.4em/1 var(--f-hand);
+  letter-spacing: 0;
+  color: var(--ink);
+  text-shadow: var(--halo);
+}
+.registry-cover-sub {
+  margin: 0.2em 0 0;
+  font: 500 1.1em/1 var(--f-hand);
+  color: var(--amber);
+}
+.registry-flyleaf {
+  margin: auto 0 0;
+  text-align: center;
+  font-size: 1.3em;
+  color: var(--amber);
+}
+.registry-flyleaf-note {
+  margin: 0 0 auto;
+  text-align: center;
+  color: var(--pencil);
+}
+.registry-world-page {
+  color: var(--pencil);
+  font-size: 0.85em;
+}
+.registry-photo {
+  position: relative;
+  width: 72%;
+  margin: 0.4em 0 0;
+  align-self: center;
+  padding: 0.7cqi 0.7cqi 1.8cqi;
+  background: var(--photo-paper);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 35%);
+  transform: rotate(2deg);
+}
+.registry-photo img,
+.discover-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.registry-photo::before,
+.discover-photo::before {
+  content: '';
+  position: absolute;
+  top: -1cqi;
+  left: 32%;
+  z-index: 1;
+  width: 36%;
+  height: 2.2cqi;
+  min-height: 10px;
+  transform: rotate(-4deg);
+  background: var(--tape);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+}
+.discover-photo::before {
+  top: -8px;
+  height: 18px;
+}
+.entry-new {
+  clip-path: inset(0 100% 0 0);
+}
+.entry-new.written {
+  animation: write 1.8s steps(36) 0.25s forwards;
+}
+.registry-tabs {
+  position: absolute;
+  top: 10%;
+  right: -3.2cqi;
+  display: grid;
+  gap: 0.8cqi;
+  width: 3.2cqi;
+  min-width: 26px;
+}
+.registry-tab {
+  height: 12cqi;
+  min-height: 72px;
+  padding: 0;
+  border: 0;
+  border-radius: 0 0.6cqi 0.6cqi 0;
+  writing-mode: vertical-rl;
+  font: 700 max(13px, 1.7cqi)/1 var(--f-hand);
+  color: var(--on-glow);
+  box-shadow: 0 0 10px rgb(var(--glow-rgb) / 25%);
+  cursor: pointer;
+}
+.registry-tab:nth-child(1) {
+  background: var(--amber);
+}
+.registry-tab:nth-child(2) {
+  background: var(--glow);
+}
+.registry-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.registry-turn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 28px;
+}
+.registry-turn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.registry-where {
+  min-width: 7ch;
+  text-align: center;
+  font: 600 20px/1 var(--f-hand);
+  color: var(--pencil);
+}
+.registry-close {
+  min-height: 44px;
+  margin-top: 0;
+  padding: 6px 18px;
+}
+@media (max-width: 639px) {
+  .registry-tabs {
+    display: none;
+  }
+}
+
+/* ---------- En partida: reloj, aviso, nota, cuaderno, cartel ---------- */
+.clock-hud {
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  background: none;
+  font: 700 21px/1 var(--f-hand);
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px #000;
+}
+.clock-rings {
+  width: 72px;
+  height: 72px;
+  overflow: visible;
+  filter: url(#wobble);
+}
+.ring-track {
+  fill: none;
+  stroke: rgb(var(--glow-rgb) / 14%);
+  stroke-width: 3;
+}
+.ring-arc {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.25s linear;
+}
+.ring-mine {
+  stroke: var(--glow);
+  filter: drop-shadow(0 0 3px var(--glow));
+}
+.ring-umbral {
+  stroke: var(--amber);
+  filter: drop-shadow(0 0 3px var(--amber));
+}
+.ring-counterweight {
+  stroke: var(--counterweight);
+  filter: drop-shadow(0 0 3px var(--counterweight));
+}
+.ring.is-off {
+  display: none;
+}
+.ring-mark {
+  fill: #fff;
+  opacity: 0.6;
+}
+.clock-hud-mine {
+  order: -1;
+  min-width: 3.6em;
+  text-align: right;
+  color: var(--glow);
+  text-shadow: 0 0 8px rgb(var(--glow-rgb) / 60%);
+}
+.clock-hud-umbral {
+  color: var(--amber);
+  text-shadow: 0 0 8px rgb(var(--amber-rgb) / 60%);
+}
+.clock-hud-counterweight {
+  color: var(--counterweight);
+}
+.clock-hud-sep {
+  display: none;
+}
+
+.prompt {
+  top: 58%;
+  bottom: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  font: 600 23px/1 var(--f-hand);
+  letter-spacing: 0.02em;
+  color: #e8fff3;
+  text-shadow:
+    0 0 10px rgb(10 30 25 / 90%),
+    0 0 2px #000;
+}
+.prompt[hidden] {
+  display: none;
+}
+.prompt-key {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--glow);
+  border-radius: 50%;
+  font: 700 23px/1 var(--f-hand);
+  color: var(--glow);
+  box-shadow:
+    0 0 12px rgb(var(--glow-rgb) / 55%),
+    inset 0 0 8px rgb(var(--glow-rgb) / 35%);
+  transform: rotate(-4deg);
+  animation: breathe 2.6s ease-in-out infinite;
+}
+.prompt-key-dot {
+  width: 16px;
+  height: 16px;
+}
+.prompt-sep {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.prompt-button {
+  min-height: 48px;
+  padding: 6px 20px 6px 10px;
+  border: 1.5px solid rgb(var(--glow-rgb) / 50%);
+  border-radius: var(--hand-radius);
+  background: rgb(var(--night-rgb) / 70%);
+}
+
+.notice {
+  left: auto;
+  right: 76px;
+  top: 18px;
+  max-width: min(440px, calc(100vw - 108px));
+  padding: 12px 18px 12px;
+  border-radius: 0;
+  background: var(--paper-a) var(--paper-noise);
+  color: var(--ink);
+  font: 500 21px/1.15 var(--f-hand);
+  text-align: left;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 45%);
+  clip-path: var(--torn-top);
+  transform: rotate(1.5deg) translateY(-6px);
+  transition:
+    opacity 0.35s,
+    transform 0.35s;
+}
+.notice.notice-visible {
+  opacity: 1;
+  transform: rotate(1.5deg);
+}
+.notice-label {
+  display: block;
+  font: 700 17px/1.2 var(--f-hand);
+  color: var(--amber);
+  text-shadow: var(--halo-amber);
+}
+.notice-text {
+  display: block;
+  text-shadow: var(--halo);
+}
+.notice-spark {
+  position: fixed;
+  z-index: 30;
+  width: 10px;
+  height: 10px;
+  margin: -5px;
+  border-radius: 50%;
+  background: var(--glow);
+  box-shadow: 0 0 12px 4px rgb(var(--glow-rgb) / 70%);
+  pointer-events: none;
+}
+
+.guia {
+  padding: 12px 20px;
+  border-radius: 0;
+  background: var(--paper-a) var(--paper-noise);
+  color: var(--ink);
+  font: 500 22px/1.2 var(--f-hand);
+  text-shadow: var(--halo);
+  box-shadow: 0 3px 10px rgb(0 0 0 / 45%);
+  clip-path: var(--torn-top);
+}
+
+.hud-book {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 5;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 4px;
+  border: 0;
+  background: none;
+  color: var(--glow);
+  cursor: pointer;
+}
+.hud-book[hidden] {
+  display: none;
+}
+.hud-book svg {
+  width: 40px;
+  height: auto;
+  overflow: visible;
+  fill: rgb(var(--glow-rgb) / 10%);
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgb(var(--glow-rgb) / 60%));
+}
+.hud-book-key {
+  font: 700 16px/1 var(--f-hand);
+  color: var(--ink);
+  text-shadow: 0 1px 3px #000;
+}
+.hud-book.is-pulse {
+  animation: bookPulse 0.9s ease 2;
+}
+@media (pointer: coarse) {
+  /* En táctil, arriba a la derecha va el botón de pausa. */
+  .hud-book {
+    right: 92px;
+  }
+  .notice {
+    right: 152px;
+    max-width: min(440px, calc(100vw - 168px));
+  }
+}
+
+.place {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 13%;
+  z-index: 6;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+}
+.place.is-on {
+  animation: placeIn 3.4s ease forwards;
+}
+.place-main {
+  display: block;
+  font: 700 clamp(46px, 7vw, 78px)/1 var(--f-hand);
+  color: #eafff4;
+  text-shadow:
+    0 0 18px rgb(var(--glow-rgb) / 75%),
+    0 2px 6px rgb(0 0 0 / 60%);
+}
+.place-main span {
+  display: inline-block;
+  padding: 0 0.1em;
+  clip-path: inset(0 100% 0 0);
+}
+.place.is-on .place-main span {
+  animation: write 1.3s steps(16) 0.2s forwards;
+}
+.place-sub {
+  display: block;
+  margin-top: 6px;
+  font: italic 400 clamp(17px, 2vw, 23px) / 1.2 var(--f-body);
+  color: var(--amber);
+  text-shadow:
+    0 0 10px rgb(var(--amber-rgb) / 50%),
+    0 1px 3px #000;
+}
+
+/* ---------- Un mundo nuevo: la foto que se seca y su nombre ---------- */
+.discover-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 55%);
+}
+.discover-backdrop[hidden] {
+  display: none;
+}
+.discover {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  width: min(440px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  padding: 24px 26px 20px;
+  transform: rotate(-1.2deg);
+}
+.discover.is-in {
+  animation: dscIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.discover-title {
+  margin: 0;
+  font: 700 34px/1 var(--f-hand);
+  color: var(--amber);
+  text-shadow: var(--halo-amber);
+}
+.discover-photo {
+  position: relative;
+  width: 100%;
+  margin: 6px 0 0;
+  padding: 8px 8px 24px;
+  background: var(--photo-paper);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+  transform: rotate(1.5deg);
+}
+.discover.is-in .discover-photo img {
+  animation: develop 2.4s ease-out;
+}
+.discover-label {
+  font: 600 23px/1 var(--f-hand);
+}
+.discover-input {
+  width: 100%;
+  padding: 0.1em 0.2em;
+  border: 0;
+  border-bottom: 1.5px dashed currentColor;
+  background: transparent;
+  color: var(--ink);
+  font: 700 36px/1.1 var(--f-hand);
+  text-align: center;
+  text-shadow: var(--halo);
+  caret-color: var(--amber);
+  outline: none;
+}
+.discover-input:focus-visible {
+  border-bottom-style: solid;
+  border-color: var(--glow);
+}
+.discover-input::placeholder {
+  color: inherit;
+  opacity: 0.35;
+}
+.discover-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+}
+.discover-hint {
+  margin: 0;
+  font: 400 15px/1.3 var(--f-body);
+  color: var(--pencil);
+  text-align: center;
+}
+.discover-save {
+  min-height: 44px;
+  padding: 6px 18px;
+}
+.discover-flying {
+  position: fixed;
+  z-index: 40;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* ---------- Vuelo, final y controles táctiles: el mismo lenguaje ---------- */
+.ship-panel {
+  border-radius: 0;
+  background: var(--night) var(--fiber-noise);
+  box-shadow: inset 0 0 14px rgb(var(--glow-rgb) / 12%);
+}
+.ending-card {
+  padding: 34px 34px 26px;
+}
+.ending-text {
+  font-size: 19px;
+}
+.ending-choice {
+  min-height: 44px;
+}
+.touch-pause,
+.touch-jump,
+.touch-ship-action {
+  border-color: rgb(var(--glow-rgb) / 55%);
+  font-family: var(--f-hand);
+  font-size: 18px;
+}
+
+/* ---------- Sin movimiento y calidad baja ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ink-c.on,
+  .reader-sheet,
+  .reader-strip,
+  .recorder-card,
+  .puzzle-card,
+  .registry-book,
+  .discover.is-in,
+  .discover.is-in .discover-photo img,
+  .reader--charla::before,
+  .reader--charla::after,
+  .prompt-key,
+  .hud-book.is-pulse,
+  .reader-portrait.is-talking .fil,
+  .reader-portrait.is-talking .tip,
+  .reader.is-ready .reader-next {
+    animation: none;
+  }
+  .registry-shift,
+  .notice,
+  .ring-arc {
+    transition: none;
+  }
+  .entry-new,
+  .reader-noted-item,
+  .reader-hint,
+  .place-main span {
+    clip-path: none;
+    animation: none !important;
+  }
+  .place.is-on {
+    animation: none;
+    opacity: 1;
+  }
+}
+.calidad-baja * {
+  text-shadow: none !important;
+}
+.calidad-baja .ink-c.on,
+.calidad-baja .prompt-key,
+.calidad-baja .reader-portrait.is-talking .fil,
+.calidad-baja .reader-portrait.is-talking .tip {
+  animation: none;
+}
+.calidad-baja .clock-rings,
+.calidad-baja .ring-arc,
+.calidad-baja .reader-portrait svg,
+.calidad-baja .registry-doodle,
+.calidad-baja .hud-book svg,
+.calidad-baja .portrait-ool .tip {
+  filter: none;
+}

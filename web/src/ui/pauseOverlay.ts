@@ -1,5 +1,8 @@
 // Pantalla de inicio y pausa. En PC captura el ratón (pointer lock) al hacer clic; Esc lo libera y
 // vuelve a mostrar la pausa. En pantallas táctiles basta con tocar para empezar.
+// Es una página del cuaderno (plan del HUD, D.6), con un botón Configuración que solo lleva lo nuevo del HUD: la
+// velocidad del texto y el sonido de letras (se guardan en el navegador, typewriter/textPreferences.ts).
+import { TEXT_SPEED_LABELS, TEXT_SPEEDS, type TextSettings } from '../typewriter/textPreferences';
 
 export interface PauseOverlay {
   readonly playing: boolean;
@@ -41,6 +44,10 @@ export interface PauseOptions {
   onResetProgress: () => boolean;
   /** Abre el panel del Registro. */
   onOpenRegistry: () => void;
+  /** La velocidad del texto y el sonido de letras. */
+  settings: TextSettings;
+  /** Suena una letra de muestra (al encender el sonido de letras). */
+  onLetterSample?: () => void;
 }
 
 /** Botón dentro de la pantalla: su clic no debe contar como "clic para jugar". */
@@ -76,6 +83,12 @@ export function createPauseOverlay(
   overlay.setAttribute('aria-label', title);
   overlay.tabIndex = 0;
   document.body.append(overlay);
+  /** La hoja del cuaderno donde va todo; en Configuración, sus clics no empiezan a jugar. */
+  const page = document.createElement('div');
+  page.className = 'overlay-page';
+  page.addEventListener('click', (event) => {
+    if (inSettings) event.stopPropagation();
+  });
 
   let playing = false;
   let started = false;
@@ -86,6 +99,74 @@ export function createPauseOverlay(
 
   let confirmingReset = false;
   let resetFailed = false;
+  let inSettings = false;
+
+  /** Un grupo de opciones de las que se elige una (los botones dicen cuál está puesta). */
+  const choices = <T extends string | boolean>(
+    legend: string,
+    values: readonly T[],
+    current: T,
+    labelOf: (value: T) => string,
+    choose: (value: T) => void,
+  ): HTMLElement => {
+    const group = document.createElement('fieldset');
+    group.className = 'overlay-choices';
+    const caption = document.createElement('legend');
+    caption.textContent = legend;
+    group.append(caption);
+    for (const value of values) {
+      const label = labelOf(value);
+      const button = actionButton(label, () => {
+        choose(value);
+        render();
+        // Redibujar destruye el botón con foco: el teclado sigue donde estaba, en la misma opción.
+        [...overlay.querySelectorAll('button')]
+          .find((b) => b.textContent === label)
+          ?.focus({
+            preventScroll: true,
+          });
+      });
+      button.setAttribute('aria-pressed', String(value === current));
+      if (value === current) button.classList.add('chosen');
+      group.append(button);
+    }
+    return group;
+  };
+
+  const settingsView = (): HTMLElement[] => {
+    const prefs = options.settings.current;
+    const back = actionButton('Volver', () => {
+      inSettings = false;
+      render();
+      focusDefault(true);
+    });
+    const actions = document.createElement('div');
+    actions.className = 'overlay-actions';
+    actions.append(back);
+    return [
+      line('strong', 'Configuración'),
+      choices(
+        'Velocidad del texto',
+        TEXT_SPEEDS,
+        prefs.speed,
+        (s) => TEXT_SPEED_LABELS[s],
+        (speed) => {
+          options.settings.update({ speed });
+        },
+      ),
+      choices(
+        'Sonido de letras',
+        [true, false],
+        prefs.letterSound,
+        (on) => (on ? 'Sí' : 'No'),
+        (on) => {
+          options.settings.update({ letterSound: on });
+          if (on) options.onLetterSample?.();
+        },
+      ),
+      actions,
+    ];
+  };
 
   const resetActions = (): HTMLElement => {
     const actions = document.createElement('div');
@@ -120,6 +201,11 @@ export function createPauseOverlay(
 
   function render(): void {
     overlay.hidden = playing;
+    if (inSettings && !playing) {
+      page.replaceChildren(...settingsView());
+      overlay.replaceChildren(page);
+      return;
+    }
     const action = touch ? 'Toca' : 'Haz clic';
     const lines = started
       ? [line('strong', 'Pausa'), line('span', `${action} para seguir`)]
@@ -129,6 +215,11 @@ export function createPauseOverlay(
     play.append(
       actionButton(started ? 'Seguir' : 'Jugar', start, 'primary'),
       actionButton('Registro', options.onOpenRegistry),
+      actionButton('Configuración', () => {
+        inSettings = true;
+        render();
+        focusDefault(true);
+      }),
     );
     lines.push(play);
     const loops = options.loops();
@@ -142,7 +233,8 @@ export function createPauseOverlay(
       lines.push(line('small', 'No se pudo borrar la partida.', 'overlay-warning'));
     }
     if (!touch) lines.push(line('small', DESKTOP_HELP));
-    overlay.replaceChildren(...lines);
+    page.replaceChildren(...lines);
+    overlay.replaceChildren(page);
     focusDefault();
   }
 
@@ -157,7 +249,9 @@ export function createPauseOverlay(
     const buttons = overlay.querySelectorAll<HTMLButtonElement>('button');
     const target = confirmingReset
       ? [...buttons].find((b) => b.textContent === 'Cancelar')
-      : buttons[0];
+      : inSettings
+        ? (overlay.querySelector<HTMLButtonElement>('button.chosen') ?? buttons[0])
+        : buttons[0];
     target?.focus({ preventScroll: true });
   }
 
@@ -165,6 +259,7 @@ export function createPauseOverlay(
     playing = value;
     if (value) started = true;
     confirmingReset = false;
+    inSettings = false;
     render();
     onChange();
   };
@@ -205,14 +300,21 @@ export function createPauseOverlay(
   // Normalmente el navegador ya libera el ratón con Esc; si no (p. ej. teclas sintéticas o juego
   // con arrastre), se pausa aquí.
   const pauseWithEscape = (event: KeyboardEvent): void => {
-    if (event.code === 'Escape') pause();
+    if (event.code !== 'Escape') return;
+    if (!playing && inSettings) {
+      inSettings = false;
+      render();
+      focusDefault(true);
+      return;
+    }
+    pause();
   };
 
   overlay.addEventListener('click', start, { signal });
   overlay.addEventListener(
     'keydown',
     (e) => {
-      if (e.key === 'Enter') start();
+      if (e.key === 'Enter' && !inSettings) start();
     },
     { signal },
   );

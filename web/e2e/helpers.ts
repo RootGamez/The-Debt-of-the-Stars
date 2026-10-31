@@ -32,6 +32,18 @@ export async function ready(page: Page, query = ''): Promise<void> {
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
 }
 
+/**
+ * Cierra la lectura o charla abierta como un jugador: cada E completa la frase o pasa a la siguiente, y en la
+ * última cierra. Se mira después de cada pulsación para no volver a abrirla con una E de más.
+ */
+export async function closeReader(page: Page): Promise<void> {
+  const reader = page.locator('.reader');
+  for (let presses = 0; presses < 60 && (await reader.isVisible()); presses++) {
+    await page.keyboard.press('KeyE');
+  }
+  await expect(reader).toBeHidden();
+}
+
 export async function startPlaying(page: Page, query = ''): Promise<void> {
   await ready(page, query);
   await page.locator('.overlay').click({ position: { x: 20, y: 20 } });

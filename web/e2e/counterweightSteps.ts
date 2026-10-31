@@ -1,7 +1,7 @@
 // Pasos compartidos del Contrapeso para las pruebas de Playwright (Fases 10C y 10D): cogerlo, sacar el motor viejo,
 // ponerlo en la cuna, igualar las ruedas y dejar que el pulso de las 9:00 lo encaje.
 import { expect, type Page } from '@playwright/test';
-import { startPlaying } from './helpers';
+import { closeReader, startPlaying } from './helpers';
 
 export async function counterweight(page: Page) {
   return page.evaluate(() => window.__juego?.counterweight?.() ?? null);
@@ -19,7 +19,7 @@ export async function intoTheCradle(page: Page): Promise<void> {
   await expect(page.locator('.prompt')).toHaveText('E · leer');
   await page.keyboard.press('KeyE');
   await expect(page.locator('.reader-title')).toHaveText('Las notas de la investigadora');
-  await page.keyboard.press('KeyE');
+  await closeReader(page);
   // Las notas ya dicen que está terminado: el Contrapeso no tiene nada nuevo y se coge sin examinarlo.
   await standAt(page, 'lab.contrapeso');
   await expect(page.locator('.prompt')).toHaveText('E · coger');

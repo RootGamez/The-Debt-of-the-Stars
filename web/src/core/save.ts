@@ -1,15 +1,25 @@
 // Guardado entre ciclos. Lo único que persiste es el conocimiento (CONTEXTO_HISTORIA.md §8): el número de
 // ciclos, la lista de hechos descubiertos (Fase 4), si ya se jugó el prólogo en casa (Fase 9, versión 2) y los
-// finales vistos (Fase 10, versión 3).
+// finales vistos (Fase 10, versión 3) y los nombres que el jugador puso a cada mundo de su bitácora (versión 4).
 // Lo leído de localStorage se trata como dato externo: se valida y, si está dañado o manipulado,
 // se descarta y se empieza de cero con un aviso. Sin almacenamiento (modo privado) se juega igual.
 
 export const SAVE_KEY = 'bucle-tiempo:partida';
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 export const MAX_LOOPS = 1_000_000;
 export const MAX_FACTS = 5000;
 /** Ids de hechos: "mundo.nombre" con letras, números, guiones y puntos. */
 const FACT_ID = /^[a-z0-9_.-]{1,64}$/i;
+/** Ids de mundos ("umbral", "laboratorio"…). */
+const WORLD_ID = /^[a-z0-9_-]{1,32}$/;
+/** Los nombres de mundo se escriben a mano: sin caracteres de control (U+0000–U+001F y U+007F). */
+export function isControlChar(char: string): boolean {
+  const code = char.charCodeAt(0);
+  return code < 0x20 || code === 0x7f;
+}
+/** Lo más largo que puede ser el nombre de un mundo (en letras). */
+export const MAX_WORLD_NAME = 24;
+export const MAX_WORLDS = 32;
 /** Los finales que cuentan como vistos (la boca equivocada no es un final). */
 export const SEEN_ENDINGS = ['A', 'B'] as const;
 export type SeenEnding = (typeof SEEN_ENDINGS)[number];
@@ -22,6 +32,13 @@ export interface SaveData {
   prologueDone: boolean;
   /** Los finales que ya se han visto. */
   endings: readonly SeenEnding[];
+  /** Los mundos que el jugador ya nombró (su bitácora): el nombre y el ciclo en que lo encontró. */
+  worlds: Readonly<Record<string, NamedWorld>>;
+}
+
+export interface NamedWorld {
+  name: string;
+  loop: number;
 }
 
 /** Lo mínimo de `Storage` que se usa (permite almacenamiento falso en los tests). */
@@ -39,7 +56,14 @@ export interface LoadResult {
 }
 
 export function freshSave(): SaveData {
-  return { version: SAVE_VERSION, loopsCompleted: 0, facts: [], prologueDone: false, endings: [] };
+  return {
+    version: SAVE_VERSION,
+    loopsCompleted: 0,
+    facts: [],
+    prologueDone: false,
+    endings: [],
+    worlds: {},
+  };
 }
 
 /** `localStorage` si el navegador lo permite (puede lanzar en iframes o con cookies bloqueadas). */
@@ -54,7 +78,11 @@ export function browserStore(): KeyValueStore | null {
 /** Versión 1 (antes del prólogo): esas partidas empezaban ya en Umbral, así que lo dan por hecho. */
 function prologueOf(version: unknown, prologueDone: unknown): boolean | null {
   if (version === 1) return true;
-  if ((version !== 2 && version !== SAVE_VERSION) || typeof prologueDone !== 'boolean') return null;
+  if (
+    (version !== 2 && version !== 3 && version !== SAVE_VERSION) ||
+    typeof prologueDone !== 'boolean'
+  )
+    return null;
   return prologueDone;
 }
 
@@ -64,17 +92,44 @@ function isSeenEnding(value: unknown): value is SeenEnding {
 
 /** Versiones 1 y 2 (antes de los finales): ninguno visto. */
 function endingsOf(version: unknown, endings: unknown): SeenEnding[] | null {
-  if (version !== SAVE_VERSION) return [];
+  if (version !== 3 && version !== SAVE_VERSION) return [];
   if (!Array.isArray(endings) || !endings.every(isSeenEnding)) return null;
   return [...new Set(endings)];
 }
 
+function isNamedWorld(value: unknown): value is NamedWorld {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const { name, loop } = value as Record<string, unknown>;
+  if (typeof name !== 'string' || Array.from(name).some(isControlChar)) return false;
+  const letters = Array.from(name).length;
+  if (letters < 1 || letters > MAX_WORLD_NAME) return false;
+  return Number.isInteger(loop) && (loop as number) >= 0 && (loop as number) <= MAX_LOOPS;
+}
+
+/** Versiones 1 a 3 (antes de la bitácora): ningún mundo nombrado. */
+function worldsOf(version: unknown, worlds: unknown): Record<string, NamedWorld> | null {
+  if (version !== SAVE_VERSION) return {};
+  if (typeof worlds !== 'object' || worlds === null || Array.isArray(worlds)) return null;
+  const entries = Object.entries(worlds);
+  if (entries.length > MAX_WORLDS) return null;
+  const valid: Record<string, NamedWorld> = {};
+  for (const [id, world] of entries) {
+    if (!WORLD_ID.test(id) || !isNamedWorld(world)) return null;
+    valid[id] = { name: world.name, loop: world.loop };
+  }
+  return valid;
+}
+
 function validate(raw: unknown): SaveData | null {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
-  const { version, loopsCompleted, facts, prologueDone, endings } = raw as Record<string, unknown>;
+  const { version, loopsCompleted, facts, prologueDone, endings, worlds } = raw as Record<
+    string,
+    unknown
+  >;
   const prologue = prologueOf(version, prologueDone);
   const seen = endingsOf(version, endings);
-  if (prologue === null || seen === null) return null;
+  const named = worldsOf(version, worlds);
+  if (prologue === null || seen === null || named === null) return null;
   if (!Number.isInteger(loopsCompleted)) return null;
   const loops = loopsCompleted as number;
   if (loops < 0 || loops > MAX_LOOPS) return null;
@@ -86,6 +141,7 @@ function validate(raw: unknown): SaveData | null {
     facts: [...new Set(facts)],
     prologueDone: prologue,
     endings: seen,
+    worlds: named,
   };
 }
 
@@ -148,8 +204,8 @@ export function clearSave(store: KeyValueStore | null): boolean {
 }
 
 /**
- * Guarda el progreso fusionándolo con lo que ya hay guardado: unión de hechos, el mayor número de ciclos y
- * el prólogo hecho si lo estaba en cualquiera de los dos. Así dos pestañas abiertas a la vez no se pisan, y el director del ciclo (que solo conoce los
+ * Guarda el progreso fusionándolo con lo que ya hay guardado: unión de hechos y de mundos nombrados, el mayor
+ * número de ciclos y el prólogo hecho si lo estaba en cualquiera de los dos. Así dos pestañas abiertas a la vez no se pisan, y el director del ciclo (que solo conoce los
  * ciclos) no borra los hechos que escribió la lectura. Una partida de una versión más nueva no se toca.
  */
 export function saveProgress(store: KeyValueStore | null, data: SaveData): boolean {
@@ -162,7 +218,8 @@ export function saveProgress(store: KeyValueStore | null, data: SaveData): boole
   const loopsCompleted = Math.max(stored.data.loopsCompleted, data.loopsCompleted);
   const prologueDone = data.prologueDone || stored.data.prologueDone;
   const endings = [...new Set([...stored.data.endings, ...data.endings])];
-  return writeSave(store, { ...data, loopsCompleted, facts, prologueDone, endings });
+  const worlds = { ...stored.data.worlds, ...data.worlds };
+  return writeSave(store, { ...data, loopsCompleted, facts, prologueDone, endings, worlds });
 }
 
 /**
@@ -186,6 +243,18 @@ export function markEndingSeen(
 ): boolean {
   if (loaded.readOnly) return false;
   return saveProgress(store, { ...loaded.data, endings: [ending] });
+}
+
+/** Al nombrar un mundo nuevo: lo pega en la bitácora guardada, con lo demás que ya había. false si no se pudo. */
+export function markWorldNamed(
+  store: KeyValueStore | null,
+  loaded: LoadResult,
+  world: string,
+  name: string,
+  loop: number,
+): boolean {
+  if (loaded.readOnly) return false;
+  return saveProgress(store, { ...loaded.data, worlds: { [world]: { name, loop } } });
 }
 
 /**

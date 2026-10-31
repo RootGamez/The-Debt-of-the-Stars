@@ -6,6 +6,8 @@ import {
   loadSave,
   markEndingSeen,
   markPrologueDone,
+  markWorldNamed,
+  MAX_WORLDS,
   MAX_FACTS,
   MAX_LOOPS,
   SAVE_KEY,
@@ -55,6 +57,7 @@ describe('loadSave', () => {
       facts: ['umbral.placa'],
       prologueDone: true,
       endings: ['B'],
+      worlds: { umbral: { name: 'Primera luz', loop: 2 } },
     });
 
     expect(loadSave(store).data).toEqual({
@@ -63,6 +66,7 @@ describe('loadSave', () => {
       facts: ['umbral.placa'],
       prologueDone: true,
       endings: ['B'],
+      worlds: { umbral: { name: 'Primera luz', loop: 2 } },
     });
   });
 
@@ -81,6 +85,7 @@ describe('loadSave', () => {
         facts: ['a.b'],
         prologueDone: true,
         endings: [],
+        worlds: {},
       },
       readOnly: false,
     });
@@ -91,7 +96,12 @@ describe('loadSave', () => {
     const v2 = { version: 2, loopsCompleted: 3, facts: ['a.b'], prologueDone: false };
     store.setItem(SAVE_KEY, JSON.stringify(v2));
 
-    expect(loadSave(store).data).toEqual({ ...v2, version: SAVE_VERSION, endings: [] });
+    expect(loadSave(store).data).toEqual({
+      ...v2,
+      version: SAVE_VERSION,
+      endings: [],
+      worlds: {},
+    });
   });
 
   it.each([
@@ -215,6 +225,7 @@ describe('saveProgress (two tabs never lose facts)', () => {
     facts,
     prologueDone,
     endings: [],
+    worlds: {},
   });
 
   it('never forgets that the prologue was played, whichever tab saves last', () => {
@@ -362,5 +373,93 @@ describe('markEndingSeen (reaching an ending)', () => {
     const store = memoryStore({ [SAVE_KEY]: newer });
     expect(markEndingSeen(store, loadSave(store), 'A')).toBe(false);
     expect(store.data.get(SAVE_KEY)).toBe(newer);
+  });
+});
+
+describe('the named worlds (version 4)', () => {
+  it('reads a save from before the log of worlds (version 3) with no world named yet', () => {
+    const store = memoryStore();
+    const v3 = {
+      version: 3,
+      loopsCompleted: 2,
+      facts: ['a.b'],
+      prologueDone: true,
+      endings: ['A'],
+    };
+    store.setItem(SAVE_KEY, JSON.stringify(v3));
+
+    expect(loadSave(store).data).toEqual({ ...v3, version: SAVE_VERSION, worlds: {} });
+  });
+
+  it.each([
+    ['without worlds', undefined],
+    ['with worlds that are a list', []],
+    ['with a world id with odd characters', { '<b>': { name: 'x', loop: 0 } }],
+    ['with an empty name', { umbral: { name: '', loop: 0 } }],
+    ['with a name that is too long', { umbral: { name: 'a'.repeat(25), loop: 0 } }],
+    ['with control characters in a name', { umbral: { name: 'a b', loop: 0 } }],
+    ['with a broken loop', { umbral: { name: 'Umbral', loop: -1 } }],
+    ['with a world that is not an object', { umbral: 'Umbral' }],
+  ])('rejects a version 4 save %s', (_name, worlds) => {
+    const store = memoryStore();
+    const raw = {
+      version: 4,
+      loopsCompleted: 1,
+      facts: [],
+      prologueDone: true,
+      endings: [],
+      worlds,
+    };
+    store.setItem(SAVE_KEY, JSON.stringify(raw));
+
+    expect(loadSave(store).data).toEqual(freshSave());
+    expect(loadSave(store).warning).toBeDefined();
+  });
+
+  it('rejects a save with more worlds than it accepts', () => {
+    const worlds = Object.fromEntries(
+      Array.from({ length: MAX_WORLDS + 1 }, (_, i) => [`mundo${i}`, { name: 'x', loop: 0 }]),
+    );
+    const store = memoryStore();
+    const raw = {
+      version: 4,
+      loopsCompleted: 1,
+      facts: [],
+      prologueDone: true,
+      endings: [],
+      worlds,
+    };
+    store.setItem(SAVE_KEY, JSON.stringify(raw));
+
+    expect(loadSave(store).data).toEqual(freshSave());
+  });
+
+  it('keeps the worlds another tab named and adds the new one', () => {
+    const store = memoryStore();
+    writeSave(store, { ...freshSave(), worlds: { umbral: { name: 'Primera luz', loop: 0 } } });
+
+    saveProgress(store, { ...freshSave(), worlds: { archivo: { name: 'Frío', loop: 3 } } });
+
+    expect(loadSave(store).data.worlds).toEqual({
+      umbral: { name: 'Primera luz', loop: 0 },
+      archivo: { name: 'Frío', loop: 3 },
+    });
+  });
+
+  it('saves the name of a world keeping everything else, and not over a newer save', () => {
+    const store = memoryStore();
+    writeSave(store, { ...freshSave(), loopsCompleted: 4, facts: ['a.b'] });
+
+    expect(markWorldNamed(store, loadSave(store), 'umbral', 'Primera luz', 4)).toBe(true);
+
+    expect(loadSave(store).data).toMatchObject({
+      loopsCompleted: 4,
+      facts: ['a.b'],
+      worlds: { umbral: { name: 'Primera luz', loop: 4 } },
+    });
+    const newer = JSON.stringify({ version: SAVE_VERSION + 1, loopsCompleted: 3, facts: [] });
+    const other = memoryStore({ [SAVE_KEY]: newer });
+    expect(markWorldNamed(other, loadSave(other), 'umbral', 'x', 0)).toBe(false);
+    expect(other.data.get(SAVE_KEY)).toBe(newer);
   });
 });

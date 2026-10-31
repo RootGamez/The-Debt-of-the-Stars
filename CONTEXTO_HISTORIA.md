@@ -1,8 +1,8 @@
 # CONTEXTO DE HISTORIA — Juego de bucle de tiempo
 
 **Título provisional:** por definir (ver preguntas abiertas)
-**Versión:** v1.10 (los finales jugables: la vuelta a casa)
-**Última actualización:** 2026-10-30 · Fase 10
+**Versión:** v1.11 (el HUD del Cuaderno vivo y la bitácora de mundos)
+**Última actualización:** 2026-10-30 · HUD
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)
 
 > Documento vivo. Es la fuente de verdad de la historia del juego: léelo entero antes de continuar el trabajo en cualquier sesión (con Claude o sin él) y actualízalo al final.
@@ -263,6 +263,8 @@ Evitar el recurso de texto en espiral con traductor. Propuesta: los Ausentes dej
   - 13:30 a 15:00 · Absorción en orden de cercanía.
   - 15:00 · Fin del ciclo.
 - **Interfaz:** reloj doble en pantalla (el del jugador y el del punto de referencia). Es HUD, narrativa y puzzle a la vez. 🟡 Discreto, abajo en el centro ("tú 03:12 · Umbral 03:54"), contando desde 0:00; la pausa detiene ambos.
+- ✅ **El Cuaderno vivo (Anthony, 2026-10-30; plan `docs/plan-hud-cuaderno-vivo.md`).** El HUD no parece una web: es el cuaderno del explorador. Papel crema mate, rasgado y con cinta; letra a mano (Caveat) para lo que él anota y Alegreya para lo que dicen otros; **solo la tinta brilla**, con la luz verde de los filamentos de los Ool (títulos en ámbar). Los textos se escriben como tinta que se seca y se pasan frase a frase (E, Espacio, Intro, clic; mantener acelera). Las charlas van en una tira abajo, con bandas de cine y el retrato dibujado del Ool que habla; las lecturas, en una hoja pegada en el centro. El reloj doble son anillos de luz trazados a mano (un tercero mientras se lleva el Contrapeso). La pausa tiene el mismo estilo y una **Configuración** con solo la velocidad del texto y el sonido de letras. El **Registro** es un libro cuyas hojas giran, con pestañas de Preguntas y Mundos.
+- ✅ **La bitácora de mundos (Anthony, 2026-10-30).** La primera vez que se llega a un mundo, su dibujo se revela y el jugador le pone nombre (vacío = el oficial); el dibujo vuela al cuaderno y queda pegado con cinta en su página, con lo anotado allí. Hogar y la Luna vienen ya nombrados; el Laboratorio Oculto no aparece hasta encontrarlo. El nombre propio solo se ve en el cuaderno, en el cartel de llegada y en la nave: las placas y grabaciones de los Ausentes siguen diciendo "Umbral".
 
 ---
 
@@ -354,3 +356,4 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-29 · Sesión 6 (Fase 10).** Anthony acepta las propuestas del plan de la Fase 10: el final B es la **profecía autocumplida**; el final lo deciden **la boca que se elige y llevar o no los planos** del Contrapeso; los **pasos del Contrapeso** (cogerlo en el Laboratorio, su tercer reloj, sacar el motor viejo antes de las 9:00, las dos ruedas y encajarlo en el pulso); y los tres que se quedaron **murieron en el laboratorio** (opción 4).
 - **2026-10-30 · Fase 10 (hito 10D, 🟡).** El epílogo se puede jugar: con el Contrapeso instalado se baja con la nave al horizonte estable (tira de la nave, la marea se nota, el reloj de Umbral se acelera) y al cruzarlo, fundido a negro, se despierta en el Archivo de las Puertas. Se proponen los números del puzzle de las bocas de casa (§9) y que los planos se puedan dejar. La boca y los planos ya deciden el final (A, B o "llega tarde"); las escenas de cada final son el hito siguiente.
 - **2026-10-30 · Fase 10 (hito 10E, 🟡).** Los finales se pueden jugar: la vuelta a casa por la boca elegida (el Hogar de antes con A y B; el de siempre si se llega tarde), la Directora que cierra el viaje con la tarjeta del final, la Luna sin fragmento en el final A y los finales vistos en el guardado. Los textos de las tarjetas y las escenas son de Anthony.
+- **2026-10-30 · HUD (Cuaderno vivo).** Implementado el rediseño del HUD con las decisiones de Anthony (§8 «Interfaz»): textos que se escriben y se pasan frase a frase, charlas con retrato, el Registro como libro y la bitácora de mundos (nombrar cada mundo al llegar y pegar su dibujo). Viendo el juego, Anthony pide el papel crema de la propuesta A con solo la tinta brillando.

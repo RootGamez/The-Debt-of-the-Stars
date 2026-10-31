@@ -19,7 +19,10 @@ import {
 } from '../registry/interaction';
 import { canGiveNew } from '../registry/knowledge';
 import { keyAction } from './keyActions';
+import { notebookPages } from '../registry/notebookPages';
 import { buildRegistryView } from '../registry/registryView';
+import type { TextSettings } from '../typewriter/textPreferences';
+import { createBookButton } from '../ui/bookButton';
 import { createInteractPrompt } from '../ui/interactPrompt';
 import { createNotice } from '../ui/notice';
 import type { PauseOverlay } from '../ui/pauseOverlay';
@@ -28,6 +31,7 @@ import { createReadingPanel } from '../ui/readingPanel';
 import { createRecordingPanel } from '../ui/recordingPanel';
 import { createRegistryPanel } from '../ui/registryPanel';
 import { WorldDataError } from '../worlds/markers';
+import { worldPages, type WorldNames } from '../worlds/worldLog';
 import { RecordingPlayback } from './recording';
 import type { OpenReading, ReadingSession } from './readingSession';
 import type { WorldSources } from './worldSources';
@@ -46,6 +50,13 @@ export interface ReadingUiOptions {
   actions?: SourceActions;
   /** Lectores de puzle que trae el juego (las ruedas de la cuna, que miran el Contrapeso en vivo). */
   readers?: CustomReaders;
+  /** La velocidad del texto y el sonido de letras (Configuración, en la pausa). */
+  settings: TextSettings;
+  reducedMotion: boolean;
+  /** Los mundos nombrados (la bitácora del cuaderno). */
+  worldNames: () => WorldNames;
+  /** Cada pocas letras escritas, con el tono de quien habla. */
+  onLetters?: (pitch: number) => void;
 }
 
 /** Lo que se hace con una fuente además de leerla (por ejemplo, examinar el Contrapeso y luego cogerlo). */
@@ -155,13 +166,27 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   let target: Interactable | undefined;
   let enabled = true;
 
-  const notice = createNotice();
+  const book = createBookButton(touch, () => {
+    if (overlay.playing && !reading.frozen && !registryPanel.isOpen) openRegistry();
+  });
+  const notice = createNotice(book);
   const registryPanel = createRegistryPanel(() => {
     closeRegistry();
+  }, options.reducedMotion);
+  const readingPanel = createReadingPanel({
+    onClose: () => {
+      closeReading();
+    },
+    touch,
+    settings: options.settings,
+    reducedMotion: options.reducedMotion,
+    onLetters: (pitch) => {
+      if (options.settings.current.letterSound) options.onLetters?.(pitch);
+    },
   });
-  const readingPanel = createReadingPanel(() => {
-    closeReading();
-  }, touch);
+  /** Lo que ya estaba en el cuaderno la última vez que se abrió: lo demás se escribe al abrirlo. */
+  const inNotebook = new Set<string>([...reading.known, ...reading.rumors()]);
+  const namedInNotebook = new Set<string>(Object.keys(options.worldNames()));
   const puzzlePanel = createPuzzlePanel(
     () => {
       closeReading();
@@ -280,8 +305,10 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   }
 
   function activate(): void {
-    if (reading.frozen) closeReading();
-    else if (canInteract() && target) {
+    // Con una lectura abierta, E completa la frase o pasa a la siguiente; al final, cierra.
+    if (reading.frozen) {
+      if (!readingPanel.isOpen || !readingPanel.advance()) closeReading();
+    } else if (canInteract() && target) {
       if (actionOf(target.id) !== undefined) actions?.run(target.id);
       else openReading(target.id);
     }
@@ -291,7 +318,16 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     if (reading.frozen) closeReading();
     if (overlay.playing) overlay.pause();
     overlay.setInert(true); // detrás del Registro no se puede reanudar con el teclado
-    registryPanel.open(buildRegistryView(clues, reading.known));
+    const names = options.worldNames();
+    const rumors = reading.rumors();
+    const fresh = {
+      facts: new Set([...reading.known, ...rumors].filter((id) => !inNotebook.has(id))),
+      worlds: new Set(Object.keys(names).filter((id) => !namedInNotebook.has(id))),
+    };
+    const view = buildRegistryView(clues, reading.known);
+    registryPanel.open(notebookPages(view, worldPages(names, clues, reading.known), fresh));
+    for (const id of [...reading.known, ...rumors]) inNotebook.add(id);
+    for (const id of Object.keys(names)) namedInNotebook.add(id);
   }
 
   function onKey(event: KeyboardEvent): void {
@@ -347,6 +383,8 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       lastTime = timeSeconds;
       if (!overlay.playing && reading.frozen) closeReading(); // al pausar se cierra la lectura
       playRecording(dt);
+      readingPanel.update(dt);
+      book.setVisible(overlay.playing && enabled && !reading.frozen && !registryPanel.isOpen);
       if (!enabled) {
         prompt.hide();
         current.markers.hide();
@@ -425,6 +463,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     dispose() {
       abort.abort();
       notice.dispose();
+      book.dispose();
       registryPanel.dispose();
       readingPanel.dispose();
       recordingPanel.dispose();
