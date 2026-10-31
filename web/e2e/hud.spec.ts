@@ -62,10 +62,10 @@ test('the pause has a Configuración with text speed and letter sound, and it is
     'aria-pressed',
     'true',
   );
-  await page
-    .getByRole('group', { name: 'Sonido de letras' })
-    .getByRole('button', { name: 'Sí' })
-    .click();
+  const sound = page.getByRole('group', { name: 'Sonido de letras' });
+  await sound.getByRole('button', { name: 'Sí' }).click();
+  // Redibujar no le quita el foco al teclado: sigue en la opción elegida.
+  await expect(sound.getByRole('button', { name: 'Sí' })).toBeFocused();
 
   const saved = await page.evaluate(
     (key) => JSON.parse(window.localStorage.getItem(key) ?? 'null') as unknown,
@@ -135,6 +135,17 @@ test('a new world is named on arrival and its drawing is taped into the bitácor
   const umbral = (await snapshot(page))?.loop.umbral;
   await page.waitForTimeout(600);
   expect((await snapshot(page))?.loop.umbral).toBe(umbral); // el tiempo espera al nombre
+
+  // Aunque el foco salga del nombre (clic en la foto), ninguna tecla llega al juego: ni E, ni R, ni Esc.
+  await dialog.getByRole('img').click();
+  await expect(page.getByLabel('Ponle nombre')).toBeFocused();
+  await page.keyboard.press('KeyE');
+  await page.keyboard.press('KeyR');
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeVisible();
+  await expect(page.locator('.registry')).toBeHidden();
+  await expect(page.locator('.overlay')).toBeHidden();
+  await expect(page.locator('.reader')).toBeHidden();
 
   await page.getByLabel('Ponle nombre').fill('Faro');
   await page.keyboard.press('Enter');

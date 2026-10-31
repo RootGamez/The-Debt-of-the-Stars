@@ -84,9 +84,15 @@ export function createWorldDiscovery(book: () => HTMLElement | undefined): World
         ],
         { duration: FLY_MS, easing: 'cubic-bezier(.5,0,.3,1)' },
       )
-      .addEventListener('finish', () => {
-        copy.remove();
-      });
+      // Termine o se cancele (pestaña oculta), la copia no se queda en pantalla.
+      .finished.then(
+        () => {
+          copy.remove();
+        },
+        () => {
+          copy.remove();
+        },
+      );
   }
 
   function finish(): void {
@@ -94,27 +100,41 @@ export function createWorldDiscovery(book: () => HTMLElement | undefined): World
     const { official, onNamed } = pending;
     pending = undefined;
     const name = cleanWorldName(input.value, official);
-    backdrop.hidden = true;
+    // La foto se mide con el diálogo aún visible: oculto, no ocupa sitio y la copia saldría de tamaño cero.
     flyToBook();
+    backdrop.hidden = true;
     onNamed(name);
   }
 
-  // Lo que se escribe es del nombre: ninguna tecla sale de aquí hacia el juego.
-  for (const type of ['keydown', 'keyup'] as const) {
-    input.addEventListener(type, (event) => {
-      event.stopPropagation();
-      if (type === 'keydown' && event.key === 'Enter') {
-        event.preventDefault();
-        finish();
-      }
-    });
-  }
+  // Lo que se escribe es del nombre: ninguna tecla pulsada aquí sale hacia el juego (ni E, ni R, ni Esc), vaya donde
+  // vaya el foco dentro del diálogo. Al soltar sí llegan: si venías andando con W, el juego tiene que enterarse de
+  // que ya no la tienes pulsada.
+  backdrop.addEventListener('keydown', (event) => {
+    event.stopPropagation();
+    if (event.key === 'Enter' && event.target === input && !event.isComposing) {
+      event.preventDefault();
+      finish();
+    }
+  });
   save.addEventListener('click', (event) => {
     event.stopPropagation();
     finish();
   });
   backdrop.addEventListener('click', (event) => {
     event.stopPropagation();
+  });
+  // El foco no sale del diálogo: un clic en la foto o el fondo lo devolvería al cuerpo de la página, y las teclas
+  // dejarían de pasar por aquí.
+  backdrop.addEventListener('pointerdown', (event) => {
+    if (event.target !== input && event.target !== save) event.preventDefault();
+  });
+  backdrop.addEventListener('focusout', (event) => {
+    if (
+      pending &&
+      !(event.relatedTarget instanceof Node && backdrop.contains(event.relatedTarget))
+    ) {
+      input.focus({ preventScroll: true });
+    }
   });
 
   return {

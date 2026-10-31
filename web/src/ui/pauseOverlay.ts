@@ -115,9 +115,16 @@ export function createPauseOverlay(
     caption.textContent = legend;
     group.append(caption);
     for (const value of values) {
-      const button = actionButton(labelOf(value), () => {
+      const label = labelOf(value);
+      const button = actionButton(label, () => {
         choose(value);
         render();
+        // Redibujar destruye el botón con foco: el teclado sigue donde estaba, en la misma opción.
+        [...overlay.querySelectorAll('button')]
+          .find((b) => b.textContent === label)
+          ?.focus({
+            preventScroll: true,
+          });
       });
       button.setAttribute('aria-pressed', String(value === current));
       if (value === current) button.classList.add('chosen');
