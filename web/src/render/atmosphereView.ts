@@ -34,6 +34,8 @@ uniform vec3 uZenith;
 uniform vec3 uHorizon;
 uniform vec3 uGlow;
 uniform vec3 uGround;
+uniform vec3 uNight;
+uniform float uHasNight;
 uniform float uDensity;
 varying vec3 vDir;
 void main() {
@@ -44,6 +46,10 @@ void main() {
   float low = 1.0 - smoothstep(0.0, 0.6, h);
   sky = mix(sky, uGlow, clamp(pow(s, 6.0) * 0.7 * low + pow(s, 48.0) * 0.6, 0.0, 1.0));
   vec3 color = h < 0.0 ? mix(uHorizon, uGround, smoothstep(0.0, 0.3, -h)) : sky;
+  // Con la estrella bajo el horizonte el cielo se apaga; queda un resto de luz del lado por donde se fue.
+  float day = smoothstep(-0.25, 0.08, dot(uUp, uSun));
+  vec3 night = mix(uNight, uHorizon * 0.35, pow(s, 3.0) * (1.0 - smoothstep(0.0, 0.5, h)));
+  color = mix(color, night, uHasNight * (1.0 - day));
   gl_FragColor = vec4(color, uDensity);
   #include <colorspace_fragment>
 }`;
@@ -61,6 +67,8 @@ export interface AtmosphereView {
   update(frame: AtmosphereFrame): void;
   /** Cuánto cielo se ve (0–1), para depurar y para las pruebas. */
   readonly density: number;
+  /** Cuánto tapa a las estrellas (la densidad por la opacidad del aire; < 1 en un aire fino). */
+  readonly coverage: number;
   dispose(): void;
 }
 
@@ -72,6 +80,8 @@ export function createAtmosphereView(scene: Scene): AtmosphereView {
     uHorizon: { value: new Color() },
     uGlow: { value: new Color() },
     uGround: { value: new Color() },
+    uNight: { value: new Color() },
+    uHasNight: { value: 0 },
     uDensity: { value: 0 },
   };
   // Opaco a efectos de orden (va en la lista de lo opaco, tras las estrellas), pero mezclado por su alfa.
@@ -102,21 +112,29 @@ export function createAtmosphereView(scene: Scene): AtmosphereView {
         ? airDensity(eye.distanceTo(world.center) - world.radius, world.air.height)
         : 0;
       sky.visible = density > 0;
-      if (!world || !sky.visible) return;
+      if (!world || !sky.visible) {
+        uniforms.uDensity.value = 0;
+        return;
+      }
       if (shown !== world.air) {
         shown = world.air;
         uniforms.uZenith.value.setHex(world.air.zenith);
         uniforms.uHorizon.value.setHex(world.air.horizon);
         uniforms.uGlow.value.setHex(world.air.glow);
         uniforms.uGround.value.setHex(world.air.ground);
+        uniforms.uNight.value.setHex(world.air.night ?? world.air.zenith);
+        uniforms.uHasNight.value = world.air.night === undefined ? 0 : 1;
       }
       sky.position.copy(eye);
       uniforms.uUp.value.subVectors(eye, world.center).normalize();
       uniforms.uSun.value.subVectors(star, eye).normalize();
-      uniforms.uDensity.value = density;
+      uniforms.uDensity.value = density * (world.air.opacity ?? 1);
     },
     get density() {
       return density;
+    },
+    get coverage() {
+      return uniforms.uDensity.value;
     },
     dispose() {
       scene.remove(sky);

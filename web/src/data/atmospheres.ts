@@ -1,5 +1,5 @@
-// Los mundos con aire (Fase 9): desde su suelo se ve un cielo en vez del espacio. Solo Hogar, el único mundo vivo;
-// los del sistema ajeno no tienen (CONTEXTO_PLANETAS.md). Colores de amanecer: la estrella baja al este.
+// Los mundos con aire: desde su suelo se ve un cielo en vez del espacio. Hogar (Fase 9), el único mundo vivo, con
+// su amanecer; y Umbral (Fase 11, ✅ Anthony 2026-11-03), con un aire fino de ocaso que deja ver las estrellas.
 
 export interface Atmosphere {
   /** Color del cielo arriba, en el horizonte, alrededor de la estrella y bajo el horizonte. */
@@ -9,8 +9,22 @@ export interface Atmosphere {
   ground: number;
   /** Metros sobre el suelo a los que el aire se acaba y vuelve a verse el espacio. */
   height: number;
+  /** Cuánto tapa el cielo a las estrellas con todo el aire encima (1 = del todo; menos, un aire fino). */
+  opacity?: number;
+  /** Color del cielo cuando la estrella está bajo el horizonte (la cara de noche); sin él, siempre de día. */
+  night?: number;
 }
 
 export const ATMOSPHERES: Readonly<Record<string, Atmosphere>> = {
   hogar: { zenith: 0x7fb0d6, horizon: 0xf0c49c, glow: 0xffdcae, ground: 0xb8a48e, height: 110 },
+  // 🟡 Ocaso permanente: violeta arriba, ámbar en el horizonte (CONTEXTO_PLANETAS.md §3, «Atmósfera»).
+  umbral: {
+    zenith: 0x3a2c58,
+    horizon: 0xd88a54,
+    glow: 0xffb066,
+    ground: 0x8a5a48,
+    height: 70,
+    opacity: 0.78,
+    night: 0x140f26,
+  },
 };

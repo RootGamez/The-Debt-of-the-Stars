@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.10
-**Última actualización:** 2026-10-30 · Fase 10 (el Archivo de las Puertas y la vuelta a casa)
+**Versión:** v0.11
+**Última actualización:** 2026-11-03 · Fase 11 (Umbral por código, su aire y sus estructuras nuevas)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -81,11 +81,23 @@
 
 **Atmósfera.** Ámbar, ocre, violeta oscuro, azul hielo, arena. Sol grande y bajo, sombras largas, viento leve. Piano sparse.
 
-**Blender.** Icosfera de unos 5 mil triángulos con ruido suave. El anillo, unos 500. Casas modulares, unos 150 cada una.
+**Aire (✅ Anthony, 2026-11-03; aspecto 🟡).** Umbral tiene un aire fino: cielo de ocaso violeta arriba y ámbar en el horizonte que deja ver las estrellas, y que se apaga a violeta oscuro en la cara de noche; bruma lejana cálida de día y violeta de noche, que se va al subir con la nave; polvo de arena que el viento leve arrastra rozando el suelo.
+
+**Más lugares (🟡, Fase 11, sin pistas).** Para dar vida y referencias a la planicie:
+- **La Vía de los Anillos:** tres anillos de pie, cada vez más pequeños, en el camino de La Boca al Muelle; se cruzan caminando.
+- **La Atalaya:** torre de estratos con un faro ámbar, en la cara de noche al oeste del Mirador; se ve desde lejos.
+- **El Anfiteatro:** gradas en anillos alrededor de un anillo tumbado, al sur de las Casas; se entra a ras de suelo.
+- **El Anillo Caído:** un primer anillo, roto y medio enterrado, con sus dovelas por la arena, al sur de la caseta.
+- **La Estación del Hielo:** un tambor con antena de anillo al borde del casquete norte.
+- **Los silos del Muelle:** tres silos de cúpula unidos por una pasarela, al sur del Muelle de Envíos.
+
+**Modelo.** ✅ Por código desde la Fase 11 (`web/src/worlds/procedural/umbral.ts`, sin Blender): terreno de unos 48 mil triángulos y los lugares, con el mismo contrato de marcas que tenía el `.glb`.
 
 ---
 
 ## 4. Archivo — la biblioteca
+
+> **Rediseño (✅ Anthony, 2026-11-03):** el Archivo pasa a ser un **planeta de agua**. Los archivos que rodean el planeta quedan dentro de una **cúpula de vidrio** que los Ausentes construyeron alrededor del planeta para guardarlos, con **una sola entrada** (bajo el agua o igual de difícil) que solo se encuentra **leyendo una pista en otro planeta**. Se modela por código. Cómo se concreta (🟡, con preguntas ❓) en `docs/plan-fase-11-modelado-por-codigo.md`, hito 11E: un océano con la Galería, un anillo de vidrio en el ecuador medio hundido; una esclusa en el fondo como única entrada; bucear con aire limitado. Lo de abajo es el diseño anterior; los lugares, el evento y las pistas se conservan dentro de la cúpula.
 
 **Idea.** Un cañón-biblioteca excavado en un mundo denso y silencioso, donde el tiempo pesa de verdad.
 
@@ -116,6 +128,8 @@
 ---
 
 ## 5. Taller — la fábrica sin gente
+
+> **Rediseño (✅ Anthony, 2026-11-03):** el Taller pasa a ser un **planeta gaseoso**. Lo que hay en él va en **pedazos de isla o roca que giran** (o en ciertos puntos del planeta), **aterrizar es complicado** y **caer dentro del planeta es la muerte**. Se modela por código. Cómo se concreta (🟡, con preguntas ❓) en `docs/plan-fase-11-modelado-por-codigo.md`, hito 11F: cinco islas flotantes, una por lugar, que orbitan deprisa (de ahí el reloj 0,85) y giran sobre sí mismas; a las 7:00 se alinean. Lo de abajo es el diseño anterior; los lugares, el evento y las pistas se conservan repartidos por las islas.
 
 **Idea.** Un diminuto planeta de talleres que gira tan rápido que amanece cada tres minutos, donde las máquinas siguen trabajando para nadie. Lo más inquietantemente vivo del sistema.
 
@@ -237,7 +251,7 @@
 
 **Hogar (🟡, nombre ❓).** Un planeta templado, verde y ocre, cálido, vivo. Contraste fuerte con Umbral. En una colina está el **Instituto**; abajo, **la aldea** de los Ool, que también se recorre (✅ Anthony, 2026-10-29).
 
-**Cómo es Hogar (🟡, Fase 9).** El Instituto en la cima llana de una colina: la Sala de Fragmentos (una rotonda) y tres alas redondas —el aula de la Maestra, el taller de la Puerta pequeña y el despacho de la Directora— unidas por pasillos de aros y lona, con su plaza de entrada. Al este de la cima, el hangar del Albatros II. Abajo, en los prados del norte, la aldea con su árbol de musgo, y en la costa del este un embarcadero. Es el único mundo con aire: cielo de amanecer, la estrella baja al este.
+**Cómo es Hogar (🟡, Fase 9).** El Instituto en la cima llana de una colina: la Sala de Fragmentos (una rotonda) y tres alas redondas —el aula de la Maestra, el taller de la Puerta pequeña y el despacho de la Directora— unidas por pasillos de aros y lona, con su plaza de entrada. Al este de la cima, el hangar del Albatros II. Abajo, en los prados del norte, la aldea con su árbol de musgo, y en la costa del este un embarcadero. Es el único mundo con aire espeso (Umbral tiene uno fino, Fase 11): cielo de amanecer, la estrella baja al este.
 
 **Lenguaje de los Ool (🟡).** Redondeado, blando y hecho a mano: telas cosidas en gajos de colores sobre costillas de madera, puertas y ventanas redondeadas, musgo por todas partes y luz viva verde azulada (bulbos en tallos, frutos en los árboles). Nada de troncos ni chapa remachada. Junto a esto, los fragmentos de los Ausentes (arenisca y pizarra, cortados en curva perfecta) se ven ajenos.
 
@@ -317,3 +331,5 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-10-30 · Fase 10 (hito 10C, 🟡).** La Sala del Motor en uso: el motor viejo es una pieza que sale del núcleo con la palanca, la cuna con sus dos ruedas recibe el Contrapeso y el pulso de las 9:00 lo encaja si los relojes coinciden. Instalado, el agujero negro nace pero se queda pequeño (6 m) y no se traga ningún mundo.
 - **2026-10-30 · Fase 10 (hito 10D, 🟡).** Nueva §10: el Archivo de las Puertas como mundo propio fuera del tiempo (las bocas, el muro de los rastros con su última fila en blanco, las cuatro bocas de casa con su atril y el Banco con los planos) y cómo se llega cruzando el horizonte estable con la nave. Las secciones siguientes se renumeran.
 - **2026-10-30 · Fase 10 (hito 10E, 🟡).** §9: cómo es el Hogar de antes (sin las piedras de las vitrinas ni el fragmento de la Luna, los Ool algo más pequeños) y desde dónde se ve la Luna en el final A.
+- **2026-11-03 · Fase 11.** Anthony decide dejar Blender por ahora y modelar los mundos por código (Umbral, el primero) y que Umbral tenga atmósfera (✅). Se proponen (🟡) el aspecto del aire y seis lugares nuevos sin pistas en §3.
+- **2026-11-03 · Fase 11 (rediseños).** Anthony decide que el Archivo sea un planeta de agua con una cúpula de vidrio para los archivos y una única entrada difícil que se aprende en otro planeta, y que el Taller sea un gigante gaseoso con islas de roca que giran, donde aterrizar cuesta y caer dentro mata (✅). Se proponen los detalles (🟡) en el plan de la Fase 11.

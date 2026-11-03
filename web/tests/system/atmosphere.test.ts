@@ -20,8 +20,16 @@ describe('the air of a world', () => {
     expect(airDensity(10, 0)).toBe(0);
   });
 
-  it('only home has air: the worlds of the alien system are dead', () => {
-    expect(Object.keys(ATMOSPHERES)).toEqual(['hogar']);
+  it('home and Umbral have air; the other worlds of the alien system are dead', () => {
+    expect(Object.keys(ATMOSPHERES).sort()).toEqual(['hogar', 'umbral']);
     expect(ATMOSPHERES.hogar?.height).toBeGreaterThan(0);
+  });
+
+  it('gives Umbral a thin dusk air that lets the stars through and dims on its night side', () => {
+    const umbral = ATMOSPHERES.umbral;
+
+    expect(umbral?.height).toBeGreaterThan(0);
+    expect(umbral?.opacity).toBeLessThan(1);
+    expect(umbral?.night).toBeDefined();
   });
 });

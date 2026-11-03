@@ -488,7 +488,24 @@ export interface SkyLightColors {
   ground: Color;
   /** En la cara de noche. */
   night: Color;
+  /** Bruma por distancia (perspectiva aérea), solo en mundos con aire. */
+  haze?: HazeColors;
 }
+
+export interface HazeColors {
+  /** Color de la bruma en la cara de día y en la de noche. */
+  day: Color;
+  night: Color;
+  /** Cuánto se espesa por metro de distancia. */
+  density: number;
+  /** Lo más que tapa (0–1): lo lejano nunca desaparece del todo. */
+  max: number;
+  /** Radio del mundo: la bruma se ve desde cerca del suelo y se va al subir con la nave. */
+  radius: number;
+}
+
+/** Altura sobre el suelo (m) a la que la bruma empieza a irse y a la que ya no se ve. */
+const HAZE_FADE: readonly [number, number] = [25, 140];
 
 /**
  * Relleno de cielo para un planeta pequeño. Una luz hemisférica apunta siempre al mismo "arriba", que en
@@ -507,6 +524,14 @@ export function applySkyLight(
     uSkyDay: { value: colors.day },
     uSkyGround: { value: colors.ground },
     uSkyNight: { value: colors.night },
+  };
+  const { haze } = colors;
+  const hazeUniforms = haze && {
+    uHazeDay: { value: haze.day },
+    uHazeNight: { value: haze.night },
+    uHazeDensity: { value: haze.density },
+    uHazeMax: { value: haze.max },
+    uHazeRadius: { value: haze.radius },
   };
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
@@ -548,7 +573,44 @@ export function applySkyLight(
           reflectedLight.indirectDiffuse += skyColor * BRDF_Lambert(diffuseColor.rgb);
         }`,
       );
+    if (hazeUniforms) {
+      Object.assign(shader.uniforms, hazeUniforms);
+      // La altura de quien mira se mide en el vertex shader: el fragment no tiene modelMatrix.
+      shader.vertexShader = shader.vertexShader
+        .replace(
+          '#include <common>',
+          `#include <common>
+          uniform float uHazeRadius;
+          varying float vHazeNear;`,
+        )
+        .replace(
+          '#include <begin_vertex>',
+          `#include <begin_vertex>
+          vec3 hazeCenter = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+          float hazeHeight = length(cameraPosition - hazeCenter) - uHazeRadius;
+          vHazeNear = 1.0 - smoothstep(${HAZE_FADE[0].toFixed(1)}, ${HAZE_FADE[1].toFixed(1)}, hazeHeight);`,
+        );
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          '#include <common>',
+          `#include <common>
+          uniform vec3 uHazeDay;
+          uniform vec3 uHazeNight;
+          uniform float uHazeDensity;
+          uniform float uHazeMax;
+          varying float vHazeNear;`,
+        )
+        .replace(
+          '#include <tonemapping_fragment>',
+          `{
+            // Perspectiva aérea: cuanto más lejos, más color de cielo. Desde el espacio, nada.
+            float hazeAmount = (1.0 - exp(-uHazeDensity * length(vViewPosition))) * uHazeMax * vHazeNear;
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, mix(uHazeNight, uHazeDay, vSkyDay), hazeAmount);
+          }
+          #include <tonemapping_fragment>`,
+        );
+    }
   };
-  material.customProgramCacheKey = () => 'sky-light';
+  material.customProgramCacheKey = () => (haze ? 'sky-light-haze' : 'sky-light');
   material.needsUpdate = true;
 }

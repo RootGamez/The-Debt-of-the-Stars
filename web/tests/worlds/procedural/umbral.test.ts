@@ -1,7 +1,7 @@
 // Umbral modelado por código (Fase 11): que sea reproducible y que el juego se pueda jugar en él igual que en el
 // modelo exportado de Blender: aparición, rampas, fuentes alcanzables y sitio para la nave.
 import { describe, expect, it } from 'vitest';
-import { Vector3 } from 'three';
+import { Points, Vector3 } from 'three';
 import { PHYSICS_STEP } from '../../../src/data/movement';
 import { createCharacter, stepCharacter } from '../../../src/physics/characterMotor';
 import { yaw } from '../../../src/physics/surfaceFrame';
@@ -151,6 +151,35 @@ describe('where the ship waits', () => {
     // Nada por encima del suelo (ni piedras ni mojones) y casi llano.
     expect(Math.max(...heights) - Math.min(...heights)).toBeLessThan(0.6);
     expect(Math.abs(park.length() - Math.max(...heights))).toBeLessThan(0.3);
+  });
+});
+
+describe('the air of Umbral (Phase 11)', () => {
+  it('carries dust close to the ground, never inside it nor up in the sky', () => {
+    const dust = runtime.world.scene.getObjectByName('umbral_Polvo');
+    if (!(dust instanceof Points)) throw new Error('falta umbral_Polvo');
+    const geometry = (dust as Points).geometry;
+    const positions = geometry.getAttribute('position');
+    const p = new Vector3();
+    let lowest = Infinity;
+    let highest = -Infinity;
+
+    for (let i = 0; i < positions.count; i += 37) {
+      p.fromBufferAttribute(positions, i);
+      const ground = runtime.collision.raycast(
+        p.clone().setLength(UMBRAL_RADIUS + 40),
+        p.clone().normalize().negate(),
+        80,
+      );
+      if (ground === null) continue;
+      const above = p.length() - (UMBRAL_RADIUS + 40 - ground);
+      lowest = Math.min(lowest, above);
+      highest = Math.max(highest, above);
+    }
+
+    expect(positions.count).toBeGreaterThan(3000);
+    expect(lowest).toBeGreaterThan(-25); // bajo una mesa o un edificio puede quedar alguna, nunca enterrada lejos
+    expect(highest).toBeLessThan(6);
   });
 });
 

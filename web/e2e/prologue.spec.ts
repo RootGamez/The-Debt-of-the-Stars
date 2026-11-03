@@ -81,7 +81,7 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   // El primer despertar frente a La Boca: aparece el reloj de Umbral.
   await play(page);
   await expect(page.locator('.clock-hud')).toBeVisible();
-  expect((await page.evaluate(() => window.__juego?.sky?.()))?.density).toBe(0); // Umbral no tiene aire
+  expect((await page.evaluate(() => window.__juego?.sky?.()))?.density).toBe(1); // aire fino (Fase 11)
   expect(new URL(page.url()).searchParams.has('mundo')).toBe(false);
 
   await page.reload();

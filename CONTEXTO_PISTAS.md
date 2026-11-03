@@ -152,6 +152,8 @@ final se entiende como aviso.
 
 ### 5.3 Archivo — la biblioteca (reloj 0,80)
 
+> **Fase 11 (✅ Anthony, 2026-11-03):** la entrada a la cúpula del Archivo solo se encuentra con una pista leída en otro planeta. Propuesta (🟡, sin añadir aún al grafo): un hecho nuevo `archivo.entrada` que da una fuente de Umbral (❓ el Muelle de Envíos o la Estación del Hielo); nada del Archivo hace falta para conseguirlo.
+
 | id | Tipo | Cuándo | Superficial | Profunda | Hechos · Hilos |
 |---|---|---|---|---|---|
 | `archivo.informe_oficial` | Texto | Siempre | Informe del Consejo: "incidentes aislados en Puertas lejanas, sin riesgo" | Es la versión que tapó los primeros colapsos (con H4) | `silencio.version_oficial` · H3, H4 |
@@ -320,3 +322,4 @@ textos de ambiente sin peso en el grafo.
 - **2026-10-29 · Fase 10.** Anthony decide el destino de los tres que se quedaron (murieron en el laboratorio): `lab.dormitorio` lo cuenta. El epílogo usa K7 y K8 para elegir la boca y la decisión final es llevar o no los planos del Contrapeso.
 - **2026-10-30 · Fase 10 (hito 10C, 🟡).** Dos fuentes nuevas en la Sala del Motor de Cicatriz: `cicatriz.palanca` ("E · tirar": saca el motor viejo antes del pulso) y `cicatriz.cuna` (lector `ruedas`: igualar el reloj del Contrapeso con el de la máquina; da `contrapeso.reloj` al igualarlos si ya se sabe qué es). Textos `[texto pendiente]` para Anthony.
 - **2026-10-30 · Fase 10 (hito 10D, 🟡).** El Archivo de las Puertas tiene tres fuentes (`puertas.rastros`, `puertas.bocas` con el lector `bocas`, `puertas.planos`) y cuatro hechos de cierre (`puertas.otros_viajeros`, `silencio.no_cruzaron`, `bocas.vuelta_antes`, `contrapeso.planos`). Cambia la línea de §5.8 que decía que el epílogo no daba hechos (regla 6). Total: 52 fuentes y 60 hechos.
+- **2026-11-03 · Fase 11.** El Archivo se rediseña como planeta de agua con cúpula y una única entrada que se aprende en otro planeta (✅); se propone el hecho `archivo.entrada` (🟡).

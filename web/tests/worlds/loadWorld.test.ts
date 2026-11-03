@@ -1,7 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
-import { BoxGeometry, Group, Mesh, MeshBasicMaterial } from 'three';
+import {
+  BoxGeometry,
+  BufferGeometry,
+  Group,
+  Mesh,
+  MeshBasicMaterial,
+  Points,
+  PointsMaterial,
+} from 'three';
 import {
   buildWorld,
   disposeWorld,
@@ -106,6 +114,20 @@ describe('disposeWorld', () => {
     const material = new MeshBasicMaterial();
     const scene = new Group();
     scene.add(new Mesh(geometry, material));
+    const disposeGeometry = vi.spyOn(geometry, 'dispose');
+    const disposeMaterial = vi.spyOn(material, 'dispose');
+
+    disposeWorld(scene);
+
+    expect(disposeGeometry).toHaveBeenCalledOnce();
+    expect(disposeMaterial).toHaveBeenCalledOnce();
+  });
+
+  it('also releases the dust of a world with wind (Points)', () => {
+    const geometry = new BufferGeometry();
+    const material = new PointsMaterial();
+    const scene = new Group();
+    scene.add(new Points(geometry, material));
     const disposeGeometry = vi.spyOn(geometry, 'dispose');
     const disposeMaterial = vi.spyOn(material, 'dispose');
 

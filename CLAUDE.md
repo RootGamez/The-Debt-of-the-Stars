@@ -1,6 +1,7 @@
 # CLAUDE.md — Juego de bucle de tiempo
 
-Juego 3D low poly que corre gratis en el navegador (Three.js + TypeScript + Vite), modelado en Blender.
+Juego 3D low poly que corre gratis en el navegador (Three.js + TypeScript + Vite). Los mundos se modelaron en Blender
+y desde la Fase 11 se migran a código (Blender en pausa).
 
 ## Antes de trabajar
 1. Carga la skill `juego-bucle-tiempo` (y `tiny-planets-blender` si se modela).
@@ -77,3 +78,10 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - El Laboratorio está dentro del Nudo (cuerpo oculto en `sistema.json`); se entra por la Puerta plegada. Con `?debug`: `__juego.warpTo('laboratorio')` y `__juego.place()`.
 - La lente (`system/lens.ts`): la imagen del Nudo se ve girada 18° hacia la Brasa; nítida solo desde el Observatorio en la alineación. **G** muestra la mira graduada. Con `?debug`: `__juego.lens()`.
 - Mareas (`physics/tides.ts`): el Borde de Cicatriz, la semilla del Nudo y su cáscara; la tensión acumulada mata (`marea`). Con `?debug`: `__juego.tide()`.
+
+## Mundos por código (Fase 11)
+- Blender está en pausa: los mundos se migran a TypeScript en `web/src/worlds/procedural/` (plan: `docs/plan-fase-11-modelado-por-codigo.md`).
+- `kit.ts` (primitivas, marcos lat/lon, piezas con colisión, terreno, dispersión, luz de cielo y bruma), `noise.ts`, `wind.ts` (polvo).
+- Un mundo por código cumple el mismo contrato que su `.glb` (raíz con datos, `COL_`, `INT_`, `SPAWN_`, `PARK_`, `TRIG_`, `EVT_`); `loadWorld` lo usa si existe en `procedural/index.ts` y si no descarga el `.glb`.
+- Umbral ya es por código (`umbral.ts`, lugares nuevos en `umbralLandmarks.ts`, colores en `umbralPalette.ts`) y tiene aire (`data/atmospheres.ts`).
+- Para mirar un mundo de cerca sin jugar, una página temporal en `web/` que llame a `buildUmbral()` sirve (no la dejes en el repo).

@@ -57,6 +57,17 @@ import {
   type XYZ,
 } from './kit';
 import { createNoise, fbm, ridged, seededRandom, type Random } from './noise';
+import { PALETTE, STRATA } from './umbralPalette';
+import {
+  amphitheatre,
+  fallenRing,
+  iceStation,
+  LANDMARKS,
+  ringWay,
+  silos,
+  watchtower,
+} from './umbralLandmarks';
+import { windDust } from './wind';
 
 export const UMBRAL_ID = 'umbral';
 export const UMBRAL_RADIUS = 90;
@@ -65,36 +76,8 @@ export const UMBRAL_DETAIL = 48;
 
 const DEG = Math.PI / 180;
 
-export const PALETTE = {
-  sandstone: '#D8C49A',
-  sandstoneLight: '#E6D7B2',
-  sandstoneShade: '#B8A27A',
-  deepSand: '#C2AA80',
-  pathSand: '#B49A72',
-  rock: '#7A6A5E',
-  rockLight: '#968270',
-  rockDark: '#5C4E46',
-  ochre: '#B87A3A',
-  ochreLight: '#C99B5E',
-  amber: '#E0A040',
-  slate: '#3A3A48',
-  slateLight: '#4C4C5C',
-  violet: '#3A2850',
-  porcelain: '#E8E0D0',
-  bread: '#C88A40',
-  fruit: '#A04030',
-  paper: '#EDE4CC',
-  cloth: '#6A4A5A',
-  ice: '#A8D0E8',
-  iceLight: '#D4E9F3',
-  tuft: '#B89650',
-  tuftDry: '#9C7E48',
-  light: '#FFC070',
-} as const;
 const P = PALETTE;
 
-/** Estratos de las mesas de roca, de abajo arriba. */
-const STRATA = ['#C9A57A', '#B48A62', '#D6BA8E', '#A47A56', '#C2966C', '#9A7458'] as const;
 /** Brillo de las luces ámbar (no dependen de la Brasa). */
 const LAMP_GLOW = 3;
 
@@ -115,11 +98,16 @@ const noise2 = createNoise(31);
 const MASSIF = { lat: 35, lon: 70, radius: 26 } as const;
 const MASSIF_DIR = direction(MASSIF.lat, MASSIF.lon);
 
+/** Ancho máximo de un camino (m): su ancho base más lo que lo ensancha el ruido. */
+const PATH_MAX_WIDTH = 1.6;
+
 interface Pad {
   d: Vector3;
   radius: number;
   falloff: number;
   height: number;
+  /** Coseno del ángulo de su borde exterior: más allá no influye (evita el arcocoseno casi siempre). */
+  reach: number;
 }
 
 interface Path {
@@ -181,6 +169,7 @@ class Relief implements Surface {
       radius,
       falloff,
       height: samples.reduce((s, v) => s + v, 0) / samples.length,
+      reach: Math.cos((radius + falloff) / UMBRAL_RADIUS),
     });
   }
 
@@ -192,6 +181,7 @@ class Relief implements Surface {
     let h = baseHeight(x, y, z);
     const d = { x, y, z };
     for (const pad of this.pads) {
+      if (x * pad.d.x + y * pad.d.y + z * pad.d.z < pad.reach) continue;
       const distance = angleBetween(d, pad.d) * UMBRAL_RADIUS;
       if (distance < pad.radius + pad.falloff) {
         h += (pad.height - h) * (1 - smoothstep(pad.radius, pad.radius + pad.falloff, distance));
@@ -218,8 +208,12 @@ class Relief implements Surface {
   /** 1 en mitad de un camino, 0 fuera. */
   onPath(x: number, y: number, z: number): number {
     let t = 0;
+    let width = 0;
     for (const path of this.paths) {
-      const width = 1.15 + noise(x * 11, y * 11, z * 11) * 0.45;
+      // Lejos del círculo máximo del camino no hace falta medir más (es la mayoría de las llamadas).
+      const s = x * path.normal.x + y * path.normal.y + z * path.normal.z;
+      if (Math.abs(s) * UMBRAL_RADIUS > PATH_MAX_WIDTH) continue;
+      width ||= 1.15 + noise(x * 11, y * 11, z * 11) * 0.45;
       t = Math.max(t, 1 - smoothstep(width * 0.55, width, this.pathDistance({ x, y, z }, path)));
     }
     return t;
@@ -1210,6 +1204,19 @@ function shardGeometry(): BufferGeometry {
   return geometry.scale(0.4, 0.4, 0.9).translate(0, 0, 0.5);
 }
 
+/** Paradas de la Vía de los Anillos sobre el camino de La Boca al Muelle, mirando hacia el Muelle. */
+function ringStops(
+  from: { lat: number; lon: number },
+  to: { lat: number; lon: number },
+): { lat: number; lon: number; heading: number }[] {
+  const a = direction(from.lat, from.lon);
+  const b = direction(to.lat, to.lon);
+  return [0.5, 0.6, 0.7].map((t) => {
+    const { lat, lon } = latLon(a.clone().lerp(b, t).normalize());
+    return { lat, lon, heading: headingTowards(lat, lon, b) };
+  });
+}
+
 // ---- Ensamblado -------------------------------------------------------------------------------------------
 
 export interface UmbralOptions {
@@ -1251,6 +1258,23 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
   for (const [from, to] of route) {
     relief.addPath(direction(s[from].lat, s[from].lon), direction(s[to].lat, s[to].lon));
   }
+  // Las estructuras nuevas (Fase 11, 🟡): sus explanadas y los caminos que llevan a ellas.
+  for (const site of Object.values(LANDMARKS)) {
+    relief.addPad(site.lat, site.lon, site.pad, site.falloff);
+  }
+  const L = LANDMARKS;
+  const extraRoute: readonly (readonly [
+    { lat: number; lon: number },
+    { lat: number; lon: number },
+  ])[] = [
+    [s.lookout, L.tower],
+    [s.plaza, L.amphitheatre],
+    [s.booth, L.fallen],
+    [s.dock, L.silos],
+  ];
+  for (const [from, to] of extraRoute) {
+    relief.addPath(direction(from.lat, from.lon), direction(to.lat, to.lon));
+  }
 
   builder.theMouth();
   builder.dock();
@@ -1258,6 +1282,12 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
   builder.lookout();
   builder.classroom();
   builder.houses();
+  ringWay(builder, ringStops(s.mouth, s.dock));
+  watchtower(builder);
+  amphitheatre(builder);
+  fallenRing(builder);
+  iceStation(builder);
+  silos(builder);
   builder.mesas();
   builder.cairns();
 
@@ -1265,6 +1295,14 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
     day: new Color('#b89ab8').multiplyScalar(1.7),
     ground: new Color('#c48a58').multiplyScalar(1.3),
     night: new Color(0.07, 0.06, 0.16),
+    // Aire fino de ocaso (🟡, ✅ que lo tenga: Anthony 2026-11-03): lo lejano se tiñe de ámbar o de violeta.
+    haze: {
+      day: new Color('#c98a62'),
+      night: new Color('#1c1630'),
+      density: 0.016,
+      max: 0.62,
+      radius: UMBRAL_RADIUS,
+    },
   };
   const lit = (
     options: ConstructorParameters<typeof MeshStandardMaterial>[0],
@@ -1369,7 +1407,7 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
       castShadow: true,
       groundRadius,
       pick: (d, r) => {
-        if (iceCap(d.z, d.x, d.y) < 0.7) return null;
+        if (iceCap(d.z, d.x, d.y) < 0.7 || !relief.isFree(d, 1)) return null;
         const size = 0.3 + r() * 0.8;
         return {
           scale: [size, size, size],
@@ -1382,6 +1420,21 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
     random,
   );
   frame.add(rocks.mesh, tufts.mesh, shards.mesh);
+  // El viento leve (CONTEXTO_PLANETAS.md §3): polvo de arena que pasa rozando el suelo.
+  frame.add(
+    windDust({
+      name: 'umbral_Polvo',
+      groundRadius,
+      count: 9000,
+      height: [0.25, 5],
+      axis: new Vector3(0.3, -0.2, 1),
+      speed: 0.012,
+      color: new Color('#ffd7a0'),
+      size: 26,
+      reach: 26,
+      seed: 61,
+    }),
+  );
   for (const g of rocks.colliders) builder.pieces.addCollider(g);
   frame.add(colliderMesh('COL_umbral_Lugares', builder.pieces.colliders));
 

@@ -12,6 +12,9 @@ export default defineConfig({
   test: {
     include: ['tests/**/*.test.ts'],
     environment: 'node',
+    // Los mundos modelados por código (Fase 11) se construyen en cada prueba que los usa: medio segundo
+    // suelto, pero varios segundos con la cobertura y todas las pruebas en paralelo.
+    testTimeout: 20_000,
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],

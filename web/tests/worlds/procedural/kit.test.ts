@@ -228,5 +228,41 @@ describe('applySkyLight', () => {
     expect(Object.keys(shader.uniforms)).toEqual(['uSkySun', 'uSkyDay', 'uSkyGround', 'uSkyNight']);
     expect(shader.vertexShader).toContain('vSkyDay = smoothstep');
     expect(shader.fragmentShader).toContain('reflectedLight.indirectDiffuse += skyColor');
+    expect(shader.fragmentShader).not.toContain('hazeAmount');
+  });
+
+  it('adds the aerial haze only to worlds with air, with its own program key', () => {
+    const material = new MeshStandardMaterial();
+    applySkyLight(material, new Vector3(1, 0, 0), {
+      day: new Color(1, 1, 1),
+      ground: new Color(0.5, 0.4, 0.3),
+      night: new Color(0.1, 0.1, 0.2),
+      haze: {
+        day: new Color(1, 0.6, 0.4),
+        night: new Color(0.1, 0.1, 0.2),
+        density: 0.02,
+        max: 0.6,
+        radius: 90,
+      },
+    });
+    const shader = {
+      uniforms: {},
+      vertexShader: '#include <common>\n#include <begin_vertex>',
+      fragmentShader:
+        '#include <common>\n#include <lights_fragment_end>\n#include <tonemapping_fragment>',
+    };
+
+    material.onBeforeCompile(
+      shader as unknown as WebGLProgramParametersWithUniforms,
+      {} as unknown as WebGLRenderer,
+    );
+
+    expect(material.customProgramCacheKey()).toBe('sky-light-haze');
+    expect(Object.keys(shader.uniforms)).toContain('uHazeDensity');
+    expect(shader.fragmentShader).toContain('hazeAmount');
+    expect(shader.fragmentShader).toContain('#include <tonemapping_fragment>');
+    // El fragment shader de Three no declara modelMatrix: usarlo ahí rompe la compilación.
+    expect(shader.fragmentShader).not.toContain('modelMatrix');
+    expect(shader.vertexShader).toContain('vHazeNear =');
   });
 });

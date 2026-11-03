@@ -1,6 +1,6 @@
 // Carga un mundo y lee sus datos y marcas: construido por código (Fase 11, `procedural/`) o, mientras no se
 // migre, desde el glTF exportado de Blender. Las dos vías dan la misma forma de escena.
-import type { Group, Material, Object3D } from 'three';
+import { Points, type Group, type Material, type Object3D } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import {
@@ -62,10 +62,15 @@ function disposeMaterial(material: Material): void {
   material.dispose();
 }
 
+function isPoints(object: Object3D): object is Points {
+  return object instanceof Points;
+}
+
 /** Libera geometrías, materiales y texturas de la GPU al cambiar de mundo. */
 export function disposeWorld(scene: Object3D): void {
   scene.traverse((object) => {
-    if (!isMesh(object)) return;
+    // Las mallas y las motas de polvo de los mundos con viento (Points).
+    if (!isMesh(object) && !isPoints(object)) return;
     object.geometry.dispose();
     const materials = Array.isArray(object.material) ? object.material : [object.material];
     materials.forEach(disposeMaterial);
