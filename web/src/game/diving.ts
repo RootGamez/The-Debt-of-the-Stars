@@ -57,7 +57,7 @@ export function createDiving(): Diving {
       const drowned = frame.running && breath.update(underwater, dt);
       const depth = water ? water.level - frame.feet.distanceTo(water.center) : 0;
       veil.style.opacity = underwater
-        ? String(0.35 + 0.5 * Math.min(1, Math.max(0, depth) / DARK_DEPTH))
+        ? String(0.3 + 0.45 * Math.min(1, Math.max(0, depth) / DARK_DEPTH))
         : '0';
       meter.hidden = breath.fraction >= 1;
       const percent = Math.round(breath.fraction * 100);

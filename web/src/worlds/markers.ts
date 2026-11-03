@@ -32,9 +32,16 @@ export interface WorldInfo {
   interiorLight?: { color: number; intensity: number } | undefined;
   /**
    * Mundos con mar (el Archivo, Fase 11E): radio de la superficie del agua (`sea_level`) y, si lo hay, el tubo
-   * seco alrededor del ecuador (`dry_ring_major` y `dry_ring_minor`: ver physics/water.ts).
+   * seco alrededor del ecuador (`dry_ring_major` y `dry_ring_minor`: ver physics/water.ts) y el oleaje: su altura
+   * máxima (`sea_wave_height`, m) y la semilla de sus direcciones (`sea_wave_seed`; ver physics/waves.ts).
    */
-  sea?: { level: number; dry?: { major: number; minor: number } } | undefined;
+  sea?:
+    | {
+        level: number;
+        dry?: { major: number; minor: number };
+        waves?: { height: number; seed: number };
+      }
+    | undefined;
 }
 
 export interface InteractionMarker {
@@ -171,13 +178,15 @@ function readSea(root: Object3D): WorldInfo['sea'] {
   const level = optionalNumber(root, 'sea_level', 'positive');
   if (level === undefined) return undefined;
   const major = optionalNumber(root, 'dry_ring_major', 'positive');
-  if (major === undefined) return { level };
+  const height = optionalNumber(root, 'sea_wave_height', 'positive');
   return {
     level,
-    dry: {
-      major,
-      minor: requireNumber(root, 'dry_ring_minor', 'positive'),
-    },
+    ...(major !== undefined && {
+      dry: { major, minor: requireNumber(root, 'dry_ring_minor', 'positive') },
+    }),
+    ...(height !== undefined && {
+      waves: { height, seed: optionalNumber(root, 'sea_wave_seed', 'positive') ?? 1 },
+    }),
   };
 }
 

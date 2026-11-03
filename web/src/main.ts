@@ -19,6 +19,8 @@ import { endingFromQuery, homeLook } from './game/homecoming';
 import { createHomecomingRig } from './game/homecomingRig';
 import { createFoldedPassage } from './game/foldedPassage';
 import { createDiving } from './game/diving';
+import { createWaterPlay } from './game/waterPlay';
+import { createWaterEffects } from './render/waterEffects';
 import { createTideEffects } from './game/tideEffects';
 import { insideCavity } from './physics/gravity';
 import { createInteriorLights } from './render/interiorLight';
@@ -236,6 +238,11 @@ async function start(): Promise<void> {
   let tideDeath: DeathCause | undefined;
   // El aire bajo el mar del Archivo.
   const diving = createDiving();
+  // Salpicaduras, ondas y burbujas al tocar el agua (a pie o con la nave).
+  const waterEffects = createWaterEffects();
+  scene.add(waterEffects.object);
+  const waterPlay = createWaterPlay(waterEffects);
+  const splashUp = new Vector3();
   let drowned: DeathCause | undefined;
   let horizonCross: DeathCause | undefined;
   // Por una boca de casa del Archivo, con el final que sale de ella y de los planos.
@@ -335,6 +342,7 @@ async function start(): Promise<void> {
       enterWorld(startWorld);
       tides.reset();
       diving.reset();
+      waterPlay.reset();
       counterweight?.play.reset();
       arrive(startWorld);
     },
@@ -529,7 +537,7 @@ async function start(): Promise<void> {
     window.__juego.audio = () => soundtrack.snapshot();
     window.__juego.lens = () => lens.snapshot();
     window.__juego.tide = () => tides.snapshot();
-    window.__juego.dive = () => diving.snapshot();
+    window.__juego.dive = () => ({ ...diving.snapshot(), effects: waterEffects.snapshot() });
     window.__juego.blackHole = () => blackHole.snapshot();
     window.__juego.sky = () => ({ density: atmosphere.density });
     window.__juego.ool = () => ({ turns: ool.snapshot(), filaments: filaments.snapshot() });
@@ -735,6 +743,20 @@ async function start(): Promise<void> {
         dt,
       );
       if (outOfAir) drowned = 'ahogado';
+      {
+        // El agua solo se pinta en el mundo de referencia (el que está en el origen de la escena).
+        const flying = flight?.piloting === true;
+        const waterWorld = flying ? flight.frame : currentWorld.id;
+        const water =
+          waterWorld !== undefined && waterWorld === systemScene.referenceWorld
+            ? runtimes.get(waterWorld)?.water
+            : undefined;
+        const at = flying ? flight.position : player.state.position;
+        if (flying && water) splashUp.subVectors(at, water.center).normalize();
+        else upOf(player.state.body, splashUp);
+        waterPlay.update(water, { position: at, up: splashUp, ship: flying }, dt);
+        waterEffects.update(dt, water);
+      }
       if (horizon.crossed(here.frame, here.position) && session.acceptsInput) {
         horizonCross = 'horizonte';
       }

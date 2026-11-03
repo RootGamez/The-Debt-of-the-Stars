@@ -116,7 +116,11 @@ declare global {
       homecoming?(): { ending: Ending; phase: HomecomingPhase; without: readonly string[] } | null;
       /** La marea donde estás y la tensión acumulada (0–1; a 1, muerte `marea`). */
       tide?(): { tide: number; strain: number };
-      dive?(): { underwater: boolean; breath: number };
+      dive?(): {
+        underwater: boolean;
+        breath: number;
+        effects: { particles: number; ripples: number };
+      };
       /**
        * La imagen del Nudo: si se ve, con qué claridad y cuánto la desvía la lente (grados); si las estrellas se
        * doblan (no con calidad baja) y cuánto las dobla el agujero negro (rad).

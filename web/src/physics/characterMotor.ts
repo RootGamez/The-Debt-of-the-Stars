@@ -34,6 +34,7 @@ import { createCapsule, createContact, placeCapsule, type CollisionWorld } from 
 import { gravityAt, type GravityWell } from './gravity';
 import { alignUp, forwardOf, rightOf, smoothingFactor, upOf } from './surfaceFrame';
 import { submersion, type WaterBody } from './water';
+import { maxWaveHeight, waveClock, waveDrift } from './waves';
 
 export interface CharacterState {
   /** Posición de los pies (m). */
@@ -185,17 +186,40 @@ function applyJumpAndGravity(state: CharacterState, intent: MoveIntent, dt: numb
   return jumped;
 }
 
+const fromCenter = new Vector3();
+const drift = new Vector3();
+
+/** El vaivén de las olas donde está quien nada (cero sin oleaje). */
+function surfaceDrift(position: Vector3, water: WaterBody | undefined): Vector3 {
+  drift.set(0, 0, 0);
+  if (!water?.waves) return drift;
+  fromCenter.subVectors(position, water.center);
+  // Solo cerca del mar abierto: en el pozo que sube al tubo seco el agua no tiene olas.
+  if (Math.abs(fromCenter.length() - water.level) > maxWaveHeight(water.waves) + PLAYER_HEIGHT) {
+    return drift;
+  }
+  return waveDrift(water.waves, fromCenter.normalize(), water.level, waveClock(), drift);
+}
+
 /**
  * En el agua: se nada sobre el plano del suelo (la intención frena y acelera menos), Espacio sube y Mayús bucea;
  * el empuje del agua compensa la gravedad cuando se flota en la línea de flotación y el agua lo frena todo.
  */
-function swim(state: CharacterState, intent: MoveIntent, wet: number, dt: number): void {
+function swim(
+  state: CharacterState,
+  intent: MoveIntent,
+  wet: number,
+  drift: Vector3,
+  dt: number,
+): void {
   forwardOf(state.body, forward);
   rightOf(state.body, right);
   wish.set(0, 0, 0).addScaledVector(right, intent.x).addScaledVector(forward, intent.z);
   projectOnPlane(wish, up, wish);
   if (wish.lengthSq() > 1e-12)
     wish.setLength(Math.min(1, Math.hypot(intent.x, intent.z)) * SWIM_SPEED);
+  // En la superficie las olas mecen a quien nada; bajo el agua ya no llegan.
+  wish.addScaledVector(drift, Math.max(0, Math.min(1, (1 - wet) / (1 - SWIM_SUBMERSION))));
   const verticalSpeed = state.velocity.dot(up);
   projectOnPlane(state.velocity, up, planar);
   moveTowards(planar, wish, SWIM_ACCELERATION * dt);
@@ -285,7 +309,7 @@ export function stepCharacter(
   const wasGrounded = state.grounded;
   let jumped = false;
   if (state.swimming) {
-    swim(state, intent, wet, dt);
+    swim(state, intent, wet, surfaceDrift(state.position, env.water), dt);
   } else {
     steer(state, intent, dt);
     jumped = applyJumpAndGravity(state, intent, dt);

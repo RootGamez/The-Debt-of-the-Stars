@@ -33,7 +33,7 @@ export const ATMOSPHERES: Readonly<Record<string, Atmosphere>> = {
     zenith: 0x2f6fc0,
     horizon: 0xb4d6ee,
     glow: 0xfff1d6,
-    ground: 0x1f4f6c,
+    ground: 0x6f9fbf,
     height: 60,
     opacity: 0.95,
     night: 0x0a1428,

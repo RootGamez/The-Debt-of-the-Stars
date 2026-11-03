@@ -27,6 +27,8 @@ import {
   TUBE_BAND,
   TUBE_MAJOR,
   TUBE_MINOR,
+  WAVE_HEIGHT,
+  WAVE_SEED,
 } from './archivoShape';
 import { ARCHIVO_PALETTE as P, GalleryBuilder, glassTube } from './archivoGallery';
 import {
@@ -50,6 +52,9 @@ import {
   type XYZ,
 } from './kit';
 import { createNoise, fbm, seededRandom } from './noise';
+import { ATMOSPHERES } from '../../data/atmospheres';
+import { createWaves } from '../../physics/waves';
+import { applyUnderwater, oceanMesh } from '../../render/ocean';
 import { cloudLayer } from './clouds';
 import { sunInWorld } from './sun';
 
@@ -130,12 +135,12 @@ function seaGeometry(): BufferGeometry {
   // Donde el tubo corta el nivel del mar: 2·asin(r / 2R).
   const cut = 2 * Math.asin(TUBE_MINOR / (2 * TUBE_MAJOR)) - 0.07 * DEG;
   const cap = Math.PI / 2 - cut;
-  const north = new SphereGeometry(SEA_LEVEL, 128, 40, 0, Math.PI * 2, 0, cap);
-  const south = new SphereGeometry(SEA_LEVEL, 128, 40, 0, Math.PI * 2, Math.PI / 2 + cut, cap);
+  const north = new SphereGeometry(SEA_LEVEL, 192, 56, 0, Math.PI * 2, 0, cap);
+  const south = new SphereGeometry(SEA_LEVEL, 192, 56, 0, Math.PI * 2, Math.PI / 2 + cut, cap);
   const sea = mergeGeometries([north, south]);
   sea.deleteAttribute('uv');
-  // SphereGeometry tiene el eje en Y; el marco de Blender, en Z.
-  return sea.rotateX(Math.PI / 2);
+  // En el marco de glTF (Y arriba, el eje del tubo), como SphereGeometry: el mar va en la raíz, no en el marco.
+  return sea;
 }
 
 /** El Borde: un embarcadero de piedra en el islote donde se despierta, mirando al tubo. */
@@ -231,15 +236,6 @@ export function buildArchivo({ detail = ARCHIVO_DETAIL }: ArchivoOptions = {}): 
     light: new MeshBasicMaterial({ vertexColors: true }),
     rock: lit({ roughness: 0.92 }),
     weed: lit({ roughness: 1, side: DoubleSide }),
-    sea: lit({
-      color: '#1f5a78',
-      transparent: true,
-      opacity: 0.78,
-      roughness: 0.15,
-      metalness: 0.05,
-      side: DoubleSide,
-      depthWrite: false,
-    }),
   };
 
   // Marco de Blender: el contenido se gira −90° en X (como el exportador glTF).
@@ -263,10 +259,41 @@ export function buildArchivo({ detail = ARCHIVO_DETAIL }: ArchivoOptions = {}): 
   groundCollider.visible = false;
   frame.add(groundCollider);
 
-  const sea = new Mesh(seaGeometry(), materials.sea);
-  sea.name = 'archivo_Mar';
+  const air = ATMOSPHERES[ARCHIVO_ID];
+  const sea = oceanMesh(seaGeometry(), {
+    name: 'archivo_Mar',
+    level: SEA_LEVEL,
+    waves: createWaves(WAVE_HEIGHT, WAVE_SEED),
+    // Del marco de Blender al de glTF: (x, z, −y).
+    sun: new Vector3(sun.x, sun.z, -sun.y),
+    colors: {
+      deep: new Color('#1c6c8f'),
+      shallow: new Color('#46a8c6'),
+      foam: new Color('#f1f9fc'),
+      sky: new Color(air?.zenith ?? 0x2f6fc0),
+      horizon: new Color(air?.horizon ?? 0xb4d6ee),
+      under: new Color('#2a8aa3'),
+    },
+    haze: [35, 120],
+    opacity: 0.62,
+    seed: WAVE_SEED,
+  });
   sea.renderOrder = 1;
-  frame.add(sea);
+  // Lo hundido se tiñe del agua y lleva los reflejos de las olas; dentro del tubo seco, no.
+  for (const material of [
+    materials.ground,
+    materials.stone,
+    materials.metal,
+    materials.rock,
+    materials.weed,
+  ]) {
+    applyUnderwater(material, {
+      level: SEA_LEVEL,
+      sun,
+      tint: new Color('#2b7d97'),
+      dry: { axis: new Vector3(0, 0, 1), major: TUBE_MAJOR, minor: TUBE_MINOR },
+    });
+  }
 
   const tube = glassTube();
   const seaGlass = new Mesh(tube.lower, glass('#1a4f6a', 0.42));
@@ -385,9 +412,11 @@ export function buildArchivo({ detail = ARCHIVO_DETAIL }: ArchivoOptions = {}): 
     sea_level: SEA_LEVEL,
     dry_ring_major: TUBE_MAJOR,
     dry_ring_minor: TUBE_MINOR,
+    sea_wave_height: WAVE_HEIGHT,
+    sea_wave_seed: WAVE_SEED,
   });
   root.userData.stats = statsOf(frame, terrain, builder.pieces.colliders);
-  root.add(frame);
+  root.add(frame, sea);
 
   const scene = new Group();
   scene.add(root);

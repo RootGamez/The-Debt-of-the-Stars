@@ -1,7 +1,7 @@
 // El Archivo de agua por código (Fase 11E): su forma, que el vidrio no deje entrar más que por la esclusa y que se
 // pueda bajar buceando, entrar por el pozo y subir a la Galería antes de quedarse sin aire.
 import { describe, expect, it } from 'vitest';
-import { Mesh, SphereGeometry, Vector3 } from 'three';
+import { Mesh, SphereGeometry, Vector3, type ShaderMaterial } from 'three';
 import { ATMOSPHERES } from '../../../src/data/atmospheres';
 import type { MoveIntent } from '../../../src/core/input';
 import { BREATH_SECONDS, PHYSICS_STEP } from '../../../src/data/movement';
@@ -17,6 +17,7 @@ import {
   SEABED,
   TUBE_MAJOR,
   TUBE_MINOR,
+  WAVE_HEIGHT,
 } from '../../../src/worlds/procedural/archivoShape';
 import { ARCHIVO_SOURCES } from '../../../src/worlds/procedural/archivoGallery';
 import { direction, frameAt, type Triple } from '../../../src/worlds/procedural/kit';
@@ -43,7 +44,7 @@ describe('the Archivo built in code', () => {
       radius: 70,
       gravity: 1.5,
       clockRate: 0.8,
-      sea: { level: 70, dry: { major: 70, minor: 9 } },
+      sea: { level: 70, dry: { major: 70, minor: 9 }, waves: { height: WAVE_HEIGHT, seed: 3 } },
     });
   });
 
@@ -91,7 +92,9 @@ describe('the Archivo built in code', () => {
     }
     const above = toGltf(direction(10, 0).multiplyScalar(SEA_LEVEL + 50));
     const down = above.clone().normalize().negate();
-    expect(runtime.hull.raycast(above, down, 60)).toBeCloseTo(50, 1);
+    expect(Math.abs((runtime.hull.raycast(above, down, 60) ?? 0) - 50)).toBeLessThanOrEqual(
+      WAVE_HEIGHT + 0.01,
+    );
   });
 });
 
@@ -127,7 +130,10 @@ describe('the glass of the gallery', () => {
     const above = toGltf(direction(30, 60).multiplyScalar(SEA_LEVEL + 10));
     const down = above.clone().normalize().negate();
 
-    expect(runtime.hull.raycast(above, down, 40)).toBeCloseTo(10, 1);
+    // Sobre las olas: la nave sube y baja con ellas, nunca más que su altura.
+    expect(Math.abs((runtime.hull.raycast(above, down, 40) ?? 0) - 10)).toBeLessThanOrEqual(
+      WAVE_HEIGHT + 0.01,
+    );
     expect(runtime.collision.raycast(above, down, 40)).toBeGreaterThan(20);
   });
 });
@@ -193,5 +199,16 @@ describe('the lock, the only way in', () => {
   it('opens into a shaft whose water ends where the dry tube begins', () => {
     expect(water && isWet(atLock([-0.6, 0, 3]), water)).toBe(true);
     expect(water && isWet(atLock([-0.6, 0, 5.6]), water)).toBe(false);
+  });
+});
+
+describe('the open sea of the Archivo', () => {
+  it('moves with the same waves the physics uses', () => {
+    expect(water?.waves?.length).toBeGreaterThan(0);
+    const sea = world.scene.getObjectByName('archivo_Mar');
+    if (!(sea instanceof Mesh)) throw new Error('falta archivo_Mar');
+    const uniforms = (sea.material as ShaderMaterial).uniforms;
+    expect(uniforms.uWaveA?.value).toEqual(water?.waves?.map((w) => w.amplitude));
+    expect(uniforms.uLevel?.value).toBe(SEA_LEVEL);
   });
 });

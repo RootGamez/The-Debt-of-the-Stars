@@ -5,6 +5,9 @@
 export const ARCHIVO_ID = 'archivo';
 /** El radio del mundo es el del mar: la superficie del agua. */
 export const SEA_LEVEL = 70;
+/** El oleaje (🟡): altura máxima de la ola sobre el nivel (m) y semilla de sus direcciones. */
+export const WAVE_HEIGHT = 0.45;
+export const WAVE_SEED = 3;
 /** El fondo de roca, de media (unos 14 m bajo el agua). */
 export const SEABED = 56;
 /** El tubo de la Galería: su anillo va por el nivel del agua (mitad fuera, mitad dentro). */

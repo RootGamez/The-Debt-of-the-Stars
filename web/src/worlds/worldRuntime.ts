@@ -8,6 +8,7 @@ import { surfaceUp, wellForWorld, type GravityWell } from '../physics/gravity';
 import { chooseSpawn, spawnOnGround, type SpawnPoint } from '../physics/spawn';
 import type { CollisionWorld, RaycastWorld } from '../physics/collisionWorld';
 import { withSeaSurface, type WaterBody } from '../physics/water';
+import { createWaves } from '../physics/waves';
 import type { Gate } from './gates';
 import type { LoadedWorld } from './loadWorld';
 import { WorldDataError } from './markers';
@@ -34,7 +35,13 @@ export function createWorldRuntime(world: LoadedWorld): WorldRuntime {
   }
   const well = wellForWorld(world.info);
   const collision = createBvhWorld(world.markers.colliders);
-  const water: WaterBody | undefined = world.info.sea && { center: well.center, ...world.info.sea };
+  const sea = world.info.sea;
+  const water: WaterBody | undefined = sea && {
+    center: well.center,
+    level: sea.level,
+    dry: sea.dry,
+    waves: sea.waves && createWaves(sea.waves.height, sea.waves.seed),
+  };
   const spawnMarker = chooseSpawn(world.markers.spawns);
   if (!spawnMarker) throw new WorldDataError(`${world.info.id} no tiene ningún SPAWN_`);
   return {

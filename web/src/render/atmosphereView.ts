@@ -42,10 +42,12 @@ void main() {
   vec3 d = normalize(vDir);
   float h = dot(d, uUp);
   float s = max(dot(d, uSun), 0.0);
-  vec3 sky = mix(uHorizon, uZenith, smoothstep(0.0, 0.55, h));
-  float low = 1.0 - smoothstep(0.0, 0.6, h);
+  // Sin cortes en el horizonte: el resplandor sigue un poco por debajo y el suelo entra poco a poco.
+  float above = max(h, 0.0);
+  vec3 sky = mix(uHorizon, uZenith, smoothstep(0.0, 0.55, above));
+  float low = 1.0 - smoothstep(0.0, 0.6, above);
   sky = mix(sky, uGlow, clamp(pow(s, 6.0) * 0.7 * low + pow(s, 48.0) * 0.6, 0.0, 1.0));
-  vec3 color = h < 0.0 ? mix(uHorizon, uGround, smoothstep(0.0, 0.3, -h)) : sky;
+  vec3 color = mix(sky, uGround, smoothstep(0.0, 0.35, -h));
   // Con la estrella bajo el horizonte el cielo se apaga; queda un resto de luz del lado por donde se fue.
   float day = smoothstep(-0.25, 0.08, dot(uUp, uSun));
   vec3 night = mix(uNight, uHorizon * 0.35, pow(s, 3.0) * (1.0 - smoothstep(0.0, 0.5, h)));

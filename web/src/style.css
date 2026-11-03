@@ -440,7 +440,11 @@ body {
   inset: 0;
   z-index: 2;
   opacity: 0;
-  background: radial-gradient(ellipse at center, rgb(20 70 110 / 55%) 30%, rgb(4 14 34 / 95%) 100%);
+  background: radial-gradient(
+    ellipse at center,
+    rgb(40 130 165 / 35%) 30%,
+    rgb(10 50 80 / 85%) 100%
+  );
   transition: opacity 0.25s;
   pointer-events: none;
 }
