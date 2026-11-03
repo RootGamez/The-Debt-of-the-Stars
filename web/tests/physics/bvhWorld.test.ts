@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import {
   BoxGeometry,
@@ -13,12 +11,12 @@ import { createBvhWorld, type BvhWorld } from '../../src/physics/bvhWorld';
 import { createCapsule, createContact, placeCapsule } from '../../src/physics/collisionWorld';
 import { createCharacter, stepCharacter } from '../../src/physics/characterMotor';
 import { wellForWorld } from '../../src/physics/gravity';
-import { parseWorld, type LoadedWorld } from '../../src/worlds/loadWorld';
+import type { LoadedWorld } from '../../src/worlds/loadWorld';
+import { loadBuiltWorld } from '../helpers/builtWorlds';
 import { PHYSICS_STEP, PLAYER_HEIGHT } from '../../src/data/movement';
 import { spawnOnGround } from '../../src/physics/spawn';
 import { yaw } from '../../src/physics/surfaceFrame';
 
-const UMBRAL_GLB = fileURLToPath(new URL('../../public/models/umbral.glb', import.meta.url));
 const IDLE = { x: 0, z: 0, run: false, jump: false };
 const WALK = { x: 0, z: 1, run: false, jump: false };
 
@@ -26,11 +24,7 @@ let umbral: LoadedWorld;
 let world: BvhWorld;
 
 beforeAll(async () => {
-  const bytes = readFileSync(UMBRAL_GLB);
-  umbral = await parseWorld(
-    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
-    'umbral',
-  );
+  umbral = await loadBuiltWorld('umbral');
   world = createBvhWorld(umbral.markers.colliders);
 });
 
@@ -145,6 +139,8 @@ describe('the player on the real Umbral', () => {
     const env = { wells: [wellForWorld(umbral.info)], world };
     const start = spawnOnGround(spawn, world, wellForWorld(umbral.info).center);
     const state = createCharacter(start.feet, start.body);
+    // Se aparece mirando a La Boca (Fase 11): se camina de espaldas a ella, rampa abajo y por la planicie.
+    yaw(state.body, Math.PI);
     const down = new Vector3();
     let worstGap = Infinity;
 

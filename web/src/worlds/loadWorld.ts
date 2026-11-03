@@ -1,4 +1,5 @@
-// Carga el glTF de un mundo exportado desde Blender y lee sus datos y marcas.
+// Carga un mundo y lee sus datos y marcas: construido por código (Fase 11, `procedural/`) o, mientras no se
+// migre, desde el glTF exportado de Blender. Las dos vías dan la misma forma de escena.
 import type { Group, Material, Object3D } from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
@@ -10,6 +11,7 @@ import {
   type WorldInfo,
   type WorldMarkers,
 } from './markers';
+import { buildProceduralScene } from './procedural';
 
 export interface LoadedWorld {
   scene: Group;
@@ -31,7 +33,16 @@ export async function parseWorld(data: ArrayBuffer, worldId: string): Promise<Lo
   return { scene, info: readWorldInfo(scene, worldId), markers: collectMarkers(scene) };
 }
 
+/** El mundo construido por código, o `undefined` si ese mundo aún llega como .glb. */
+export function buildWorld(worldId: string): LoadedWorld | undefined {
+  const scene = buildProceduralScene(worldId);
+  if (!scene) return undefined;
+  return { scene, info: readWorldInfo(scene, worldId), markers: collectMarkers(scene) };
+}
+
 export async function loadWorld(worldId: string): Promise<LoadedWorld> {
+  const built = buildWorld(worldId);
+  if (built) return built;
   const url = worldUrl(worldId);
   const response = await fetch(url);
   // Vite devuelve index.html con 200 si el archivo no existe: comprobamos también el tipo.
