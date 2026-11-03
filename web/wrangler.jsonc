@@ -1,0 +1,11 @@
+// Publicación en Cloudflare (Workers con assets estáticos, sin script): `npm run deploy` construye y sube `dist/`.
+// Los modelos 3D (5,7 MB en total, el mayor 3,5 MB) viajan con el resto: el límite por archivo es de 25 MiB, así
+// que no hace falta R2.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bucle-de-tiempo",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+  },
+}

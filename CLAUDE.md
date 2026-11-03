@@ -79,6 +79,12 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - La lente (`system/lens.ts`): la imagen del Nudo se ve girada 18° hacia la Brasa; nítida solo desde el Observatorio en la alineación. **G** muestra la mira graduada. Con `?debug`: `__juego.lens()`.
 - Mareas (`physics/tides.ts`): el Borde de Cicatriz, la semilla del Nudo y su cáscara; la tensión acumulada mata (`marea`). Con `?debug`: `__juego.tide()`.
 
+## Publicación (Cloudflare)
+- Está en https://bucle-de-tiempo.anthonygamez2858.workers.dev (cuenta de Anthony, Workers con assets estáticos, sin script: `web/wrangler.jsonc`).
+- `npm run deploy` (en `web/`) construye y sube `dist/`; `npm run deploy:dry` solo comprueba. Hace falta haber entrado con `npx wrangler login`.
+- Los modelos `.glb` (5,7 MB) van dentro de `dist/models/`: el límite por archivo es de 25 MiB, así que no se usa R2. Si algún día los modelos pasan de unos 100 MB en total, sí convendría un bucket.
+- `web/public/_headers` pone la caché (`/assets/*` inmutable, `/models/*` revalidando) y `web/public/.assetsignore` deja fuera los `.map`.
+
 ## Mundos por código (Fase 11)
 - Blender está en pausa: los mundos se migran a TypeScript en `web/src/worlds/procedural/` (plan: `docs/plan-fase-11-modelado-por-codigo.md`).
 - `kit.ts` (primitivas, marcos lat/lon, piezas con colisión, terreno, dispersión, luz de cielo y bruma), `noise.ts`, `wind.ts` (polvo).
