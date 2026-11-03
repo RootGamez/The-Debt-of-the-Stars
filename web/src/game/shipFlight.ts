@@ -239,7 +239,7 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
       .copy(ship.state.position)
       .divideScalar(center || 1)
       .negate();
-    const ground = runtime.collision.raycast(ship.state.position, down, ALTITUDE_PROBE);
+    const ground = runtime.hull.raycast(ship.state.position, down, ALTITUDE_PROBE);
     return (ground ?? center - runtime.world.info.radius) - ship.radius;
   }
 
@@ -506,6 +506,6 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
   function groundOf(world: string | undefined) {
     if (!world) return undefined;
     const runtime = runtimeOf(runtimes, world);
-    return { world: runtime.collision, center: runtime.well.center };
+    return { world: runtime.hull, center: runtime.well.center };
   }
 }

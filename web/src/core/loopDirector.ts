@@ -39,10 +39,20 @@ export type LoopPhase = 'playing' | 'dying' | 'waking';
  * `marea`: la tensión de la marea llegó al máximo (Fase 7, physics/tides.ts). `gusano` no es una muerte: es el
  * paso al sistema ajeno al final del prólogo, con el mismo fundido a blanco. `horizonte` tampoco: es cruzar el
  * horizonte estable (Fase 10) hacia el Archivo de las Puertas, con un fundido a negro; `boca`, cruzar una de las
- * bocas de casa del Archivo de vuelta a Hogar, con el blanco del gusano.
+ * bocas de casa del Archivo de vuelta a Hogar, con el blanco del gusano. `ahogado`: se acabó el aire buceando en
+ * el mar del Archivo (Fase 11E).
  */
 export type DeathCause =
-  'fin' | 'absorcion' | 'caida' | 'choque' | 'calor' | 'marea' | 'gusano' | 'horizonte' | 'boca';
+  | 'fin'
+  | 'absorcion'
+  | 'caida'
+  | 'choque'
+  | 'calor'
+  | 'marea'
+  | 'ahogado'
+  | 'gusano'
+  | 'horizonte'
+  | 'boca';
 
 /** Lo que no es una muerte sino un paso a otro sitio: no cuenta ciclo y la página se recarga allí. */
 const CROSSINGS: readonly DeathCause[] = ['gusano', 'horizonte', 'boca'];

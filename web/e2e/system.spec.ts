@@ -57,7 +57,8 @@ test('warping to another world changes the frame, the gravity and the clock rate
   const s = await snapshot(page);
   expect(s?.world).toBe('archivo');
   expect(s?.loop.rate).toBeCloseTo(0.8);
-  expect(s?.gravity).toBeCloseTo(9.8 * 1.5, 1);
+  // En el islote del Borde, algo por encima del mar (el radio del mundo): la gravedad ya baja un poco.
+  expect(s?.gravity).toBeCloseTo(9.8 * 1.5, 0);
 });
 
 test('refuses to warp to a world that is not in the game', async ({ page }) => {

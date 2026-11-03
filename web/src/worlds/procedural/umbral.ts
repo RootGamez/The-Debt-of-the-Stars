@@ -21,10 +21,7 @@ import {
   Vector3,
 } from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import systemData from '../../data/sistema.json';
-import { parseSystem } from '../../system/systemData';
 import { isMesh } from '../markers';
-import { WORLD_IDS } from '../worldSelection';
 import {
   angleBetween,
   applySkyLight,
@@ -67,6 +64,7 @@ import {
   silos,
   watchtower,
 } from './umbralLandmarks';
+import { sunInWorld } from './sun';
 import { windDust } from './wind';
 
 export const UMBRAL_ID = 'umbral';
@@ -83,10 +81,7 @@ const LAMP_GLOW = 3;
 
 /** Dirección de la Brasa en el marco de Umbral (rotación bloqueada: siempre la misma cara). */
 export function sunInUmbral(): Vector3 {
-  const body = parseSystem(systemData, WORLD_IDS).bodyOf(UMBRAL_ID);
-  const c = body?.spinPhase ?? 0;
-  // En glTF (Y arriba) la Brasa queda en (−cos c, 0, −sin c); en el marco de Blender, (−cos c, sin c, 0).
-  return new Vector3(-Math.cos(c), Math.sin(c), 0);
+  return sunInWorld(UMBRAL_ID);
 }
 
 // ---- Relieve ----------------------------------------------------------------------------------------------
@@ -688,6 +683,35 @@ class UmbralBuilder {
     this.ramp(f, [0, -3.9, top + 0.06], [0, -6.5]);
     this.mark('INT_registro_envios', f, [-3.2, -3.0, top + 1.25], {
       clue_id: 'umbral.envios',
+      kind: 'texto',
+    });
+    // Fase 11E (🟡): una hoja suelta del registro, clavada en un tablón, dice por dónde se entra al Archivo.
+    v.add(
+      P.slate,
+      cylinder(0.08, 6),
+      f.at([2.4, -3.1, top + 0.6], undefined, [1, 1, 1.2]),
+      'metal',
+      {
+        solid: true,
+      },
+    );
+    v.add(P.rock, box(), f.at([2.4, -3.1, top + 1.3], [-0.2, 0, 0], [0.8, 0.08, 0.6]));
+    v.add(P.paper, box(), f.at([2.4, -3.16, top + 1.3], [-0.2, 0, 0], [0.42, 0.02, 0.5]), 'stone', {
+      solid: false,
+    });
+    for (let k = 0; k < 3; k++) {
+      v.add(
+        P.amber,
+        box(),
+        f.at([2.4, -3.18, top + 1.18 + k * 0.08], [-0.2, 0, 0], [0.26, 0.01, 0.03]),
+        'metal',
+        {
+          solid: false,
+        },
+      );
+    }
+    this.mark('INT_hoja_entrada', f, [2.4, -3.3, top + 1.3], {
+      clue_id: 'umbral.hoja_entrada',
       kind: 'texto',
     });
   }

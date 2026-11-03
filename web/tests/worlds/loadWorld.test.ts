@@ -31,7 +31,7 @@ describe('worldUrl', () => {
   });
 });
 
-describe('parseWorld with a real exported world (the Archivo, still from Blender)', () => {
+describe('parseWorld with a real exported world (the Archivo as Blender exported it, before Phase 11E)', () => {
   it('keeps world data and every marker after Blender export and meshopt', async () => {
     const world = await parseWorld(readGlb(ARCHIVO_GLB), 'archivo');
 
@@ -77,6 +77,7 @@ describe('buildWorld (worlds modelled in code, Phase 11)', () => {
       'umbral.casas',
       'umbral.cuaderno',
       'umbral.envios',
+      'umbral.hoja_entrada',
       'umbral.placa',
     ]);
     expect(world?.markers.triggers.map((t) => t.event)).toEqual(['boca_destello']);
@@ -94,7 +95,7 @@ describe('buildWorld (worlds modelled in code, Phase 11)', () => {
   });
 
   it('leaves the worlds not migrated yet to their exported model', () => {
-    expect(buildWorld('archivo')).toBeUndefined();
+    expect(buildWorld('taller')).toBeUndefined();
   });
 
   it('is what loadWorld returns for a world modelled in code (no download)', async () => {

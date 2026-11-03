@@ -3,6 +3,7 @@
 //   1. gravedad → nuevo "arriba"   2. intención → velocidad deseada sobre el suelo
 //   3. salto (con búfer y tiempo coyote) y gravedad   4. mover la cápsula en subpasos y sacarla de
 //   la geometría   5. pegarse al suelo al bajar cuestas o pasar aristas
+// En el agua (mundos con mar) los pasos 2 y 3 cambian: se nada en 3D, el agua empuja hacia arriba y frena.
 // El estado se modifica en el sitio para no crear objetos en cada paso.
 import { Quaternion, Vector3 } from 'three';
 import type { MoveIntent } from '../core/input';
@@ -10,20 +11,29 @@ import {
   AIR_ACCELERATION,
   COYOTE_SECONDS,
   GROUND_ACCELERATION,
+  FLOAT_LINE,
   GROUND_SNAP_DISTANCE,
   JUMP_BUFFER_SECONDS,
   JUMP_SPEED,
   MAX_SLOPE_DEGREES,
+  MAX_BUOYANCY,
   MAX_SPEED,
   PLAYER_HEIGHT,
   PLAYER_RADIUS,
   RUN_SPEED,
+  SWIM_ACCELERATION,
+  SWIM_SPEED,
+  SWIM_SUBMERSION,
+  SWIM_VERTICAL_ACCELERATION,
   UP_ALIGN_RATE,
   WALK_SPEED,
+  WATER_DRAG,
+  WATER_DRAG_QUADRATIC,
 } from '../data/movement';
 import { createCapsule, createContact, placeCapsule, type CollisionWorld } from './collisionWorld';
 import { gravityAt, type GravityWell } from './gravity';
 import { alignUp, forwardOf, rightOf, smoothingFactor, upOf } from './surfaceFrame';
+import { submersion, type WaterBody } from './water';
 
 export interface CharacterState {
   /** Posición de los pies (m). */
@@ -46,11 +56,15 @@ export interface CharacterState {
   landings: number;
   /** Velocidad contra el suelo en el último aterrizaje (m/s), para la muerte por caída. */
   lastLandingSpeed: number;
+  /** Nada (bastante cuerpo bajo el agua): Espacio sube, Mayús bucea. */
+  swimming: boolean;
 }
 
 export interface MotorEnvironment {
   wells: readonly GravityWell[];
   world: CollisionWorld;
+  /** El mar del mundo, si lo tiene. */
+  water?: WaterBody | undefined;
 }
 
 const MIN_WALKABLE_DOT = Math.cos((MAX_SLOPE_DEGREES * Math.PI) / 180);
@@ -92,6 +106,7 @@ export function createCharacter(feet: Vector3, body: Quaternion): CharacterState
     takeoffs: 0,
     landings: 0,
     lastLandingSpeed: 0,
+    swimming: false,
   };
 }
 
@@ -170,6 +185,36 @@ function applyJumpAndGravity(state: CharacterState, intent: MoveIntent, dt: numb
   return jumped;
 }
 
+/**
+ * En el agua: se nada sobre el plano del suelo (la intención frena y acelera menos), Espacio sube y Mayús bucea;
+ * el empuje del agua compensa la gravedad cuando se flota en la línea de flotación y el agua lo frena todo.
+ */
+function swim(state: CharacterState, intent: MoveIntent, wet: number, dt: number): void {
+  forwardOf(state.body, forward);
+  rightOf(state.body, right);
+  wish.set(0, 0, 0).addScaledVector(right, intent.x).addScaledVector(forward, intent.z);
+  projectOnPlane(wish, up, wish);
+  if (wish.lengthSq() > 1e-12)
+    wish.setLength(Math.min(1, Math.hypot(intent.x, intent.z)) * SWIM_SPEED);
+  const verticalSpeed = state.velocity.dot(up);
+  projectOnPlane(state.velocity, up, planar);
+  moveTowards(planar, wish, SWIM_ACCELERATION * dt);
+  state.velocity.copy(planar).addScaledVector(up, verticalSpeed);
+
+  const buoyancy = Math.min(MAX_BUOYANCY, wet / FLOAT_LINE);
+  state.velocity.addScaledVector(gravity, (1 - buoyancy) * dt);
+  const stroke = (intent.jump ? 1 : 0) - (intent.run ? 1 : 0);
+  state.velocity.addScaledVector(up, stroke * SWIM_VERTICAL_ACCELERATION * dt);
+  // Lo de lado ya lo frena la intención (que lleva hacia `wish`); el agua frena lo que sube y baja.
+  const rising = state.velocity.dot(up);
+  const drag = WATER_DRAG + WATER_DRAG_QUADRATIC * Math.abs(rising);
+  state.velocity.addScaledVector(up, rising * (Math.exp(-drag * dt) - 1));
+  // Nadando no se salta: soltar Espacio tampoco deja un salto pendiente al salir.
+  state.jumpHeld = intent.jump;
+  state.jumpBuffer = 0;
+  state.coyote = 0;
+}
+
 /** Saca la cápsula de la geometría; devuelve si quedó sobre suelo caminable. */
 function resolveContacts(state: CharacterState, env: MotorEnvironment): boolean {
   placeCapsule(capsule, state.position, up, PLAYER_HEIGHT);
@@ -214,7 +259,11 @@ function snapToGround(state: CharacterState, env: MotorEnvironment): boolean {
     placeCapsule(capsule, probe, up, PLAYER_HEIGHT);
     if (!env.world.resolve(capsule, up, contact)) continue;
     if (contact.floorDot < MIN_WALKABLE_DOT) return false; // lo primero que toca no es suelo
-    state.position.copy(probe).add(contact.correction);
+    // Se sale solo hacia arriba (lo que haga falta para dejar de tocar esa cara): al coronar una rampa empinada,
+    // empujar según su normal devolvería al jugador cuesta abajo.
+    const lift = contact.correction.dot(up);
+    if (lift <= 1e-9) return false;
+    state.position.copy(probe).addScaledVector(up, contact.correction.lengthSq() / lift);
     state.groundNormal.copy(contact.floorNormal);
     const speed = state.velocity.length();
     projectOnPlane(state.velocity, contact.floorNormal, state.velocity);
@@ -231,12 +280,19 @@ export function stepCharacter(
   dt: number,
 ): void {
   updateUp(state, env, dt);
-  steer(state, intent, dt);
+  const wet = env.water ? submersion(state.position, up, env.water) : 0;
+  state.swimming = wet > SWIM_SUBMERSION;
   const wasGrounded = state.grounded;
-  const jumped = applyJumpAndGravity(state, intent, dt);
+  let jumped = false;
+  if (state.swimming) {
+    swim(state, intent, wet, dt);
+  } else {
+    steer(state, intent, dt);
+    jumped = applyJumpAndGravity(state, intent, dt);
+  }
   stepImpact = 0;
   let grounded = moveAndCollide(state, env, dt);
-  if (!grounded && wasGrounded && !jumped) grounded = snapToGround(state, env);
+  if (!grounded && wasGrounded && !jumped && !state.swimming) grounded = snapToGround(state, env);
 
   if (wasGrounded && !grounded) state.takeoffs++;
   if (!wasGrounded && grounded) {

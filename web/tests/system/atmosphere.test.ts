@@ -20,8 +20,8 @@ describe('the air of a world', () => {
     expect(airDensity(10, 0)).toBe(0);
   });
 
-  it('home and Umbral have air; the other worlds of the alien system are dead', () => {
-    expect(Object.keys(ATMOSPHERES).sort()).toEqual(['hogar', 'umbral']);
+  it('home, Umbral and the Archivo have air; the other worlds of the alien system are dead', () => {
+    expect(Object.keys(ATMOSPHERES).sort()).toEqual(['archivo', 'hogar', 'umbral']);
     expect(ATMOSPHERES.hogar?.height).toBeGreaterThan(0);
   });
 
@@ -31,5 +31,16 @@ describe('the air of a world', () => {
     expect(umbral?.height).toBeGreaterThan(0);
     expect(umbral?.opacity).toBeLessThan(1);
     expect(umbral?.night).toBeDefined();
+  });
+
+  it('gives the Archivo a blue sea sky, thicker than the air of Umbral, with a night side', () => {
+    const archivo = ATMOSPHERES.archivo;
+    const umbral = ATMOSPHERES.umbral;
+
+    expect(archivo?.height).toBeGreaterThan(0);
+    expect(archivo?.opacity ?? 0).toBeGreaterThan(umbral?.opacity ?? 1);
+    expect(archivo?.night).toBeDefined();
+    // Azul: el cénit tiene más azul que rojo.
+    expect((archivo?.zenith ?? 0) & 0xff).toBeGreaterThan(((archivo?.zenith ?? 0) >> 16) & 0xff);
   });
 });

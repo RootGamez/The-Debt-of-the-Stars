@@ -18,6 +18,7 @@ import { followCrossing, replay, toArchive } from './game/crossings';
 import { endingFromQuery, homeLook } from './game/homecoming';
 import { createHomecomingRig } from './game/homecomingRig';
 import { createFoldedPassage } from './game/foldedPassage';
+import { createDiving } from './game/diving';
 import { createTideEffects } from './game/tideEffects';
 import { insideCavity } from './physics/gravity';
 import { createInteriorLights } from './render/interiorLight';
@@ -233,6 +234,9 @@ async function start(): Promise<void> {
     palco: BLACK_HOLE.palco,
   });
   let tideDeath: DeathCause | undefined;
+  // El aire bajo el mar del Archivo.
+  const diving = createDiving();
+  let drowned: DeathCause | undefined;
   let horizonCross: DeathCause | undefined;
   // Por una boca de casa del Archivo, con el final que sale de ella y de los planos.
   let mouthCross: DeathCause | undefined;
@@ -245,6 +249,7 @@ async function start(): Promise<void> {
       {
         wells: [runtime.well],
         world: withSphereObstacle(runtime.collision, () => game.flight?.obstacleIn(id)),
+        water: runtime.water,
       },
     ]),
   );
@@ -329,6 +334,7 @@ async function start(): Promise<void> {
       game.flight?.reset();
       enterWorld(startWorld);
       tides.reset();
+      diving.reset();
       counterweight?.play.reset();
       arrive(startWorld);
     },
@@ -523,6 +529,7 @@ async function start(): Promise<void> {
     window.__juego.audio = () => soundtrack.snapshot();
     window.__juego.lens = () => lens.snapshot();
     window.__juego.tide = () => tides.snapshot();
+    window.__juego.dive = () => diving.snapshot();
     window.__juego.blackHole = () => blackHole.snapshot();
     window.__juego.sky = () => ({ density: atmosphere.density });
     window.__juego.ool = () => ({ turns: ool.snapshot(), filaments: filaments.snapshot() });
@@ -641,6 +648,7 @@ async function start(): Promise<void> {
   let awoke = false;
   const feet = new Vector3();
   const airCenter = new Vector3();
+  const diveUp = new Vector3();
   const body = new Quaternion();
   runFrameLoop(
     renderer,
@@ -680,10 +688,10 @@ async function start(): Promise<void> {
       session.update(
         dt,
         timeRuns,
-        mouthCross ?? horizonCross ?? wormhole ?? shipDeath ?? tideDeath,
+        mouthCross ?? horizonCross ?? wormhole ?? shipDeath ?? tideDeath ?? drowned,
       );
       // si el ciclo no corrió, espera; la boca elegida no se olvida (cruzar no tiene vuelta y la página se recarga)
-      if (timeRuns) wormhole = shipDeath = tideDeath = horizonCross = undefined;
+      if (timeRuns) wormhole = shipDeath = tideDeath = drowned = horizonCross = undefined;
       for (const prop of eventProps) {
         prop.object.visible = session.activeEventIds.includes(prop.event);
       }
@@ -717,6 +725,16 @@ async function start(): Promise<void> {
         dt,
       );
       if (tideLethal && session.acceptsInput) tideDeath = 'marea';
+      const outOfAir = diving.update(
+        {
+          water: piloting ? undefined : currentWorld.water,
+          feet: player.state.position,
+          up: upOf(player.state.body, diveUp),
+          running: timeRuns && session.acceptsInput,
+        },
+        dt,
+      );
+      if (outOfAir) drowned = 'ahogado';
       if (horizon.crossed(here.frame, here.position) && session.acceptsInput) {
         horizonCross = 'horizonte';
       }

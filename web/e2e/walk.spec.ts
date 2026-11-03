@@ -62,5 +62,6 @@ test('each world has its own gravity', async ({ page }) => {
   await ready(page, '&mundo=archivo');
 
   expect(await value(page, 'world')).toBe('archivo');
-  expect(await value(page, 'gravity')).toBeCloseTo(14.7, 1);
+  // Se despierta en el islote del Borde, algo por encima del mar (el radio del mundo): la gravedad ya baja un poco.
+  expect(await value(page, 'gravity')).toBeCloseTo(14.7, 0);
 });

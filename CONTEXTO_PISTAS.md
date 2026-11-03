@@ -1,6 +1,6 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.7
+**Versión:** v0.8
 **Última actualización:** 2026-10-30 · Fase 10 (el Archivo de las Puertas)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
@@ -149,10 +149,11 @@ final se entiende como aviso.
 | `umbral.aula` | Texto | Siempre | Inscripciones infantiles: números y la forma de escribir horas | Una canción de cuna: "no cruces dos veces la misma Puerta en el mismo día" (H2) | `lectura.horas`, `deuda.cancion` · H2 |
 | `umbral.casas` | Objeto | Siempre | Seis casas con las mesas servidas, sin violencia | El aviso de evacuación pegado en una puerta: "40 minutos, Puertas 2 a 6" | `partida.evacuacion` · H3 |
 | `umbral.destello` | Evento (`TRIG_LaBoca_Destello`) | 10:00, 3 s | La Boca se abre un instante; su luz se ve desde otros mundos | Las Puertas "se buscan": La Boca responde a una llamada lejana (la de casa) | `deuda.puertas_se_buscan` · H2, H7 |
+| `umbral.hoja_entrada` (🟡, Fase 11E) | Texto | Siempre | Una hoja suelta del registro en el tablón del Muelle: las cargas al Archivo no entraban por el vidrio | "Bajo la tercera torre, en el fondo, la puerta del pozo. Busca las tres bandas" | `archivo.entrada` · H4 |
 
 ### 5.3 Archivo — la biblioteca (reloj 0,80)
 
-> **Fase 11 (✅ Anthony, 2026-11-03):** la entrada a la cúpula del Archivo solo se encuentra con una pista leída en otro planeta. Propuesta (🟡, sin añadir aún al grafo): un hecho nuevo `archivo.entrada` que da una fuente de Umbral (❓ el Muelle de Envíos o la Estación del Hielo); nada del Archivo hace falta para conseguirlo.
+> **Fase 11 (✅ Anthony, 2026-11-03):** la entrada a la cúpula del Archivo solo se encuentra con una pista leída en otro planeta. La fuente está en el Muelle de Envíos (✅ el sitio): `umbral.hoja_entrada` da el hecho `archivo.entrada` (🟡, hilo H4), y nada del Archivo hace falta para conseguirlo. No es un hecho esencial, porque la esclusa se puede encontrar buceando sin la pista.
 
 | id | Tipo | Cuándo | Superficial | Profunda | Hechos · Hilos |
 |---|---|---|---|---|---|
@@ -301,7 +302,7 @@ textos de ambiente sin peso en el grafo.
 
 ## 11. Cómo quedó implementado (Fase 4)
 
-- Los hilos, hechos, conclusiones y las 52 fuentes (47 del primer grafo + 2 de la Sala del Motor y 3 del Archivo de las Puertas, Fase 10) están transcritos en `web/src/data/pistas/` (60 hechos).
+- Los hilos, hechos, conclusiones y las 53 fuentes (47 del primer grafo + 2 de la Sala del Motor y 3 del Archivo de las Puertas, Fase 10, + la hoja del Muelle, Fase 11E) están transcritos en `web/src/data/pistas/` (61 hechos).
 - **Cada hecho se asigna a la lectura superficial o a la profunda** de su fuente en los datos (la tabla de §5 no lo distinguía siempre). Criterio: la profunda da lo que explica lo oculto. Los datos son la referencia; corrígelos ahí.
 - **Conclusiones con alternativas:** K5 (reloj) y K8 (prueba mayor) se desbloquean con *cualquiera* de varios hechos por grupo; K3 requiere K1, K2 y KC.
 - El Registro muestra cada hecho bajo su **primer hilo**, con su frase y enlaces "ver también", pero **no el lugar** donde se aprendió (no se guarda; solo se guardan los hechos).
@@ -323,3 +324,4 @@ textos de ambiente sin peso en el grafo.
 - **2026-10-30 · Fase 10 (hito 10C, 🟡).** Dos fuentes nuevas en la Sala del Motor de Cicatriz: `cicatriz.palanca` ("E · tirar": saca el motor viejo antes del pulso) y `cicatriz.cuna` (lector `ruedas`: igualar el reloj del Contrapeso con el de la máquina; da `contrapeso.reloj` al igualarlos si ya se sabe qué es). Textos `[texto pendiente]` para Anthony.
 - **2026-10-30 · Fase 10 (hito 10D, 🟡).** El Archivo de las Puertas tiene tres fuentes (`puertas.rastros`, `puertas.bocas` con el lector `bocas`, `puertas.planos`) y cuatro hechos de cierre (`puertas.otros_viajeros`, `silencio.no_cruzaron`, `bocas.vuelta_antes`, `contrapeso.planos`). Cambia la línea de §5.8 que decía que el epílogo no daba hechos (regla 6). Total: 52 fuentes y 60 hechos.
 - **2026-11-03 · Fase 11.** El Archivo se rediseña como planeta de agua con cúpula y una única entrada que se aprende en otro planeta (✅); se propone el hecho `archivo.entrada` (🟡).
+- **2026-11-03 · Fase 11E (🟡).** Nueva fuente `umbral.hoja_entrada` en el tablón del Muelle de Envíos (texto borrador) con el hecho `archivo.entrada` (H4): la puerta del pozo bajo la tercera torre, marcada con tres bandas. Total: 53 fuentes y 61 hechos.

@@ -8,6 +8,15 @@ describe('the real clue data', () => {
     (s) => !(s.kind === 'charla' && s.surface.facts.length === 0 && !s.deep),
   );
 
+  it('teaches the way into the Archivo outside the Archivo (Phase 11E): the loose sheet of the Muelle', () => {
+    const teaching = clues.sources.filter((s) =>
+      [...s.surface.facts, ...(s.deep?.facts ?? [])].includes('archivo.entrada'),
+    );
+
+    expect(teaching.map((s) => s.id)).toEqual(['umbral.hoja_entrada']);
+    expect(teaching.every((s) => s.world !== 'archivo')).toBe(true);
+  });
+
   it('loads and validates without errors', () => {
     expect(clues.sources.length).toBeGreaterThan(0);
   });
@@ -20,7 +29,7 @@ describe('the real clue data', () => {
     expect(chats.length - (clues.sources.length - graph.length)).toBe(1); // solo la Directora da hechos
   });
 
-  it('contains the 7 threads, the 9 conclusions and the 52 sources of CONTEXTO_PISTAS.md', () => {
+  it('contains the 7 threads, the 9 conclusions and the 53 sources of CONTEXTO_PISTAS.md', () => {
     expect(clues.threads.map((t) => t.id)).toEqual(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7']);
     expect(clues.conclusions.map((c) => c.id)).toEqual([
       'K1',
@@ -33,7 +42,7 @@ describe('the real clue data', () => {
       'K7',
       'K8',
     ]);
-    expect(graph).toHaveLength(52);
+    expect(graph).toHaveLength(53);
   });
 
   it('spreads the sources over the places of the document', () => {
@@ -43,7 +52,7 @@ describe('the real clue data', () => {
     expect(Object.fromEntries(perWorld)).toEqual({
       hogar: 6,
       luna: 1,
-      umbral: 8,
+      umbral: 9,
       archivo: 7,
       taller: 8,
       cicatriz: 9,

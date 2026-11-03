@@ -1,6 +1,6 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.11
+**Versión:** v0.12
 **Última actualización:** 2026-11-03 · Fase 11 (Umbral por código, su aire y sus estructuras nuevas)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
@@ -98,6 +98,15 @@
 ## 4. Archivo — la biblioteca
 
 > **Rediseño (✅ Anthony, 2026-11-03):** el Archivo pasa a ser un **planeta de agua**. Los archivos que rodean el planeta quedan dentro de una **cúpula de vidrio** que los Ausentes construyeron alrededor del planeta para guardarlos, con **una sola entrada** (bajo el agua o igual de difícil) que solo se encuentra **leyendo una pista en otro planeta**. Se modela por código. Cómo se concreta (🟡, con preguntas ❓) en `docs/plan-fase-11-modelado-por-codigo.md`, hito 11E: un océano con la Galería, un anillo de vidrio en el ecuador medio hundido; una esclusa en el fondo como única entrada; bucear con aire limitado. Lo de abajo es el diseño anterior; los lugares, el evento y las pistas se conservan dentro de la cúpula.
+
+**Cómo quedó en el código (Fase 11E; 🟡 salvo lo marcado).**
+- **El mar.** El radio del mundo (70 m) es la superficie del agua; el fondo de roca queda unos 14 m abajo, con islotes. Se despierta seco en el islote del **Borde**, con un muelle y un anillo dorado. La nave flota en el agua.
+- **La Galería (✅ la forma).** Un tubo de vidrio que da la vuelta al ecuador justo al nivel del agua: la mitad asoma y la otra mitad queda sumergida. Dentro está el cañón seco de siempre, con su suelo, costillas, estanterías y los mismos lugares en sus posiciones. El Fondo del Cañón es un tramo del suelo hundido unos 2 m.
+- **Seis torres** sostienen el tubo y se numeran hacia el este desde la del Borde. La **tercera** lleva **tres bandas de luz**, la marca de la entrada.
+- **La esclusa, única entrada.** Bajo la tercera torre, en el fondo del mar, se abre un pozo de piedra con la puerta al pie, hacia el oeste. Se bucea hasta la puerta y se sube por el pozo hasta donde acaba el agua. Desde ahí, una rampa lleva a una cámara seca y otra rampa sube por un hueco del suelo hasta la Galería. El vidrio no se puede atravesar en ningún otro sitio.
+- **Bucear (✅ aire limitado).** Se nada con Espacio (subir) y Mayús (bajar). El aire dura **40 s**, se ve una barra y, si se acaba, la muerte es *ahogado*. Fuera del agua el aire se recupera en 3 s. El recorrido desde la superficie hasta la Galería se hace en unos 20 s.
+- **La pista (✅ el sitio).** Una hoja suelta en el Muelle de Envíos de Umbral (`umbral.hoja_entrada`) dice dónde está la puerta.
+- **El cielo (✅ azul con nubes, Anthony 2026-11-03; 🟡 los colores).** Aire de mar casi opaco: un cielo azul con un resplandor cálido alrededor de la Brasa, que de noche se vuelve azul hondo con estrellas. Lo lejano se ve azulado. Hay dos capas de nubes que el viento mueve: cúmulos a 26 m sobre el agua y velos altos a 40 m.
 
 **Idea.** Un cañón-biblioteca excavado en un mundo denso y silencioso, donde el tiempo pesa de verdad.
 
@@ -334,4 +343,5 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-11-03 · Fase 11.** Anthony decide dejar Blender por ahora y modelar los mundos por código (Umbral, el primero) y que Umbral tenga atmósfera (✅). Se proponen (🟡) el aspecto del aire y seis lugares nuevos sin pistas en §3.
 - **2026-11-03 · Fase 11 (rediseños).** Anthony decide que el Archivo sea un planeta de agua con una cúpula de vidrio para los archivos y una única entrada difícil que se aprende en otro planeta, y que el Taller sea un gigante gaseoso con islas de roca que giran, donde aterrizar cuesta y caer dentro mata (✅). Se proponen los detalles (🟡) en el plan de la Fase 11.
 - **2026-11-03 · Fase 11 (respuestas).** Anthony decide (✅): la pista de la entrada del Archivo está en el Muelle de Envíos de Umbral; al bucear el aire es limitado; la Galería es un tubo de vidrio al nivel del agua que encierra el cañón; el Taller tiene cinco islas pequeñas y un secreto en el centro, al que se llega por un teletransportador que solo se activa en una situación concreta. Después elige que el Contrapeso siga en el Laboratorio y que en el centro esté lo que falta para instalarlo (✅ opción B; 🟡 las páginas de sincronización).
-
+- **2026-11-03 · Fase 11E (🟡).** El Archivo se hace por código como planeta de agua: el mar al radio 70 con el fondo a 56, el tubo de vidrio de la Galería al nivel del agua, seis torres, la esclusa bajo la tercera torre como única entrada, bucear con 40 s de aire (muerte *ahogado*) y la hoja del Muelle de Umbral que la señala.
+- **2026-11-03 · Fase 11E (cielo).** Anthony pide para el Archivo un cielo azul con nubes (✅). Se le da aire de mar (casi opaco, con noche), bruma azul y dos capas de nubes animadas en el shader (🟡 colores y alturas).

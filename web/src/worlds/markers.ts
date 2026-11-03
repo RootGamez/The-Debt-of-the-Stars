@@ -30,6 +30,11 @@ export interface WorldInfo {
   innerRadius?: number | undefined;
   /** Luz de dentro de la cavidad, que sustituye a la de la Brasa (`interior_light` y `interior_light_color`). */
   interiorLight?: { color: number; intensity: number } | undefined;
+  /**
+   * Mundos con mar (el Archivo, Fase 11E): radio de la superficie del agua (`sea_level`) y, si lo hay, el tubo
+   * seco alrededor del ecuador (`dry_ring_major` y `dry_ring_minor`: ver physics/water.ts).
+   */
+  sea?: { level: number; dry?: { major: number; minor: number } } | undefined;
 }
 
 export interface InteractionMarker {
@@ -158,6 +163,21 @@ export function readWorldInfo(scene: Object3D, worldId: string): WorldInfo {
     ambient: readLight(root, 'ambient'),
     innerRadius,
     interiorLight: innerRadius === undefined ? undefined : readLight(root, 'interior_light'),
+    sea: readSea(root),
+  };
+}
+
+function readSea(root: Object3D): WorldInfo['sea'] {
+  const level = optionalNumber(root, 'sea_level', 'positive');
+  if (level === undefined) return undefined;
+  const major = optionalNumber(root, 'dry_ring_major', 'positive');
+  if (major === undefined) return { level };
+  return {
+    level,
+    dry: {
+      major,
+      minor: requireNumber(root, 'dry_ring_minor', 'positive'),
+    },
   };
 }
 

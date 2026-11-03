@@ -6,6 +6,8 @@ import type { MotorEnvironment } from '../physics/characterMotor';
 import { createBvhWorld, type BvhWorld } from '../physics/bvhWorld';
 import { surfaceUp, wellForWorld, type GravityWell } from '../physics/gravity';
 import { chooseSpawn, spawnOnGround, type SpawnPoint } from '../physics/spawn';
+import type { CollisionWorld, RaycastWorld } from '../physics/collisionWorld';
+import { withSeaSurface, type WaterBody } from '../physics/water';
 import type { Gate } from './gates';
 import type { LoadedWorld } from './loadWorld';
 import { WorldDataError } from './markers';
@@ -18,6 +20,10 @@ export interface WorldRuntime {
   spawn: SpawnPoint;
   /** Anillos de Puertas plegadas (vacío en casi todos los mundos). */
   gates: Gate[];
+  /** El mar, en los mundos que lo tienen (el Archivo). */
+  water: WaterBody | undefined;
+  /** Las colisiones de la nave: las del mundo y, si hay mar, su superficie (la nave flota; el jugador nada). */
+  hull: CollisionWorld & RaycastWorld;
 }
 
 export function createWorldRuntime(world: LoadedWorld): WorldRuntime {
@@ -28,6 +34,7 @@ export function createWorldRuntime(world: LoadedWorld): WorldRuntime {
   }
   const well = wellForWorld(world.info);
   const collision = createBvhWorld(world.markers.colliders);
+  const water: WaterBody | undefined = world.info.sea && { center: well.center, ...world.info.sea };
   const spawnMarker = chooseSpawn(world.markers.spawns);
   if (!spawnMarker) throw new WorldDataError(`${world.info.id} no tiene ningún SPAWN_`);
   return {
@@ -37,6 +44,8 @@ export function createWorldRuntime(world: LoadedWorld): WorldRuntime {
     collision,
     spawn: spawnOnGround(spawnMarker[1], collision, well),
     gates: readGates(world, well),
+    water,
+    hull: water ? withSeaSurface(collision, water) : collision,
   };
 }
 
@@ -55,5 +64,5 @@ function readGates(world: LoadedWorld, well: GravityWell): Gate[] {
 
 /** Lo que el motor del personaje necesita para moverse por ese mundo. */
 export function environmentOf(runtime: WorldRuntime): MotorEnvironment {
-  return { wells: [runtime.well], world: runtime.collision };
+  return { wells: [runtime.well], world: runtime.collision, water: runtime.water };
 }

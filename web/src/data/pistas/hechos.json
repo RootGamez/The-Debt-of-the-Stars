@@ -141,6 +141,12 @@
     "enlaces": ["bucle.orden_camara", "silencio.orden"]
   },
   {
+    "id": "archivo.entrada",
+    "hilos": ["H4"],
+    "frase": "Al Archivo se entra por abajo: un pozo en el fondo del mar, bajo la tercera torre.",
+    "enlaces": []
+  },
+  {
     "id": "silencio.economia",
     "hilos": ["H4"],
     "frase": "Las Puertas eran la economía y el orgullo de los Ausentes: nadie quería detenerlas.",

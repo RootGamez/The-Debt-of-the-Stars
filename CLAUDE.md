@@ -84,4 +84,8 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - `kit.ts` (primitivas, marcos lat/lon, piezas con colisión, terreno, dispersión, luz de cielo y bruma), `noise.ts`, `wind.ts` (polvo).
 - Un mundo por código cumple el mismo contrato que su `.glb` (raíz con datos, `COL_`, `INT_`, `SPAWN_`, `PARK_`, `TRIG_`, `EVT_`); `loadWorld` lo usa si existe en `procedural/index.ts` y si no descarga el `.glb`.
 - Umbral ya es por código (`umbral.ts`, lugares nuevos en `umbralLandmarks.ts`, colores en `umbralPalette.ts`) y tiene aire (`data/atmospheres.ts`).
+- El Archivo es por código y es de agua (`archivo.ts`, `archivoGallery.ts`, medidas en `archivoShape.ts`). La raíz lleva `sea_level`, `dry_ring_major` y `dry_ring_minor`: el mar es una esfera y el tubo de la Galería, un toro seco. La única entrada es la esclusa bajo la tercera torre.
+- Nubes: `procedural/clouds.ts` (capa esférica con ruido en el shader); el Archivo tiene dos y aire azul en `data/atmospheres.ts`.
+- Agua (`physics/water.ts`): se nada por encima de 0,45 sumergido (Espacio sube, Mayús baja), 40 s de aire (muerte `ahogado`), y `runtime.hull` añade la superficie del mar para que la nave flote. Con `?debug`: `__juego.dive()`.
+- `rampMatrix` da una matriz local al marco del sitio: multiplícala por `f.base`. `snapToGround` levanta en vertical (no por la normal) para no atascarse en la cima de una rampa.
 - Para mirar un mundo de cerca sin jugar, una página temporal en `web/` que llame a `buildUmbral()` sirve (no la dejes en el repo).

@@ -1,5 +1,6 @@
 // Los mundos con aire: desde su suelo se ve un cielo en vez del espacio. Hogar (Fase 9), el único mundo vivo, con
-// su amanecer; y Umbral (Fase 11, ✅ Anthony 2026-11-03), con un aire fino de ocaso que deja ver las estrellas.
+// su amanecer; Umbral (Fase 11, ✅ Anthony 2026-11-03), con un aire fino de ocaso que deja ver las estrellas; y el
+// Archivo (Fase 11, ✅ Anthony 2026-11-03), con un cielo azul de mar y nubes.
 
 export interface Atmosphere {
   /** Color del cielo arriba, en el horizonte, alrededor de la estrella y bajo el horizonte. */
@@ -26,5 +27,15 @@ export const ATMOSPHERES: Readonly<Record<string, Atmosphere>> = {
     height: 70,
     opacity: 0.78,
     night: 0x140f26,
+  },
+  // 🟡 Cielo azul de mar, casi opaco de día; de noche, azul hondo con estrellas.
+  archivo: {
+    zenith: 0x2f6fc0,
+    horizon: 0xb4d6ee,
+    glow: 0xfff1d6,
+    ground: 0x1f4f6c,
+    height: 60,
+    opacity: 0.95,
+    night: 0x0a1428,
   },
 };

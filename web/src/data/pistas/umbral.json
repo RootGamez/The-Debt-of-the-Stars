@@ -82,6 +82,20 @@
     }
   },
   {
+    "id": "umbral.hoja_entrada",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "titulo": "Una hoja suelta del registro",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Envíos al Archivo. Las cargas no entraban por el vidrio: nadie podía romperlo.",
+        "«Bajo la tercera torre, en el fondo, la puerta del pozo. Busca las tres bandas.»"
+      ],
+      "hechos": ["archivo.entrada"]
+    }
+  },
+  {
     "id": "umbral.carta",
     "mundo": "umbral",
     "tipo": "texto",

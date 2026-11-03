@@ -32,6 +32,24 @@ export const EYE_HEIGHT = 1.6;
 export const FIELD_OF_VIEW = 75;
 export const MAX_PITCH_DEGREES = 85;
 
+// Nadar y bucear (Fase 11E, el mar del Archivo).
+/** Con más de esta fracción del cuerpo bajo el agua se nada en vez de andar. */
+export const SWIM_SUBMERSION = 0.45;
+/** En reposo se flota con esta fracción del cuerpo dentro: los ojos quedan fuera. */
+export const FLOAT_LINE = 0.8;
+/** El empuje del agua llega como mucho a este múltiplo de la gravedad (bien hundido, se sube despacio). */
+export const MAX_BUOYANCY = 1.25;
+export const SWIM_SPEED = 3; // m/s
+export const SWIM_ACCELERATION = 6; // m/s²
+/** Empuje al bucear (Mayús) o al subir (Espacio), en m/s². */
+export const SWIM_VERTICAL_ACCELERATION = 12;
+/** Freno del agua: lineal (1/s) y cuadrático (1/m), para que una caída al mar no llegue al fondo como un golpe. */
+export const WATER_DRAG = 2.5;
+export const WATER_DRAG_QUADRATIC = 0.3;
+/** 🟡 El aire que se aguanta bajo el agua (s) y lo que tarda en recuperarse entero al sacar la cabeza. */
+export const BREATH_SECONDS = 40;
+export const BREATH_REFILL_SECONDS = 3;
+
 /** Velocidad a la que el "arriba" del jugador sigue a la gravedad (1/s). */
 export const UP_ALIGN_RATE = 8;
 
