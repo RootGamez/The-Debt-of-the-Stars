@@ -1,7 +1,7 @@
 // Panel de los lectores de puzle (Fase 7, hito 7E): el cuaderno del turno (completar la última hora del
 // Archivo) y las cartas del Archivo (ordenarlas por cuándo se escribieron de verdad); desde la Fase 10, los tres
 // que enseñan la cuenta del Contrapeso (ui/clockPuzzles.ts) y los que trae el juego (las ruedas de la cuna, que
-// miran el Contrapeso en vivo, y las bocas de casa del Archivo: `CustomReaders`). Diálogo accesible; todo entra como texto. La lógica está en
+// miran el Contrapeso en vivo, las bocas de casa del Archivo y el reloj de la Pista del Taller: `CustomReaders`). Diálogo accesible; todo entra como texto. La lógica está en
 // reading/puzzles.ts (con tests).
 import { LETTERS, NOTEBOOK, type Letter } from '../data/puzzles';
 import type { PuzzleReader } from '../registry/clues';
@@ -198,6 +198,8 @@ export function createPuzzlePanel(
         return { body: element('p', 'puzzle-hint', 'No hay nada que ajustar.') };
       case 'bocas':
         return { body: element('p', 'puzzle-hint', 'Todas las bocas están quietas.') };
+      case 'pista':
+        return { body: element('p', 'puzzle-hint', 'El reloj de la Pista está parado.') };
     }
   }
 

@@ -4,7 +4,7 @@
 import { Vector3 } from 'three';
 import type { Player } from '../core/player';
 import { lookAlong } from '../physics/surfaceFrame';
-import { findCrossing, gateArrival, REFOLD_SECONDS } from '../worlds/gates';
+import { findCrossing, gateArrival, REFOLD_SECONDS, type Gate } from '../worlds/gates';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 
 /** Desde cuánto por encima del punto de llegada se busca el suelo, y hasta qué profundidad (m). */
@@ -13,8 +13,11 @@ const PROBE_DEPTH = 8;
 const FLASH_CLASS = 'fold-flash-on';
 
 export interface FoldedPassage {
-  /** Una vez por fotograma, a pie y con el juego en marcha. Devuelve si el jugador cruzó. */
-  update(world: WorldRuntime, player: Player): boolean;
+  /**
+   * Una vez por fotograma, a pie y con el juego en marcha. Devuelve si el jugador cruzó. Por un anillo que
+   * `isOpen` da por cerrado se pasa de largo (el teletransportador del Taller, fuera de su momento).
+   */
+  update(world: WorldRuntime, player: Player, isOpen?: (gate: Gate) => boolean): boolean;
   /** Olvida dónde estaban los pies (cambio de mundo, reinicio o teletransporte de depuración). */
   reset(feet: Vector3): void;
   /** Cruces hechos (depuración y pruebas). */
@@ -43,10 +46,11 @@ export function createFoldedPassage(): FoldedPassage {
   }
 
   return {
-    update(world, player) {
+    update(world, player, isOpen) {
       const feet = player.state.position;
       const now = performance.now() / 1000;
-      const gate = known && now >= refoldAt ? findCrossing(lastFeet, feet, world.gates) : undefined;
+      const gate =
+        known && now >= refoldAt ? findCrossing(lastFeet, feet, world.gates, isOpen) : undefined;
       lastFeet.copy(feet);
       known = true;
       if (!gate) return false;

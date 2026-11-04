@@ -1,6 +1,6 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.8
+**Versión:** v0.9
 **Última actualización:** 2026-10-30 · Fase 10 (el Archivo de las Puertas)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
@@ -172,10 +172,12 @@ final se entiende como aviso.
 | `taller.montaje` | Observación | Siempre | Brazos mecánicos que siguen montando anillos para nadie | Aquí se fabricaban las Puertas: eran su economía y su orgullo (H4: por qué callaron) | `silencio.economia` · H4 |
 | `taller.cuna` | Objeto | Siempre | Un pedestal vacío con cables; placa "trasladado para las pruebas finales" | Se lo llevaron al sitio de las pruebas: el Sitio Lento (H5) | `contrapeso.trasladado` · H5, H6 |
 | `taller.nota_cuna` | Texto | Siempre | "No lo muevan sin ajustar el reloj" | Su reloj interno importa (K5) | `contrapeso.reloj` · H6 |
-| `taller.manual` | Texto (incompleto) | Siempre | Manual de instalación del Contrapeso; faltan las páginas de sincronización | Qué es y qué sustituye: el motor de la máquina (K4); lo que falta está en el Laboratorio (`lab.pizarra`) | `contrapeso.que_es`, `contrapeso.sustituye_motor` · H6 |
+| `taller.manual` | Texto (incompleto) | Siempre | Manual de instalación del Contrapeso; faltan las páginas de sincronización | Qué es y qué sustituye: el motor de la máquina (K4); lo que falta está en el Laboratorio (`lab.pizarra`) y, desde la Fase 11F (🟡), también en el centro del Taller (`taller.paginas`) | `contrapeso.que_es`, `contrapeso.sustituye_motor` · H6 |
 | `taller.gemelos` | Texto (puzzle) | Siempre | Dos diarios de los mismos tres meses (un técnico aquí, su hermana en Umbral) con cifras que no cuadran | Dilatación por velocidad; el método para calcular cuánto se desfasa un reloj al viajar (K5) | `contrapeso.metodo_sincronia` · H2, H6 |
 | `taller.cabina` | Observación | Siempre | Consola con el reloj del Taller frente al de otros mundos | Hay una línea para un destino sin nombre (ritmo 0,20) y su ventana de transferencia: hacia dónde girar la imagen (K1, corrección) | `lab.existe_lugar_lento`, `lab.correccion` · H5 |
 | `taller.secuencia` | Evento | 7:00, 2 min | Toda la fábrica se pone en marcha | Una simulación automática de cómo se instalaba el Contrapeso: abrir el núcleo durante el pulso, sacar el motor, encajar el Contrapeso (K4, K6) | `contrapeso.que_es`, `contrapeso.ventana_pulso` · H6 |
+| `taller.pista` 🟡 | Observación (puzzle) | Siempre | El reloj de la Pista de Pruebas, desajustado, con dos ruedas | Ajustarlo a la hora del Taller enseña a comparar relojes de sitios distintos; con él en hora, el anillo de la Pista se abre a las 7:00 (Fase 11F) | `contrapeso.medir_desfase` · H6 |
+| `taller.paginas` 🟡 | Texto | Sala del Centro (por el anillo de la Pista) | Las páginas de sincronización que faltan en el manual | La cuenta para corregir el reloj del Contrapeso según la ruta (K5); segunda fuente de la cuenta, con `lab.pizarra` (✅ opción B, Fase 11F) | `contrapeso.cuenta_sincronia` · H6 |
 | `taller.dormitorios` | Texto | Siempre | Literas y objetos personales | El técnico nombra a la investigadora y al escéptico: "se fueron al sitio lento y no volvieron a escribir" | `silencio.dos_investigadores` · H4, H5 |
 
 ### 5.5 Cicatriz — el origen (reloj 0,60 y bajando)
@@ -268,12 +270,12 @@ fuentes en Taller y Archivo además del Laboratorio, así que no depende de lleg
 | Prólogo (Instituto + Luna) | 7 | 3 (K4, K7, K8 por lectura profunda o directa) |
 | Umbral | 8 | 3 |
 | Archivo | 7 | 4 |
-| Taller | 8 | 5 |
+| Taller | 10 | 5 |
 | Cicatriz | 9 | 5 |
 | Observatorio (opcional) | 3 | 1 |
 | Laboratorio | 7 | 2 |
 | Epílogo (Archivo de las Puertas) 🟡 | 3 | 0 (usa K7 y K8) |
-| **Total** | **52** | |
+| **Total** | **54** | |
 
 Está por debajo de las ~10 fuentes por mundo de la pregunta 4 de `CONTEXTO_PLANETAS.md`: deja hueco para
 textos de ambiente sin peso en el grafo.
@@ -302,7 +304,7 @@ textos de ambiente sin peso en el grafo.
 
 ## 11. Cómo quedó implementado (Fase 4)
 
-- Los hilos, hechos, conclusiones y las 53 fuentes (47 del primer grafo + 2 de la Sala del Motor y 3 del Archivo de las Puertas, Fase 10, + la hoja del Muelle, Fase 11E) están transcritos en `web/src/data/pistas/` (61 hechos).
+- Los hilos, hechos, conclusiones y las 55 fuentes (47 del primer grafo + 2 de la Sala del Motor y 3 del Archivo de las Puertas, Fase 10, + la hoja del Muelle, Fase 11E, + el reloj de la Pista y las páginas de sincronización del Taller, Fase 11F) están transcritos en `web/src/data/pistas/` (61 hechos).
 - **Cada hecho se asigna a la lectura superficial o a la profunda** de su fuente en los datos (la tabla de §5 no lo distinguía siempre). Criterio: la profunda da lo que explica lo oculto. Los datos son la referencia; corrígelos ahí.
 - **Conclusiones con alternativas:** K5 (reloj) y K8 (prueba mayor) se desbloquean con *cualquiera* de varios hechos por grupo; K3 requiere K1, K2 y KC.
 - El Registro muestra cada hecho bajo su **primer hilo**, con su frase y enlaces "ver también", pero **no el lugar** donde se aprendió (no se guarda; solo se guardan los hechos).
@@ -310,7 +312,7 @@ textos de ambiente sin peso en el grafo.
 - Reglas del grafo comprobadas por código: 1 (≥ 2 fuentes por hecho esencial y ≥ 2 mundos por conclusión), 2 (sin depender solo del Observatorio ni del prólogo), 3 (cada mundo da un "dónde" y un "por qué"), 4 (todo alcanzable, sin esperas circulares), 5 (marcas y fuentes se corresponden; hoy solo Umbral), 6 (cada fuente da algo; el prólogo tiene lectura profunda) y 7 (K3 se logra sin entrar al Laboratorio).
 - **Grabaciones (Fase 7):** cada fuente de tipo grabación lleva `reloj`, el ritmo con que se grabó (0,20 la del escéptico). Se oye con una rueda de velocidad: se entiende cuando velocidad × reloj ≈ 1 (±15 %); si no, las palabras salen arrastradas (lenta) o tragadas (rápida). La lectura superficial es lo que se oye al pulsarla; la profunda es lo que dice, frase a frase. **Lo profundo se anota al oírla entera a la velocidad buena**, sepa lo que sepa el jugador: entenderla es la llave. El `requiere` de los datos sigue diciendo qué ayuda a encontrar esa velocidad (lo usan las reglas del grafo). Mientras no haya voces de verdad suena un murmullo sintetizado.
 - **Charlas (Fase 9, 🟡):** tipo de fuente `charla` para la gente de casa ("E · hablar"). La Directora es una charla del grafo (da la misión y su lectura profunda); la Maestra, el técnico, la mecánica y los vecinos de la aldea tienen charlas de ambiente sin hechos, que no cuentan entre las fuentes ni para las reglas del grafo.
-- **Lectores de puzle (Fase 7):** `umbral.cuaderno` (completar la última hora del Archivo) y `archivo.cartas` (ordenar las cartas por cuándo se escribieron en días de Umbral) llevan `lector`. Lo que dan se anota **al resolverlos**, no al abrirlos. Desde la Fase 10 también `taller.gemelos`, `taller.cabina`, `lab.pizarra`, `cicatriz.cuna` (sus dos ruedas igualan el reloj del Contrapeso con el de la máquina) y `puertas.bocas` (elegir la boca de casa: lo que da se anota al cruzar por la buena).
+- **Lectores de puzle (Fase 7):** `umbral.cuaderno` (completar la última hora del Archivo) y `archivo.cartas` (ordenar las cartas por cuándo se escribieron en días de Umbral) llevan `lector`. Lo que dan se anota **al resolverlos**, no al abrirlos. Desde la Fase 10 también `taller.gemelos`, `taller.cabina`, `lab.pizarra`, `cicatriz.cuna` (sus dos ruedas igualan el reloj del Contrapeso con el de la máquina) y `puertas.bocas` (elegir la boca de casa: lo que da se anota al cruzar por la buena). Desde la Fase 11F, `taller.pista` (sus dos ruedas ponen en hora el reloj de la Pista; con él en hora el anillo lleva a la Sala del Centro durante las 7:00).
 
 ## 12. Bitácora
 
@@ -325,3 +327,4 @@ textos de ambiente sin peso en el grafo.
 - **2026-10-30 · Fase 10 (hito 10D, 🟡).** El Archivo de las Puertas tiene tres fuentes (`puertas.rastros`, `puertas.bocas` con el lector `bocas`, `puertas.planos`) y cuatro hechos de cierre (`puertas.otros_viajeros`, `silencio.no_cruzaron`, `bocas.vuelta_antes`, `contrapeso.planos`). Cambia la línea de §5.8 que decía que el epílogo no daba hechos (regla 6). Total: 52 fuentes y 60 hechos.
 - **2026-11-03 · Fase 11.** El Archivo se rediseña como planeta de agua con cúpula y una única entrada que se aprende en otro planeta (✅); se propone el hecho `archivo.entrada` (🟡).
 - **2026-11-03 · Fase 11E (🟡).** Nueva fuente `umbral.hoja_entrada` en el tablón del Muelle de Envíos (texto borrador) con el hecho `archivo.entrada` (H4): la puerta del pozo bajo la tercera torre, marcada con tres bandas. Total: 53 fuentes y 61 hechos.
+- **2026-11-03 · Fase 11F (🟡).** Dos fuentes nuevas en el Taller: `taller.pista` (lector `pista`, da `contrapeso.medir_desfase`) y `taller.paginas`, en la Sala del Centro (da `contrapeso.cuenta_sincronia`, que sigue también en `lab.pizarra`: dos fuentes en dos mundos). Total: 55 fuentes y 61 hechos. `taller.manual` remite ahora a los dos sitios.

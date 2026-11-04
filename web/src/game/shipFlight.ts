@@ -5,6 +5,7 @@
 import { PointLight, Quaternion, Vector3, type Camera, type MeshStandardMaterial } from 'three';
 import type { DeathCause } from '../core/loopDirector';
 import type { Player } from '../core/player';
+import { sunkInGas } from '../physics/gas';
 import { gravityAt } from '../physics/gravity';
 import type { SphereObstacle } from '../physics/obstacles';
 import { spawnOnGround } from '../physics/spawn';
@@ -395,6 +396,10 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
       if (!ship.landed) flightTime += dt;
       followSpheres(t);
       if (result.crashed) return 'choque';
+      if (ship.frame !== undefined) {
+        const { well, world } = runtimeOf(runtimes, ship.frame);
+        if (sunkInGas(ship.state.position, well.center, world.info.gas)) return 'gas';
+      }
       toSystemPosition(framePose(ship.frame, t), ship.state.position, sysPosition);
       return sysPosition.length() <= spec.star.radius + ship.radius ? 'calor' : undefined;
     },

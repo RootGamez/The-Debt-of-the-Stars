@@ -14,7 +14,8 @@ import { yaw } from '../physics/surfaceFrame';
 import { clampPitch } from '../render/firstPersonCamera';
 import type { MoveIntent } from './input';
 
-/** Por debajo de esta fracción del radio, el jugador ha atravesado el suelo. */
+/** Por debajo de esta fracción del radio, el jugador ha atravesado el suelo (salvo en la sala del centro de un
+ * gigante de gas, ver physics/gravity.ts). */
 const MIN_DISTANCE_RADII = 0.5;
 
 export class Player {
@@ -92,7 +93,7 @@ export class Player {
     return (
       !Number.isFinite(distance) ||
       distance > this.home.radius * RESPAWN_DISTANCE_RADII ||
-      distance < this.home.radius * MIN_DISTANCE_RADII
+      (distance < this.home.radius * MIN_DISTANCE_RADII && !(distance < (this.home.core ?? 0)))
     );
   }
 }

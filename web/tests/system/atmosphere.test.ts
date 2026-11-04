@@ -20,8 +20,8 @@ describe('the air of a world', () => {
     expect(airDensity(10, 0)).toBe(0);
   });
 
-  it('home, Umbral and the Archivo have air; the other worlds of the alien system are dead', () => {
-    expect(Object.keys(ATMOSPHERES).sort()).toEqual(['archivo', 'hogar', 'umbral']);
+  it('home, Umbral, the Archivo and the Taller have air; the other worlds of the alien system are dead', () => {
+    expect(Object.keys(ATMOSPHERES).sort()).toEqual(['archivo', 'hogar', 'taller', 'umbral']);
     expect(ATMOSPHERES.hogar?.height).toBeGreaterThan(0);
   });
 

@@ -348,3 +348,61 @@ describe('animated parts (ANIM_)', () => {
     expect(() => collectMarkers(scene)).toThrow(/spin/);
   });
 });
+
+describe('the Taller of gas (Phase 11F)', () => {
+  it('reads a ring that only the game can open', () => {
+    const scene = umbralScene();
+    const out = node('PASO_Pista', { destino: 'PASO_Centro', cerradura: 'pista' });
+    scene.add(out, node('PASO_Centro', { destino: 'PASO_Pista' }));
+
+    const { gates } = collectMarkers(scene);
+
+    expect(gates.map((g) => [g.name, g.lock])).toEqual([
+      ['PASO_Pista', 'pista'],
+      ['PASO_Centro', undefined],
+    ]);
+  });
+
+  it('keeps the colliders of an event apart from the ones that are always there', () => {
+    const scene = umbralScene();
+    const bridges = mesh('COL_Taller_Puentes');
+    bridges.userData = { event: 'secuencia_fabrica' };
+    scene.add(bridges);
+
+    const markers = collectMarkers(scene);
+
+    expect(markers.colliders.map((c) => c.name)).toEqual(['COL_umbral_Terreno']);
+    expect(markers.eventColliders).toEqual([{ event: 'secuencia_fabrica', mesh: bridges }]);
+    expect(bridges.visible).toBe(false);
+  });
+
+  it('reads the layer of gas that kills, with its safe room in the middle', () => {
+    const scene = new Group();
+    scene.add(
+      node('taller', {
+        radius: 80,
+        gravity: 0.6,
+        clock_rate: 0.85,
+        gas_lethal_radius: 74,
+        gas_safe_radius: 22,
+      }),
+    );
+
+    expect(readWorldInfo(scene, 'taller').gas).toEqual({ lethal: 74, safe: 22 });
+  });
+
+  it('rejects a safe room as big as the gas around it', () => {
+    const scene = new Group();
+    scene.add(
+      node('taller', {
+        radius: 80,
+        gravity: 0.6,
+        clock_rate: 0.85,
+        gas_lethal_radius: 20,
+        gas_safe_radius: 22,
+      }),
+    );
+
+    expect(() => readWorldInfo(scene, 'taller')).toThrow(WorldDataError);
+  });
+});

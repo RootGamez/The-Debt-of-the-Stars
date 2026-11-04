@@ -10,6 +10,7 @@ import './ui/theme.css';
 import { Quaternion, Timer, Vector3, type PerspectiveCamera, type WebGLRenderer } from 'three';
 import { loadChronology } from './core/chronology';
 import { createSoundtrack } from './audio/soundtrack';
+import { machineTime } from './game/counterweight';
 import { createCounterweightRig } from './game/counterweightRig';
 import type { Ending } from './game/epilogue';
 import { createEpilogueRig } from './game/epilogueRig';
@@ -19,6 +20,7 @@ import { endingFromQuery, homeLook } from './game/homecoming';
 import { createHomecomingRig } from './game/homecomingRig';
 import { createFoldedPassage } from './game/foldedPassage';
 import { createDiving } from './game/diving';
+import { createTrackClock, TELEPORTER, teleporterOpen } from './game/teleporter';
 import { createWaterPlay } from './game/waterPlay';
 import { createWaterEffects } from './render/waterEffects';
 import { createTideEffects } from './game/tideEffects';
@@ -28,6 +30,7 @@ import { createLensView } from './render/lensView';
 import { createAtmosphereView } from './render/atmosphereView';
 import { createOolView } from './render/oolView';
 import { createFilaments } from './ui/filaments';
+import { trackClockBody } from './ui/trackClockBody';
 import { ATMOSPHERES } from './data/atmospheres';
 import { createBlackHoleView } from './render/blackHoleView';
 import { growthFor } from './system/blackHole';
@@ -59,6 +62,8 @@ import { loadSystem } from './game/loadSystem';
 import { approachPoint, createHorizon } from './game/horizon';
 import { createShipFlight, type ShipFlight } from './game/shipFlight';
 import type { MotorEnvironment } from './physics/characterMotor';
+import { withEventColliders } from './physics/eventColliders';
+import { sunkInGas } from './physics/gas';
 import { withSphereObstacle } from './physics/obstacles';
 import { forwardOf, upOf } from './physics/surfaceFrame';
 import { ReadingSession } from './reading/readingSession';
@@ -79,6 +84,7 @@ import { createArrivalLayer, endArrivingPaint, sessionStore, takeCrossing } from
 import { lockGameKeys } from './ui/endingCard';
 import { createPlaceCard } from './ui/placeCard';
 import { createWorldDiscovery } from './ui/worldDiscovery';
+import type { Gate } from './worlds/gates';
 import { createTextSettings } from './typewriter/textPreferences';
 import { voicePitch } from './typewriter/speech';
 import {
@@ -212,6 +218,21 @@ async function start(): Promise<void> {
       game.ui?.notify(message);
     },
   });
+  // El reloj de la Pista del Taller: con él en hora, el anillo lleva a la Sala del Centro durante las 7:00.
+  const taller = runtimes.get(TELEPORTER.world);
+  const track =
+    taller &&
+    createTrackClock(() =>
+      machineTime(
+        session.director.clock.t,
+        taller.world.info.clockRate,
+        chronology.clocks[TELEPORTER.world],
+      ),
+    );
+  const portal = taller?.world.scene.getObjectByName(TELEPORTER.portal);
+  const gateOpen = (gate: Gate): boolean =>
+    gate.lock === undefined ||
+    (track !== undefined && teleporterOpen(gate.lock, session.activeEventIds, track));
   const birthplace =
     counterweight?.core ??
     sources.get(BLACK_HOLE.world)?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
@@ -244,6 +265,10 @@ async function start(): Promise<void> {
   const waterPlay = createWaterPlay(waterEffects);
   const splashUp = new Vector3();
   let drowned: DeathCause | undefined;
+  // Hundirse en las nubes del Taller (a pie; con la nave lo dice shipFlight).
+  let gassed: DeathCause | undefined;
+  // Los eventos que ocurren ahora (los puentes de luz del Taller solo se pisan durante el suyo).
+  let liveEvents: readonly string[] = [];
   let horizonCross: DeathCause | undefined;
   // Por una boca de casa del Archivo, con el final que sale de ella y de los planos.
   let mouthCross: DeathCause | undefined;
@@ -255,7 +280,10 @@ async function start(): Promise<void> {
       id,
       {
         wells: [runtime.well],
-        world: withSphereObstacle(runtime.collision, () => game.flight?.obstacleIn(id)),
+        world: withSphereObstacle(
+          withEventColliders(runtime.collision, runtime.eventCollision, () => liveEvents),
+          () => game.flight?.obstacleIn(id),
+        ),
         water: runtime.water,
       },
     ]),
@@ -344,6 +372,7 @@ async function start(): Promise<void> {
       diving.reset();
       waterPlay.reset();
       counterweight?.play.reset();
+      track?.reset();
       arrive(startWorld);
     },
   });
@@ -446,7 +475,11 @@ async function start(): Promise<void> {
     player,
     touch: isTouchDevice(),
     actions: counterweight?.play.actions ?? epilogue?.play.actions ?? homecoming?.play.actions,
-    readers: { ...counterweight?.readers, ...epilogue?.readers },
+    readers: {
+      ...counterweight?.readers,
+      ...epilogue?.readers,
+      ...(track && { pista: (status, _solved, solve) => trackClockBody(track, status, solve) }),
+    },
     settings: textSettings,
     reducedMotion,
     worldNames: () => worldNames,
@@ -579,6 +612,8 @@ async function start(): Promise<void> {
       homecomingEnding && homecoming
         ? { ending: homecomingEnding, phase: homecoming.phase, without: home?.without ?? [] }
         : null;
+    window.__juego.teleporter = () =>
+      track ? { matched: track.matched, open: portal?.visible ?? false } : null;
     window.__juego.skipTo = (seconds) => {
       session.director.skip(seconds - session.director.clock.t);
       return session.director.clock.t;
@@ -696,12 +731,18 @@ async function start(): Promise<void> {
       session.update(
         dt,
         timeRuns,
-        mouthCross ?? horizonCross ?? wormhole ?? shipDeath ?? tideDeath ?? drowned,
+        mouthCross ?? horizonCross ?? wormhole ?? shipDeath ?? tideDeath ?? drowned ?? gassed,
       );
       // si el ciclo no corrió, espera; la boca elegida no se olvida (cruzar no tiene vuelta y la página se recarga)
-      if (timeRuns) wormhole = shipDeath = tideDeath = drowned = horizonCross = undefined;
+      if (timeRuns) {
+        wormhole = shipDeath = tideDeath = drowned = gassed = horizonCross = undefined;
+      }
+      liveEvents = session.activeEventIds;
       for (const prop of eventProps) {
-        prop.object.visible = session.activeEventIds.includes(prop.event);
+        prop.object.visible = liveEvents.includes(prop.event);
+      }
+      if (portal) {
+        portal.visible = track !== undefined && teleporterOpen(TELEPORTER.lock, liveEvents, track);
       }
       if (timeRuns) {
         // Un mundo que el agujero se está tragando se ve casi quieto desde fuera.
@@ -714,7 +755,15 @@ async function start(): Promise<void> {
       // En pausa la física sigue (jugador quieto, se asienta en el suelo); el ciclo sí se detiene.
       const alpha = physics.advance(dt);
       const piloting = flight?.piloting ?? false;
-      if (!piloting && canAct()) passage.update(currentWorld, player);
+      if (!piloting && canAct()) passage.update(currentWorld, player, gateOpen);
+      const { gas } = currentWorld.world.info;
+      if (
+        !piloting &&
+        session.acceptsInput &&
+        sunkInGas(player.state.position, currentWorld.well.center, gas)
+      ) {
+        gassed = 'gas';
+      }
       interior.update(
         currentWorld.id,
         !piloting && insideCavity(player.state.position, currentWorld.well),

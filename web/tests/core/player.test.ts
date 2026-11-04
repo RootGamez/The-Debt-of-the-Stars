@@ -60,6 +60,22 @@ describe('Player safety respawn', () => {
     expect(player.respawnCount).toBe(1);
   });
 
+  it('lets you stand in the room at the centre of a gas giant', () => {
+    const giant: GravityWell = { ...well, core: 22 };
+    const core = 8;
+    const player = new Player(
+      spawn,
+      { wells: [giant], world: sphereWorld(new Vector3(), core) },
+      giant,
+    );
+    player.moveTo(new Vector3(0, core, 0), new Quaternion());
+
+    player.step(IDLE, PHYSICS_STEP);
+
+    expect(player.respawnCount).toBe(0);
+    expect(player.state.position.length()).toBeCloseTo(core, 0);
+  });
+
   it('does not respawn during normal play and resets velocity when it does', () => {
     const player = newPlayer();
     for (let i = 0; i < 60; i++) player.step(IDLE, PHYSICS_STEP);

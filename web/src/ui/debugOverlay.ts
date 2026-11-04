@@ -80,6 +80,8 @@ declare global {
       toShip?(): boolean;
       /** Lleva el reloj de Umbral a ese instante del ciclo (s); devuelve dónde quedó. */
       skipTo?(seconds: number): number;
+      /** El anillo de la Pista del Taller: si su reloj está en hora y si deja pasar ahora. */
+      teleporter?(): { matched: boolean; open: boolean } | null;
       /**
        * El agujero negro: su radio (m), si se ve, su radio aparente desde quien mira (rad) y cuánto ha caído hacia
        * él quien está en el mundo que se traga (0–1).

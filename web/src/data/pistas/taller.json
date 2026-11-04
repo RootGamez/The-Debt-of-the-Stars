@@ -86,5 +86,22 @@
     "titulo": "Los Dormitorios",
     "borrador": true,
     "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.dos_investigadores"] }
+  },
+  {
+    "id": "taller.pista",
+    "mundo": "taller",
+    "tipo": "observacion",
+    "lector": "pista",
+    "titulo": "El reloj de la Pista de Pruebas",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.medir_desfase"] }
+  },
+  {
+    "id": "taller.paginas",
+    "mundo": "taller",
+    "tipo": "texto",
+    "titulo": "Las páginas de sincronización",
+    "borrador": true,
+    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.cuenta_sincronia"] }
   }
 ]

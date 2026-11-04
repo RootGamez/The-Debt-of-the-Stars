@@ -33,6 +33,12 @@ describe('crossing a folded gate', () => {
     expect(findCrossing(at(0, 25, -0.4), at(0, 25, 0.4), gates)).toBe(outside);
   });
 
+  it('lets you walk through a ring that is closed (the teleporter of the Taller out of its moment)', () => {
+    expect(
+      findCrossing(at(0, 25, -0.4), at(0, 25, 0.4), gates, (g) => g !== outside),
+    ).toBeUndefined();
+  });
+
   it('works in both directions', () => {
     expect(findCrossing(at(0, 25, 0.4), at(0, 25, -0.4), gates)).toBe(outside);
   });

@@ -2,7 +2,8 @@
 // Convención (ver CLAUDE.md): COL_ colisión, INT_ interacción, SPAWN_ aparición del jugador,
 // PARK_ dónde espera la nave al empezar cada ciclo, TRIG_ evento, EVT_ algo que solo se ve durante un
 // evento de la cronología (por ejemplo, el haz de la ranura del Archivo), ANIM_ pieza que gira, PASO_
-// anillo de una Puerta plegada (se cruza uno y se sale por su gemelo) y OOL_<quién> un Ool (Fase 9), con lo que
+// anillo de una Puerta plegada (se cruza uno y se sale por su gemelo; con `cerradura`, solo cuando el juego lo
+// abre) y OOL_<quién> un Ool (Fase 9), con lo que
 // brilla en su hijo OOL_<quién>_Luz.
 // Las propiedades personalizadas de Blender llegan como userData (export_extras).
 import type { Mesh, Object3D } from 'three';
@@ -42,6 +43,11 @@ export interface WorldInfo {
         waves?: { height: number; seed: number };
       }
     | undefined;
+  /**
+   * Gigantes de gas (el Taller, Fase 11F): bajo `gas_lethal_radius` las nubes matan, salvo dentro de
+   * `gas_safe_radius` (la sala del centro, a la que solo se llega por el teletransportador).
+   */
+  gas?: { lethal: number; safe: number } | undefined;
 }
 
 export interface InteractionMarker {
@@ -62,6 +68,8 @@ export interface TriggerMarker {
 
 export interface WorldMarkers {
   colliders: Mesh[];
+  /** Colisiones que solo existen mientras dura su evento (COL_ con propiedad `event`: los puentes de luz). */
+  eventColliders: EventCollider[];
   interactions: InteractionMarker[];
   spawns: Map<string, Object3D>;
   /** Dónde espera la nave al empezar cada ciclo (PARK_). */
@@ -87,6 +95,13 @@ export interface GateMarker {
   name: string;
   object: Object3D;
   target: string;
+  /** Si el anillo está cerrado salvo que el juego lo abra (propiedad `cerradura`), qué lo abre. */
+  lock: string | undefined;
+}
+
+export interface EventCollider {
+  event: string;
+  mesh: Mesh;
 }
 
 export interface AnimatedPart {
@@ -171,7 +186,20 @@ export function readWorldInfo(scene: Object3D, worldId: string): WorldInfo {
     innerRadius,
     interiorLight: innerRadius === undefined ? undefined : readLight(root, 'interior_light'),
     sea: readSea(root),
+    gas: readGas(root),
   };
+}
+
+function readGas(root: Object3D): WorldInfo['gas'] {
+  const lethal = optionalNumber(root, 'gas_lethal_radius', 'positive');
+  if (lethal === undefined) return undefined;
+  const safe = requireNumber(root, 'gas_safe_radius', 'nonNegative');
+  if (safe >= lethal) {
+    throw new WorldDataError(
+      `${root.name}: "gas_safe_radius" (${safe}) debe ser menor que "gas_lethal_radius" (${lethal})`,
+    );
+  }
+  return { lethal, safe };
 }
 
 function readSea(root: Object3D): WorldInfo['sea'] {
@@ -234,6 +262,7 @@ function collectColliders(object: Object3D, colliders: Mesh[]): void {
 export function collectMarkers(scene: Object3D): WorldMarkers {
   const markers: WorldMarkers = {
     colliders: [],
+    eventColliders: [],
     interactions: [],
     spawns: new Map(),
     parks: new Map(),
@@ -269,7 +298,13 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
       markers.eventProps.push({ event: requireString(object, 'event'), object });
       object.visible = false;
     } else if (name.startsWith('PASO_')) {
-      markers.gates.push({ name, object, target: requireString(object, 'destino') });
+      const lock: unknown = object.userData.cerradura;
+      markers.gates.push({
+        name,
+        object,
+        target: requireString(object, 'destino'),
+        lock: lock === undefined ? undefined : requireString(object, 'cerradura'),
+      });
     } else if (name.startsWith('OOL_') && !name.endsWith(GLOW_SUFFIX)) {
       const glow = object.getObjectByName(`${name}${GLOW_SUFFIX}`);
       markers.characters.push({
@@ -291,7 +326,16 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
   // Solo las raíces COL_ (un grupo COL_ incluye a sus hijos COL_).
   for (const root of colliderRoots) {
     const nestedInOther = colliderRoots.some((other) => other !== root && isAncestor(other, root));
-    if (!nestedInOther) collectColliders(root, markers.colliders);
+    if (nestedInOther) continue;
+    const event: unknown = root.userData.event;
+    if (event === undefined) {
+      collectColliders(root, markers.colliders);
+      continue;
+    }
+    const name = requireString(root, 'event');
+    const meshes: Mesh[] = [];
+    collectColliders(root, meshes);
+    for (const mesh of meshes) markers.eventColliders.push({ event: name, mesh });
   }
   return markers;
 }

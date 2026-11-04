@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.12
-**Última actualización:** 2026-11-03 · Fase 11 (Umbral por código, su aire y sus estructuras nuevas)
+**Versión:** v0.13
+**Última actualización:** 2026-11-03 · Fase 11F (el Taller, gigante de gas)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -140,6 +140,15 @@
 ## 5. Taller — la fábrica sin gente
 
 > **Rediseño (✅ Anthony, 2026-11-03):** el Taller pasa a ser un **planeta gaseoso**. Lo que hay en él va en **pedazos de isla o roca que giran** (o en ciertos puntos del planeta), **aterrizar es complicado** y **caer dentro del planeta es la muerte**. Se modela por código. Cómo se concreta (🟡, con preguntas ❓) en `docs/plan-fase-11-modelado-por-codigo.md`, hito 11F: cinco islas flotantes, una por lugar, que orbitan deprisa (de ahí el reloj 0,85) y giran sobre sí mismas; a las 7:00 se alinean. Lo de abajo es el diseño anterior; los lugares, el evento y las pistas se conservan repartidos por las islas.
+
+**Cómo quedó en el código (Fase 11F; 🟡 salvo lo marcado).**
+- **El gigante (✅ la idea).** Una esfera de nubes en bandas (crema, naranja, cian) de **80 m** de radio que se mueven a distinto paso, con una capa de bruma por encima. No tiene suelo. No es más grande porque su reloj llegaría a Cicatriz cuando sus órbitas se acercan. Gravedad 0,6 y reloj 0,85, como antes. El gigante gira cada 90 s y su día dura 180 s.
+- **Cinco islas (✅ cinco).** Islas de roca planas por arriba, con un cono de roca colgando y escombros que giran despacio a su alrededor, a unos 20–26 m sobre las nubes. Hay una por lugar: Montaje (donde se despierta; arcos, los cuatro brazos y la maqueta del núcleo), la Cuna (anillo vacío, nota y manual), los Dormitorios (tres cabinas y las camas de los gemelos), la Cabina de Control (garita con tres consolas) y la Pista de Pruebas (un anillo de vía partido alrededor, el reloj y el teletransportador).
+- **Las islas quedan fijas sobre el gigante, que gira (🟡; distinto de lo propuesto).** No orbitan cada una por su cuenta. Vistas desde fuera barren el cielo a unos 7 m/s, así que aterrizar sigue exigiendo seguir al gigante. Así sus colisiones son estáticas.
+- **Caer es morir (✅).** Bajo 74 m de radio, las nubes matan (causa nueva `gas`), tanto a pie como con la nave. Las islas no tienen gravedad propia.
+- **Los puentes de luz (🟡).** A las 7:00, con la secuencia de la fábrica, se encienden puentes de luz que unen las cinco islas en cadena, de Montaje a la Pista. Solo se pueden pisar mientras dura la secuencia (2 min); fuera de ella, se pasa de isla en isla con la nave. Se encienden también las luces de cada isla.
+- **El teletransportador (✅ la condición).** Un anillo en la Pista. Se abre (un velo de luz cian) **solo durante la secuencia de las 7:00** y **con el reloj de la Pista en hora**. Ese reloj empieza cada ciclo **3 min 17 s adelantado** (🟡). Se ajusta con dos ruedas, minutos y segundos, hasta que marque lo mismo que el reloj del Taller. Al ajustarlo se anota `contrapeso.medir_desfase`.
+- **La Sala del Centro (🟡).** Un núcleo de roca de 8 m de radio, en el centro del gigante. Se camina por encima y la gravedad tira hacia el centro. Lo rodea una cáscara oscura de 20 m, con anillos e **indicaciones talladas** que brillan en violeta. En un atril están **las páginas de sincronización** (✅ opción B: lo que falta para instalar el Contrapeso). Otro anillo, siempre abierto, devuelve a la Pista.
 
 **Idea.** Un diminuto planeta de talleres que gira tan rápido que amanece cada tres minutos, donde las máquinas siguen trabajando para nadie. Lo más inquietantemente vivo del sistema.
 
@@ -347,3 +356,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-11-03 · Fase 11E (🟡).** El Archivo se hace por código como planeta de agua: el mar al radio 70 con el fondo a 56, el tubo de vidrio de la Galería al nivel del agua, seis torres, la esclusa bajo la tercera torre como única entrada, bucear con 40 s de aire (muerte *ahogado*) y la hoja del Muelle de Umbral que la señala.
 - **2026-11-03 · Fase 11E (cielo).** Anthony pide para el Archivo un cielo azul con nubes (✅). Se le da aire de mar (casi opaco, con noche), bruma azul y dos capas de nubes animadas en el shader (🟡 colores y alturas).
 - **2026-11-03 · Fase 11E (agua).** Anthony pide un mar con oleaje, más claro y con más detalle, una lógica de agua reutilizable y quitar la raya del horizonte del cielo (✅). Se hace con olas compartidas entre física y shader, un material de océano nuevo, salpicaduras, ondas y burbujas y el fondo teñido con cáusticas; el cielo ya no corta en el horizonte (🟡 el aspecto).
+- **2026-11-03 · Fase 11F (🟡).** El Taller se hace por código como gigante de gas: nubes en bandas de 80 m, cinco islas fijas sobre el gigante que gira, muerte `gas` bajo 74 m, puentes de luz pisables solo a las 7:00, el anillo de la Pista que se abre a las 7:00 con su reloj ajustado y la Sala del Centro con las páginas de sincronización. Cambia lo propuesto: las islas no orbitan por separado.

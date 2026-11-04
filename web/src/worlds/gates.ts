@@ -13,6 +13,8 @@ export interface Gate {
   forward: Vector3;
   /** Nombre del anillo gemelo. */
   target: string;
+  /** Qué lo abre, si está cerrado salvo que el juego diga otra cosa (el teletransportador del Taller). */
+  lock?: string | undefined;
 }
 
 /** Medio ancho y alto del hueco del anillo (m): por fuera de eso se pasa de largo. */
@@ -30,10 +32,16 @@ const offset = new Vector3();
 const crossing = new Vector3();
 const side = new Vector3();
 
-/** El anillo que cruzan los pies al ir de `from` a `to` en un paso, si cruzan alguno. */
-export function findCrossing(from: Vector3, to: Vector3, gates: readonly Gate[]): Gate | undefined {
+/** El anillo que cruzan los pies al ir de `from` a `to` en un paso, si cruzan alguno abierto. */
+export function findCrossing(
+  from: Vector3,
+  to: Vector3,
+  gates: readonly Gate[],
+  isOpen: (gate: Gate) => boolean = () => true,
+): Gate | undefined {
   if (from.distanceTo(to) > MAX_STEP) return undefined;
   for (const gate of gates) {
+    if (!isOpen(gate)) continue;
     const before = offset.subVectors(from, gate.position).dot(gate.forward);
     const after = offset.subVectors(to, gate.position).dot(gate.forward);
     if (before === after || Math.sign(before) === Math.sign(after)) continue;

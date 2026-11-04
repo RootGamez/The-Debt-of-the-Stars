@@ -40,7 +40,7 @@ export type LoopPhase = 'playing' | 'dying' | 'waking';
  * paso al sistema ajeno al final del prólogo, con el mismo fundido a blanco. `horizonte` tampoco: es cruzar el
  * horizonte estable (Fase 10) hacia el Archivo de las Puertas, con un fundido a negro; `boca`, cruzar una de las
  * bocas de casa del Archivo de vuelta a Hogar, con el blanco del gusano. `ahogado`: se acabó el aire buceando en
- * el mar del Archivo (Fase 11E).
+ * el mar del Archivo (Fase 11E). `gas`: hundirse en las nubes del Taller, a pie o con la nave (Fase 11F).
  */
 export type DeathCause =
   | 'fin'
@@ -50,6 +50,7 @@ export type DeathCause =
   | 'calor'
   | 'marea'
   | 'ahogado'
+  | 'gas'
   | 'gusano'
   | 'horizonte'
   | 'boca';

@@ -16,6 +16,8 @@ export interface GravityWell {
   range: number;
   /** Solo los mundos huecos: radio de la cara interior de la cavidad (m). */
   innerRadius?: number | undefined;
+  /** Solo los gigantes de gas: radio de la sala del centro, donde también se puede estar de pie (m). */
+  core?: number | undefined;
 }
 
 /**
@@ -33,6 +35,7 @@ export function wellForWorld(info: WorldInfo, center = new Vector3()): GravityWe
     strength: G_BASE * info.gravity,
     range: info.radius * GRAVITY_RANGE_RADII,
     innerRadius: info.innerRadius,
+    core: info.gas?.safe,
   };
 }
 

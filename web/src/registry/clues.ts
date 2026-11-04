@@ -27,6 +27,7 @@ export const PUZZLE_READERS = [
   'pizarra',
   'ruedas',
   'bocas',
+  'pista',
 ] as const;
 export type PuzzleReader = (typeof PUZZLE_READERS)[number];
 
