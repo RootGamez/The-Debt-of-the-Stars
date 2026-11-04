@@ -35,6 +35,9 @@ export default defineConfig({
         'src/reading/worldSources.ts',
         'src/game/**',
         'src/ui/**',
+        // El menú principal es DOM y WebGL; sus planos (shots.ts) sí se prueban.
+        'src/menu/mainMenu.ts',
+        'src/menu/showcase.ts',
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },

@@ -10,6 +10,8 @@ export interface PauseOverlay {
   readonly playing: boolean;
   /** Jugando sin pointer lock (el navegador no lo concedió): mirar arrastrando el ratón. */
   readonly dragLook: boolean;
+  /** Empieza a jugar (lo que hace el clic en la pantalla): desde un gesto del jugador, para captar el ratón. */
+  begin(): void;
   /** Pausa el juego (botón de pausa táctil, Esc). */
   pause(): void;
   /** Suelta el ratón para usar un panel (puzle, grabadora) SIN pausar; se sigue jugando al cerrarlo. */
@@ -393,6 +395,7 @@ export function createPauseOverlay(
     get dragLook() {
       return dragLook;
     },
+    begin: start,
     pause,
     releasePointer() {
       if (!playing || document.pointerLockElement !== canvas) return;

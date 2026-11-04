@@ -41,7 +41,8 @@ import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
-import { browserStore, loadSave, markEndingSeen } from './core/save';
+import { browserStore, clearSave, loadSave, markEndingSeen, type SaveData } from './core/save';
+import { createMainMenu, type MainMenu } from './menu/mainMenu';
 import { createPrologueGate, WORMHOLE } from './game/prologue';
 import { Guide } from './game/guide';
 import { wormholeCenter } from './game/wormhole';
@@ -161,8 +162,35 @@ function setUpDisplay() {
   return { language, accessibility, chooseLanguage };
 }
 
+/** El menú principal está a la vista mientras carga el juego (para mostrar el fallo si lo hay). */
+let activeMenu: MainMenu | undefined;
+
+/** Sin menú al saltar a un mundo (pruebas, `?debug`), al volver de un final ni al cruzar el gusano. */
+function wantsMenu(): boolean {
+  const query = new URLSearchParams(window.location.search);
+  if (['debug', 'mundo', 'final'].some((key) => query.has(key))) return false;
+  try {
+    return window.sessionStorage.getItem('bucle-tiempo:gusano') === null;
+  } catch {
+    return true;
+  }
+}
+
+const hasProgress = (data: Readonly<SaveData>): boolean =>
+  data.loopsCompleted > 0 || data.prologueDone || data.facts.length > 0;
+
 async function start(): Promise<void> {
   const display = setUpDisplay();
+  if (wantsMenu()) {
+    activeMenu = createMainMenu({
+      hasProgress: hasProgress(loadSave(browserStore()).data),
+      display,
+      onNewGame: () => {
+        clearSave(browserStore());
+        window.location.reload();
+      },
+    });
+  }
   document.getElementById('game')?.setAttribute('aria-label', t('Vista del juego'));
   document.title = t('Bucle de tiempo');
   const canvas = requireElement('game', HTMLCanvasElement);
@@ -545,6 +573,17 @@ async function start(): Promise<void> {
   // Leyendo, muriendo o cerrado ya el viaje (la vuelta a casa), no se hace nada.
   const free = (): boolean =>
     session.acceptsInput && !ui.blocking && !discovery.isOpen && !(homecoming?.blocking ?? false);
+  // El menú principal cubre la pantalla de pausa hasta que el jugador pulsa Jugar o Continuar.
+  const menu = activeMenu;
+  if (menu) {
+    overlay.setInert(true);
+    menu.ready(() => {
+      menu.dispose();
+      activeMenu = undefined;
+      overlay.setInert(false);
+      overlay.begin();
+    });
+  }
   const canAct = (): boolean => overlay.playing && free();
   function shipAction(action: 'board' | 'target' | 'stabilize'): void {
     if (flight && canAct()) flight.action(action, currentWorld.id, session.director.clock.t);
@@ -1003,5 +1042,7 @@ start().catch((error: unknown) => {
   endArrivingPaint();
   document.querySelector('.llegada')?.remove();
   const status = document.getElementById('status');
-  if (status) status.textContent = t('No se pudo cargar el mundo. Revisa la consola.');
+  const message = t('No se pudo cargar el mundo. Revisa la consola.');
+  if (status) status.textContent = message;
+  activeMenu?.fail(message);
 });

@@ -285,4 +285,6 @@ export const EN: Readonly<Record<string, string>> = {
   'Final B': 'Ending B',
   'Llegas tarde': 'You arrive too late',
   '[texto pendiente]': '[text pending]',
+  Continuar: 'Continue',
+  'Quince minutos antes del final de un mundo.': 'Fifteen minutes before a world ends.',
 };
