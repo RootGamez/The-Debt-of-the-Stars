@@ -1288,3 +1288,37 @@ body {
     text-align: center;
   }
 }
+
+/* El borde del casco de burbuja (primera persona): latón que asoma solo en las esquinas y un reflejo del cristal. */
+.casco {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  background: radial-gradient(
+    ellipse 120% 115% at 50% 50%,
+    rgb(0 0 0 / 0%) 51%,
+    rgb(46 32 16 / 22%) 55%,
+    rgb(150 108 48 / 42%) 57.5%,
+    rgb(92 62 28 / 55%) 59%,
+    rgb(28 20 12 / 72%) 63%
+  );
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+.casco.visible {
+  opacity: 1;
+}
+
+.casco span {
+  position: absolute;
+  top: 5%;
+  left: 7%;
+  width: 34vw;
+  height: 30vh;
+  border-top: 2px solid rgb(255 255 255 / 16%);
+  border-radius: 50%;
+  transform: rotate(-14deg);
+  filter: blur(1px);
+}

@@ -3,6 +3,7 @@
 // moverse sobre él. Decide a partir de cómo cambia cada cuerpo de un fotograma a otro; lo que se ve lo pinta
 // render/waterEffects.ts.
 import { Vector3 } from 'three';
+import { EYE_HEIGHT } from '../data/movement';
 import { headUnder, submersion, surfacePoint, type WaterBody } from '../physics/water';
 import type { WaterEffects } from '../render/waterEffects';
 
@@ -88,7 +89,7 @@ export function createWaterPlay(
         if (wasUnder && !under) {
           effects.splash(surface, up, 0.2); // saca la cabeza
         } else if (!wasUnder && under) {
-          effects.bubbles(head.copy(position).addScaledVector(up, 1.4), up, 10);
+          effects.bubbles(head.copy(position).addScaledVector(up, EYE_HEIGHT - 0.15), up, 10);
         }
       }
 
@@ -103,7 +104,7 @@ export function createWaterPlay(
       bubble -= dt;
       if (under && bubble <= 0) {
         effects.bubbles(
-          head.copy(position).addScaledVector(up, 1.55),
+          head.copy(position).addScaledVector(up, EYE_HEIGHT - 0.05),
           up,
           2 + Math.floor(random() * 3),
         );

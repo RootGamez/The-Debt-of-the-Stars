@@ -95,6 +95,22 @@ declare global {
       guide?(): { shown: string | null; done: string[] };
       /** Los Ool: cuánto se ha girado cada uno hacia ti (rad) y tus filamentos (si brillan, cuántas veces latieron). */
       ool?(): { turns: Record<string, number>; filaments: { glowing: boolean; beats: number } };
+      /** Tú: si se te ve, primera persona, velocidad, fase del paso, mezclas y triángulos; y la cámara exterior. */
+      explorer?(): {
+        visible: boolean;
+        firstPerson: boolean;
+        speed: number;
+        phase: number;
+        move: number;
+        air: number;
+        swim: number;
+        triangles: number;
+        outside: boolean;
+      };
+      /** La cámara exterior de depuración (como F6), girada `angle` rad a su alrededor (π = de frente). */
+      outside?(on: boolean, angle?: number): boolean;
+      /** Pone el cabeceo de la vista (rad, > 0 arriba; se limita); devuelve el que quedó. */
+      pitch?(angle: number): number;
       /** El cielo de un mundo con aire: cuánto se ve (0 = el espacio, 1 = todo cielo). */
       sky?(): { density: number };
       /** La absorción de los mundos: avance de cada uno (0–1), los ya tragados y los trozos que caen. */

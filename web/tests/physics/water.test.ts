@@ -7,6 +7,7 @@ import {
   BREATH_SECONDS,
   EYE_HEIGHT,
   PHYSICS_STEP,
+  PLAYER_HEIGHT,
   SWIM_SPEED,
 } from '../../src/data/movement';
 import {
@@ -73,14 +74,20 @@ describe('where the water is', () => {
 
   it('measures how much of the body is in, from the feet up', () => {
     expect(submersion(new Vector3(0, 71, 0), UPWARD, water)).toBe(0);
-    expect(submersion(new Vector3(0, 69.1, 0), UPWARD, water)).toBeCloseTo(0.5, 2);
+    expect(submersion(new Vector3(0, 70 - PLAYER_HEIGHT / 2, 0), UPWARD, water)).toBeCloseTo(
+      0.5,
+      2,
+    );
     expect(submersion(new Vector3(0, 60, 0), UPWARD, water)).toBe(1);
   });
 
   it('finds the surface of the well that rises into the tube (radial up at the equator)', () => {
     const outward = new Vector3(1, 0, 0);
-    // El fondo del tubo está a 61 m del centro: pies a 60,1 m, la mitad del cuerpo dentro.
-    expect(submersion(new Vector3(60.1, 0, 0), outward, water)).toBeCloseTo(0.5, 2);
+    // El fondo del tubo está a 61 m del centro: con los pies media altura por debajo, la mitad del cuerpo dentro.
+    expect(submersion(new Vector3(61 - PLAYER_HEIGHT / 2, 0, 0), outward, water)).toBeCloseTo(
+      0.5,
+      2,
+    );
   });
 
   it('knows when the eyes are under', () => {

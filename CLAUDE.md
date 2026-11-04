@@ -97,3 +97,9 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - Agua (`physics/water.ts`): se nada por encima de 0,45 sumergido (Espacio sube, Mayús baja), 40 s de aire (muerte `ahogado`), y `runtime.hull` añade la superficie del mar para que la nave flote. Con `?debug`: `__juego.dive()`.
 - `rampMatrix` da una matriz local al marco del sitio: multiplícala por `f.base`. `snapToGround` levanta en vertical (no por la normal) para no atascarse en la cima de una rampa.
 - Para mirar un mundo de cerca sin jugar, una página temporal en `web/` que llame a `buildUmbral()` sirve (no la dejes en el repo).
+
+## El explorador (el jugador, por código)
+- Ool joven con traje acolchado remendado y casco de burbuja (lámina de Anthony): `web/src/character/`. `gait.ts` es la lógica pura del andar (fase por distancia, quieto/andar/correr/aire/nadar), `explorerBody.ts` y `explorerGear.ts` las piezas, `explorerModel.ts` el muñeco articulado (un `Group` por articulación, marco de diseño Z arriba y frente +Y).
+- ✅ Mide como un Ool adulto: `EYE_HEIGHT` 1,08 y `PLAYER_HEIGHT` 1,45 (`data/movement.ts`).
+- `render/explorerView.ts` lo cuelga de la escena: en primera persona oculta cabeza y casco y retrasa el cuerpo (`FIRST_PERSON_BACK`/`_DOWN`) para verse al mirar abajo; pilotando no se dibuja. `ui/helmetRim.ts` pone el borde del casco.
+- Con `?debug`: **F6** cámara exterior, **F7** la gira; `__juego.outside(true, Math.PI)` (de frente), `__juego.pitch(-1.2)` y `__juego.explorer()`.

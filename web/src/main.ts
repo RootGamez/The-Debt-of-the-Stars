@@ -69,7 +69,9 @@ import { forwardOf, upOf } from './physics/surfaceFrame';
 import { ReadingSession } from './reading/readingSession';
 import { createReadingUi, type ReadingUi } from './reading/readingUi';
 import { createWorldSources, type WorldSources } from './reading/worldSources';
-import { cameraPose } from './render/firstPersonCamera';
+import { cameraPose, chasePose } from './render/firstPersonCamera';
+import { createExplorerView } from './render/explorerView';
+import { createHelmetRim } from './ui/helmetRim';
 import { createStarfield, dimStars } from './render/sky';
 import { finalApproach, finalLight } from './system/absorption';
 import { AMBIENT_COLOR, AMBIENT_INTENSITY, createStage } from './render/stage';
@@ -204,6 +206,12 @@ async function start(): Promise<void> {
   for (const { object } of characters) object.scale.multiplyScalar(home?.oolScale ?? 1);
   const ool = createOolView(characters, reducedMotion);
   const filaments = createFilaments();
+  // Tú: el explorador (un Ool con su traje), que anda con el jugador; al mirar abajo se ve su cuerpo.
+  const explorer = createExplorerView(scene);
+  const helmetRim = createHelmetRim();
+  // Con `?debug`, F6 pone la cámara fuera, detrás del explorador, para verlo andar; F7 la gira a su alrededor.
+  let outside = false;
+  let around = 0;
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
   const chronology = looping ? loadChronology(window.location.search) : quietChronology();
   // A pie, la nave posada es un obstáculo más del mundo donde está; `ui` llega después (avisos del Contrapeso).
@@ -574,6 +582,22 @@ async function start(): Promise<void> {
     window.__juego.blackHole = () => blackHole.snapshot();
     window.__juego.sky = () => ({ density: atmosphere.density });
     window.__juego.ool = () => ({ turns: ool.snapshot(), filaments: filaments.snapshot() });
+    window.__juego.explorer = () => ({ ...explorer.snapshot(), outside });
+    window.__juego.pitch = (angle) => {
+      player.look(0, angle - player.pitch);
+      return player.pitch;
+    };
+    window.__juego.outside = (on, angle) => {
+      outside = on;
+      if (angle !== undefined) around = angle;
+      return outside;
+    };
+    window.addEventListener('keydown', (event) => {
+      if (event.code !== 'F6' && event.code !== 'F7') return;
+      event.preventDefault();
+      if (event.code === 'F6') outside = !outside;
+      else around += Math.PI / 4;
+    });
     window.__juego.wormhole = () => ({
       active: wormholeView?.active ?? false,
       progress: wormholeView?.progress ?? 0,
@@ -819,8 +843,24 @@ async function start(): Promise<void> {
       } else {
         player.interpolatedFeet(alpha, feet);
         player.interpolatedBody(alpha, body);
-        cameraPose(body, player.pitch, feet, camera.position, camera.quaternion);
+        if (outside) chasePose(body, feet, camera.position, camera.quaternion, around);
+        else cameraPose(body, player.pitch, feet, camera.position, camera.quaternion);
       }
+      explorer.update({
+        feet,
+        body,
+        pitch: player.pitch,
+        velocity: player.state.velocity,
+        grounded: player.state.grounded,
+        swimming: player.state.swimming,
+        landings: player.state.landings,
+        landingSpeed: player.state.lastLandingSpeed,
+        dt,
+        visible: !piloting,
+        firstPerson: !outside,
+        reading: reading.current !== null,
+      });
+      helmetRim.update(!piloting && !outside && overlay.playing);
       camera.position.add(session.shake);
       const t = session.director.clock.t;
       // Al final de la ventana de tu mundo caes con él: el agujero se acerca y la luz se apaga.

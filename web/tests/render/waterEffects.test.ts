@@ -14,6 +14,7 @@ import { createWaves } from '../../src/physics/waves';
 import { applyUnderwater, oceanMaterial, oceanMesh } from '../../src/render/ocean';
 import { createWaterEffects } from '../../src/render/waterEffects';
 import { seededRandom } from '../../src/worlds/procedural/noise';
+import { FLOAT_LINE, PLAYER_HEIGHT } from '../../src/data/movement';
 
 const SEA = 70;
 const water: WaterBody = { center: new Vector3(), level: SEA };
@@ -108,7 +109,7 @@ describe('when the water splashes', () => {
   it('leaves rings while you swim along the surface and bubbles while you dive', () => {
     const effects = createWaterEffects(seededRandom(7));
     const play = createWaterPlay(effects, seededRandom(8));
-    const position = new Vector3(0, SEA - 1.2, 0);
+    const position = new Vector3(0, SEA - FLOAT_LINE * PLAYER_HEIGHT, 0); // flotando
     for (let i = 0; i < 30; i++) {
       position.x += 2 / 60;
       play.update(water, { position, up: UP, ship: false }, 1 / 60);
