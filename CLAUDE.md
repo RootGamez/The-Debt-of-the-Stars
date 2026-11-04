@@ -103,3 +103,11 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - ✅ Mide como un Ool adulto: `EYE_HEIGHT` 1,08 y `PLAYER_HEIGHT` 1,45 (`data/movement.ts`).
 - `render/explorerView.ts` lo cuelga de la escena: en primera persona oculta cabeza y casco y retrasa el cuerpo (`FIRST_PERSON_BACK`/`_DOWN`) para verse al mirar abajo; pilotando no se dibuja. `ui/helmetRim.ts` pone el borde del casco.
 - Con `?debug`: **F6** cámara exterior, **F7** la gira; `__juego.outside(true, Math.PI)` (de frente), `__juego.pitch(-1.2)` y `__juego.explorer()`.
+
+## Idiomas y accesibilidad
+- Español (por defecto) e inglés. El texto en español del código es la clave: `t('Volver')` (`web/src/i18n/`); la traducción está en `i18n/en.ts` y `tests/i18n/dictionary.test.ts` falla si un `t('...')` no tiene entrada. Huecos: `t('Ciclos: {n}', { n })`; plurales: `plural(n, 'día', 'días')`.
+- El idioma se decide al cargar (guardado en `bucle-tiempo:idioma`, si no el del navegador) y cambiarlo recarga la página. No llames a `t()` con textos de datos que no estén en el diccionario.
+- Las pistas se traducen superponiendo `web/src/i18n/clues/<mundo>.en.json` (por `id`) sobre `data/pistas/*.json` (`i18n/localizeClues.ts`). Al añadir una pista o cambiar un texto, actualiza su `.en.json`; el test `tests/i18n/clues.test.ts` lo exige.
+- Los nombres de los mundos en inglés: Home, Moon, Threshold (Umbral), Archive, Workshop, Scar, Observatory, Hidden Laboratory; la Boca = Mouth, Puerta = Gate, Ausentes = the Absent.
+- Accesibilidad (Configuración, en la pausa): escala de la interfaz (100–200 %) y de las letras (100–200 %), guardadas en `bucle-tiempo:accesibilidad`. Todo el CSS sigue en px: `web/scripts/postcss-ui-scale.ts` los envuelve en `calc(Npx * var(--ui-scale))` (y las letras, además, por `--text-scale`). No uses medidas en px fuera del CSS (canvas/inline) sin multiplicarlas.
+

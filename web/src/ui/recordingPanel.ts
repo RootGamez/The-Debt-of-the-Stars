@@ -4,6 +4,7 @@
 // reading/recording.ts; esto solo la dibuja.
 import type { OpenReading } from '../reading/readingSession';
 import { sliderFromSpeed, speedFromSlider, type PlaybackView } from '../reading/recording';
+import { getLanguage, t } from '../i18n';
 
 export interface RecordingPanel {
   show(reading: OpenReading, startSpeed: number): void;
@@ -32,15 +33,15 @@ function element<K extends keyof HTMLElementTagNameMap>(
 
 /** "×2,5": la velocidad como se lee en español. */
 export function formatSpeed(speed: number): string {
-  return `×${speed.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`;
+  return `×${speed.toLocaleString(getLanguage() === 'en' ? 'en-US' : 'es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`;
 }
 
 function statusOf(clarity: number, understood: boolean): string {
-  if (understood) return 'Entendida entera.';
-  if (clarity >= 1) return 'Se entiende. Escúchala entera.';
-  if (clarity > 0.5) return 'Casi se entiende.';
-  if (clarity > 0) return 'Se adivina alguna palabra.';
-  return 'No se entiende nada.';
+  if (understood) return t('Entendida entera.');
+  if (clarity >= 1) return t('Se entiende. Escúchala entera.');
+  if (clarity > 0.5) return t('Casi se entiende.');
+  if (clarity > 0) return t('Se adivina alguna palabra.');
+  return t('No se entiende nada.');
 }
 
 export function createRecordingPanel(
@@ -72,7 +73,7 @@ export function createRecordingPanel(
   const fill = element('div', 'recorder-meter-fill');
   const meter = element('div', 'recorder-meter');
   meter.setAttribute('role', 'meter');
-  meter.setAttribute('aria-label', 'Claridad');
+  meter.setAttribute('aria-label', t('Claridad'));
   meter.setAttribute('aria-valuemin', '0');
   meter.setAttribute('aria-valuemax', '100');
   meter.append(fill);
@@ -110,7 +111,7 @@ export function createRecordingPanel(
       const title = element('h2', 'recorder-title', reading.title);
       title.id = 'recorder-title';
       backdrop.setAttribute('aria-labelledby', title.id);
-      const close = element('button', 'recorder-close', touch ? 'Cerrar' : 'Cerrar (E)');
+      const close = element('button', 'recorder-close', touch ? t('Cerrar') : `${t('Cerrar')} (E)`);
       close.type = 'button';
       close.addEventListener('click', onClose);
 
@@ -124,24 +125,24 @@ export function createRecordingPanel(
       speedLabel.textContent = formatSpeed(startSpeed);
       wheel.setAttribute('aria-valuetext', formatSpeed(startSpeed));
 
-      const wheelLabel = element('label', 'recorder-label', 'Velocidad');
+      const wheelLabel = element('label', 'recorder-label', t('Velocidad'));
       wheelLabel.htmlFor = wheel.id;
       const controls = element('div', 'recorder-controls');
       controls.append(
         wheelLabel,
-        stepButton('−', 'Más lento', -1),
+        stepButton('−', t('Más lento'), -1),
         wheel,
-        stepButton('+', 'Más rápido', 1),
+        stepButton('+', t('Más rápido'), 1),
         speedLabel,
       );
       const clarityRow = element('div', 'recorder-clarity');
-      clarityRow.append(element('span', 'recorder-label', 'Claridad'), meter);
+      clarityRow.append(element('span', 'recorder-label', t('Claridad')), meter);
       const hint = touch
-        ? 'Mueve la rueda hasta que la voz se entienda.'
-        : 'Mueve la rueda (← →) hasta que la voz se entienda.';
+        ? t('Mueve la rueda hasta que la voz se entienda.')
+        : t('Mueve la rueda (← →) hasta que la voz se entienda.');
 
       const parts: HTMLElement[] = [title];
-      if (reading.draft) parts.push(element('p', 'recorder-tag', 'Texto provisional'));
+      if (reading.draft) parts.push(element('p', 'recorder-tag', t('Texto provisional')));
       for (const paragraph of reading.text) parts.push(element('p', 'recorder-text', paragraph));
       parts.push(
         tape,
@@ -183,12 +184,17 @@ export function createRecordingPanel(
     },
     showUnderstood(lines) {
       if (lines.length === 0) {
-        noted.replaceChildren(element('p', 'recorder-hint', 'Ya estaba anotado en el Registro.'));
+        noted.replaceChildren(
+          element('p', 'recorder-hint', t('Ya estaba anotado en el Registro.')),
+        );
         return;
       }
       const list = element('ul', 'recorder-noted-list');
       for (const line of lines) list.append(element('li', 'recorder-noted-item', line));
-      noted.replaceChildren(element('p', 'recorder-noted-title', 'Anotado en el Registro'), list);
+      noted.replaceChildren(
+        element('p', 'recorder-noted-title', t('Anotado en el Registro')),
+        list,
+      );
     },
     hide() {
       backdrop.hidden = true;

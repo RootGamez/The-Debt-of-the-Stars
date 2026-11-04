@@ -9,6 +9,7 @@ import type { OpenReading } from '../reading/readingSession';
 import { checkLetters, formatMinutes, lettersInOrder, notebook } from '../reading/puzzles';
 import { consoleBody, routeBody, twinsBody, type PuzzleBody } from './clockPuzzles';
 import { button, element } from './puzzleKit';
+import { plural, t } from '../i18n';
 
 /** Un lector que trae el juego: recibe la línea de estado y si ya se resolvió, y llama a `solve` al resolverlo. */
 export type CustomReader = (status: HTMLElement, solved: boolean, solve: () => void) => PuzzleBody;
@@ -26,14 +27,18 @@ export interface PuzzlePanel {
 
 /** "4 días allí son 5 en Umbral": el ritmo de un reloj como una comparación, sin fórmulas. */
 export function equivalence(rate: number): string {
-  if (Math.abs(rate - 1) < 1e-9) return 'Es el reloj de Umbral.';
+  if (Math.abs(rate - 1) < 1e-9) return t('Es el reloj de Umbral.');
   for (let there = 1; there <= 10; there++) {
     const here = there / rate;
     if (Math.abs(here - Math.round(here)) < 1e-6) {
-      return `${String(there)} ${there === 1 ? 'día' : 'días'} allí son ${String(Math.round(here))} en Umbral.`;
+      return t('{there} {days} allí son {here} en Umbral.', {
+        there,
+        days: plural(there, 'día', 'días'),
+        here: Math.round(here),
+      });
     }
   }
-  return `Un día allí son ${(1 / rate).toFixed(1)} en Umbral.`;
+  return t('Un día allí son {here} en Umbral.', { here: (1 / rate).toFixed(1) });
 }
 
 export function createPuzzlePanel(
@@ -61,7 +66,7 @@ export function createPuzzlePanel(
     const book = notebook(NOTEBOOK);
     const table = element('table', 'puzzle-notebook');
     const head = element('tr', '');
-    head.append(element('th', '', 'Umbral'), element('th', '', NOTEBOOK.other));
+    head.append(element('th', '', t('Umbral')), element('th', '', t(NOTEBOOK.other)));
     table.append(head);
     let blank: HTMLTableCellElement | undefined;
     book.rows.forEach((row, i) => {
@@ -77,18 +82,22 @@ export function createPuzzlePanel(
     if (solved || !blank) return body;
     const choices = element('div', 'puzzle-choices');
     choices.append(
-      element('p', 'puzzle-hint', `¿Qué hora anotó el turno en el ${NOTEBOOK.other}?`),
+      element(
+        'p',
+        'puzzle-hint',
+        t('¿Qué hora anotó el turno en el {other}?', { other: t(NOTEBOOK.other) }),
+      ),
     );
     for (const option of book.options) {
       const choice = button(formatMinutes(option), 'puzzle-choice');
       choice.addEventListener('click', () => {
         if (option !== book.answer) {
-          status.textContent = 'No cuadra con cómo se separan las columnas.';
+          status.textContent = t('No cuadra con cómo se separan las columnas.');
           return;
         }
         if (blank) blank.textContent = formatMinutes(option);
         choices.remove();
-        status.textContent = 'Las columnas se separan siempre igual: el Archivo se queda atrás.';
+        status.textContent = t('Las columnas se separan siempre igual: el Archivo se queda atrás.');
         onSolved();
       });
       choices.append(choice);
@@ -104,7 +113,7 @@ export function createPuzzlePanel(
       : [...LETTERS];
     const body = element('div', 'puzzle-body');
     const list = element('ol', 'puzzle-letters');
-    const check = button('Comprobar el orden', 'puzzle-check');
+    const check = button(t('Comprobar el orden'), 'puzzle-check');
 
     function render(): void {
       list.replaceChildren(
@@ -116,7 +125,10 @@ export function createPuzzlePanel(
             element(
               'span',
               '',
-              `Fechada el día ${String(letter.day)} según el reloj de ${letter.clock}.`,
+              t('Fechada el día {day} según el reloj de {clock}.', {
+                day: letter.day,
+                clock: letter.clock,
+              }),
             ),
             element('small', '', equivalence(letter.rate)),
           );
@@ -158,13 +170,13 @@ export function createPuzzlePanel(
           order.map((l) => l.id),
         )
       ) {
-        status.textContent = 'Aún no: alguna contesta antes de que la otra se escribiera.';
+        status.textContent = t('Aún no: alguna contesta antes de que la otra se escribiera.');
         return;
       }
       solved = true;
       check.remove();
       render();
-      status.textContent = 'En días de Umbral, cada carta llega después de la anterior.';
+      status.textContent = t('En días de Umbral, cada carta llega después de la anterior.');
       onSolved();
     });
     render();
@@ -172,7 +184,7 @@ export function createPuzzlePanel(
       element(
         'p',
         'puzzle-hint',
-        'Ordénalas de la primera que se escribió a la última, en días de Umbral.',
+        t('Ordénalas de la primera que se escribió a la última, en días de Umbral.'),
       ),
       list,
     );
@@ -195,11 +207,11 @@ export function createPuzzlePanel(
       case 'cuaderno':
         return { body: notebookBody(solved, solve) };
       case 'ruedas':
-        return { body: element('p', 'puzzle-hint', 'No hay nada que ajustar.') };
+        return { body: element('p', 'puzzle-hint', t('No hay nada que ajustar.')) };
       case 'bocas':
-        return { body: element('p', 'puzzle-hint', 'Todas las bocas están quietas.') };
+        return { body: element('p', 'puzzle-hint', t('Todas las bocas están quietas.')) };
       case 'pista':
-        return { body: element('p', 'puzzle-hint', 'El reloj de la Pista está parado.') };
+        return { body: element('p', 'puzzle-hint', t('El reloj de la Pista está parado.')) };
     }
   }
 
@@ -208,7 +220,7 @@ export function createPuzzlePanel(
       const title = element('h2', 'puzzle-title', reading.title);
       title.id = 'puzzle-title';
       backdrop.setAttribute('aria-labelledby', title.id);
-      const close = button(touch ? 'Cerrar' : 'Cerrar (E)', 'puzzle-close');
+      const close = button(touch ? t('Cerrar') : `${t('Cerrar')} (E)`, 'puzzle-close');
       close.addEventListener('click', onClose);
       status.textContent = '';
       noted.replaceChildren();
@@ -220,7 +232,7 @@ export function createPuzzlePanel(
         onSolved();
       };
       const parts: HTMLElement[] = [title];
-      if (reading.draft) parts.push(element('p', 'puzzle-tag', 'Texto provisional'));
+      if (reading.draft) parts.push(element('p', 'puzzle-tag', t('Texto provisional')));
       for (const paragraph of reading.text) parts.push(element('p', 'puzzle-text', paragraph));
       stopBody?.();
       const { body, stop } = bodyFor(reading.puzzle?.reader ?? 'cuaderno', solved, solve);
@@ -239,12 +251,12 @@ export function createPuzzlePanel(
     },
     showSolved(lines) {
       if (lines.length === 0) {
-        noted.replaceChildren(element('p', 'puzzle-hint', 'Ya estaba anotado en el Registro.'));
+        noted.replaceChildren(element('p', 'puzzle-hint', t('Ya estaba anotado en el Registro.')));
         return;
       }
       const list = element('ul', 'puzzle-noted-list');
       for (const line of lines) list.append(element('li', 'puzzle-noted-item', line));
-      noted.replaceChildren(element('p', 'puzzle-noted-title', 'Anotado en el Registro'), list);
+      noted.replaceChildren(element('p', 'puzzle-noted-title', t('Anotado en el Registro')), list);
     },
     hide() {
       stopBody?.();

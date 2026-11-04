@@ -11,6 +11,7 @@ import {
 } from '../registry/notebookPages';
 import type { WorldPage } from '../worlds/worldLog';
 import { worldDrawing } from './worldDrawings';
+import { t } from '../i18n';
 
 /** Lo que tarda una hoja en dar la vuelta entera (ms). */
 const FLIP_MS = 520;
@@ -52,9 +53,9 @@ function entryItem(entry: NotebookEntry): HTMLElement {
   item.append(node('span', 'registry-line', entry.line));
   if (entry.related.length > 0) {
     const related = node('ul', 'registry-related');
-    related.setAttribute('aria-label', 'Ver también');
+    related.setAttribute('aria-label', t('Ver también'));
     for (const line of entry.related) related.append(node('li', 'registry-related-item', line));
-    item.append(node('p', 'registry-also', 'Ver también'), related);
+    item.append(node('p', 'registry-also', t('Ver también')), related);
   }
   return item;
 }
@@ -92,7 +93,7 @@ function worldPhoto(world: WorldPage): HTMLElement {
   if (url) {
     const image = document.createElement('img');
     image.src = url;
-    image.alt = `Dibujo de ${world.name}`;
+    image.alt = t('Dibujo de {name}', { name: world.name });
     image.width = 360;
     image.height = 270;
     figure.append(image);
@@ -103,7 +104,11 @@ function worldPhoto(world: WorldPage): HTMLElement {
 function worldMeta(world: WorldPage): string {
   const parts = [world.where];
   if (world.name !== world.official) parts.unshift(world.official);
-  parts.push(world.loop === undefined ? 'casa' : `encontrado en el ciclo ${world.loop + 1}`);
+  parts.push(
+    world.loop === undefined
+      ? t('casa')
+      : t('encontrado en el ciclo {loop}', { loop: world.loop + 1 }),
+  );
   return parts.join(' · ');
 }
 
@@ -113,25 +118,29 @@ function pageContent(page: NotebookPage): HTMLElement[] {
     case 'cover': {
       const label = node('div', 'registry-cover-label');
       label.append(
-        node('h2', 'registry-title', 'Registro'),
-        node('p', 'registry-cover-sub', 'cuaderno de campo'),
+        node('h2', 'registry-title', t('Registro')),
+        node('p', 'registry-cover-sub', t('cuaderno de campo')),
       );
       return [label];
     }
     case 'flyleaf':
       return [
-        node('p', 'registry-flyleaf', 'Instituto de Hogar'),
-        node('p', 'registry-flyleaf-note', 'Si lo encuentras: aquí está todo lo que he aprendido.'),
+        node('p', 'registry-flyleaf', t('Instituto de Hogar')),
+        node(
+          'p',
+          'registry-flyleaf-note',
+          t('Si lo encuentras: aquí está todo lo que he aprendido.'),
+        ),
       ];
     case 'known': {
       const parts: HTMLElement[] = [
-        node('h3', 'registry-known-title', 'Lo que sé'),
-        node('p', 'registry-summary', `${page.totalFacts} hechos anotados`),
+        node('h3', 'registry-known-title', t('Lo que sé')),
+        node('p', 'registry-summary', t('{total} hechos anotados', { total: page.totalFacts })),
       ];
       const list = node('ul', 'registry-known');
       for (const title of page.conclusions) list.append(node('li', 'registry-known-item', title));
       if (page.conclusions.length === 0) {
-        list.append(node('li', 'registry-empty', 'Todavía no sé nada con certeza.'));
+        list.append(node('li', 'registry-empty', t('Todavía no sé nada con certeza.')));
       }
       parts.push(list);
       return parts;
@@ -142,12 +151,16 @@ function pageContent(page: NotebookPage): HTMLElement[] {
       if (page.part > 0) question.dataset['sigue'] = 'true';
       section.append(
         question,
-        node('p', 'registry-count', `${page.known} de ${page.total} hechos`),
+        node(
+          'p',
+          'registry-count',
+          t('{known} de {total} hechos', { known: page.known, total: page.total }),
+        ),
       );
       const list = node('ul', 'registry-facts');
       for (const entry of page.entries) list.append(entryItem(entry));
       if (page.entries.length === 0) {
-        list.append(node('li', 'registry-empty', 'Todavía no sé nada sobre esto.'));
+        list.append(node('li', 'registry-empty', t('Todavía no sé nada sobre esto.')));
       }
       section.append(list);
       if (page.part === 0) section.append(doodle(page.threadId));
@@ -157,12 +170,16 @@ function pageContent(page: NotebookPage): HTMLElement[] {
       const list = node('ul', 'registry-worlds');
       for (const world of page.worlds) {
         const item = node('li', 'registry-world-item', world.name);
-        item.append(node('span', 'registry-world-page', ` · p. ${world.page}`));
+        item.append(node('span', 'registry-world-page', ` · ${t('p.')} ${world.page}`));
         list.append(item);
       }
       return [
-        node('h3', 'registry-known-title', 'Bitácora de mundos'),
-        node('p', 'registry-count', 'A cada mundo que encuentro le pongo nombre y pego su dibujo.'),
+        node('h3', 'registry-known-title', t('Bitácora de mundos')),
+        node(
+          'p',
+          'registry-count',
+          t('A cada mundo que encuentro le pongo nombre y pego su dibujo.'),
+        ),
         list,
       ];
     }
@@ -175,7 +192,7 @@ function pageContent(page: NotebookPage): HTMLElement[] {
       const list = node('ul', 'registry-facts');
       for (const fact of page.facts) list.append(node('li', 'registry-fact', fact.line));
       if (page.part === 0 && page.facts.length === 0) {
-        list.append(node('li', 'registry-empty', 'Aún no he anotado nada aquí.'));
+        list.append(node('li', 'registry-empty', t('Aún no he anotado nada aquí.')));
       }
       parts.push(list);
       return parts;
@@ -211,7 +228,7 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
   const backdrop = node('div', 'registry');
   backdrop.setAttribute('role', 'dialog');
   backdrop.setAttribute('aria-modal', 'true');
-  backdrop.setAttribute('aria-label', 'Registro');
+  backdrop.setAttribute('aria-label', t('Registro'));
   backdrop.hidden = true;
   const book = node('div', 'registry-book');
   const shift = node('div', 'registry-shift');
@@ -219,12 +236,12 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
   const bar = node('div', 'registry-bar');
   const prev = node('button', 'registry-turn', '‹');
   prev.type = 'button';
-  prev.setAttribute('aria-label', 'Página anterior');
+  prev.setAttribute('aria-label', t('Página anterior'));
   const where = node('span', 'registry-where');
   const next = node('button', 'registry-turn', '›');
   next.type = 'button';
-  next.setAttribute('aria-label', 'Página siguiente');
-  const close = node('button', 'registry-close', 'Cerrar (Esc)');
+  next.setAttribute('aria-label', t('Página siguiente'));
+  const close = node('button', 'registry-close', t('Cerrar (Esc)'));
   close.type = 'button';
   bar.append(prev, where, next, close);
   backdrop.append(book, bar);
@@ -385,8 +402,8 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
     }
     const tabs = node('div', 'registry-tabs');
     for (const [text, kind] of [
-      ['Preguntas', 'thread'],
-      ['Mundos', 'worlds'],
+      [t('Preguntas'), 'thread'],
+      [t('Mundos'), 'worlds'],
     ] as const) {
       const tab = node('button', 'registry-tab', text);
       tab.type = 'button';

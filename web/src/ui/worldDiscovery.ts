@@ -3,6 +3,7 @@
 // El tiempo espera mientras tanto (main.ts). Las teclas que se escriben no llegan al juego (ni E, ni R, ni M).
 import { MAX_WORLD_NAME, cleanWorldName } from '../worlds/worldLog';
 import { worldDrawing } from './worldDrawings';
+import { t } from '../i18n';
 
 const FLY_MS = 800;
 
@@ -33,14 +34,14 @@ export function createWorldDiscovery(book: () => HTMLElement | undefined): World
   backdrop.setAttribute('aria-labelledby', 'discover-title');
   backdrop.hidden = true;
   const card = element('div', 'discover');
-  const title = element('h2', 'discover-title', 'Un mundo nuevo');
+  const title = element('h2', 'discover-title', t('Un mundo nuevo'));
   title.id = 'discover-title';
   const photo = element('figure', 'discover-photo');
   const image = document.createElement('img');
   image.width = 360;
   image.height = 270;
   photo.append(image);
-  const label = element('label', 'discover-label', 'Ponle nombre');
+  const label = element('label', 'discover-label', t('Ponle nombre'));
   const input = element('input', 'discover-input');
   input.id = 'discover-name';
   input.type = 'text';
@@ -49,7 +50,7 @@ export function createWorldDiscovery(book: () => HTMLElement | undefined): World
   input.spellcheck = false;
   label.htmlFor = input.id;
   const hint = element('p', 'discover-hint');
-  const save = element('button', 'discover-save', 'Pegar en el cuaderno');
+  const save = element('button', 'discover-save', t('Pegar en el cuaderno'));
   save.type = 'button';
   const foot = element('div', 'discover-foot');
   foot.append(hint, save);
@@ -141,10 +142,10 @@ export function createWorldDiscovery(book: () => HTMLElement | undefined): World
     open(id, official, onNamed) {
       pending = { official, onNamed };
       image.src = worldDrawing(id);
-      image.alt = `Dibujo de ${official}`;
+      image.alt = t('Dibujo de {name}', { name: official });
       input.value = '';
       input.placeholder = official;
-      hint.textContent = `Intro para pegarlo · sin nombre se queda «${official}»`;
+      hint.textContent = t('Intro para pegarlo · sin nombre se queda «{name}»', { name: official });
       backdrop.hidden = false;
       card.classList.remove('is-in');
       card.getBoundingClientRect(); // reinicia la animación del revelado

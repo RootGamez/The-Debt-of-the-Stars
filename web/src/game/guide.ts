@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 // La guía del prólogo (Fase 9D): avisos cortos, de uno en uno y en su sitio, que enseñan a andar, hablar, usar el
 // Registro, ir al hangar, volar a la Luna, posarse y examinar el fragmento. Cada uno se muestra hasta que se hace
 // lo que pide y no vuelve. Lógica pura: ui/guideView.ts lo pinta.
@@ -108,28 +109,33 @@ export class Guide {
 }
 
 const KEYS: Record<GuideStep, string> = {
-  andar: 'Ratón para mirar · W A S D para andar',
-  directora:
+  andar: t('Ratón para mirar · W A S D para andar'),
+  directora: t(
     'La Directora te espera en el Motor, junto al mar, al este del Instituto. Acércate a quien quieras y pulsa E para hablar',
-  registro: 'Lo que aprendes queda en el Registro: ábrelo con Tab',
-  hangar:
+  ),
+  registro: t('Lo que aprendes queda en el Registro: ábrelo con Tab'),
+  hangar: t(
     'El Albatros II te espera en el hangar, al este del Instituto. Junto a la escotilla, F para subir',
-  apuntar: 'T apunta a la Luna · W para ir hacia ella',
-  posarse:
+  ),
+  apuntar: t('T apunta a la Luna · W para ir hacia ella'),
+  posarse: t(
     'Frena con X y baja despacio hasta posarte. Con la nave quieta en el suelo, F para bajar',
-  fragmento: 'El fragmento está cerca: acércate y examínalo con E',
+  ),
+  fragmento: t('El fragmento está cerca: acércate y examínalo con E'),
 };
 
 const TOUCH: Record<GuideStep, string> = {
-  andar: 'Arrastra para mirar · el mando de la izquierda para andar',
-  directora:
+  andar: t('Arrastra para mirar · el mando de la izquierda para andar'),
+  directora: t(
     'La Directora te espera en el Motor, junto al mar, al este del Instituto. Acércate a quien quieras y toca Hablar',
-  registro: 'Lo que aprendes queda en el Registro: ábrelo con su botón',
-  hangar:
+  ),
+  registro: t('Lo que aprendes queda en el Registro: ábrelo con su botón'),
+  hangar: t(
     'El Albatros II te espera en el hangar, al este del Instituto. Junto a la escotilla, toca Subir',
-  apuntar: 'Apunta a la Luna con su botón y avanza hacia ella',
-  posarse: 'Frena y baja despacio hasta posarte. Con la nave quieta en el suelo, toca Bajar',
-  fragmento: 'El fragmento está cerca: acércate y toca Examinar',
+  ),
+  apuntar: t('Apunta a la Luna con su botón y avanza hacia ella'),
+  posarse: t('Frena y baja despacio hasta posarte. Con la nave quieta en el suelo, toca Bajar'),
+  fragmento: t('El fragmento está cerca: acércate y toca Examinar'),
 };
 
 export function guideText(step: GuideStep, touch: boolean): string {

@@ -1,0 +1,87 @@
+{
+  "umbral.boca": {
+    "titulo": "The Mouth",
+    "superficial": [
+      "A ring of stone and metal, dark. Across the arch runs a crack of light that slowly closes behind your back.",
+      "Every time you wake up, you are here."
+    ],
+    "profunda": [
+      "Now you see the crack differently: it is not closing, it is being sewn shut.",
+      "Something, somewhere, keeps this quarter of an hour open."
+    ]
+  },
+  "umbral.placa": {
+    "titulo": "Inauguration plaque",
+    "superficial": [
+      "INAUGURATION OF THE MOUTH",
+      "By leave of the Transit Council, and to the pride of one and all, the first passage to the sibling worlds opens today."
+    ],
+    "profunda": [
+      "Underneath, in small letters and in a different hand, someone engraved: \"The count begins today.\"",
+      "Now you know that the clocks drift apart. A count, then: of what?"
+    ]
+  },
+  "umbral.cuaderno": {
+    "titulo": "Shift notebook",
+    "superficial": [
+      "Two columns written in the same hand: \"Threshold\" and \"Archive\".",
+      "At first the hours match. Page after page, the second falls behind, a little more each day.",
+      "Nobody wrote down why."
+    ]
+  },
+  "umbral.envios": {
+    "titulo": "Shipping register",
+    "superficial": [
+      "Crates, barrels, letters. Destination of all: —.",
+      "No name, no map, no coordinates."
+    ],
+    "profunda": [
+      "The receipts from that destination arrive with dates that barely advance: for each day here, a blink there.",
+      "Now you know how to read it: it is a place where time hardly runs."
+    ]
+  },
+  "umbral.hoja_entrada": {
+    "titulo": "A loose sheet from the register",
+    "superficial": [
+      "Shipments to the Archive. The cargo would not go in through the glass: nobody could break it.",
+      "\"Under the third tower, at the bottom, the door of the shaft. Look for the three bands.\""
+    ]
+  },
+  "umbral.carta": {
+    "titulo": "Unsent letter",
+    "superficial": [
+      "\"Dearest: every evening I come to the stone bench and set out two cups. Tell me you have eaten, that you sleep, that you do not work late...\"",
+      "There is no signature. The second cup is clean."
+    ],
+    "profunda": [
+      "At the bottom, in different ink: \"You write that for you a week has passed. Here, months have.\"",
+      "Whoever waited knew that the time of the one who left ran differently."
+    ]
+  },
+  "umbral.aula": {
+    "titulo": "The Classroom",
+    "superficial": [
+      "Inscriptions by children, made in charcoal: numbers, and below them the way to write the hours.",
+      "You learn to read the clock of the Absent."
+    ],
+    "profunda": [
+      "In the corner, a lullaby written to learn the rhythm:",
+      "\"Sleep, sleep, never cross the same Gate twice in the same day.\""
+    ]
+  },
+  "umbral.casas": {
+    "titulo": "The houses",
+    "superficial": ["Six houses. The tables are still set. There are no signs of violence."],
+    "profunda": [
+      "A notice nailed to a door. Now you can read the hour: \"Evacuation. Forty minutes. Gates 2 to 6.\"",
+      "The tables are still set because nobody had time."
+    ]
+  },
+  "umbral.destello": {
+    "titulo": "The flash of the Mouth",
+    "superficial": [
+      "The Mouth opens for an instant. Its light reaches other worlds.",
+      "Something, very far away, called it; and it answered."
+    ]
+  }
+}

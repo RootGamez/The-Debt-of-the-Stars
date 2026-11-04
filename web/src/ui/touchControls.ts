@@ -4,6 +4,7 @@ import { intentFromStick, type MoveIntent } from '../core/input';
 import type { InputController } from '../core/inputController';
 import { MOUSE_LOOK_SENSITIVITY, TOUCH_LOOK_SENSITIVITY } from '../data/movement';
 import { EMPTY_FLIGHT_KEYS, type FlightKeys } from '../ship/shipInput';
+import { t } from '../i18n';
 
 const STICK_RADIUS = 56; // px
 const DEAD_ZONE = 0.15;
@@ -51,20 +52,20 @@ export function createTouchControls(
   const layer = div('touch', document.body);
   const base = div('touch-stick', layer);
   const knob = div('touch-knob', base);
-  const jump = button('touch-jump', 'Saltar', layer);
-  const pause = button('touch-pause', 'Pausa', layer);
+  const jump = button('touch-jump', t('Saltar'), layer);
+  const pause = button('touch-pause', t('Pausa'), layer);
   const shipPanel = div('touch-ship-controls', layer);
-  const board = button('touch-ship-action', 'Nave', shipPanel);
-  const target = button('touch-ship-action', 'Objetivo', shipPanel);
-  const stabilize = button('touch-ship-action', 'Estab.', shipPanel);
+  const board = button('touch-ship-action', t('Nave'), shipPanel);
+  const target = button('touch-ship-action', t('Objetivo'), shipPanel);
+  const stabilize = button('touch-ship-action', t('Estab.'), shipPanel);
   const up = button('touch-ship-action', '↑', shipPanel);
   const down = button('touch-ship-action', '↓', shipPanel);
-  const match = button('touch-ship-action', 'Frenar', shipPanel);
+  const match = button('touch-ship-action', t('Frenar'), shipPanel);
   up.classList.add('touch-ship-flight');
   down.classList.add('touch-ship-flight');
   match.classList.add('touch-ship-flight');
-  pause.setAttribute('aria-label', 'Pausar el juego');
-  shipPanel.setAttribute('aria-label', 'Controles de la nave');
+  pause.setAttribute('aria-label', t('Pausar el juego'));
+  shipPanel.setAttribute('aria-label', t('Controles de la nave'));
   base.hidden = true;
 
   let stickId: number | null = null;
@@ -243,7 +244,7 @@ export function createTouchControls(
     shownPiloting = piloting;
     shipPanel.classList.toggle('piloting', piloting);
     jump.hidden = piloting;
-    board.textContent = piloting ? 'Bajar' : 'Nave';
+    board.textContent = piloting ? t('Bajar') : t('Nave');
   };
 
   return {

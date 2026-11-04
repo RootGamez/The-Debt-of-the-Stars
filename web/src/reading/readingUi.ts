@@ -35,6 +35,7 @@ import { worldPages, type WorldNames } from '../worlds/worldLog';
 import { RecordingPlayback } from './recording';
 import type { OpenReading, ReadingSession } from './readingSession';
 import type { WorldSources } from './worldSources';
+import { t } from '../i18n';
 
 export interface ReadingUiOptions {
   camera: PerspectiveCamera;
@@ -283,7 +284,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     recordingPanel.show(opened, playback.speed);
     recordingPanel.update(playback.view());
     if (opened.newFacts.length > 0) {
-      notice.show(`Anotado en el Registro: ${opened.newFacts.map(lineOf).join(' · ')}`);
+      notice.show(
+        t('Anotado en el Registro: {facts}', { facts: opened.newFacts.map(lineOf).join(' · ') }),
+      );
     }
   }
 
@@ -357,7 +360,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       if (!insideRadius(camera.position, event.position, event.radius)) continue;
       const learned = reading.witness(event.sourceId, loop.activeEventIds);
       if (learned.length > 0)
-        notice.show(`Anotado en el Registro: ${learned.map(lineOf).join(' · ')}`);
+        notice.show(
+          t('Anotado en el Registro: {facts}', { facts: learned.map(lineOf).join(' · ') }),
+        );
     }
   }
 

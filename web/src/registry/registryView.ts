@@ -2,6 +2,7 @@
 // (ui/registryPanel.ts) solo pinta este resultado. Un hecho sale una sola vez, bajo su primer hilo.
 import type { Clues, Thread } from './clues';
 import { relatedFacts, rumorsOf, unlockedConclusions, type KnownFacts } from './knowledge';
+import { t } from '../i18n';
 
 export interface FactView {
   id: string;
@@ -53,7 +54,7 @@ export function buildRegistryView(clues: Clues, known: KnownFacts): RegistryView
         })),
       rumors: rumors
         .filter((id) => clues.facts.get(id)?.threads[0] === thread.id)
-        .map((id) => ({ id, question: clues.facts.get(id)?.rumor ?? 'Algo que aún no sé…' })),
+        .map((id) => ({ id, question: clues.facts.get(id)?.rumor ?? t('Algo que aún no sé…') })),
       known: own.filter((f) => known.has(f.id)).length,
       total: own.length,
     };

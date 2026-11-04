@@ -7,6 +7,7 @@ import { loadEndingCards } from '../data/endings';
 import { showEndingCard } from '../ui/endingCard';
 import type { Ending } from './epilogue';
 import { createHomecomingPlay, isFinal, type HomecomingPlay } from './homecoming';
+import { t } from '../i18n';
 
 /** Lo que dura el giro hacia la Luna en el final A (s) y qué parte de lo que falta se gira por segundo. */
 export const TURN_SECONDS = 3.5;
@@ -51,9 +52,9 @@ export function createHomecomingRig(options: HomecomingRigOptions): HomecomingRi
     showEndingCard(
       card,
       isFinal(ending)
-        ? [{ label: 'Volver a jugar', run: options.replay }]
-        : [{ label: 'Volver al Archivo', run: options.backToArchive }],
-      saved ? undefined : 'No se ha podido guardar el final.',
+        ? [{ label: t('Volver a jugar'), run: options.replay }]
+        : [{ label: t('Volver al Archivo'), run: options.backToArchive }],
+      saved ? undefined : t('No se ha podido guardar el final.'),
     );
   }
 

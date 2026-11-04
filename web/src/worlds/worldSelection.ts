@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 // Qué mundo se carga. Por defecto Umbral (la llegada); `?mundo=<id>` permite probar los demás.
 // Solo se aceptan ids conocidos: la URL nunca decide qué archivo arbitrario se descarga.
 
@@ -85,5 +86,5 @@ export function replayHref(href: string, saved: boolean): string {
 
 /** "umbral" → "Umbral". */
 export function worldTitle(id: string): string {
-  return id.charAt(0).toUpperCase() + id.slice(1);
+  return t(id.charAt(0).toUpperCase() + id.slice(1));
 }

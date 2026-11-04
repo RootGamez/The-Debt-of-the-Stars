@@ -1,8 +1,11 @@
 import { defineConfig } from 'vitest/config';
+import uiScale from './scripts/postcss-ui-scale.ts';
 
 export default defineConfig({
   // Rutas relativas: el build funciona en itch.io, GitHub Pages o Cloudflare Pages sin cambios.
   base: './',
+  // Accesibilidad: escala de la interfaz y de la letra sobre todo el CSS (scripts/postcss-ui-scale).
+  css: { postcss: { plugins: [uiScale()] } },
   build: {
     target: 'es2022',
     sourcemap: true,

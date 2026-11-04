@@ -9,6 +9,7 @@ import { portraitOf, speechLines, voicePitch, type SpeechLine } from '../typewri
 import { lettersPerSecond, type TextSettings } from '../typewriter/textPreferences';
 import { createInkWriter, inkLetters } from './ink';
 import { portraitSvg } from './portraits';
+import { t } from '../i18n';
 
 /** Mantener pulsado (ratón o dedo) más que esto acelera en vez de avanzar. */
 const HOLD_MS = 260;
@@ -84,7 +85,7 @@ export function createReadingPanel(options: ReadingPanelOptions): ReadingPanel {
   }
 
   function label(last: boolean): string {
-    const word = last ? 'Cerrar' : 'Seguir';
+    const word = last ? t('Cerrar') : t('Seguir');
     return touch ? word : `${word} (E)`;
   }
 
@@ -138,10 +139,10 @@ export function createReadingPanel(options: ReadingPanelOptions): ReadingPanel {
     if (noted.length > 0) {
       const list = element('ul', 'reader-noted');
       for (const line of noted) list.append(element('li', 'reader-noted-item', line));
-      box.append(element('p', 'reader-noted-title', 'Anotado en el Registro'), list);
+      box.append(element('p', 'reader-noted-title', t('Anotado en el Registro')), list);
     }
     if (reading.deepPending) {
-      box.append(element('p', 'reader-hint', 'Hay algo más aquí que aún no sabes leer.'));
+      box.append(element('p', 'reader-hint', t('Hay algo más aquí que aún no sabes leer.')));
     }
     return box;
   }
@@ -173,8 +174,8 @@ export function createReadingPanel(options: ReadingPanelOptions): ReadingPanel {
     const foot = element('div', 'reader-foot');
     foot.append(nextArrow(), close);
     const tags: HTMLElement[] = [];
-    if (reading.level === 'deep') tags.push(element('p', 'reader-tag', 'Lectura más profunda'));
-    if (reading.draft) tags.push(element('p', 'reader-tag', 'Texto provisional'));
+    if (reading.level === 'deep') tags.push(element('p', 'reader-tag', t('Lectura más profunda')));
+    if (reading.draft) tags.push(element('p', 'reader-tag', t('Texto provisional')));
     if (!talk) {
       portrait = undefined;
       return [title, ...tags, paras, notes, foot];

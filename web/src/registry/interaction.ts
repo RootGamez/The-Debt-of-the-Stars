@@ -2,6 +2,7 @@
 // cámara y las marcas del mundo se leen en main.ts.
 import { Vector3 } from 'three';
 import type { SourceKind } from './clues';
+import { t } from '../i18n';
 
 /** Distancia (m) desde los ojos y media amplitud del cono de mirada (grados) para poder leer. */
 export const INTERACT_RANGE = 2.5;
@@ -69,5 +70,6 @@ export function promptLabel(kind: SourceKind, touch: boolean): string {
 
 /** El aviso de cualquier verbo ("coger"): "E · coger" en PC, "Coger" en el botón táctil. */
 export function verbLabel(verb: string, touch: boolean): string {
-  return touch ? verb.charAt(0).toUpperCase() + verb.slice(1) : `E · ${verb}`;
+  const word = t(verb);
+  return touch ? word.charAt(0).toUpperCase() + word.slice(1) : `E · ${word}`;
 }

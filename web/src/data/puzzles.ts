@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 // Los números de los lectores de puzle (plan de la Fase 7, hito 7E). Los textos son de Anthony: aquí solo
 // van la mecánica y rótulos neutros (borradores). Los ritmos son los de CONTEXTO_PLANETAS.md.
 
@@ -13,7 +14,7 @@ export interface NotebookConfig {
 
 /** El cuaderno del turno de Umbral: horas de Umbral y del Archivo, que se separan. */
 export const NOTEBOOK: NotebookConfig = {
-  other: 'Archivo',
+  other: t('Archivo'),
   otherRate: 0.8,
   stepMinutes: 150,
   rows: 6,
@@ -36,14 +37,14 @@ export interface Letter {
 export const LETTERS: readonly Letter[] = [
   {
     id: 'investigadora',
-    title: 'Carta desde el destino sin nombre',
-    clock: 'el destino sin nombre',
+    title: t('Carta desde el destino sin nombre'),
+    clock: t('el destino sin nombre'),
     rate: 0.2,
     day: 3,
   },
-  { id: 'consejo', title: 'Respuesta del Consejo', clock: 'Umbral', rate: 1, day: 12 },
-  { id: 'archivista', title: 'Nota del archivista', clock: 'el Archivo', rate: 0.8, day: 16 },
-  { id: 'informe', title: 'Informe archivado', clock: 'el Archivo', rate: 0.8, day: 8 },
+  { id: 'consejo', title: t('Respuesta del Consejo'), clock: t('Umbral'), rate: 1, day: 12 },
+  { id: 'archivista', title: t('Nota del archivista'), clock: t('el Archivo'), rate: 0.8, day: 16 },
+  { id: 'informe', title: t('Informe archivado'), clock: t('el Archivo'), rate: 0.8, day: 8 },
 ];
 
 // Fase 10 (hito 10A): los tres lectores que enseñan la cuenta del Contrapeso.
@@ -70,11 +71,11 @@ export interface ConsoleClock {
 
 /** La consola de la Cabina de Control: el reloj del Taller frente a los de los otros destinos, en vivo. */
 export const CONSOLE_CLOCKS: readonly ConsoleClock[] = [
-  { id: 'taller', label: 'Taller', rate: 0.85 },
-  { id: 'umbral', label: 'Umbral', rate: 1 },
-  { id: 'archivo', label: 'Archivo', rate: 0.8 },
-  { id: 'cicatriz', label: 'Cicatriz', rate: 0.6 },
-  { id: 'sin_nombre', label: 'Ruta 7 (sin nombre)', rate: 0.2 },
+  { id: 'taller', label: t('Taller'), rate: 0.85 },
+  { id: 'umbral', label: t('Umbral'), rate: 1 },
+  { id: 'archivo', label: t('Archivo'), rate: 0.8 },
+  { id: 'cicatriz', label: t('Cicatriz'), rate: 0.6 },
+  { id: 'sin_nombre', label: t('Ruta 7 (sin nombre)'), rate: 0.2 },
 ];
 
 /** Minutos de Umbral que corren en la consola por cada segundo real (para que la deriva se vea enseguida). */
@@ -92,8 +93,8 @@ export interface RouteLeg {
 export const ROUTE = {
   machineRate: 0.6,
   legs: [
-    { place: 'Laboratorio', minutes: 10, rate: 0.2 },
-    { place: 'El vuelo', minutes: 5, rate: 1 },
-    { place: 'Taller', minutes: 4, rate: 0.85 },
+    { place: t('Laboratorio'), minutes: 10, rate: 0.2 },
+    { place: t('El vuelo'), minutes: 5, rate: 1 },
+    { place: t('Taller'), minutes: 4, rate: 0.85 },
   ] satisfies RouteLeg[],
 } as const;

@@ -21,6 +21,7 @@ import {
   type CounterweightFrame,
   type CounterweightPlay,
 } from './counterweightPlay';
+import { t } from '../i18n';
 
 /** En el núcleo se ve más grande: el hueco del motor viejo es enorme. */
 const CORE_SCALE = 2.2;
@@ -28,10 +29,12 @@ const CORE_SCALE = 2.2;
 const DEFAULT_PULSE = 540;
 
 const NOTICES: Partial<Record<CounterweightPlace, string>> = {
-  installed: 'El pulso lo encaja: el Contrapeso ocupa el lugar del motor.',
-  rejected: 'El pulso lo rechaza: los dos relojes no coincidían.',
+  installed: t('El pulso lo encaja: el Contrapeso ocupa el lugar del motor.'),
+  rejected: t('El pulso lo rechaza: los dos relojes no coincidían.'),
 };
-const MOTOR_OUT_NOTICE = 'El motor viejo sale del núcleo. El núcleo queda abierto hasta el pulso.';
+const MOTOR_OUT_NOTICE = t(
+  'El motor viejo sale del núcleo. El núcleo queda abierto hasta el pulso.',
+);
 
 export interface CounterweightRigOptions {
   scene: Scene;

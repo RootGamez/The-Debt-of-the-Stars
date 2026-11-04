@@ -9,6 +9,7 @@ import { insideCavity } from '../physics/gravity';
 import { edgeTide, seedTide, shellTide, speedFactor, TideStrain } from '../physics/tides';
 import { holeTide, horizonTide } from '../system/absorption';
 import type { WorldRuntime } from '../worlds/worldRuntime';
+import { t } from '../i18n';
 
 /** Cuánto se ensancha la vista con la marea (fracción del campo de visión por unidad de marea). */
 const FOV_STRETCH = 0.18;
@@ -84,11 +85,11 @@ export function createTideEffects(camera: PerspectiveCamera, sources: TideSource
   meter.hidden = true;
   const label = document.createElement('span');
   label.className = 'tide-label';
-  label.textContent = 'tensión';
+  label.textContent = t('tensión');
   const bar = document.createElement('div');
   bar.className = 'tide-bar';
   bar.setAttribute('role', 'meter');
-  bar.setAttribute('aria-label', 'Tensión de la marea');
+  bar.setAttribute('aria-label', t('Tensión de la marea'));
   bar.setAttribute('aria-valuemin', '0');
   bar.setAttribute('aria-valuemax', '100');
   const fill = document.createElement('div');

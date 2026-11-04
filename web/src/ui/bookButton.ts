@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 // El cuaderno en la esquina (plan del HUD, D.3): recuerda que el Registro está ahí (R) y, en pantallas táctiles, lo
 // abre. Late cuando se anota algo: la chispa del aviso vuela hasta él.
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -29,7 +30,7 @@ export function createBookButton(touch: boolean, onOpen: () => void): BookButton
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'hud-book';
-  button.setAttribute('aria-label', 'Abrir el Registro');
+  button.setAttribute('aria-label', t('Abrir el Registro'));
   button.append(bookIcon());
   if (!touch) {
     const key = document.createElement('span');

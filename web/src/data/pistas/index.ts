@@ -15,6 +15,8 @@ import observatorio from './observatorio.json';
 import puertas from './puertas.json';
 import taller from './taller.json';
 import umbral from './umbral.json';
+import { getLanguage } from '../../i18n';
+import { localizeClues, type RawClues } from '../../i18n/localizeClues';
 
 /**
  * Nombres de las marcas `TRIG_` que dan hechos. Deben coincidir con `blender/marcas/<mundo>.json`
@@ -44,9 +46,10 @@ let cached: Clues | undefined;
 
 /** Datos de pistas ya validados (se calculan una sola vez). */
 export function loadClues(): Clues {
-  cached ??= parseClues(
-    { hilos, hechos, conclusiones, fuentes: SOURCE_FILES.flat() },
-    { worlds: WORLD_IDS, events: [...chronologyEventIds(), ...TRIGGER_EVENTS] },
-  );
+  const raw: RawClues = { hilos, hechos, conclusiones, fuentes: SOURCE_FILES.flat() };
+  cached ??= parseClues(getLanguage() === 'en' ? localizeClues(raw, 'en') : raw, {
+    worlds: WORLD_IDS,
+    events: [...chronologyEventIds(), ...TRIGGER_EVENTS],
+  });
   return cached;
 }

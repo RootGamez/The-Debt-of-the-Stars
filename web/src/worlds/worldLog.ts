@@ -5,6 +5,7 @@
 import { MAX_WORLD_NAME, isControlChar, type NamedWorld } from '../core/save';
 import type { Clues } from '../registry/clues';
 import { worldTitle } from './worldSelection';
+import { t } from '../i18n';
 
 export { MAX_WORLD_NAME };
 
@@ -21,14 +22,14 @@ export interface LoggedWorld {
 
 /** En el orden del cuaderno. */
 export const WORLD_LOG: readonly LoggedWorld[] = [
-  { id: 'hogar', name: 'Hogar', where: 'mi sistema · sin ciclo' },
-  { id: 'luna', name: 'Luna', where: 'la luna de Hogar' },
-  { id: 'umbral', name: 'Umbral', where: 'reloj de referencia' },
-  { id: 'archivo', name: 'Archivo', where: 'masa densa · su tiempo va lento' },
-  { id: 'taller', name: 'Taller', where: 'órbita rapidísima' },
-  { id: 'cicatriz', name: 'Cicatriz', where: 'junto al Taller · luz roja' },
-  { id: 'observatorio', name: 'Observatorio', where: 'la luz llega tarde' },
-  { id: 'laboratorio', name: 'Laboratorio Oculto', where: 'dentro del Nudo' },
+  { id: 'hogar', name: t('Hogar'), where: t('mi sistema · sin ciclo') },
+  { id: 'luna', name: t('Luna'), where: t('la luna de Hogar') },
+  { id: 'umbral', name: t('Umbral'), where: t('reloj de referencia') },
+  { id: 'archivo', name: t('Archivo'), where: t('masa densa · su tiempo va lento') },
+  { id: 'taller', name: t('Taller'), where: t('órbita rapidísima') },
+  { id: 'cicatriz', name: t('Cicatriz'), where: t('junto al Taller · luz roja') },
+  { id: 'observatorio', name: t('Observatorio'), where: t('la luz llega tarde') },
+  { id: 'laboratorio', name: t('Laboratorio Oculto'), where: t('dentro del Nudo') },
 ];
 
 /** Casa: no se nombran, ya tienen nombre. */

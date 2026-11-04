@@ -1,0 +1,12 @@
+{
+  "taller.montaje": { "titulo": "The Assembly Hall" },
+  "taller.cuna": { "titulo": "The empty Cradle" },
+  "taller.nota_cuna": { "titulo": "The note stuck to the Cradle" },
+  "taller.manual": { "titulo": "The installation manual" },
+  "taller.gemelos": { "titulo": "The twins' diaries" },
+  "taller.cabina": { "titulo": "The Control Booth" },
+  "taller.secuencia": { "titulo": "The factory sequence" },
+  "taller.dormitorios": { "titulo": "The Dormitories" },
+  "taller.pista": { "titulo": "The Test Track clock" },
+  "taller.paginas": { "titulo": "The synchronization pages" }
+}

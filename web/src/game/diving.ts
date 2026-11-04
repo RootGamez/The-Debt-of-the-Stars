@@ -3,6 +3,7 @@
 // `ahogado`. Las cuentas están en physics/water.ts (con tests); esto lo cubre e2e/archivo.spec.ts.
 import type { Vector3 } from 'three';
 import { Breath, headUnder, type WaterBody } from '../physics/water';
+import { t } from '../i18n';
 
 /** Profundidad (m) a la que el azul llega a su máximo. */
 const DARK_DEPTH = 14;
@@ -40,7 +41,7 @@ export function createDiving(): Diving {
   const bar = document.createElement('div');
   bar.className = 'breath-bar';
   bar.setAttribute('role', 'meter');
-  bar.setAttribute('aria-label', 'Aire que queda');
+  bar.setAttribute('aria-label', t('Aire que queda'));
   bar.setAttribute('aria-valuemin', '0');
   bar.setAttribute('aria-valuemax', '100');
   const fill = document.createElement('div');

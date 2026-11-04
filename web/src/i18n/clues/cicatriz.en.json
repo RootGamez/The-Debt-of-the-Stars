@@ -1,0 +1,23 @@
+{
+  "cicatriz.sala_motor": { "titulo": "The Engine Room" },
+  "cicatriz.mordidas": { "titulo": "The Bites" },
+  "cicatriz.grabacion_esceptico": {
+    "titulo": "The skeptic's recording",
+    "superficial": [
+      "A recorder on the desk of the post. When you press it, a voice drags every syllable as if speaking from the bottom of a well."
+    ],
+    "profunda": [
+      "If you understand me, you have turned the wheel far enough. Where I record, one of your days is five.",
+      "I record inside the Knot, on the inner face, with the seed hanging overhead.",
+      "From outside you will not see us where we are: the light that leaves here bends toward the Ember.",
+      "To find us, look at the image and turn your gaze away from the Ember by about eighteen degrees.",
+      "The Council will say there is no risk. There is a Limit, and every trip brings us closer to it."
+    ]
+  },
+  "cicatriz.bitacora": { "titulo": "The machine's logbook" },
+  "cicatriz.lista_mundos": { "titulo": "The list of connected worlds" },
+  "cicatriz.primera_puerta": { "titulo": "The First Gate" },
+  "cicatriz.borde": { "titulo": "The Edge" },
+  "cicatriz.palanca": { "titulo": "The core lever" },
+  "cicatriz.cuna": { "titulo": "The core cradle" }
+}

@@ -5,6 +5,7 @@ import { formatClock } from '../core/loopClock';
 import type { TrackClock } from '../game/teleporter';
 import type { PuzzleBody } from './clockPuzzles';
 import { button, element } from './puzzleKit';
+import { t } from '../i18n';
 
 const WHEELS = [
   { wheel: 'minutes', name: 'Minutos' },
@@ -19,14 +20,16 @@ export function trackClockBody(
   const hint = element(
     'p',
     'puzzle-hint',
-    'El anillo de la Pista no se enciende con su reloj desajustado. Gira las ruedas hasta que marque la hora del Taller.',
+    t(
+      'El anillo de la Pista no se enciende con su reloj desajustado. Gira las ruedas hasta que marque la hora del Taller.',
+    ),
   );
   const list = element('ul', 'puzzle-console');
   const taller = element('span', 'puzzle-console-time');
   const own = element('span', 'puzzle-console-time');
   for (const [name, readout] of [
-    ['El Taller', taller],
-    ['La Pista', own],
+    [t('El Taller'), taller],
+    [t('La Pista'), own],
   ] as const) {
     const line = element('li', 'puzzle-console-line');
     line.append(element('span', 'puzzle-console-name', name), readout);
@@ -39,7 +42,7 @@ export function trackClockBody(
     taller.textContent = formatClock(reading.taller);
     own.textContent = formatClock(reading.track);
     if (reading.matched) {
-      status.textContent = 'Los dos relojes marcan lo mismo.';
+      status.textContent = t('Los dos relojes marcan lo mismo.');
       solve();
     } else status.textContent = '';
   }

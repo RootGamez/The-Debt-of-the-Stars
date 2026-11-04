@@ -1,0 +1,9 @@
+{
+  "lab.pizarra": { "titulo": "The blackboard" },
+  "lab.notas_investigadora": { "titulo": "The researcher's notes" },
+  "lab.notas_esceptico": { "titulo": "The skeptic's notes" },
+  "lab.orden_silencio": { "titulo": "The order of silence" },
+  "lab.dormitorio": { "titulo": "The shared dormitory" },
+  "lab.contrapeso": { "titulo": "The Counterweight" },
+  "lab.camara": { "titulo": "The Chamber" }
+}

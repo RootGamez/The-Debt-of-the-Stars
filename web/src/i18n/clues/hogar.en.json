@@ -1,0 +1,223 @@
+{
+  "instituto.ficha": {
+    "titulo": "Irrigation shift tablet",
+    "superficial": [
+      "A fired-clay tablet, one of the first the Institute learned to read. The Teacher always keeps it at hand for new students.",
+      "\"Irrigation shifts of the waxing quarter: the Aren, at dawn. The Tolu, mid-morning. The Imre, at sunset.\"",
+      "Beside every shift, the same small mark, repeated."
+    ],
+    "profunda": [
+      "Now you recognize the small mark: it is the mark of the Gates.",
+      "\"At dawn, the irrigation; and then, the Gate.\" They crossed to go to work, to come back to eat, to visit someone.",
+      "Each irrigation, a trip. Each trip, a little more debt."
+    ]
+  },
+  "instituto.vitrina_bordes": {
+    "titulo": "Fragments with curved edges",
+    "superficial": [
+      "Two carved stones, from two different arrivals. Both have a smooth, curved edge, as if someone had scooped a piece out of a sphere with a spoon.",
+      "The label reads: \"Cut of unknown origin. No known tool leaves it like this.\""
+    ],
+    "profunda": [
+      "They are not broken ruins. They are bites: the space over there, torn out in perfect spheres by the small wormholes that open when the debt leaks.",
+      "Every curved edge is the footprint of a mouth that opened for an instant."
+    ]
+  },
+  "instituto.simbolo_partido": {
+    "titulo": "The split symbol",
+    "superficial": [
+      "A pale slab with the lower half of a ring of lines, like those of a clock, cut off at the top in a curve.",
+      "Nobody at the Institute knows what it means. The Teacher says that what matters is what is missing."
+    ],
+    "profunda": [
+      "The other half is still there, on the wall of a bite at the Scar. They fit line to line.",
+      "This stone did not travel: it was torn from the world where the black hole is born."
+    ]
+  },
+  "instituto.informe_deuda": {
+    "titulo": "Incomplete report on the debt",
+    "superficial": [
+      "Institute report, unfinished: the translation of a technical plaque of the Absent.",
+      "\"Every step leaves a debt that...\" The rest is broken.",
+      "In the margin, in the Director's hand: \"Energy cost. Compensated by the test room generator.\""
+    ],
+    "profunda": [
+      "It was not energy. The debt is one of time: every step drifts the clocks of the two mouths a little further apart.",
+      "The margin still says \"compensated.\" Nobody at home yet knows with what."
+    ]
+  },
+  "instituto.mesa_puerta": {
+    "titulo": "The small Gate's table",
+    "superficial": [
+      "On the workshop table, a brass ring the size of a hand, held in clamps and full of wires. Beside it, a stack of sheets: \"Minor test 3: the ring opened for eleven seconds. No incidents.\"",
+      "On the blackboard, circled three times: \"Great test, in forty days.\""
+    ],
+    "profunda": [
+      "They are rebuilding a Gate from plans that arrived in pieces, and they are missing exactly the piece that keeps it stable.",
+      "Forty days. That is the time you have to get back."
+    ]
+  },
+  "instituto.directora": {
+    "titulo": "The Director",
+    "superficial": [
+      "The Director is waiting for you at the Engine, at the foot of the Great Gate, looking at the Moon above the Institute's hill.",
+      "\"Yesterday the largest fragment of all appeared up there, stuck in the ground. I want you to see it before anyone else: it will be your first official flight.\"",
+      "\"The Albatross II is ready in the hangar. Go, look, and come back and tell me.\""
+    ],
+    "profunda": [
+      "She speaks of the great test the way others speak of a child. She has been preparing it for years: it is the one that will greet those who left all this behind.",
+      "If anyone has to hear the truth, it is her. And she is the one who will least want to hear it."
+    ]
+  },
+  "instituto.maestra": {
+    "titulo": "The Teacher",
+    "superficial": [
+      "\"Have you read the irrigation tablet yet? Always start there: the everyday is what is best understood.\"",
+      "\"We have read their language for years and still do not know how they laughed. That is not on any stone.\"",
+      "\"Go and see the Director before she runs out of patience. And come back and tell me everything, all right?\""
+    ]
+  },
+  "instituto.tecnico": {
+    "titulo": "The workshop technician",
+    "superficial": [
+      "\"The small ring now holds open eleven seconds in a row. Eleven!\"",
+      "\"The Director says that in the great test we will greet whoever made all this. I only ask that the mount does not melt.\""
+    ]
+  },
+  "instituto.mecanica": {
+    "titulo": "The hangar mechanic",
+    "superficial": [
+      "\"The Albatross II is ready: tanks full and the reliquary empty, waiting for your fragment.\"",
+      "\"Climb in with F. In there the dashboard tells you everything: aim at the Moon with T and, if everything spins, Z steadies it.\"",
+      "\"And do not scratch her. She is the only one we have.\""
+    ]
+  },
+  "aldea.pozo": {
+    "titulo": "The neighbor by the well",
+    "superficial": [
+      "\"They say another of those stones fell on the Moon yesterday. Bigger than a house.\"",
+      "\"My grandfather found one in the vegetable garden, one of the first. He used it to prop the door. Now it is in a display case.\""
+    ]
+  },
+  "aldea.tejedora": {
+    "titulo": "The weaver",
+    "superficial": [
+      "\"I mended the elbow of your suit last night. Make sure it does not tear again on the Moon.\"",
+      "\"When you come back, tell me what color the light is up there. I want to dye something that color.\""
+    ]
+  },
+  "aldea.cria": {
+    "titulo": "A little one",
+    "superficial": [
+      "\"Will you bring me a stone from the Moon? A small one! I promise not to show it to anyone.\""
+    ]
+  },
+  "aldea.pescador": {
+    "titulo": "The fisherman",
+    "superficial": [
+      "\"The sea is stiller than ever. My grandmother used to say that when the sea goes quiet, something big is listening.\""
+    ]
+  },
+  "aldea.arbol": {
+    "titulo": "The neighbor by the tree",
+    "superficial": [
+      "\"Today everyone has come out to the square to see you take off. Act natural, or they will get nervous.\""
+    ]
+  },
+  "hogar.diario_maestra": {
+    "titulo": "The Teacher's diary",
+    "superficial": [
+      "A notebook with worn covers, open beside the spyglass. The handwriting is small and cramped.",
+      "\"Today they went up to look at the Moon again, not moving, filaments glowing, thinking nobody notices.\"",
+      "\"Of all the new students, they were the one who asked me who does the watering on the other side. I still do not know what to answer.\"",
+      "\"When they come back, I will tell them: that I knew this day would come.\""
+    ]
+  },
+  "hogar.plano_albatros": {
+    "titulo": "The plan of the first Albatross",
+    "superficial": [
+      "A blue plan pinned to the wall: a round ship, smaller than the one in the hangar. At the top it says \"Albatross\".",
+      "Underneath, in pencil: \"Lost in the altitude test, to the west, beyond the sea. Nobody was hurt. Nobody went to look for it.\"",
+      "And in another hand, newer: \"That is why the current one is called the second.\""
+    ]
+  },
+  "hogar.guarida": {
+    "titulo": "The den",
+    "superficial": [
+      "Under the tarp, charcoal drawings: the Moon, some stars, a ship with a lantern. There are more drawings than room.",
+      "On a board, in a child's hand: \"Club of those who look up. Only rule: do not tell the grown-ups.\"",
+      "One of the names on the list is circled twice. It is yours."
+    ]
+  },
+  "hogar.lectora": {
+    "titulo": "The Reader's fountain",
+    "superficial": [
+      "A stone Ool with an open book; water falls from its pages. The plaque is worn from being touched so often.",
+      "\"To Ilen, who read the first word of those who are not here. The word was: water.\"",
+      "The city children say that if you ask it something in a low voice, its stone filaments light up."
+    ]
+  },
+  "hogar.turnos_riego": {
+    "titulo": "The shift board",
+    "superficial": [
+      "The irrigation shifts of this moon, hand-painted: \"The village, at dawn. The city, mid-morning. The Institute, at sunset.\"",
+      "Below, someone has added: \"As on the clay tablet. If it went well for them, it will go well for us.\"",
+      "Nobody has written what they did after watering."
+    ]
+  },
+  "hogar.campana": {
+    "titulo": "The sunken bell",
+    "superficial": [
+      "A greenish brass bell, half buried in the sand of the seabed. It must have been the old lighthouse's.",
+      "Around the rim, some letters: \"Ring when the sea goes quiet.\"",
+      "Now the sea is quiet. And the bell, down here, cannot ring."
+    ]
+  },
+  "hogar.chatarra": {
+    "titulo": "The mount's label",
+    "superficial": [
+      "A label tied with wire to a twisted mount, as if melted and cooled again.",
+      "\"Minor test 1: the ring opened for two seconds and the mount melted. Do not throw away. We learn from what breaks, too. —T.\"",
+      "Around it, half-built rings, generator drums and gears. All with their label, all in the same hand."
+    ]
+  },
+  "hogar.bitacora_albatros": {
+    "titulo": "The Albatross's logbook",
+    "superficial": [
+      "The pages are swollen with damp, but the ink holds.",
+      "\"Altitude test. On the way up, the mast lantern went out and the wind carried me west. I came down at night on an island where the plants give light.\"",
+      "\"I am staying here until they come. There is water, and the night is lovely.\"",
+      "The last page: \"They have come. I am leaving. I leave the notebook in case someone else gets lost: let them know that this is home too.\""
+    ]
+  },
+  "hogar.placa_primera_piedra": {
+    "titulo": "The first stone plaque",
+    "superficial": [
+      "A ring of mossy stones around a shallow pit with a smooth, curved edge.",
+      "\"Here appeared the first stone of those who are not here, two hundred winters ago. Nobody saw it fall: one morning, it was there.\"",
+      "\"They took it to the Institute. We kept the pit.\""
+    ]
+  },
+  "hogar.cartas_cielo": {
+    "titulo": "The sky charts",
+    "superficial": [
+      "Slate sheets with chalk dots: stars, noted night after night for years.",
+      "On the last one: \"Night of the Moon's great stone. The sky, still; not a single star moved. I note it anyway: let it be known that I waited.\""
+    ]
+  },
+  "hogar.astronoma": {
+    "titulo": "The astronomer",
+    "superficial": [
+      "\"A visitor. It has been years. Did the Director send you? No, I see she did not: curiosity brought you.\"",
+      "\"Forty years watching the sky and I have never seen one of those stones fall. They do not fall. They appear, like someone leaving something at another's door.\"",
+      "\"Come back and tell me, if you ever find out.\""
+    ]
+  },
+  "hogar.banco_prado": {
+    "titulo": "The meadow bench",
+    "superficial": [
+      "A lone bench in the middle of the lights. On the backrest there is a sentence carved with a knife point.",
+      "\"You cannot see the Moon from here. That is why we came.\""
+    ]
+  }
+}

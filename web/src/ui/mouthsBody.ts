@@ -12,6 +12,7 @@ import {
 } from '../game/epilogue';
 import type { PuzzleBody } from './clockPuzzles';
 import { button, element } from './puzzleKit';
+import { t } from '../i18n';
 
 export interface MouthsReader {
   /** Lo que se ha entendido ahora (K7, K8). */
@@ -21,7 +22,7 @@ export interface MouthsReader {
   cross(id: MouthId): void;
 }
 
-const HINT = 'Cuatro bocas de casa. Al otro lado de cada una, Hogar.';
+const HINT = t('Cuatro bocas de casa. Al otro lado de cada una, Hogar.');
 
 export function mouthsBody(
   reader: MouthsReader,
@@ -38,13 +39,17 @@ export function mouthsBody(
 
   function ask(id: MouthId, view: string, pick: HTMLButtonElement): void {
     status.textContent = '';
-    const go = button('Cruzar', 'puzzle-choice');
-    const wait = button('Todavía no', 'puzzle-choice');
-    const question = element('p', 'puzzle-hint', `¿Cruzar hacia «${view}»? No hay vuelta atrás.`);
+    const go = button(t('Cruzar'), 'puzzle-choice');
+    const wait = button(t('Todavía no'), 'puzzle-choice');
+    const question = element(
+      'p',
+      'puzzle-hint',
+      t('¿Cruzar hacia «{view}»? No hay vuelta atrás.', { view }),
+    );
     question.id = 'puzzle-mouth-question';
     const lines = [question];
     if (reader.carryingPlans()) {
-      lines.push(element('p', 'puzzle-hint', 'Llevas los planos del Contrapeso.'));
+      lines.push(element('p', 'puzzle-hint', t('Llevas los planos del Contrapeso.')));
     }
     go.addEventListener('click', () => {
       const mouth = mouthById(id);
@@ -65,13 +70,13 @@ export function mouthsBody(
     const line = element('li', 'puzzle-mouth');
     line.append(element('p', 'puzzle-mouth-view', row.view));
     if (!row.open) {
-      line.append(element('p', 'puzzle-mouth-note', 'Cerrada.'));
+      line.append(element('p', 'puzzle-mouth-note', t('Cerrada.')));
       list.append(line);
       continue;
     }
     if (row.seen) line.append(element('p', 'puzzle-mouth-note', row.seen));
     if (row.offset) line.append(element('p', 'puzzle-mouth-note', row.offset));
-    const pick = button('Elegir', 'puzzle-choice', `Elegir: ${row.view}`);
+    const pick = button(t('Elegir'), 'puzzle-choice', `${t('Elegir')}: ${row.view}`);
     pick.addEventListener('click', () => {
       ask(row.id, row.view, pick);
     });

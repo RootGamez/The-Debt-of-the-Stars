@@ -3,6 +3,7 @@
 // de la boca (K7: sus relojes no marcan lo mismo); la prueba mayor es el día 40 (K8). Solo una deja antes. La boca
 // y llevar o no los planos deciden el final (CONTEXTO_HISTORIA.md, Finales). Los números son 🟡.
 import type { SourceActions } from '../reading/readingUi';
+import { plural, t } from '../i18n';
 
 /** El día de la prueba mayor, contado desde que despegaste. */
 export const GREAT_TEST_DAY = 40;
@@ -31,10 +32,10 @@ export interface HomeMouth {
  * tarde. Solo el Instituto más joven, corregido por su desfase, deja antes.
  */
 export const HOME_MOUTHS: readonly HomeMouth[] = [
-  { id: 'fragmentos', view: 'La Sala de Fragmentos, llena', seen: 2, offset: 44 },
-  { id: 'instituto', view: 'El Instituto, más joven', seen: -400, offset: 280 },
-  { id: 'anochecer', view: 'Hogar al anochecer', seen: 38, offset: 12 },
-  { id: 'pronto', view: 'Tapada con una losa. Una marca: «pronto».' },
+  { id: 'fragmentos', view: t('La Sala de Fragmentos, llena'), seen: 2, offset: 44 },
+  { id: 'instituto', view: t('El Instituto, más joven'), seen: -400, offset: 280 },
+  { id: 'anochecer', view: t('Hogar al anochecer'), seen: 38, offset: 12 },
+  { id: 'pronto', view: t('Tapada con una losa. Una marca: «pronto».') },
 ];
 
 /** A: llega antes y sin los planos; B: llega antes con los planos (la profecía autocumplida); tarde: después. */
@@ -65,10 +66,12 @@ export function endingFor(mouth: HomeMouth, carryingPlans: boolean): Ending | un
 
 /** Un día de Hogar contado desde que despegaste, en palabras. */
 export function formatHomeDay(day: number): string {
-  if (day === 0) return 'el día que despegaste';
+  if (day === 0) return t('el día que despegaste');
   const count = Math.abs(day);
-  const days = `${String(count)} ${count === 1 ? 'día' : 'días'}`;
-  return day < 0 ? `${days} antes de despegar` : `el día ${String(day)} desde que despegaste`;
+  const days = `${String(count)} ${plural(count, 'día', 'días')}`;
+  return day < 0
+    ? t('{days} antes de despegar', { days })
+    : t('el día {day} desde que despegaste', { day });
 }
 
 export interface MouthKnowledge {
@@ -97,9 +100,15 @@ export function mouthRows(knowledge: MouthKnowledge): MouthRow[] {
       id: mouth.id,
       view: mouth.view,
       open: true,
-      seen: `Se ve ${formatHomeDay(mouth.seen)}.`,
+      seen: t('Se ve {day}.', { day: formatHomeDay(mouth.seen) }),
       offset: knowledge.offsets
-        ? `Su reloj va ${String(offset)} ${offset === 1 ? 'día' : 'días'} por delante: se llega ${String(offset)} ${offset === 1 ? 'día' : 'días'} después de lo que se ve.`
+        ? t(
+            'Su reloj va {offset} {days} por delante: se llega {offset} {days} después de lo que se ve.',
+            {
+              offset,
+              days: plural(offset, 'día', 'días'),
+            },
+          )
         : undefined,
     };
   });
@@ -107,7 +116,9 @@ export function mouthRows(knowledge: MouthKnowledge): MouthRow[] {
 
 /** Solo con K8: el día de la prueba mayor. */
 export function testDayLine(knowledge: MouthKnowledge): string | undefined {
-  return knowledge.testDay ? `La prueba mayor es ${formatHomeDay(GREAT_TEST_DAY)}.` : undefined;
+  return knowledge.testDay
+    ? t('La prueba mayor es {day}.', { day: formatHomeDay(GREAT_TEST_DAY) })
+    : undefined;
 }
 
 export interface EpiloguePlay {

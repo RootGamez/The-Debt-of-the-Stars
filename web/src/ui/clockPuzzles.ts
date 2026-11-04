@@ -11,6 +11,7 @@ import {
   twins,
 } from '../reading/puzzles';
 import { choiceQuestion, element, row } from './puzzleKit';
+import { getLanguage, t } from '../i18n';
 
 export interface PuzzleBody {
   body: HTMLElement;
@@ -25,11 +26,11 @@ export function twinsBody(solved: boolean, status: HTMLElement, onSolved: () => 
   const book = twins(TWINS);
   const table = element('table', 'puzzle-notebook');
   const lastTaller = element('td', 'puzzle-cell', solved ? String(book.last.answer) : '¿?');
-  const technician = row(['Técnico (Taller)', String(book.stormTaller)]);
+  const technician = row([t('Técnico (Taller)'), String(book.stormTaller)]);
   technician.append(lastTaller);
   table.append(
-    row(['Diario', 'La tormenta', 'Última página'], true),
-    row(['Hermana (Umbral)', String(TWINS.stormDay), String(TWINS.lastDay)]),
+    row([t('Diario'), t('La tormenta'), t('Última página')], true),
+    row([t('Hermana (Umbral)'), String(TWINS.stormDay), String(TWINS.lastDay)]),
     technician,
   );
   const body = element('div', 'puzzle-body');
@@ -37,26 +38,33 @@ export function twinsBody(solved: boolean, status: HTMLElement, onSolved: () => 
   if (solved) return { body };
   const second = choiceQuestion(
     {
-      prompt: `Tres meses: la hermana va por el día ${String(TWINS.lastDay)}. ¿Por qué día va el técnico?`,
+      prompt: t('Tres meses: la hermana va por el día {day}. ¿Por qué día va el técnico?', {
+        day: TWINS.lastDay,
+      }),
       options: book.last.options,
       answer: book.last.answer,
-      label: (day) => `Día ${String(day)}`,
-      wrong: 'No cuadra: el atraso no se queda fijo, crece con los días.',
+      label: (day) => t('Día {day}', { day }),
+      wrong: t('No cuadra: el atraso no se queda fijo, crece con los días.'),
     },
     status,
     () => {
       lastTaller.textContent = String(book.last.answer);
-      status.textContent = `El atraso crece con el tiempo: cada ${String(TWINS.stormDay)} días, ${String(book.lag.answer)} más.`;
+      status.textContent = t('El atraso crece con el tiempo: cada {storm} días, {lag} más.', {
+        storm: TWINS.stormDay,
+        lag: book.lag.answer,
+      });
       onSolved();
     },
   );
   const first = choiceQuestion(
     {
-      prompt: `¿Cuántos días se queda atrás el técnico por cada ${String(TWINS.stormDay)} de su hermana?`,
+      prompt: t('¿Cuántos días se queda atrás el técnico por cada {storm} de su hermana?', {
+        storm: TWINS.stormDay,
+      }),
       options: book.lag.options,
       answer: book.lag.answer,
-      label: (days) => `${String(days)} días`,
-      wrong: 'Mira la tormenta: el mismo día, contado en los dos diarios.',
+      label: (days) => t('{days} días', { days }),
+      wrong: t('Mira la tormenta: el mismo día, contado en los dos diarios.'),
     },
     status,
     () => {
@@ -94,7 +102,7 @@ export function consoleBody(
   const timer = window.setInterval(paint, CONSOLE_REFRESH_MS);
   const body = element('div', 'puzzle-body');
   body.append(
-    element('p', 'puzzle-hint', 'Todos los relojes se igualaron a la vez. Míralos correr.'),
+    element('p', 'puzzle-hint', t('Todos los relojes se igualaron a la vez. Míralos correr.')),
     list,
   );
   const slowest = slowestClock(CONSOLE_CLOCKS);
@@ -102,16 +110,17 @@ export function consoleBody(
     body.append(
       choiceQuestion(
         {
-          prompt: '¿Qué destino se queda atrás más deprisa?',
+          prompt: t('¿Qué destino se queda atrás más deprisa?'),
           options: CONSOLE_CLOCKS.map((c) => c.id),
           answer: slowest,
           label: (id) => CONSOLE_CLOCKS.find((c) => c.id === id)?.label ?? id,
-          wrong: 'Ese corre más: espera un poco y compáralos otra vez.',
+          wrong: t('Ese corre más: espera un poco y compáralos otra vez.'),
         },
         status,
         () => {
-          status.textContent =
-            'La ruta sin nombre casi no avanza: allí el tiempo apenas corre. Lo que se ve de ella hay que corregirlo.';
+          status.textContent = t(
+            'La ruta sin nombre casi no avanza: allí el tiempo apenas corre. Lo que se ve de ella hay que corregirlo.',
+          );
           onSolved();
         },
       ),
@@ -128,7 +137,9 @@ export function consoleBody(
 export function routeBody(solved: boolean, status: HTMLElement, onSolved: () => void): PuzzleBody {
   const route = routeDrift(ROUTE.legs, ROUTE.machineRate);
   const table = element('table', 'puzzle-notebook');
-  table.append(row(['Tramo', 'Minutos', 'El Contrapeso marca', 'La máquina marca'], true));
+  table.append(
+    row([t('Tramo'), t('Minutos'), t('El Contrapeso marca'), t('La máquina marca')], true),
+  );
   ROUTE.legs.forEach((leg, i) => {
     const counted = route.legs[i];
     table.append(
@@ -145,26 +156,33 @@ export function routeBody(solved: boolean, status: HTMLElement, onSolved: () => 
     element(
       'p',
       'puzzle-hint',
-      `Un viaje de ejemplo hasta la máquina, que marcha a ${ROUTE.machineRate.toLocaleString('es')}.`,
+      t('Un viaje de ejemplo hasta la máquina, que marcha a {rate}.', {
+        rate: ROUTE.machineRate.toLocaleString(getLanguage() === 'en' ? 'en-US' : 'es'),
+      }),
     ),
     table,
   );
   if (solved) {
-    body.append(element('p', 'puzzle-hint', `Al llegar: ${formatDrift(route.drift)}.`));
+    body.append(
+      element('p', 'puzzle-hint', t('Al llegar: {drift}.', { drift: formatDrift(route.drift) })),
+    );
     return { body };
   }
   body.append(
     choiceQuestion(
       {
-        prompt: 'Al llegar, ¿cómo va el Contrapeso respecto a la máquina?',
+        prompt: t('Al llegar, ¿cómo va el Contrapeso respecto a la máquina?'),
         options: route.step.options,
         answer: route.drift,
         label: formatDrift,
-        wrong: 'Cuenta todos los tramos: en unos se atrasa y en otros se adelanta.',
+        wrong: t('Cuenta todos los tramos: en unos se atrasa y en otros se adelanta.'),
       },
       status,
       () => {
-        status.textContent = `Cada tramo suma lo que se adelanta o se atrasa: al llegar, ${formatDrift(route.drift)}. Las ruedas lo corrigen.`;
+        status.textContent = t(
+          'Cada tramo suma lo que se adelanta o se atrasa: al llegar, {drift}. Las ruedas lo corrigen.',
+          { drift: formatDrift(route.drift) },
+        );
         onSolved();
       },
     ),

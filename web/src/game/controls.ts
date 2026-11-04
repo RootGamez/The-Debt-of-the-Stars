@@ -2,7 +2,12 @@
 import { InputController } from '../core/inputController';
 import type { LoopSession } from '../core/loopSession';
 import type { TextSettings } from '../typewriter/textPreferences';
-import { createPauseOverlay, isTouchDevice, type PauseOverlay } from '../ui/pauseOverlay';
+import {
+  createPauseOverlay,
+  isTouchDevice,
+  type DisplaySettings,
+  type PauseOverlay,
+} from '../ui/pauseOverlay';
 import { createTouchControls, type TouchControls } from '../ui/touchControls';
 
 export interface TouchShipControls {
@@ -15,7 +20,7 @@ export function createControls(
   title: string,
   session: LoopSession,
   openRegistry: () => void,
-  text: { settings: TextSettings; onLetterSample: () => void },
+  text: { settings: TextSettings; display: DisplaySettings; onLetterSample: () => void },
   shipControls?: TouchShipControls,
 ): { input: InputController; overlay: PauseOverlay; touch?: TouchControls } {
   const input = new InputController(canvas);
@@ -33,6 +38,7 @@ export function createControls(
       onResetProgress: () => session.resetProgress(),
       onOpenRegistry: openRegistry,
       settings: text.settings,
+      display: text.display,
       onLetterSample: text.onLetterSample,
     },
   );

@@ -1,0 +1,9 @@
+{
+  "archivo.informe_oficial": { "titulo": "The official report" },
+  "archivo.indice": { "titulo": "The Index" },
+  "archivo.sala_relojes": { "titulo": "The Clock Room" },
+  "archivo.cartas": { "titulo": "The letters that answer early" },
+  "archivo.escritorio": { "titulo": "The archivist's desk" },
+  "archivo.ranura_luz": { "titulo": "The light-slot tablet" },
+  "archivo.fondo_canon": { "titulo": "The Canyon Floor" }
+}

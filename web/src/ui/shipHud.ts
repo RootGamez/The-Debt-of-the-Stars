@@ -1,7 +1,8 @@
 // Interfaz de vuelo, con el mismo aire discreto que el reloj doble: velocidad y altura abajo a la
 // izquierda, el objetivo arriba con una marca sobre el mundo (o en el borde, apuntando hacia él), una
-// sola sugerencia a la vez y, a pie, el aviso "F · subir a la nave". Todo entra como texto.
+// sola sugerencia a la vez y, a pie, el aviso t("F · subir a la nave"). Todo entra como texto.
 import { formatDistance, formatSpeed, type MarkerPlacement } from '../ship/hudMath';
+import { t } from '../i18n';
 
 export interface ShipHudTarget {
   name: string;
@@ -61,7 +62,7 @@ export function createShipHud(): ShipHud {
   hint.setAttribute('role', 'status');
 
   const board = element('p', 'board-prompt', document.body);
-  board.textContent = 'F · subir a la nave';
+  board.textContent = t('F · subir a la nave');
   board.hidden = true;
 
   function placeMarker(placement: MarkerPlacement | undefined, name: string): void {
@@ -80,16 +81,16 @@ export function createShipHud(): ShipHud {
       root.hidden = !state.piloting;
       if (!state.piloting) return;
 
-      setText(speed, `Velocidad ${formatSpeed(state.speed)}`);
+      setText(speed, `${t('Velocidad')} ${formatSpeed(state.speed)}`);
       setText(
         altitude,
         state.landed
-          ? 'Posada'
+          ? t('Posada')
           : state.altitude === undefined
-            ? 'Espacio abierto'
-            : `Altura ${formatDistance(Math.max(0, state.altitude))}`,
+            ? t('Espacio abierto')
+            : `${t('Altura')} ${formatDistance(Math.max(0, state.altitude))}`,
       );
-      setText(assist, state.stabilize ? 'Estabilizador · Z' : 'Modo libre · Z');
+      setText(assist, state.stabilize ? t('Estabilizador · Z') : t('Modo libre · Z'));
       assist.classList.toggle('ship-assist-off', !state.stabilize);
 
       target.hidden = state.target === undefined;

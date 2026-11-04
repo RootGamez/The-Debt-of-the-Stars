@@ -2,6 +2,7 @@
 // diálogo propio: el juego ya no sigue detrás (quien la abre suelta el ratón e inhabilita la pausa).
 import type { EndingCard } from '../data/endings';
 import { button, element } from './puzzleKit';
+import { t } from '../i18n';
 
 export interface EndingChoice {
   label: string;
@@ -40,7 +41,7 @@ export function showEndingCard(
   const title = element('h2', 'ending-title', card.title);
   title.id = 'ending-title';
   sheet.append(title);
-  if (card.draft) sheet.append(element('p', 'reader-tag', 'Texto provisional'));
+  if (card.draft) sheet.append(element('p', 'reader-tag', t('Texto provisional')));
   const body = element('div', 'ending-body');
   body.id = 'ending-body';
   for (const paragraph of card.text) body.append(element('p', 'ending-text', paragraph));

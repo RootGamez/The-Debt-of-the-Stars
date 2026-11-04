@@ -4,6 +4,7 @@
 // (los navegadores no dejan sonar antes). Si no hay Web Audio, el motor no hace nada.
 import type { NoiseBed, Soundscape, Tone } from '../data/soundscapes';
 import type { Mix } from './mix';
+import { t } from '../i18n';
 
 /** Constantes de tiempo (s) de los cambios suaves. */
 const LEVEL_SMOOTH = 0.7;
@@ -288,7 +289,7 @@ export function createAudioEngine(createContext: () => AudioContext = defaultCon
         if (!heldBack) void context?.resume().catch(() => undefined);
       } catch (error) {
         failed = true;
-        console.warn('Sin sonido: no se pudo crear el audio.', error);
+        console.warn(t('Sin sonido: no se pudo crear el audio.'), error);
       }
     },
     update(mix) {

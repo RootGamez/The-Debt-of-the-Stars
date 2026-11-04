@@ -88,6 +88,8 @@ import { createPlaceCard } from './ui/placeCard';
 import { createWorldDiscovery } from './ui/worldDiscovery';
 import type { Gate } from './worlds/gates';
 import { createTextSettings } from './typewriter/textPreferences';
+import { createAccessibilitySettings } from './accessibility/preferences';
+import { getLanguage, saveLanguage, t, type Language } from './i18n';
 import { voicePitch } from './typewriter/speech';
 import {
   displayName,
@@ -118,7 +120,7 @@ function requireElement<T extends HTMLElement>(id: string, type: new () => T): T
 function watchGraphicsContext(canvas: HTMLCanvasElement, status: HTMLElement): void {
   canvas.addEventListener('webglcontextlost', (event) => {
     event.preventDefault(); // permite que el navegador restaure el contexto
-    status.textContent = 'Se perdió el contexto gráfico; intentando recuperarlo…';
+    status.textContent = t('Se perdió el contexto gráfico; intentando recuperarlo…');
   });
   canvas.addEventListener('webglcontextrestored', () => {
     status.textContent = '';
@@ -145,9 +147,27 @@ function runtimeOf(runtimes: ReadonlyMap<string, WorldRuntime>, id: string): Wor
   return runtime;
 }
 
+/** El idioma y la accesibilidad se fijan antes de dibujar nada: todo texto nace ya traducido y a su tamaño. */
+function setUpDisplay() {
+  const store = browserStore();
+  const language = getLanguage(); // ya decidido al cargar src/i18n
+  document.documentElement.lang = language;
+  const accessibility = createAccessibilitySettings(store, document.documentElement.style);
+  const chooseLanguage = (next: Language): void => {
+    if (next === language) return;
+    saveLanguage(store, next);
+    window.location.reload(); // el progreso ya está guardado; el texto se dibuja de nuevo en el idioma elegido
+  };
+  return { language, accessibility, chooseLanguage };
+}
+
 async function start(): Promise<void> {
+  const display = setUpDisplay();
+  document.getElementById('game')?.setAttribute('aria-label', t('Vista del juego'));
+  document.title = t('Bucle de tiempo');
   const canvas = requireElement('game', HTMLCanvasElement);
   const status = requireElement('status', HTMLParagraphElement);
+  status.textContent = t('Cargando…');
   // Si se viene del gusano, la pantalla sigue en blanco hasta que esté el mundo.
   const arrivedBy = takeCrossing(sessionStore());
   const arrival = arrivedBy ? createArrivalLayer(arrivedBy) : undefined;
@@ -413,7 +433,7 @@ async function start(): Promise<void> {
         worldNames = withDiscovery(worldNames, id, name, session.director.loopsCompleted);
         session.saveWorld(id, name);
         overlay.recapturePointer();
-        game.ui?.notify(`Pegado en la bitácora: ${name}`);
+        game.ui?.notify(t('Pegado en la bitácora: {name}', { name }));
         place.show(name, name === officialName(id) ? worldWhere(id) : officialName(id));
       });
       return;
@@ -430,6 +450,7 @@ async function start(): Promise<void> {
     },
     {
       settings: textSettings,
+      display,
       onLetterSample: () => {
         soundtrack.blip(voicePitch(undefined));
       },
@@ -982,5 +1003,5 @@ start().catch((error: unknown) => {
   endArrivingPaint();
   document.querySelector('.llegada')?.remove();
   const status = document.getElementById('status');
-  if (status) status.textContent = 'No se pudo cargar el mundo. Revisa la consola.';
+  if (status) status.textContent = t('No se pudo cargar el mundo. Revisa la consola.');
 });

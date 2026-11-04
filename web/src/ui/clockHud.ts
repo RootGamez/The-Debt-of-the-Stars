@@ -5,6 +5,7 @@
 // Los minutos se leen a los lados, en letra a mano ("tú 07:12", "Umbral 07:40").
 import { ringDashOffset, ringPoint } from '../core/clockRings';
 import { formatClock } from '../core/loopClock';
+import { t } from '../i18n';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const VIEW = 100;
@@ -57,7 +58,7 @@ export function createClockHud(duration: number, marks: readonly number[] = []):
   const hud = document.createElement('div');
   hud.className = 'clock-hud';
   hud.setAttribute('role', 'timer');
-  hud.setAttribute('aria-label', 'Reloj doble: tu tiempo y el de Umbral');
+  hud.setAttribute('aria-label', t('Reloj doble: tu tiempo y el de Umbral'));
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('viewBox', `0 0 ${VIEW} ${VIEW}`);
   svg.setAttribute('class', 'clock-rings');
@@ -93,7 +94,7 @@ export function createClockHud(duration: number, marks: readonly number[] = []):
     update(playerSeconds, umbralSeconds, visible, counterweightSeconds) {
       if (visible !== lastVisible) hud.hidden = !(lastVisible = visible);
       if (!visible) return;
-      const a = `tú ${formatClock(playerSeconds)}`;
+      const a = t('tú {time}', { time: formatClock(playerSeconds) });
       const b = `Umbral ${formatClock(umbralSeconds)}`;
       const c =
         counterweightSeconds === undefined

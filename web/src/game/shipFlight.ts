@@ -26,6 +26,7 @@ import type { SystemSpec } from '../system/systemData';
 import { createShipHud, type ShipHudTarget } from '../ui/shipHud';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 import { worldTitle } from '../worlds/worldSelection';
+import { t } from '../i18n';
 
 export type ShipAction = 'board' | 'target' | 'stabilize';
 
@@ -117,16 +118,16 @@ const CABIN_LIGHT_INTENSITY = 2.5;
 const CABIN_LIGHT_RANGE = 3.5;
 
 const KEY_HINTS = {
-  landed: 'Espacio despegar · F bajar · T objetivo',
-  free: 'Modo libre: sin ayudas (Z las devuelve)',
-  controls: 'W avanzar · ratón girar · Espacio subir · C bajar · X frenar',
-  land: 'Mantén C para posarte',
+  landed: t('Espacio despegar · F bajar · T objetivo'),
+  free: t('Modo libre: sin ayudas (Z las devuelve)'),
+  controls: t('W avanzar · ratón girar · Espacio subir · C bajar · X frenar'),
+  land: t('Mantén C para posarte'),
 };
 const TOUCH_HINTS = {
-  landed: '↑ despegar · Nave para bajar · Objetivo',
-  free: 'Modo libre: sin ayudas (Estab. las devuelve)',
-  controls: 'Palanca avanzar · arrastra para girar · ↑ subir · ↓ bajar',
-  land: 'Mantén ↓ para posarte',
+  landed: t('↑ despegar · Nave para bajar · Objetivo'),
+  free: t('Modo libre: sin ayudas (Estab. las devuelve)'),
+  controls: t('Palanca avanzar · arrastra para girar · ↑ subir · ↓ bajar'),
+  land: t('Mantén ↓ para posarte'),
 };
 
 function runtimeOf(runtimes: ReadonlyMap<string, WorldRuntime>, id: string): WorldRuntime {

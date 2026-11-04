@@ -3,6 +3,7 @@
 import raw from './finales.json';
 import type { Ending } from '../game/epilogue';
 import { WorldDataError } from '../worlds/markers';
+import { t } from '../i18n';
 
 export interface EndingCard {
   title: string;
@@ -23,7 +24,8 @@ function readCard(ending: Ending, value: unknown): EndingCard {
   if (typeof titulo !== 'string' || titulo === '' || !isTextList(texto)) {
     throw new WorldDataError(`finales.json: el final "${ending}" necesita "titulo" y "texto"`);
   }
-  return { title: titulo, text: texto, draft: borrador === true };
+  // Los textos de los finales son de Anthony y aún están pendientes: el título y el marcador se traducen.
+  return { title: t(titulo), text: texto.map((p) => t(p)), draft: borrador === true };
 }
 
 /** Una tarjeta por final; lanza si falta alguno o está mal formado. */

@@ -2,6 +2,8 @@
 // vuelve a mostrar la pausa. En pantallas táctiles basta con tocar para empezar.
 // Es una página del cuaderno (plan del HUD, D.6), con un botón Configuración que solo lleva lo nuevo del HUD: la
 // velocidad del texto y el sonido de letras (se guardan en el navegador, typewriter/textPreferences.ts).
+import { TEXT_SCALES, UI_SCALES, type AccessibilitySettings } from '../accessibility/preferences';
+import { LANGUAGE_NAMES, LANGUAGES, t, type Language } from '../i18n';
 import { TEXT_SPEED_LABELS, TEXT_SPEEDS, type TextSettings } from '../typewriter/textPreferences';
 
 export interface PauseOverlay {
@@ -25,14 +27,27 @@ export function isTouchDevice(): boolean {
   return window.matchMedia('(pointer: coarse)').matches;
 }
 
-const DESKTOP_HELP =
-  'WASD moverse · ratón mirar · Espacio saltar · Shift correr · F nave · G mira · M sonido · Esc pausa · F3 datos';
+const desktopHelp = (): string =>
+  t(
+    'WASD moverse · ratón mirar · Espacio saltar · Shift correr · F nave · G mira · M sonido · Esc pausa · F3 datos',
+  );
+
+/** Lo que se lee en el botón de cada escala: 1,25 → «125 %». */
+const percent = (scale: number): string => `${Math.round(scale * 100)} %`;
 
 function line(tag: 'strong' | 'span' | 'small', text: string, className?: string): HTMLElement {
   const element = document.createElement(tag);
   element.textContent = text;
   if (className) element.className = className;
   return element;
+}
+
+/** El idioma y la accesibilidad (tamaño de la interfaz y de las letras), que se eligen en Configuración. */
+export interface DisplaySettings {
+  readonly language: Language;
+  readonly accessibility: AccessibilitySettings;
+  /** Guarda el idioma y recarga la página (el progreso ya está guardado). */
+  readonly chooseLanguage: (language: Language) => void;
 }
 
 export interface PauseOptions {
@@ -46,6 +61,8 @@ export interface PauseOptions {
   onOpenRegistry: () => void;
   /** La velocidad del texto y el sonido de letras. */
   settings: TextSettings;
+  /** El idioma y el tamaño de la interfaz y de las letras. */
+  display: DisplaySettings;
   /** Suena una letra de muestra (al encender el sonido de letras). */
   onLetterSample?: () => void;
 }
@@ -102,7 +119,7 @@ export function createPauseOverlay(
   let inSettings = false;
 
   /** Un grupo de opciones de las que se elige una (los botones dicen cuál está puesta). */
-  const choices = <T extends string | boolean>(
+  const choices = <T extends string | number | boolean>(
     legend: string,
     values: readonly T[],
     current: T,
@@ -111,6 +128,7 @@ export function createPauseOverlay(
   ): HTMLElement => {
     const group = document.createElement('fieldset');
     group.className = 'overlay-choices';
+    group.dataset.group = legend;
     const caption = document.createElement('legend');
     caption.textContent = legend;
     group.append(caption);
@@ -120,11 +138,9 @@ export function createPauseOverlay(
         choose(value);
         render();
         // Redibujar destruye el botón con foco: el teclado sigue donde estaba, en la misma opción.
-        [...overlay.querySelectorAll('button')]
-          .find((b) => b.textContent === label)
-          ?.focus({
-            preventScroll: true,
-          });
+        [...overlay.querySelectorAll<HTMLButtonElement>('fieldset button')]
+          .find((b) => b.textContent === label && b.parentElement?.dataset.group === legend)
+          ?.focus({ preventScroll: true });
       });
       button.setAttribute('aria-pressed', String(value === current));
       if (value === current) button.classList.add('chosen');
@@ -135,7 +151,8 @@ export function createPauseOverlay(
 
   const settingsView = (): HTMLElement[] => {
     const prefs = options.settings.current;
-    const back = actionButton('Volver', () => {
+    const { accessibility, language } = options.display;
+    const back = actionButton(t('Volver'), () => {
       inSettings = false;
       render();
       focusDefault(true);
@@ -144,21 +161,48 @@ export function createPauseOverlay(
     actions.className = 'overlay-actions';
     actions.append(back);
     return [
-      line('strong', 'Configuración'),
+      line('strong', t('Configuración')),
       choices(
-        'Velocidad del texto',
+        t('Idioma'),
+        LANGUAGES,
+        language,
+        (l) => LANGUAGE_NAMES[l],
+        (l) => {
+          options.display.chooseLanguage(l);
+        },
+      ),
+      choices(
+        t('Tamaño de la interfaz'),
+        UI_SCALES,
+        accessibility.current.uiScale,
+        percent,
+        (uiScale) => {
+          accessibility.update({ uiScale });
+        },
+      ),
+      choices(
+        t('Tamaño de las letras'),
+        TEXT_SCALES,
+        accessibility.current.textScale,
+        percent,
+        (textScale) => {
+          accessibility.update({ textScale });
+        },
+      ),
+      choices(
+        t('Velocidad del texto'),
         TEXT_SPEEDS,
         prefs.speed,
-        (s) => TEXT_SPEED_LABELS[s],
+        (s) => t(TEXT_SPEED_LABELS[s]),
         (speed) => {
           options.settings.update({ speed });
         },
       ),
       choices(
-        'Sonido de letras',
+        t('Sonido de letras'),
         [true, false],
         prefs.letterSound,
-        (on) => (on ? 'Sí' : 'No'),
+        (on) => (on ? t('Sí') : t('No')),
         (on) => {
           options.settings.update({ letterSound: on });
           if (on) options.onLetterSample?.();
@@ -173,9 +217,9 @@ export function createPauseOverlay(
     actions.className = 'overlay-actions';
     if (confirmingReset) {
       actions.append(
-        line('span', '¿Borrar todo lo aprendido? No se puede deshacer.'),
+        line('span', t('¿Borrar todo lo aprendido? No se puede deshacer.')),
         actionButton(
-          'Borrar',
+          t('Borrar'),
           () => {
             resetFailed = !options.onResetProgress();
             confirmingReset = false;
@@ -183,14 +227,14 @@ export function createPauseOverlay(
           },
           'danger',
         ),
-        actionButton('Cancelar', () => {
+        actionButton(t('Cancelar'), () => {
           confirmingReset = false;
           render();
         }),
       );
     } else {
       actions.append(
-        actionButton('Empezar de cero', () => {
+        actionButton(t('Empezar de cero'), () => {
           confirmingReset = true;
           render();
         }),
@@ -206,16 +250,16 @@ export function createPauseOverlay(
       overlay.replaceChildren(page);
       return;
     }
-    const action = touch ? 'Toca' : 'Haz clic';
+    const action = touch ? t('Toca') : t('Haz clic');
     const lines = started
-      ? [line('strong', 'Pausa'), line('span', `${action} para seguir`)]
-      : [line('strong', title), line('span', `${action} para empezar`)];
+      ? [line('strong', t('Pausa')), line('span', t('{action} para seguir', { action }))]
+      : [line('strong', title), line('span', t('{action} para empezar', { action }))];
     const play = document.createElement('div');
     play.className = 'overlay-actions';
     play.append(
-      actionButton(started ? 'Seguir' : 'Jugar', start, 'primary'),
-      actionButton('Registro', options.onOpenRegistry),
-      actionButton('Configuración', () => {
+      actionButton(started ? t('Seguir') : t('Jugar'), start, 'primary'),
+      actionButton(t('Registro'), options.onOpenRegistry),
+      actionButton(t('Configuración'), () => {
         inSettings = true;
         render();
         focusDefault(true);
@@ -224,15 +268,20 @@ export function createPauseOverlay(
     lines.push(play);
     const loops = options.loops();
     if (loops > 0) {
-      lines.push(line('span', `Ciclos vividos: ${loops}`, 'overlay-loops'), resetActions());
+      lines.push(
+        line('span', t('Ciclos vividos: {loops}', { loops }), 'overlay-loops'),
+        resetActions(),
+      );
     }
     if (!options.savingWorks()) {
-      lines.push(line('small', 'Este navegador no está guardando la partida.', 'overlay-warning'));
+      lines.push(
+        line('small', t('Este navegador no está guardando la partida.'), 'overlay-warning'),
+      );
     }
     if (resetFailed) {
-      lines.push(line('small', 'No se pudo borrar la partida.', 'overlay-warning'));
+      lines.push(line('small', t('No se pudo borrar la partida.'), 'overlay-warning'));
     }
-    if (!touch) lines.push(line('small', DESKTOP_HELP));
+    if (!touch) lines.push(line('small', desktopHelp()));
     page.replaceChildren(...lines);
     overlay.replaceChildren(page);
     focusDefault();
@@ -248,7 +297,7 @@ export function createPauseOverlay(
     if (!force && focused && focused !== document.body && !overlay.contains(focused)) return;
     const buttons = overlay.querySelectorAll<HTMLButtonElement>('button');
     const target = confirmingReset
-      ? [...buttons].find((b) => b.textContent === 'Cancelar')
+      ? [...buttons].find((b) => b.textContent === t('Cancelar'))
       : inSettings
         ? (overlay.querySelector<HTMLButtonElement>('button.chosen') ?? buttons[0])
         : buttons[0];
