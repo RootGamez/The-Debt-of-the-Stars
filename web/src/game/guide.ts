@@ -110,7 +110,7 @@ export class Guide {
 const KEYS: Record<GuideStep, string> = {
   andar: 'Ratón para mirar · W A S D para andar',
   directora:
-    'La Directora te espera en su despacho, al fondo del Instituto. Acércate a quien quieras y pulsa E para hablar',
+    'La Directora te espera en el Motor, junto al mar, al este del Instituto. Acércate a quien quieras y pulsa E para hablar',
   registro: 'Lo que aprendes queda en el Registro: ábrelo con Tab',
   hangar:
     'El Albatros II te espera en el hangar, al este del Instituto. Junto a la escotilla, F para subir',
@@ -123,7 +123,7 @@ const KEYS: Record<GuideStep, string> = {
 const TOUCH: Record<GuideStep, string> = {
   andar: 'Arrastra para mirar · el mando de la izquierda para andar',
   directora:
-    'La Directora te espera en su despacho, al fondo del Instituto. Acércate a quien quieras y toca Hablar',
+    'La Directora te espera en el Motor, junto al mar, al este del Instituto. Acércate a quien quieras y toca Hablar',
   registro: 'Lo que aprendes queda en el Registro: ábrelo con su botón',
   hangar:
     'El Albatros II te espera en el hangar, al este del Instituto. Junto a la escotilla, toca Subir',

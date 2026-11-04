@@ -132,13 +132,14 @@ export function checkMarkers(clues: Clues, world: string, markers: WorldMarkers)
 }
 
 /**
- * Regla 6: cada fuente da algo y las del prólogo tienen lectura profunda. Salvo las charlas que no dan nada: la
- * gente de casa que solo habla (ambiente, sin peso en el grafo).
+ * Regla 6: cada fuente da algo y las del prólogo tienen lectura profunda. Salvo lo que no pesa en el grafo: las
+ * charlas que no dan nada (la gente de casa que solo habla) y las fuentes de ambiente (notas para los curiosos).
  */
 export function checkReadings(clues: Clues, prologueWorlds: readonly string[]): string[] {
   const failures: string[] = [];
   for (const source of clues.sources) {
-    if (source.kind === 'charla' && factsOfSource(source).length === 0) continue;
+    if (source.ambient || (source.kind === 'charla' && factsOfSource(source).length === 0))
+      continue;
     if (factsOfSource(source).length === 0) failures.push(`${source.id}: no da ningún hecho`);
     if (prologueWorlds.includes(source.world) && !source.deep) {
       failures.push(`${source.id}: las fuentes del prólogo necesitan lectura profunda`);

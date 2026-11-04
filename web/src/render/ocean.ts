@@ -269,6 +269,9 @@ export function applyUnderwater(material: MeshStandardMaterial, spec: Underwater
         #ifdef USE_INSTANCING
           uwPosition = instanceMatrix * uwPosition;
         #endif
+        #ifdef SKY_MOVED
+          uwPosition = vec4(skyPlanet, 1.0);
+        #endif
         vUwPos = uwPosition.xyz;`,
       );
     shader.fragmentShader = shader.fragmentShader

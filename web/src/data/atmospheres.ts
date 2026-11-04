@@ -1,5 +1,5 @@
 // Los mundos con aire: desde su suelo se ve un cielo en vez del espacio. Hogar (Fase 9), el único mundo vivo, con
-// su amanecer; Umbral (Fase 11, ✅ Anthony 2026-11-03), con un aire fino de ocaso que deja ver las estrellas; y el
+// su cielo de mañana (Fase 11G); Umbral (Fase 11, ✅ Anthony 2026-11-03), con un aire fino de ocaso que deja ver las estrellas; y el
 // Archivo (Fase 11, ✅ Anthony 2026-11-03), con un cielo azul de mar y nubes; y el Taller (Fase 11F), sobre su gigante.
 
 export interface Atmosphere {
@@ -17,7 +17,17 @@ export interface Atmosphere {
 }
 
 export const ATMOSPHERES: Readonly<Record<string, Atmosphere>> = {
-  hogar: { zenith: 0x7fb0d6, horizon: 0xf0c49c, glow: 0xffdcae, ground: 0xb8a48e, height: 110 },
+  // 🟡 Rehecho en la Fase 11G (✅ "el cielo del planeta de agua", Anthony 2026-11-03): azul de mañana con el horizonte
+  // aún cálido; la cara de noche, azul hondo con estrellas.
+  hogar: {
+    zenith: 0x3576c4,
+    horizon: 0xcfe0ea,
+    glow: 0xfff0d0,
+    ground: 0x88a8b8,
+    height: 110,
+    opacity: 0.96,
+    night: 0x0b1428,
+  },
   // 🟡 Ocaso permanente: violeta arriba, ámbar en el horizonte (CONTEXTO_PLANETAS.md §3, «Atmósfera»).
   umbral: {
     zenith: 0x3a2c58,

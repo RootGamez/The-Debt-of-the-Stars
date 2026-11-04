@@ -3,9 +3,9 @@ import { loadClues } from '../../src/data/pistas';
 
 describe('the real clue data', () => {
   const clues = loadClues();
-  /** Las fuentes del grafo: todas menos las charlas de ambiente (gente de casa que solo habla). */
+  /** Las fuentes del grafo: todas menos las de ambiente (gente de casa que solo habla, notas para curiosos). */
   const graph = clues.sources.filter(
-    (s) => !(s.kind === 'charla' && s.surface.facts.length === 0 && !s.deep),
+    (s) => !s.ambient && !(s.kind === 'charla' && s.surface.facts.length === 0 && !s.deep),
   );
 
   it('teaches the way into the Archivo outside the Archivo (Phase 11E): the loose sheet of the Muelle', () => {
@@ -26,7 +26,20 @@ describe('the real clue data', () => {
 
     expect(chats.map((s) => s.id)).toContain('instituto.directora');
     expect(chats.every((s) => s.world === 'hogar')).toBe(true);
-    expect(chats.length - (clues.sources.length - graph.length)).toBe(1); // solo la Directora da hechos
+    // Solo la Directora da hechos.
+    expect(chats.filter((s) => s.surface.facts.length > 0 || s.deep).map((s) => s.id)).toEqual([
+      'instituto.directora',
+    ]);
+  });
+
+  it('keeps the notes for the curious at home out of the graph (Phase 11G)', () => {
+    const ambient = clues.sources.filter((s) => s.ambient);
+
+    expect(ambient.length).toBeGreaterThanOrEqual(10);
+    expect(
+      ambient.every((s) => s.world === 'hogar' && s.surface.facts.length === 0 && !s.deep),
+    ).toBe(true);
+    expect(ambient.map((s) => s.id)).toContain('hogar.bitacora_albatros');
   });
 
   it('contains the 7 threads, the 9 conclusions and the 55 sources of CONTEXTO_PISTAS.md', () => {

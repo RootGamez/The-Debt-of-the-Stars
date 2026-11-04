@@ -69,6 +69,11 @@ export interface Source {
   title: string;
   /** Texto provisional que Anthony reescribirá. */
   draft: boolean;
+  /**
+   * De ambiente (`"ambiente": true`, Fase 11G): algo que se lee por curiosidad (las notas de Hogar para quien se
+   * aleja). No da hechos ni tiene lectura profunda: no pesa en el grafo.
+   */
+  ambient: boolean;
   /** Evento de la cronología durante el cual la fuente se puede leer (luz de la ranura, secuencia…). */
   when: string | undefined;
   /** Nombre del evento (`TRIG_`) que se presencia, para las fuentes de tipo "evento". */
@@ -318,17 +323,23 @@ function parseSource(item: unknown, facts: Map<string, Fact>, context: ClueConte
       fail(`${id}: evento desconocido "${name}"`);
   }
   if (r.superficial === undefined) fail(`${id} necesita la lectura "superficial"`);
+  const ambient = r.ambiente === true;
+  const surface = parseReading(r.superficial, `${id}.superficial`, facts, false);
+  if (ambient && (surface.facts.length > 0 || r.profunda !== undefined)) {
+    fail(`${id}: las fuentes de ambiente no dan hechos ni tienen lectura profunda`);
+  }
   return {
     id,
     world,
     kind: kind as SourceKind,
     title: text(r.titulo, `${id}.titulo`),
     draft: r.borrador === true,
+    ambient,
     when,
     eventName,
     recordedRate: parseRecordedRate(r.reloj, id, kind),
     reader: parseReader(r.lector, id),
-    surface: parseReading(r.superficial, `${id}.superficial`, facts, false),
+    surface,
     deep:
       r.profunda === undefined
         ? undefined

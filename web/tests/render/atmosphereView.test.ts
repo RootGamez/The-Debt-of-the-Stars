@@ -52,13 +52,14 @@ describe('the sky of a world with air', () => {
     expect(view.coverage).toBeLessThan(1);
   });
 
-  it('covers everything on Hogar, whose air is thick', () => {
+  it('covers almost everything on Hogar, with a sky like the Archivo (Phase 11G)', () => {
     const scene = new Scene();
     const view = createAtmosphereView(scene);
 
     view.update({ eye: new Vector3(3000, 121, 0), world: { center, radius: 120, air }, star });
 
-    expect(view.coverage).toBe(1);
+    expect(view.coverage).toBeCloseTo(air.opacity ?? 1);
+    expect(view.coverage).toBeGreaterThan(0.9);
   });
 
   it('leaves the scene clean when disposed', () => {

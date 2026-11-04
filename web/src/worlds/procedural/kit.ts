@@ -518,7 +518,11 @@ export function applySkyLight(
   material: MeshStandardMaterial,
   sunLocal: Vector3,
   colors: SkyLightColors,
+  { moved = false }: { moved?: boolean } = {},
 ): void {
+  // Las mallas que cuelgan con su propia posición y giro (un Ool, una rueda) llevan su sitio en el planeta en
+  // atributos (ver placeInWorld): sus coordenadas locales no dicen dónde está el suelo.
+  if (moved) material.defines = { ...material.defines, SKY_MOVED: '' };
   const uniforms = {
     uSkySun: { value: sunLocal },
     uSkyDay: { value: colors.day },
@@ -541,7 +545,11 @@ export function applySkyLight(
         `#include <common>
         uniform vec3 uSkySun;
         varying float vSkyDay;
-        varying vec3 vSkyUpView;`,
+        varying vec3 vSkyUpView;
+        #ifdef SKY_MOVED
+          attribute vec3 skyPlanet;
+          attribute vec3 skyLocalUp;
+        #endif`,
       )
       .replace(
         '#include <begin_vertex>',
@@ -550,9 +558,15 @@ export function applySkyLight(
         #ifdef USE_INSTANCING
           skyPosition = instanceMatrix * skyPosition;
         #endif
-        vec3 skyUp = normalize(skyPosition.xyz);
-        vSkyDay = smoothstep(-0.12, 0.35, dot(skyUp, uSkySun));
-        vSkyUpView = normalize((viewMatrix * modelMatrix * vec4(skyUp, 0.0)).xyz);`,
+        #ifdef SKY_MOVED
+          skyPosition = vec4(skyPlanet, 1.0);
+          vec3 skyUp = normalize(skyPlanet);
+          vSkyUpView = normalize((viewMatrix * modelMatrix * vec4(skyLocalUp, 0.0)).xyz);
+        #else
+          vec3 skyUp = normalize(skyPosition.xyz);
+          vSkyUpView = normalize((viewMatrix * modelMatrix * vec4(skyUp, 0.0)).xyz);
+        #endif
+        vSkyDay = smoothstep(-0.12, 0.35, dot(skyUp, uSkySun));`,
       );
     shader.fragmentShader = shader.fragmentShader
       .replace(
@@ -586,7 +600,11 @@ export function applySkyLight(
         .replace(
           '#include <begin_vertex>',
           `#include <begin_vertex>
-          vec3 hazeCenter = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+          #ifdef SKY_MOVED
+            vec3 hazeCenter = (modelMatrix * vec4(position - skyLocalUp * length(skyPlanet), 1.0)).xyz;
+          #else
+            vec3 hazeCenter = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+          #endif
           float hazeHeight = length(cameraPosition - hazeCenter) - uHazeRadius;
           vHazeNear = 1.0 - smoothstep(${HAZE_FADE[0].toFixed(1)}, ${HAZE_FADE[1].toFixed(1)}, hazeHeight);`,
         );
@@ -613,4 +631,26 @@ export function applySkyLight(
   };
   material.customProgramCacheKey = () => (haze ? 'sky-light-haze' : 'sky-light');
   material.needsUpdate = true;
+}
+
+/**
+ * Para una malla con material `moved` (ver applySkyLight): guarda en cada vértice dónde queda en el marco del
+ * planeta con la malla en reposo (`rest`: de lo local al planeta) y la vertical de ese punto en lo local. Lo que
+ * luego la anime (respirar, girarse hacia quien mira, una rueda que gira) apenas lo mueve a escala del planeta.
+ */
+export function placeInWorld(geometry: BufferGeometry, rest: Matrix4): void {
+  const position = geometry.getAttribute('position');
+  const toLocal = new Quaternion().setFromRotationMatrix(rest).invert();
+  const planet = new Float32Array(position.count * 3);
+  const up = new Float32Array(position.count * 3);
+  const p = new Vector3();
+  for (let i = 0; i < position.count; i++) {
+    p.fromBufferAttribute(position, i).applyMatrix4(rest);
+    p.toArray(planet, i * 3);
+    p.normalize()
+      .applyQuaternion(toLocal)
+      .toArray(up, i * 3);
+  }
+  geometry.setAttribute('skyPlanet', new BufferAttribute(planet, 3));
+  geometry.setAttribute('skyLocalUp', new BufferAttribute(up, 3));
 }

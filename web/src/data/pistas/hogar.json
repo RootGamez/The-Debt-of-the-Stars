@@ -120,7 +120,7 @@
     "borrador": true,
     "superficial": {
       "texto": [
-        "La Directora te espera junto a la ventana redonda, mirando la Luna.",
+        "La Directora te espera en el Motor, al pie de la Puerta Mayor, mirando la Luna por encima de la colina del Instituto.",
         "«Ayer apareció allí el fragmento más grande de todos, clavado en el suelo. Quiero que lo veas tú antes que nadie: será tu primer vuelo oficial».",
         "«El Albatros II está listo en el hangar. Ve, mira y vuelve a contármelo»."
       ],
@@ -242,6 +242,197 @@
     "superficial": {
       "texto": [
         "«Hoy todo el mundo ha salido a la plaza para verte despegar. Disimula, que si no se ponen nerviosos»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.diario_maestra",
+    "mundo": "hogar",
+    "tipo": "texto",
+    "titulo": "El diario de la Maestra",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un cuaderno de tapas gastadas, abierto junto al catalejo. La letra es pequeña y apretada.",
+        "«Hoy ha vuelto a subir a mirar la Luna, sin moverse, con los filamentos encendidos, creyendo que nadie se da cuenta».",
+        "«De todos los alumnos nuevos, fue quien me preguntó quién regaba al otro lado. Aún no sé qué contestar».",
+        "«Cuando vuelva, se lo diré: que sabía que este día iba a llegar»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.plano_albatros",
+    "mundo": "hogar",
+    "tipo": "objeto",
+    "titulo": "El plano del primer Albatros",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un plano azul clavado en la pared: una nave redonda, más pequeña que la del hangar. Arriba pone «Albatros».",
+        "Debajo, a lápiz: «Se perdió en la prueba de altura, hacia el oeste, más allá del mar. Nadie salió herido. Nadie fue a buscarlo».",
+        "Y con otra letra, más nueva: «Por eso la de ahora se llama segunda»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.guarida",
+    "mundo": "hogar",
+    "tipo": "texto",
+    "titulo": "La guarida",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Bajo la lona, dibujos a carbón: la Luna, unas estrellas, una nave con un farol. Hay más dibujos que sitio.",
+        "En una tabla, con letra de crío: «Club de los que miran arriba. Regla única: no se cuenta a los mayores».",
+        "Uno de los nombres de la lista está rodeado dos veces. Es el tuyo."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.lectora",
+    "mundo": "hogar",
+    "tipo": "objeto",
+    "titulo": "La fuente de la Lectora",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Una Ool de piedra con un libro abierto; el agua cae de sus páginas. La placa está gastada de tanto tocarla.",
+        "«A Ilen, que leyó la primera palabra de los que no están. La palabra era: agua».",
+        "Los críos de la ciudad dicen que, si le preguntas algo en voz baja, se le encienden los filamentos de piedra."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.turnos_riego",
+    "mundo": "hogar",
+    "tipo": "texto",
+    "titulo": "El tablón de los turnos",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Los turnos de riego de esta luna, pintados a mano: «La aldea, al alba. La ciudad, a media mañana. El Instituto, al caer el sol».",
+        "Abajo, alguien ha añadido: «Como en la ficha de barro. Si a ellos les fue bien, a nosotros también».",
+        "Nadie ha escrito qué hacían ellos después de regar."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.campana",
+    "mundo": "hogar",
+    "tipo": "objeto",
+    "titulo": "La campana hundida",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Una campana de latón verdoso, medio enterrada en la arena del fondo. Debió de ser la del faro viejo.",
+        "Alrededor del borde, unas letras: «Toca cuando el mar se calle».",
+        "Ahora el mar está callado. Y la campana, aquí abajo, no puede tocar."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.chatarra",
+    "mundo": "hogar",
+    "tipo": "texto",
+    "titulo": "La etiqueta del soporte",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Una etiqueta atada con alambre a un soporte retorcido, como derretido y vuelto a enfriar.",
+        "«Prueba menor 1: el anillo se abrió dos segundos y el soporte se fundió. No tirar. De lo que se rompe también se aprende. —T.».",
+        "Alrededor, aros a medio hacer, tambores de generador y engranajes. Todos con su etiqueta, todos con la misma letra."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.bitacora_albatros",
+    "mundo": "hogar",
+    "tipo": "texto",
+    "titulo": "El cuaderno de a bordo del Albatros",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Las hojas están hinchadas de humedad, pero la tinta aguanta.",
+        "«Prueba de altura. Al subir, el farol del mástil se apagó y el viento me llevó hacia el oeste. Bajé de noche en una isla donde las plantas dan luz».",
+        "«Me quedo aquí hasta que vengan. Hay agua, y la noche es bonita».",
+        "La última hoja: «Han venido. Me voy. Dejo el cuaderno por si otro se pierde: que sepa que esto también es casa»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.placa_primera_piedra",
+    "mundo": "hogar",
+    "tipo": "objeto",
+    "titulo": "La placa de la primera piedra",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un corro de piedras de musgo alrededor de un hoyo poco hondo, de borde liso y curvo.",
+        "«Aquí apareció la primera piedra de los que no están, hace doscientos inviernos. Nadie la vio caer: una mañana, estaba».",
+        "«Se la llevaron al Instituto. El hoyo nos lo quedamos nosotros»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.cartas_cielo",
+    "mundo": "hogar",
+    "tipo": "texto",
+    "titulo": "Las cartas del cielo",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Hojas de pizarra con puntos de tiza: estrellas, apuntadas noche a noche durante años.",
+        "En la última: «Noche de la piedra grande de la Luna. El cielo, quieto; ni una estrella se movió. Lo apunto igual: que conste que esperé»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.astronoma",
+    "mundo": "hogar",
+    "tipo": "charla",
+    "titulo": "La astrónoma",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "«Visita. Hacía años. ¿Te manda la Directora? No, ya veo que no: a ti te ha traído la curiosidad».",
+        "«Cuarenta años mirando el cielo y nunca he visto caer una de esas piedras. No caen. Aparecen, como quien deja algo en la puerta de otro».",
+        "«Vuelve a contármelo, si algún día lo sabes»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "hogar.banco_prado",
+    "mundo": "hogar",
+    "tipo": "objeto",
+    "titulo": "El banco del prado",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un banco solo, en medio de las luces. En el respaldo hay una frase grabada a punta de cuchillo.",
+        "«Desde aquí no se ve la Luna. Por eso veníamos»."
       ],
       "hechos": []
     }

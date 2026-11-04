@@ -1,7 +1,7 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.9
-**Última actualización:** 2026-10-30 · Fase 10 (el Archivo de las Puertas)
+**Versión:** v0.10
+**Última actualización:** 2026-11-03 · Fase 11G (Hogar: las notas para los curiosos)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
 > Este documento dice **qué se puede aprender, dónde y en qué orden**. Es el puente entre la historia y el
@@ -305,6 +305,7 @@ textos de ambiente sin peso en el grafo.
 ## 11. Cómo quedó implementado (Fase 4)
 
 - Los hilos, hechos, conclusiones y las 55 fuentes (47 del primer grafo + 2 de la Sala del Motor y 3 del Archivo de las Puertas, Fase 10, + la hoja del Muelle, Fase 11E, + el reloj de la Pista y las páginas de sincronización del Taller, Fase 11F) están transcritos en `web/src/data/pistas/` (61 hechos).
+- **Fuentes de ambiente (Fase 11G, 🟡):** llevan `"ambiente": true`. Se leen como las demás pero no dan hechos ni tienen lectura profunda, y el grafo no las cuenta (regla 6). En Hogar son once notas y objetos para los curiosos (`hogar.diario_maestra`, `plano_albatros`, `guarida`, `lectora`, `turnos_riego`, `campana`, `chatarra`, `bitacora_albatros`, `placa_primera_piedra`, `cartas_cielo`, `banco_prado`) y una charla sin hechos, `hogar.astronoma`. Textos en borrador.
 - **Cada hecho se asigna a la lectura superficial o a la profunda** de su fuente en los datos (la tabla de §5 no lo distinguía siempre). Criterio: la profunda da lo que explica lo oculto. Los datos son la referencia; corrígelos ahí.
 - **Conclusiones con alternativas:** K5 (reloj) y K8 (prueba mayor) se desbloquean con *cualquiera* de varios hechos por grupo; K3 requiere K1, K2 y KC.
 - El Registro muestra cada hecho bajo su **primer hilo**, con su frase y enlaces "ver también", pero **no el lugar** donde se aprendió (no se guarda; solo se guardan los hechos).
@@ -328,3 +329,4 @@ textos de ambiente sin peso en el grafo.
 - **2026-11-03 · Fase 11.** El Archivo se rediseña como planeta de agua con cúpula y una única entrada que se aprende en otro planeta (✅); se propone el hecho `archivo.entrada` (🟡).
 - **2026-11-03 · Fase 11E (🟡).** Nueva fuente `umbral.hoja_entrada` en el tablón del Muelle de Envíos (texto borrador) con el hecho `archivo.entrada` (H4): la puerta del pozo bajo la tercera torre, marcada con tres bandas. Total: 53 fuentes y 61 hechos.
 - **2026-11-03 · Fase 11F (🟡).** Dos fuentes nuevas en el Taller: `taller.pista` (lector `pista`, da `contrapeso.medir_desfase`) y `taller.paginas`, en la Sala del Centro (da `contrapeso.cuenta_sincronia`, que sigue también en `lab.pizarra`: dos fuentes en dos mundos). Total: 55 fuentes y 61 hechos. `taller.manual` remite ahora a los dos sitios.
+- **2026-11-03 · Fase 11G (🟡).** Hogar rehecho: doce fuentes nuevas de ambiente (once notas y la charla de la astrónoma), sin hechos. La Directora espera ahora en el Motor (cambia su primera línea). Total: 67 fuentes y 61 hechos.

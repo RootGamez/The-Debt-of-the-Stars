@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.13
-**Última actualización:** 2026-11-03 · Fase 11F (el Taller, gigante de gas)
+**Versión:** v0.14
+**Última actualización:** 2026-11-03 · Fase 11G (Hogar rehecho y los Ool)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -290,6 +290,8 @@
 
 🟡 **Cómo quedó (Fase 10, hito 10E).** Es el mismo Hogar con piezas sueltas que se quitan al cargar: las piedras de las vitrinas (`hogar_FragmentosVitrinas`; la vitrina de los bordes, que es una pista, se queda) y el fragmento de la Luna con sus esquirlas, su hilo de luz y su colisión (`luna_Fragmento`, `luna_Fragmento_Luz`, `COL_luna_Fragmento`). Los Ool, al 85 %. A esa hora la Luna está a unos 42° sobre el horizonte, hacia el suroeste del Instituto: desde dentro queda detrás del techo, y desde la plaza de entrada se ve bien.
 
+🟡 **Cómo quedó (Fase 11G; ✅ la idea, Anthony 2026-11-03: rehacer Hogar con el cielo y el agua del Archivo, recompensar la curiosidad, el Motor con la Directora, una estructura única para la Maestra y el taller con el hangar; los Ool del color de la lámina, claros de jóvenes y más oscuros y apagados de mayores).** Hogar se hace por código (`procedural/hogar*.ts`): mar con olas como el del Archivo y cielo azul con nubes. En la cara de día, un continente con el Instituto en su colina (la Sala de Fragmentos, la Torre de Lectura de la Maestra —tambores apilados como libros, aula al aire libre y rampa en espiral hasta el balcón— y el taller de la Puerta pequeña con el nido abierto del Albatros II), la aldea, la ciudad con su mercado, los huertos con su noria, las terrazas, el embarcadero y, junto al mar, el **Motor**: la Puerta Mayor a medio hacer, con su andamio y su generador, donde espera la Directora. En la cara de noche, islas para quien se aleja: el pecio del primer Albatros, el hoyo de la primera piedra, la casa de la astrónoma y un prado de plantas de luz; y una campana hundida frente al embarcadero. Los Ool (`procedural/ool.ts`): musgo verde agua claro y muy luminoso en las crías, que se oscurece y se apaga con la edad; la Maestra y la astrónoma, las más oscuras.
+
 ---
 
 ## 10. El Archivo de las Puertas — el epílogo (🟡, Fase 10)
@@ -357,3 +359,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-11-03 · Fase 11E (cielo).** Anthony pide para el Archivo un cielo azul con nubes (✅). Se le da aire de mar (casi opaco, con noche), bruma azul y dos capas de nubes animadas en el shader (🟡 colores y alturas).
 - **2026-11-03 · Fase 11E (agua).** Anthony pide un mar con oleaje, más claro y con más detalle, una lógica de agua reutilizable y quitar la raya del horizonte del cielo (✅). Se hace con olas compartidas entre física y shader, un material de océano nuevo, salpicaduras, ondas y burbujas y el fondo teñido con cáusticas; el cielo ya no corta en el horizonte (🟡 el aspecto).
 - **2026-11-03 · Fase 11F (🟡).** El Taller se hace por código como gigante de gas: nubes en bandas de 80 m, cinco islas fijas sobre el gigante que gira, muerte `gas` bajo 74 m, puentes de luz pisables solo a las 7:00, el anillo de la Pista que se abre a las 7:00 con su reloj ajustado y la Sala del Centro con las páginas de sincronización. Cambia lo propuesto: las islas no orbitan por separado.
+- **2026-11-03 · Fase 11G (🟡).** Hogar por código: continente de día con el Instituto, la aldea, la ciudad, el campo, el embarcadero y el Motor (la Directora pasa a esperar allí); islas de noche con secretos para los curiosos; mar y cielo como el Archivo; los Ool por código, de color y luz según la edad (✅).

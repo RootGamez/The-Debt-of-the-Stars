@@ -276,6 +276,23 @@ describe('rule 6: readings', () => {
     expect(checkReadings(clues, []).join(' ')).not.toMatch(/umbral\.charla/);
   });
 
+  it('leaves the notes for the curious out (ambient): no facts and no deep reading, even at home', () => {
+    const clues = graph({
+      sources: [
+        source('umbral.a', 'umbral', ['a.uno']),
+        source('umbral.nota', 'umbral', [], { ambiente: true }),
+      ],
+    });
+
+    expect(checkReadings(clues, ['umbral']).join(' ')).not.toMatch(/umbral\.nota/);
+  });
+
+  it('refuses an ambient source that gives a fact', () => {
+    expect(() =>
+      graph({ sources: [source('umbral.a', 'umbral', ['a.uno'], { ambiente: true })] }),
+    ).toThrow(/ambiente/);
+  });
+
   it('fails for a prologue source without deep reading', () => {
     const clues = graph({});
 
