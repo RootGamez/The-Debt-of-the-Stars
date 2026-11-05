@@ -114,6 +114,29 @@ describe('a hollow world (the Nudo)', () => {
   });
 });
 
+describe('a hollow world with cratered crust (Cicatriz)', () => {
+  // Cáscara de 80 m por fuera y cavidad de 60 m: la gravedad cambia de sentido justo bajo la cara interior.
+  const cicatriz: GravityWell = {
+    center: new Vector3(),
+    radius: 80,
+    strength: 12,
+    range: 160,
+    innerRadius: 60,
+    cavityLimit: 61,
+  };
+
+  it('still pulls toward the center at the bottom of a crater bowl, deep in the crust', () => {
+    expect(gravityAt(new Vector3(0, 64, 0), [cicatriz]).y).toBeCloseTo(-12);
+    expect(insideCavity(new Vector3(0, 64, 0), cicatriz)).toBe(false);
+  });
+
+  it('pushes outward onto the inner face below its limit', () => {
+    expect(gravityAt(new Vector3(0, 59.5, 0), [cicatriz]).y).toBeCloseTo(12);
+    expect(insideCavity(new Vector3(0, 60.5, 0), cicatriz)).toBe(true);
+    expect(surfaceUp(new Vector3(0, 60, 0), cicatriz).y).toBeCloseTo(-1);
+  });
+});
+
 describe('wellForWorld', () => {
   it('passes the cavity of a hollow world', () => {
     const well = wellForWorld({
@@ -125,6 +148,19 @@ describe('wellForWorld', () => {
     });
 
     expect(well.innerRadius).toBe(21);
+  });
+
+  it('passes where the gravity of a hollow world turns around', () => {
+    const well = wellForWorld({
+      id: 'cicatriz',
+      radius: 80,
+      gravity: 1.2,
+      clockRate: 0.6,
+      innerRadius: 60,
+      cavityLimit: 61,
+    });
+
+    expect(well.cavityLimit).toBe(61);
   });
 
   it('scales the base gravity by the world gravity and reaches two radii above the surface', () => {

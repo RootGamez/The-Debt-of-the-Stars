@@ -6,6 +6,8 @@ export const BLACK_HOLE = {
   /** Mundo y fuente de lectura donde nace (la Sala del Motor). */
   world: 'cicatriz',
   source: 'cicatriz.sala_motor',
+  /** Por dónde llega la nave al núcleo (Cicatriz hueca, Fase 11H): sobre el eje de la Gran Mordida. */
+  approach: 'cicatriz_Acceso',
   /** 13:30: nace (el evento `agujero_negro` de la cronología). */
   born: 810,
   /** 15:00: fin del ciclo. */

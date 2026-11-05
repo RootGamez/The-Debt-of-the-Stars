@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DAMAGE_FROM,
+  coreTide,
   edgeTide,
   seedTide,
   shellTide,
@@ -31,6 +32,28 @@ describe('the tide at the Edge of Cicatriz', () => {
   it('survives nonsense', () => {
     expect(edgeTide(Number.NaN, 100)).toBe(0);
     expect(edgeTide(0, Number.NaN)).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('the tide of the micro black hole, inside Cicatriz', () => {
+  it('is felt but bearable on the ring of the Engine Room (12 m) until the end of the cycle', () => {
+    expect(coreTide(12, 0)).toBeGreaterThan(0.12);
+    expect(coreTide(12, 0)).toBeLessThan(DAMAGE_FROM);
+    expect(coreTide(10.5, 810)).toBeLessThan(DAMAGE_FROM);
+  });
+
+  it('grows toward the center and along the cycle', () => {
+    expect(coreTide(5, 0)).toBeGreaterThan(coreTide(12, 0));
+    expect(coreTide(12, 850)).toBeGreaterThan(coreTide(12, 100));
+    expect(coreTide(4, 300)).toBeGreaterThan(DAMAGE_FROM);
+  });
+
+  it('is nothing on the inner face of the crust', () => {
+    expect(coreTide(60, 900)).toBe(0);
+  });
+
+  it('survives nonsense', () => {
+    expect(coreTide(Number.NaN, 0)).toBe(0);
   });
 });
 

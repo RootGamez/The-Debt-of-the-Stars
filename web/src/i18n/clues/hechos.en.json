@@ -158,5 +158,20 @@
   },
   "contrapeso.planos": {
     "frase": "The Counterweight's plans remain in the Archive's Bank: with them another could be built."
+  },
+  "nudo.sellado": {
+    "frase": "The first throat could not be closed: they sealed it, folded it and sent it far from Scar."
+  },
+  "deuda.mundo_vaciado": {
+    "frase": "They hollowed Scar out from within to forge the rings of the Gates."
+  },
+  "deuda.garganta_maquina": {
+    "frase": "A tiny throat sleeps at the centre of Scar; the machine surrounds it so it will not grow."
+  },
+  "partida.ultimas_salidas": {
+    "frase": "In the Departures Hall they crossed out the departures one by one; the last one has no destination."
+  },
+  "deuda.anillo_de_mordidas": {
+    "frase": "Scar's ring is the rock the bites tore off and did not take."
   }
 }

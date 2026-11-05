@@ -26,6 +26,7 @@ import { createWaterEffects } from './render/waterEffects';
 import { createTideEffects } from './game/tideEffects';
 import { insideCavity } from './physics/gravity';
 import { createInteriorLights } from './render/interiorLight';
+import { createNearDetail } from './render/nearDetail';
 import { createLensView } from './render/lensView';
 import { createAtmosphereView } from './render/atmosphereView';
 import { createOolView } from './render/oolView';
@@ -242,6 +243,7 @@ async function start(): Promise<void> {
   });
   // El Nudo por dentro: su luz sustituye a la de la Brasa, y sus anillos pliegan el paso.
   const interior = createInteriorLights(runtimes, sun);
+  const nearDetail = createNearDetail(runtimes);
   const passage = createFoldedPassage();
   // …y por fuera: su imagen en el cielo, girada hacia la Brasa, y las estrellas que dobla a su paso.
   // (el agujero negro dobla también las estrellas; con `?calidad=baja` no se dobla nada).
@@ -674,9 +676,14 @@ async function start(): Promise<void> {
     };
     // Delante de la máquina (la marca de la Sala del Motor), a la altura del núcleo: sin cruzar el anillo.
     window.__juego.nearHorizon = (radii) => {
-      const front = sources
-        .get(BLACK_HOLE.world)
-        ?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
+      // Por el acceso de la nave si el mundo lo marca (en Cicatriz, la banda de la máquina tapa los demás lados).
+      const scene = runtimes.get(BLACK_HOLE.world)?.world.scene;
+      const access = scene?.getObjectByName(BLACK_HOLE.approach);
+      const front =
+        scene && access
+          ? scene.worldToLocal(access.getWorldPosition(new Vector3()))
+          : sources.get(BLACK_HOLE.world)?.interactables.find((i) => i.id === BLACK_HOLE.source)
+              ?.position;
       if (!flight || !birthplace || !front || horizon.radius <= 0) return false;
       const at = approachPoint(birthplace, front, radii * horizon.radius);
       return flight.placeAt(BLACK_HOLE.world, at, birthplace);
@@ -853,6 +860,7 @@ async function start(): Promise<void> {
         !piloting && insideCavity(player.state.position, currentWorld.well),
       );
       const here = viewer();
+      nearDetail.update(here.frame, camera.position);
       const tideLethal = tides.update(
         {
           world: here.frame === undefined ? undefined : runtimes.get(here.frame),
@@ -860,6 +868,7 @@ async function start(): Promise<void> {
           loopTime: session.director.clock.t,
           absorption: session.director.absorption,
           horizon: horizon.closeness(here.frame, here.position),
+          stableHole: horizon.radius > 0,
           running: timeRuns && session.acceptsInput,
           piloting,
         },

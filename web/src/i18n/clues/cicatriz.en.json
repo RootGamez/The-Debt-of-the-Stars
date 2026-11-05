@@ -19,5 +19,52 @@
   "cicatriz.primera_puerta": { "titulo": "The First Gate" },
   "cicatriz.borde": { "titulo": "The Edge" },
   "cicatriz.palanca": { "titulo": "The core lever" },
-  "cicatriz.cuna": { "titulo": "The core cradle" }
+  "cicatriz.cuna": { "titulo": "The core cradle" },
+  "cicatriz.cripta": {
+    "titulo": "The Crypt of the Throat",
+    "superficial": [
+      "Beneath the plaza of the First Gate, a vault. On the floor, a plug of clamped rings; on the back wall, an inscription."
+    ],
+    "profunda": [
+      "“Here the first throat opened. We could not close it: we folded it over itself and sent it far away, where its weight would not reach us.”",
+      "“Let no one lift this seal. What lies beneath is no longer here, but it still pulls.”"
+    ]
+  },
+  "cicatriz.friso": {
+    "titulo": "The Frieze of the Excavation",
+    "superficial": [
+      "A long relief on the inner face: small figures carrying rock out of the centre and taking it, in rings, upward."
+    ],
+    "profunda": [
+      "The frieze goes on: every forged ring is a Gate, and every opened Gate leaves a bite in the shell.",
+      "At the end, the figures look at the hollow they have made. One points to the centre, where no rock is left."
+    ]
+  },
+  "cicatriz.nucleo": {
+    "titulo": "The core",
+    "superficial": [
+      "From the band's viewer you can see the centre: a black point, small as a seed, with a ring of light that bends whatever lies behind it."
+    ],
+    "profunda": [
+      "It is the same as the Knot, but tiny and awake. The machine surrounds it so it will not grow; with every pulse, the ring of light widens a little."
+    ]
+  },
+  "cicatriz.partidas": {
+    "titulo": "The Departures Hall",
+    "superficial": [
+      "A departures board on the inner face. Destinations, times, Gate numbers. Almost all crossed out."
+    ],
+    "profunda": [
+      "The last lines are handwritten, more crooked each time. The very last one has no destination: only a time, and no one crossed it out."
+    ]
+  },
+  "cicatriz.anillo": {
+    "titulo": "The Beacon's plaque",
+    "superficial": [
+      "At the foot of the Beacon, a plaque: “Passage signal. Keep ships away from the dust.”"
+    ],
+    "profunda": [
+      "Below, another hand added: “All of this was ground. What the Gates bit off and did not take stayed here, turning. The rest fell into other skies.”"
+    ]
+  }
 }

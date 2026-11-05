@@ -1,7 +1,7 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.10
-**Última actualización:** 2026-11-03 · Fase 11G (Hogar: las notas para los curiosos)
+**Versión:** v0.11
+**Última actualización:** 2026-11-04 · Fase 11H (Cicatriz hueca: cinco fuentes nuevas)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
 > Este documento dice **qué se puede aprender, dónde y en qué orden**. Es el puente entre la historia y el
@@ -193,6 +193,11 @@ final se entiende como aviso.
 | `cicatriz.borde` | Observación | Siempre; más fuerte cerca de 13:30 | Un acantilado frente al cielo | Las estrellas se deforman alrededor de un punto oscuro: el Nudo dobla la luz (K2); a las 13:30 nace el agujero negro | `lab.imagen_desplazada`, `nudo.existe` · H2, H5 |
 | `cicatriz.palanca` 🟡 | Objeto | Antes del pulso (9:00) | La palanca que saca el motor viejo del núcleo ("E · tirar") | — | `contrapeso.sustituye_motor` · H6 |
 | `cicatriz.cuna` 🟡 | Objeto (lector `ruedas`) | Siempre; se usa con el Contrapeso | La cuna frente al núcleo, con dos ruedas (minutos y segundos) y el reloj de la máquina al lado del suyo | Igualar los dos relojes: lo que pide el pulso para encajarlo (K5, se anota al igualarlos) | `contrapeso.reloj` · H6 |
+| `cicatriz.cripta` 🟡 | Texto | Siempre | La Cripta de la Garganta, bajo la explanada de la Primera Puerta: un tapón de anillos y una inscripción | La primera garganta no se pudo cerrar: la sellaron, la plegaron y la mandaron lejos (requiere `nudo.origen`) | `nudo.sellado` → `nudo.existe` · H2, H5 |
+| `cicatriz.friso` 🟡 | Texto | Siempre | El Friso de la Excavación, en la cara interior: figuras sacando roca del centro en anillos | Cada anillo forjado es una Puerta y cada Puerta deja una mordida (requiere `deuda.filtraciones`) | `deuda.mundo_vaciado` → `deuda.coste_energia` · H2, H4 |
+| `cicatriz.nucleo` 🟡 | Observación | Siempre | Desde el visor de la banda, el micro agujero del centro con su aro de luz | Es como el Nudo, pero diminuto y despierto; la máquina lo rodea para que no crezca (requiere `nudo.existe`) | `deuda.garganta_maquina` · H2 |
+| `cicatriz.partidas` 🟡 | Texto | Siempre | El tablero de la Sala de Partidas, casi todo tachado | Las últimas salidas, a mano; la última sin destino (requiere `partida.evacuacion`) | `partida.ultimas_salidas` → `partida.cascada` · H3 |
+| `cicatriz.anillo` 🟡 | Texto | Siempre | La placa del Faro, en un fragmento del anillo | El anillo es la roca que las mordidas arrancaron y no se llevaron (requiere `casa.fragmentos_de_aqui`) | `deuda.anillo_de_mordidas` · H2 |
 
 ### 5.6 Observatorio — el cielo limpio (reloj 1,15; ✅ existe, opcional)
 
@@ -271,11 +276,11 @@ fuentes en Taller y Archivo además del Laboratorio, así que no depende de lleg
 | Umbral | 8 | 3 |
 | Archivo | 7 | 4 |
 | Taller | 10 | 5 |
-| Cicatriz | 9 | 5 |
+| Cicatriz | 14 | 5 |
 | Observatorio (opcional) | 3 | 1 |
 | Laboratorio | 7 | 2 |
 | Epílogo (Archivo de las Puertas) 🟡 | 3 | 0 (usa K7 y K8) |
-| **Total** | **54** | |
+| **Total** | **59** | |
 
 Está por debajo de las ~10 fuentes por mundo de la pregunta 4 de `CONTEXTO_PLANETAS.md`: deja hueco para
 textos de ambiente sin peso en el grafo.
@@ -330,3 +335,4 @@ textos de ambiente sin peso en el grafo.
 - **2026-11-03 · Fase 11E (🟡).** Nueva fuente `umbral.hoja_entrada` en el tablón del Muelle de Envíos (texto borrador) con el hecho `archivo.entrada` (H4): la puerta del pozo bajo la tercera torre, marcada con tres bandas. Total: 53 fuentes y 61 hechos.
 - **2026-11-03 · Fase 11F (🟡).** Dos fuentes nuevas en el Taller: `taller.pista` (lector `pista`, da `contrapeso.medir_desfase`) y `taller.paginas`, en la Sala del Centro (da `contrapeso.cuenta_sincronia`, que sigue también en `lab.pizarra`: dos fuentes en dos mundos). Total: 55 fuentes y 61 hechos. `taller.manual` remite ahora a los dos sitios.
 - **2026-11-03 · Fase 11G (🟡).** Hogar rehecho: doce fuentes nuevas de ambiente (once notas y la charla de la astrónoma), sin hechos. La Directora espera ahora en el Motor (cambia su primera línea). Total: 67 fuentes y 61 hechos.
+- **2026-11-04 · Fase 11H (🟡).** Cicatriz pasa a ser hueca, con micro agujero en el centro y anillo (✅ la idea, Anthony). Cinco fuentes nuevas con texto borrador: `cicatriz.cripta`, `cicatriz.friso`, `cicatriz.nucleo`, `cicatriz.partidas` y `cicatriz.anillo`, y cinco hechos nuevos (`nudo.sellado`, `deuda.mundo_vaciado`, `deuda.garganta_maquina`, `partida.ultimas_salidas`, `deuda.anillo_de_mordidas`), todos 🟡 para que Anthony los decida. Total: 72 fuentes y 66 hechos.

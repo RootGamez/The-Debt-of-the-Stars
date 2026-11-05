@@ -13,7 +13,7 @@ import {
 import { bodyPose } from '../../src/system/orbits';
 import { parseSystem } from '../../src/system/systemData';
 import { WORLD_IDS } from '../../src/worlds/worldSelection';
-import { loadBuiltWorld } from '../helpers/builtWorlds';
+import { builtWorldInfo } from '../helpers/builtWorlds';
 
 const system = parseSystem(systemData, WORLD_IDS);
 const CYCLE = 900;
@@ -21,7 +21,7 @@ const SAMPLE_STEP = 11;
 
 async function infoOfAll() {
   const entries = await Promise.all(
-    system.bodies.map(async (b) => [b.world, (await loadBuiltWorld(b.world)).info] as const),
+    system.bodies.map(async (b) => [b.world, await builtWorldInfo(b.world)] as const),
   );
   return new Map(entries);
 }

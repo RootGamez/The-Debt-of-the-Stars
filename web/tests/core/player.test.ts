@@ -60,6 +60,19 @@ describe('Player safety respawn', () => {
     expect(player.respawnCount).toBe(1);
   });
 
+  it('does not respawn in the cavity of a hollow world (the Engine Room of Cicatriz is 12 m from its centre)', () => {
+    const hollow: GravityWell = { ...well, innerRadius: R * 0.75 };
+    const noCollision = {
+      resolve: (_c: unknown, correction: Vector3) => (correction.set(0, 0, 0), false),
+    };
+    const player = new Player(spawn, { wells: [hollow], world: noCollision }, hollow);
+    player.state.position.set(0, R * 0.15, 0);
+
+    player.step(IDLE, PHYSICS_STEP);
+
+    expect(player.respawnCount).toBe(0);
+  });
+
   it('lets you stand in the room at the centre of a gas giant', () => {
     const giant: GravityWell = { ...well, core: 22 };
     const core = 8;

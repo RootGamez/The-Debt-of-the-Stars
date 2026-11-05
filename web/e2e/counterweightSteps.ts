@@ -30,8 +30,9 @@ export async function intoTheCradle(page: Page): Promise<void> {
   await standAt(page, 'cicatriz.palanca');
   await expect(page.locator('.prompt')).toHaveText('E · tirar');
   await page.keyboard.press('KeyE');
-  await expect.poll(async () => (await counterweight(page))?.motorOut).toBe(true);
+  // El aviso dura 4,5 s reales: se mira primero (sale en el mismo fotograma que el motor) para no perderlo.
   await expect(page.locator('.notice')).toContainText('El motor viejo sale');
+  await expect.poll(async () => (await counterweight(page))?.motorOut).toBe(true);
 
   await standAt(page, 'cicatriz.cuna');
   await expect(page.locator('.prompt')).toHaveText('E · poner');

@@ -6,7 +6,7 @@ import type { PerspectiveCamera, Vector3 } from 'three';
 import type { MoveIntent } from '../core/input';
 import { FIELD_OF_VIEW } from '../data/movement';
 import { insideCavity } from '../physics/gravity';
-import { edgeTide, seedTide, shellTide, speedFactor, TideStrain } from '../physics/tides';
+import { coreTide, edgeTide, seedTide, shellTide, speedFactor, TideStrain } from '../physics/tides';
 import { holeTide, horizonTide } from '../system/absorption';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 import { t } from '../i18n';
@@ -35,6 +35,11 @@ export interface TideFrame {
   absorption: number;
   /** Lo cerca que se está del horizonte estable (0–1, `horizonCloseness`; Fase 10D): se nota, no mata. */
   horizon?: number;
+  /**
+   * El Contrapeso sujeta el agujero (hay horizonte estable): el micro agujero del núcleo de Cicatriz ya no crece y
+   * su marea es solo la del horizonte, que se nota y no mata (así se puede bajar a él con la nave).
+   */
+  stableHole?: boolean;
   /** El ciclo corre (sin pausa ni lectura): solo entonces se acumula la tensión. */
   running: boolean;
   piloting: boolean;
@@ -50,7 +55,8 @@ export interface TideEffects {
   dispose(): void;
 }
 
-function tideOf(frame: TideFrame, sources: TideSources): number {
+/** La marea en un fotograma (sin acumular): exportada para los tests. */
+export function tideOf(frame: TideFrame, sources: TideSources): number {
   const { world, position, loopTime, piloting, absorption } = frame;
   const near = horizonTide(frame.horizon ?? 0);
   if (!world) return near;
@@ -62,6 +68,13 @@ function tideOf(frame: TideFrame, sources: TideSources): number {
   const { innerRadius } = world.well;
   if (innerRadius !== undefined) {
     const distance = position.distanceTo(world.well.center);
+    if (world.world.info.cavityTide === 'nucleo') {
+      // Cicatriz: el micro agujero del centro; por fuera, su cáscara no tira de nada.
+      // Con el agujero sujeto por el Contrapeso, su marea es la del horizonte estable (`near`).
+      return insideCavity(position, world.well) && frame.stableHole !== true
+        ? Math.max(tide, coreTide(distance, loopTime))
+        : tide;
+    }
     tide = Math.max(
       tide,
       insideCavity(position, world.well)

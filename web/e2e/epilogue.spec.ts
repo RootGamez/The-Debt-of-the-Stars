@@ -55,26 +55,23 @@ test('the stable horizon pulls the ship in, and crossing it opens the Archive of
 }) => {
   test.setTimeout(180_000);
   await installCounterweight(page);
+  // Primero a la nave: subir a ella lleva su tiempo y a partir de las 13:30 queda poco ciclo.
+  await board(page);
   // Nace a las 13:30 en el núcleo de la máquina y se queda pequeño.
   await page.evaluate(() => window.__juego?.skipTo?.(812));
   await expect.poll(async () => (await horizon(page))?.radius ?? 0).toBeGreaterThan(0);
-
-  await board(page);
   const far = (await snapshot(page))?.loop.rate ?? 0;
   expect(await page.evaluate(() => window.__juego?.nearHorizon?.(2.5) ?? false)).toBe(true);
   await expect.poll(async () => (await horizon(page))?.closeness ?? 0).toBeGreaterThan(0.3);
   // Cerca del horizonte, el tiempo del sitio va más despacio: el de Umbral corre más deprisa.
   await expect.poll(async () => (await snapshot(page))?.loop.rate ?? 1).toBeLessThan(far * 0.85);
 
+  // Cruzarlo funde a negro y abre el Archivo: la página cambia enseguida, así que se espera la llegada.
   await page.keyboard.down('KeyW');
-  await expect
-    .poll(async () => (await snapshot(page))?.loop.cause, { timeout: 30_000 })
-    .toBe('horizonte');
+  await page.waitForURL(/mundo=puertas/, { timeout: 60_000 });
   await page.keyboard.up('KeyW');
-  expect((await snapshot(page))?.loop.loops).toBe(0); // no es una muerte
-
-  await page.waitForURL(/mundo=puertas/, { timeout: 30_000 });
   await expect.poll(async () => (await snapshot(page))?.world, { timeout: 20_000 }).toBe('puertas');
+  expect((await snapshot(page))?.loop.loops).toBe(0); // no fue una muerte: no cuenta ciclo
   await expect.poll(async () => (await snapshot(page))?.grounded, { timeout: 20_000 }).toBe(true);
   await expect(page.locator('.llegada')).toHaveCount(0);
 });

@@ -123,5 +123,105 @@
       "texto": ["[texto pendiente]"],
       "hechos": ["contrapeso.reloj"]
     }
+  },
+  {
+    "id": "cicatriz.cripta",
+    "mundo": "cicatriz",
+    "tipo": "texto",
+    "titulo": "La Cripta de la Garganta",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Bajo la explanada de la Primera Puerta, una bóveda. En el suelo, un tapón de anillos con abrazaderas; en la pared del fondo, una inscripción."
+      ],
+      "hechos": ["nudo.sellado"]
+    },
+    "profunda": {
+      "requiere": ["nudo.origen"],
+      "texto": [
+        "«Aquí se abrió la primera garganta. No supimos cerrarla: la plegamos sobre sí misma y la mandamos lejos, donde su peso no nos tocara.»",
+        "«Que nadie levante este sello. Lo que hay debajo ya no está aquí, pero sigue tirando.»"
+      ],
+      "hechos": ["nudo.existe"]
+    }
+  },
+  {
+    "id": "cicatriz.friso",
+    "mundo": "cicatriz",
+    "tipo": "texto",
+    "titulo": "El Friso de la Excavación",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Un relieve largo en la cara interior: figuras pequeñas sacando roca del centro y llevándola, en anillos, hacia arriba."
+      ],
+      "hechos": ["deuda.mundo_vaciado"]
+    },
+    "profunda": {
+      "requiere": ["deuda.filtraciones"],
+      "texto": [
+        "El friso sigue: cada anillo forjado es una Puerta, y cada Puerta abierta deja una mordida en la cáscara.",
+        "Al final, las figuras miran el hueco que han hecho. Una señala hacia el centro, donde ya no queda roca."
+      ],
+      "hechos": ["deuda.coste_energia"]
+    }
+  },
+  {
+    "id": "cicatriz.nucleo",
+    "mundo": "cicatriz",
+    "tipo": "observacion",
+    "titulo": "El núcleo",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Desde el visor de la banda se ve el centro: un punto negro, pequeño como una semilla, con un aro de luz que dobla lo que hay detrás."
+      ],
+      "hechos": ["deuda.garganta_maquina"]
+    },
+    "profunda": {
+      "requiere": ["nudo.existe"],
+      "texto": [
+        "Es lo mismo que el Nudo, pero diminuto y despierto. La máquina lo rodea para que no crezca; con cada pulso, el aro de luz se ensancha un poco."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "cicatriz.partidas",
+    "mundo": "cicatriz",
+    "tipo": "texto",
+    "titulo": "La Sala de Partidas",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Un tablero de salidas en la cara interior. Destinos, horas, números de Puerta. Casi todos tachados."
+      ],
+      "hechos": ["partida.ultimas_salidas"]
+    },
+    "profunda": {
+      "requiere": ["partida.evacuacion"],
+      "texto": [
+        "Las últimas líneas están escritas a mano, cada vez más torcidas. La última no tiene destino: solo una hora, y nadie la tachó."
+      ],
+      "hechos": ["partida.cascada"]
+    }
+  },
+  {
+    "id": "cicatriz.anillo",
+    "mundo": "cicatriz",
+    "tipo": "texto",
+    "titulo": "La placa del Faro",
+    "borrador": true,
+    "superficial": {
+      "texto": ["Al pie del Faro, una placa: «Señal de paso. No acercar la nave al polvo»."],
+      "hechos": ["deuda.anillo_de_mordidas"]
+    },
+    "profunda": {
+      "requiere": ["casa.fragmentos_de_aqui"],
+      "texto": [
+        "Debajo, otra mano añadió: «Todo esto era suelo. Lo que las Puertas mordieron y no se llevaron se quedó girando aquí. Lo demás cayó en otros cielos»."
+      ],
+      "hechos": []
+    }
   }
 ]

@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — Juego de bucle de tiempo
 
-**Versión:** v0.14
-**Última actualización:** 2026-11-03 · Fase 11G (Hogar rehecho y los Ool)
+**Versión:** v0.15
+**Última actualización:** 2026-11-04 · Fase 11H (Cicatriz hueca, con anillo y micro agujero)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -206,6 +206,14 @@
 
 **Blender.** Esfera con huecos esféricos hechos con booleanas. Es la pieza más lucida del juego y conviene hacerla con cuidado.
 
+**Por código (Fase 11H, 2026-11-04).** ✅ Anthony: Cicatriz es **hueca**; en su centro duerme un **micro agujero negro** (es el que crecerá a las 13:30), la máquina **rodea el centro**, hay **gravedad doble** (hacia dentro por fuera, hacia fuera en la cara interior, con la cabeza hacia el centro), un **anillo** con los fragmentos que perdió (miles de rocas y unos pocos fragmentos pisables) y los cráteres miran hacia el interior. Lo demás es 🟡:
+- **Forma.** Cáscara de 80 m por fuera y 60 m por dentro. Dieciocho mordidas (la **Gran Mordida** y diecisiete más) atraviesan la cáscara: cada cuenco acaba en un **ojo** que da a la cavidad, enmarcado por un anillo de contención. La gravedad cambia de lado a 61 m y, dentro del ojo, se tuerce hacia la cara interior: quien cae por un ojo a pie describe un arco y aterriza de pie al otro lado. De la cara interior se vuelve fuera por el Pozo.
+- **Fuera.** El Puesto del Escéptico, la Primera Puerta con la **Cripta de la Garganta** bajo su explanada (escalera, bóveda, el sello de la primera garganta y una inscripción), el Borde sobre la Gran Mordida, las **Galerías Cortadas** (salas partidas por la mordida, con la pared del símbolo), bocas de túneles cortados, el **Pozo** (una Puerta plegada lleva a la cara interior), torres con cables y un campamento con raíles que acaban en el vacío.
+- **Dentro.** El **Eje** (columna desde la cara interior hasta la máquina, con una Puerta plegada a la Sala del Motor), seis radios de cable, la **Fundición** (anillos a medio forjar), la **Sala de Partidas**, el **Friso de la Excavación**, los **Dormideros**, estratos colgantes y caminos de losas.
+- **La Sala del Motor** es una banda de 12 m de radio alrededor del centro: cuna, palanca, bitácora, lista de mundos y el visor del núcleo. Dentro, las esferas armilares, el motor viejo y el micro agujero. La marea del núcleo se aguanta en la banda hasta las 15:00. La nave llega al centro por el ojo de la Gran Mordida.
+- **El anillo.** De 108 a 152 m, inclinado, con un surco. Fragmentos pisables: el **Faro** (con la placa), el **Muro Arrancado** (media casa del revés con la mesa puesta), el **Andamio de Pesca** y la **Losa del Símbolo**.
+- Cinco fuentes nuevas (ver `CONTEXTO_PISTAS.md` §5.5).
+
 ---
 
 ## 7. Observatorio — el cielo limpio (opcional)
@@ -360,3 +368,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-11-03 · Fase 11E (agua).** Anthony pide un mar con oleaje, más claro y con más detalle, una lógica de agua reutilizable y quitar la raya del horizonte del cielo (✅). Se hace con olas compartidas entre física y shader, un material de océano nuevo, salpicaduras, ondas y burbujas y el fondo teñido con cáusticas; el cielo ya no corta en el horizonte (🟡 el aspecto).
 - **2026-11-03 · Fase 11F (🟡).** El Taller se hace por código como gigante de gas: nubes en bandas de 80 m, cinco islas fijas sobre el gigante que gira, muerte `gas` bajo 74 m, puentes de luz pisables solo a las 7:00, el anillo de la Pista que se abre a las 7:00 con su reloj ajustado y la Sala del Centro con las páginas de sincronización. Cambia lo propuesto: las islas no orbitan por separado.
 - **2026-11-03 · Fase 11G (🟡).** Hogar por código: continente de día con el Instituto, la aldea, la ciudad, el campo, el embarcadero y el Motor (la Directora pasa a esperar allí); islas de noche con secretos para los curiosos; mar y cielo como el Archivo; los Ool por código, de color y luz según la edad (✅).
+- **2026-11-04 · Fase 11H.** Anthony pide rehacer Cicatriz hueca, con el micro agujero negro en el núcleo, anillo y mucho más detalle (✅ la idea, la máquina alrededor del centro, la gravedad doble, el anillo con fragmentos pisables y hechos nuevos en el grafo). Se hace por código (`web/src/worlds/procedural/cicatriz*.ts`); los lugares y textos nuevos son 🟡.

@@ -2,6 +2,7 @@
 // hasta que se migren (docs/plan-fase-11-modelado-por-codigo.md).
 import type { Group } from 'three';
 import { buildArchivo } from './archivo';
+import { buildCicatriz } from './cicatriz';
 import { buildHogar } from './hogar';
 import { buildTaller } from './taller';
 import { buildUmbral } from './umbral';
@@ -11,6 +12,7 @@ const BUILDERS: ReadonlyMap<string, () => Group> = new Map([
   ['archivo', () => buildArchivo()],
   ['taller', () => buildTaller()],
   ['hogar', () => buildHogar()],
+  ['cicatriz', () => buildCicatriz()],
 ]);
 
 /** Si ese mundo se construye por código. */

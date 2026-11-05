@@ -289,6 +289,58 @@ describe('a hollow world (the Nudo)', () => {
     expect(info.interiorLight).toBeUndefined();
   });
 
+  it('reads where the gravity turns around and which tide fills the cavity', () => {
+    const info = readWorldInfo(
+      hollow({
+        interior_light: 2,
+        interior_light_color: '#C0D8C8',
+        cavity_limit: 22,
+        cavity_tide: 'nucleo',
+      }),
+      'umbral',
+    );
+
+    expect(info.cavityLimit).toBe(22);
+    expect(info.cavityTide).toBe('nucleo');
+  });
+
+  it('defaults to the tide of the seed (the Nudo)', () => {
+    const info = readWorldInfo(
+      hollow({ interior_light: 2, interior_light_color: '#C0D8C8' }),
+      'umbral',
+    );
+
+    expect(info.cavityLimit).toBeUndefined();
+    expect(info.cavityTide).toBe('semilla');
+  });
+
+  it('rejects a turning point outside the shell or an unknown tide', () => {
+    const light = { interior_light: 2, interior_light_color: '#C0D8C8' };
+    expect(() => readWorldInfo(hollow({ ...light, cavity_limit: 20 }), 'umbral')).toThrow(
+      /cavity_limit/,
+    );
+    expect(() => readWorldInfo(hollow({ ...light, cavity_limit: 25 }), 'umbral')).toThrow(
+      /cavity_limit/,
+    );
+    expect(() => readWorldInfo(hollow({ ...light, cavity_tide: 'luna' }), 'umbral')).toThrow(
+      /cavity_tide/,
+    );
+  });
+
+  it('reads the holes of the shell, four numbers each, and rejects broken ones', () => {
+    const light = { interior_light: 2, interior_light_color: '#C0D8C8' };
+    const info = readWorldInfo(hollow({ ...light, cavity_holes: [0, 2, 0, 0.3] }), 'umbral');
+    expect(info.cavityHoles).toHaveLength(1);
+    expect(info.cavityHoles?.[0]?.axis.toArray()).toEqual([0, 1, 0]);
+    expect(info.cavityHoles?.[0]?.angle).toBe(0.3);
+    expect(readWorldInfo(hollow(light), 'umbral').cavityHoles).toBeUndefined();
+    for (const bad of [[0, 1, 0], [0, 0, 0, 0.3], [0, 1, 0, 2], ['x', 1, 0, 0.3], 'ojos']) {
+      expect(() => readWorldInfo(hollow({ ...light, cavity_holes: bad }), 'umbral')).toThrow(
+        /cavity_holes/,
+      );
+    }
+  });
+
   it('rejects a cavity as big as the world', () => {
     expect(() => readWorldInfo(hollow({ inner_radius: 25 }), 'umbral')).toThrow(/inner_radius/);
   });

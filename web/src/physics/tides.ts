@@ -19,6 +19,17 @@ const EDGE_CURVE: readonly (readonly [number, number])[] = [
   [900, 1.3],
 ];
 
+/**
+ * El micro agujero del núcleo de Cicatriz (Fase 11H): hasta qué distancia del centro se nota (m) y cómo crece con
+ * el reloj de Umbral. En la Sala del Motor (a 12 m) se nota pero no hace daño hasta el final del ciclo.
+ */
+const CORE_RANGE = 24;
+const CORE_CURVE: readonly (readonly [number, number])[] = [
+  [0, 0.75],
+  [810, 1.05], // 13:30: nace el agujero negro
+  [900, 1.4],
+];
+
 /** La semilla: desde qué altura sobre la cara interior se nota y en cuántos metros llega a 1. */
 const SEED_FROM = 3.5;
 const SEED_SPAN = 6;
@@ -54,6 +65,13 @@ export function edgeTide(distance: number, loopTime: number): number {
   if (!Number.isFinite(distance)) return 0;
   const near = clamp(1 - distance / EDGE_RANGE, 0, 1) ** 1.5;
   return near * curveAt(EDGE_CURVE, loopTime);
+}
+
+/** Marea del micro agujero de Cicatriz a `distance` metros del centro, en el instante `loopTime` del ciclo. */
+export function coreTide(distance: number, loopTime: number): number {
+  if (!Number.isFinite(distance)) return 0;
+  const near = clamp(1 - distance / CORE_RANGE, 0, 1) ** 1.5;
+  return Math.min(MAX_TIDE, near * curveAt(CORE_CURVE, loopTime));
 }
 
 /** Marea de la semilla a `height` metros sobre la cara interior (hacia el centro). */

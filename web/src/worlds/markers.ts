@@ -6,7 +6,8 @@
 // abre) y OOL_<quién> un Ool (Fase 9), con lo que
 // brilla en su hijo OOL_<quién>_Luz.
 // Las propiedades personalizadas de Blender llegan como userData (export_extras).
-import type { Mesh, Object3D } from 'three';
+import { Vector3, type Mesh, type Object3D } from 'three';
+import type { CavityHole } from '../physics/cavityThroat';
 
 export const INTERACTION_KINDS = ['texto', 'grabacion', 'objeto', 'observacion', 'charla'] as const;
 export type InteractionKind = (typeof INTERACTION_KINDS)[number];
@@ -29,6 +30,16 @@ export interface WorldInfo {
    * la gravedad empuja hacia fuera y se camina por dentro de la esfera.
    */
   innerRadius?: number | undefined;
+  /**
+   * Mundos huecos: radio bajo el que la gravedad empuja hacia fuera (`cavity_limit`, entre `inner_radius` y
+   * `radius`). Sin él, a mitad de la cáscara (el Nudo). Cicatriz lo pone justo bajo su cara interior: sus cuencos
+   * llegan hasta ahí y su fondo tiene que seguir tirando hacia el centro.
+   */
+  cavityLimit?: number | undefined;
+  /** Qué marea llena la cavidad (`cavity_tide`): la semilla del Nudo o el micro agujero del núcleo de Cicatriz. */
+  cavityTide?: CavityTide | undefined;
+  /** Agujeros de la cáscara (`cavity_holes`: eje x, y, z y radio angular en radianes, de cuatro en cuatro). */
+  cavityHoles?: CavityHole[] | undefined;
   /** Luz de dentro de la cavidad, que sustituye a la de la Brasa (`interior_light` y `interior_light_color`). */
   interiorLight?: { color: number; intensity: number } | undefined;
   /**
@@ -49,6 +60,9 @@ export interface WorldInfo {
    */
   gas?: { lethal: number; safe: number } | undefined;
 }
+
+export const CAVITY_TIDES = ['semilla', 'nucleo'] as const;
+export type CavityTide = (typeof CAVITY_TIDES)[number];
 
 export interface InteractionMarker {
   name: string;
@@ -184,10 +198,57 @@ export function readWorldInfo(scene: Object3D, worldId: string): WorldInfo {
     clockRate: requireNumber(root, 'clock_rate', 'positive'),
     ambient: readLight(root, 'ambient'),
     innerRadius,
+    ...(innerRadius !== undefined && readCavity(root, innerRadius, radius)),
     interiorLight: innerRadius === undefined ? undefined : readLight(root, 'interior_light'),
     sea: readSea(root),
     gas: readGas(root),
   };
+}
+
+function readCavity(
+  root: Object3D,
+  innerRadius: number,
+  radius: number,
+): Pick<WorldInfo, 'cavityLimit' | 'cavityTide' | 'cavityHoles'> {
+  const limit = optionalNumber(root, 'cavity_limit', 'positive');
+  if (limit !== undefined && (limit <= innerRadius || limit >= radius)) {
+    throw new WorldDataError(
+      `${root.name}: "cavity_limit" (${limit}) debe estar entre "inner_radius" (${innerRadius}) y "radius" (${radius})`,
+    );
+  }
+  const tide: unknown = root.userData.cavity_tide ?? 'semilla';
+  if (typeof tide !== 'string' || !isCavityTide(tide)) {
+    throw new WorldDataError(
+      `${root.name}: "cavity_tide" debe ser ${CAVITY_TIDES.join(' o ')} (recibido ${String(tide)})`,
+    );
+  }
+  return { cavityLimit: limit, cavityTide: tide, cavityHoles: readHoles(root) };
+}
+
+function readHoles(root: Object3D): CavityHole[] | undefined {
+  const raw: unknown = root.userData.cavity_holes;
+  if (raw === undefined) return undefined;
+  const values: unknown[] = Array.isArray(raw) ? (raw as unknown[]) : [];
+  const numbers = values.filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+  if (!Array.isArray(raw) || numbers.length !== values.length || numbers.length % 4 !== 0) {
+    throw new WorldDataError(
+      `${root.name}: "cavity_holes" debe ser una lista de números de cuatro en cuatro (eje y ángulo)`,
+    );
+  }
+  const holes: CavityHole[] = [];
+  for (let i = 0; i < numbers.length; i += 4) {
+    const [x = 0, y = 0, z = 0, angle = 0] = numbers.slice(i, i + 4);
+    const axis = new Vector3(x, y, z);
+    if (axis.lengthSq() < 1e-9 || angle <= 0 || angle >= Math.PI / 2) {
+      throw new WorldDataError(`${root.name}: agujero ${i / 4} de "cavity_holes" no válido`);
+    }
+    holes.push({ axis: axis.normalize(), angle });
+  }
+  return holes;
+}
+
+function isCavityTide(value: string): value is CavityTide {
+  return (CAVITY_TIDES as readonly string[]).includes(value);
 }
 
 function readGas(root: Object3D): WorldInfo['gas'] {

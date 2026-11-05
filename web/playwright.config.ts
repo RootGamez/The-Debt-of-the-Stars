@@ -16,6 +16,8 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'retain-on-failure',
+    // El juego elige el idioma del navegador: las pruebas leen los textos en español.
+    locale: 'es-ES',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {

@@ -116,6 +116,9 @@ const ALTITUDE_PROBE = 200;
 const CABIN_LIGHT_COLOR = 0xffd6a0;
 const CABIN_LIGHT_INTENSITY = 2.5;
 const CABIN_LIGHT_RANGE = 3.5;
+/** Ejes de referencia para orientar la nave cuando apunta derecho al centro de un mundo. */
+const Y_AXIS = new Vector3(0, 1, 0);
+const X_AXIS = new Vector3(1, 0, 0);
 
 const KEY_HINTS = {
   landed: t('Espacio despegar · F bajar · T objetivo'),
@@ -491,7 +494,14 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
       if (!boarding.isPiloting || !spec.bodyOf(world)) return false;
       up.copy(position).normalize();
       const forward = toward.clone().sub(position);
-      place(world, position, lookAlong(up, forward.addScaledVector(up, -forward.dot(up))));
+      forward.addScaledVector(up, -forward.dot(up));
+      if (forward.lengthSq() < 1e-6) {
+        // Hacia el centro del mundo (el núcleo de Cicatriz hueca): el morro apunta abajo y el techo, a un lado.
+        forward.copy(toward).sub(position);
+        up.copy(Math.abs(forward.y) < 0.9 * forward.length() ? Y_AXIS : X_AXIS);
+        up.addScaledVector(forward, -up.dot(forward) / forward.lengthSq()).normalize();
+      }
+      place(world, position, lookAlong(up, forward));
       return true;
     },
   };

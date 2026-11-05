@@ -21,7 +21,11 @@ export function createInteriorLights(
     // Sin caída con la distancia, como un cielo pequeño. Un poco apartada del centro: si estuviera justo en
     // él, todas las caras de la esfera la recibirían de frente y la cara interior se vería lisa.
     const light = new PointLight(glow.color, glow.intensity, 0, 0);
-    light.position.set(0.3, 0.45, 0.2).multiplyScalar(runtime.world.info.innerRadius ?? 0);
+    // En Cicatriz (marea del núcleo) la luz sale de la máquina del centro: casi en él, dentro de su banda.
+    const offset = runtime.world.info.cavityTide === 'nucleo' ? 0.12 : 1;
+    light.position
+      .set(0.3, 0.45, 0.2)
+      .multiplyScalar((runtime.world.info.innerRadius ?? 0) * offset);
     light.name = `${id}: luz de la semilla`;
     light.visible = false;
     runtime.world.scene.add(light);

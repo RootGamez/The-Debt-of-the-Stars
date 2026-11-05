@@ -5,7 +5,7 @@ import { systemOf } from '../../src/game/loadSystem';
 import { bodyPose } from '../../src/system/orbits';
 import { parseSystem } from '../../src/system/systemData';
 import { WORLD_IDS } from '../../src/worlds/worldSelection';
-import { loadBuiltWorld } from '../helpers/builtWorlds';
+import { builtWorldInfo } from '../helpers/builtWorlds';
 
 const valid = {
   estrella: { radio: 100 },
@@ -97,7 +97,7 @@ describe('parseSystem', () => {
 });
 
 async function radiusOf(world: string): Promise<number> {
-  return (await loadBuiltWorld(world)).info.radius;
+  return (await builtWorldInfo(world)).radius;
 }
 
 describe('the real system (sistema.json)', () => {

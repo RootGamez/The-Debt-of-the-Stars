@@ -42,7 +42,7 @@ describe('the real clue data', () => {
     expect(ambient.map((s) => s.id)).toContain('hogar.bitacora_albatros');
   });
 
-  it('contains the 7 threads, the 9 conclusions and the 55 sources of CONTEXTO_PISTAS.md', () => {
+  it('contains the 7 threads, the 9 conclusions and the 60 sources of CONTEXTO_PISTAS.md', () => {
     expect(clues.threads.map((t) => t.id)).toEqual(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7']);
     expect(clues.conclusions.map((c) => c.id)).toEqual([
       'K1',
@@ -55,7 +55,7 @@ describe('the real clue data', () => {
       'K7',
       'K8',
     ]);
-    expect(graph).toHaveLength(55);
+    expect(graph).toHaveLength(60);
   });
 
   it('spreads the sources over the places of the document', () => {
@@ -68,18 +68,31 @@ describe('the real clue data', () => {
       umbral: 9,
       archivo: 7,
       taller: 10,
-      cicatriz: 9,
+      cicatriz: 14,
       observatorio: 3,
       laboratorio: 7,
       puertas: 3,
     });
   });
 
+  const CICATRIZ_DRAFTS = [
+    'cicatriz.cripta',
+    'cicatriz.friso',
+    'cicatriz.nucleo',
+    'cicatriz.partidas',
+    'cicatriz.anillo',
+  ];
+
   it('gives Umbral, home and the recordings readable draft texts and leaves the rest as skeleton', () => {
     // Las grabaciones necesitan un borrador para que su mecánica se pueda probar (Fase 7); casa, para el
     // prólogo (Fase 9).
-    const drafted = (s: { world: string; kind: string }) =>
-      s.world === 'umbral' || s.world === 'hogar' || s.world === 'luna' || s.kind === 'grabacion';
+    // Las fuentes nuevas de Cicatriz (Fase 11H) llegan con borrador para que se lean en su sitio.
+    const drafted = (s: { id: string; world: string; kind: string }) =>
+      s.world === 'umbral' ||
+      s.world === 'hogar' ||
+      s.world === 'luna' ||
+      s.kind === 'grabacion' ||
+      CICATRIZ_DRAFTS.includes(s.id);
     const readable = clues.sources.filter(drafted);
     const others = clues.sources.filter((s) => !drafted(s));
 

@@ -3,6 +3,7 @@
 // Los mundos huecos (el Nudo) tienen además una cavidad: dentro, la gravedad empuja hacia fuera, contra la
 // cara interior, y se camina por dentro de la esfera con la cabeza hacia el centro.
 import { Vector3 } from 'three';
+import { holePull, type CavityHole } from './cavityThroat';
 import { G_BASE, GRAVITY_RANGE_RADII } from '../data/movement';
 import type { WorldInfo } from '../worlds/markers';
 
@@ -16,6 +17,10 @@ export interface GravityWell {
   range: number;
   /** Solo los mundos huecos: radio de la cara interior de la cavidad (m). */
   innerRadius?: number | undefined;
+  /** Solo los mundos huecos: bajo este radio la gravedad empuja hacia fuera (por defecto, a mitad de la cáscara). */
+  cavityLimit?: number | undefined;
+  /** Solo los mundos huecos con agujeros (los ojos de Cicatriz): dentro de ellos la gravedad se tuerce. */
+  holes?: readonly CavityHole[] | undefined;
   /** Solo los gigantes de gas: radio de la sala del centro, donde también se puede estar de pie (m). */
   core?: number | undefined;
 }
@@ -27,6 +32,7 @@ export interface GravityWell {
 const CAVITY_CORE = 0.25;
 
 const toCenter = new Vector3();
+const pull = new Vector3();
 
 export function wellForWorld(info: WorldInfo, center = new Vector3()): GravityWell {
   return {
@@ -35,6 +41,8 @@ export function wellForWorld(info: WorldInfo, center = new Vector3()): GravityWe
     strength: G_BASE * info.gravity,
     range: info.radius * GRAVITY_RANGE_RADII,
     innerRadius: info.innerRadius,
+    cavityLimit: info.cavityLimit,
+    holes: info.cavityHoles,
     core: info.gas?.safe,
   };
 }
@@ -45,11 +53,13 @@ function falloff(distance: number, well: GravityWell): number {
 }
 
 /**
- * Por debajo de esta distancia al centro se está en la cavidad (la mitad del grosor de la cáscara: ahí
- * dentro todo es roca, así que el límite exacto no se pisa nunca).
+ * Por debajo de esta distancia al centro se está en la cavidad. Por defecto, a mitad del grosor de la cáscara
+ * (en el Nudo ahí dentro todo es roca, así que el límite exacto no se pisa nunca); un mundo con cuencos que
+ * atraviesan la cáscara (Cicatriz) lo pone justo bajo su cara interior.
  */
 function cavityLimit(well: GravityWell): number | undefined {
-  return well.innerRadius === undefined ? undefined : (well.innerRadius + well.radius) / 2;
+  if (well.innerRadius === undefined) return undefined;
+  return well.cavityLimit ?? (well.innerRadius + well.radius) / 2;
 }
 
 export function insideCavity(position: Vector3, well: GravityWell): boolean {
@@ -57,11 +67,15 @@ export function insideCavity(position: Vector3, well: GravityWell): boolean {
   return limit !== undefined && position.distanceTo(well.center) < limit;
 }
 
-/** Aceleración de gravedad en `position` (m/s²). Escribe en `target` y lo devuelve. */
+/**
+ * Aceleración de gravedad en `position` (m/s²). Escribe en `target` y lo devuelve. Con `side`, en los mundos
+ * huecos manda ese lado (el que recuerda el personaje: physics/cavityThroat.ts) y no la distancia al centro.
+ */
 export function gravityAt(
   position: Vector3,
   wells: readonly GravityWell[],
   target = new Vector3(),
+  side?: 'inside' | 'outside',
 ): Vector3 {
   target.set(0, 0, 0);
   for (const well of wells) {
@@ -69,11 +83,15 @@ export function gravityAt(
     const distance = toCenter.length();
     if (distance < 1e-6) continue; // en el centro exacto no hay dirección
     const limit = cavityLimit(well);
-    if (limit !== undefined && well.innerRadius !== undefined && distance < limit) {
+    const inside = side === undefined ? limit !== undefined && distance < limit : side === 'inside';
+    if (limit !== undefined && well.innerRadius !== undefined && inside) {
       // Dentro de la cavidad: hacia fuera, apagándose cerca del centro.
       const core = well.innerRadius * CAVITY_CORE;
       const magnitude = well.strength * Math.min(1, distance / core);
-      target.addScaledVector(toCenter, -magnitude / distance);
+      // Solo los personajes (con lado): la nave cruza los ojos con la gravedad de siempre.
+      const bent = side === undefined ? undefined : holePull(position, well, pull);
+      if (bent) target.addScaledVector(bent, magnitude);
+      else target.addScaledVector(toCenter, -magnitude / distance);
       continue;
     }
     const magnitude = well.strength * falloff(distance, well);

@@ -31,6 +31,7 @@ import {
   WATER_DRAG_QUADRATIC,
 } from '../data/movement';
 import { createCapsule, createContact, placeCapsule, type CollisionWorld } from './collisionWorld';
+import { hollowWell, nextCavitySide, type CavitySide } from './cavityThroat';
 import { gravityAt, type GravityWell } from './gravity';
 import { alignUp, forwardOf, rightOf, smoothingFactor, upOf } from './surfaceFrame';
 import { submersion, type WaterBody } from './water';
@@ -59,6 +60,8 @@ export interface CharacterState {
   lastLandingSpeed: number;
   /** Nada (bastante cuerpo bajo el agua): Espacio sube, Mayús bucea. */
   swimming: boolean;
+  /** En un mundo hueco, de qué lado de la cáscara está (decide hacia dónde tira la gravedad). */
+  cavitySide: CavitySide | undefined;
 }
 
 export interface MotorEnvironment {
@@ -108,6 +111,7 @@ export function createCharacter(feet: Vector3, body: Quaternion): CharacterState
     landings: 0,
     lastLandingSpeed: 0,
     swimming: false,
+    cavitySide: undefined,
   };
 }
 
@@ -136,8 +140,25 @@ function moveTowards(current: Vector3, target: Vector3, maxDelta: number): void 
   current.set(current.x + dx * k, current.y + dy * k, current.z + dz * k);
 }
 
+/**
+ * El lado de la cáscara (mundos huecos), recordado: así no se sube y baja sin parar en el límite. Quien cae por
+ * un ojo pasa a la cavidad y la gravedad del ojo (physics/gravity.ts) lo lleva en arco hasta la cara interior.
+ */
+function updateCavitySide(state: CharacterState, env: MotorEnvironment): void {
+  const well = hollowWell(env.wells);
+  state.cavitySide = well
+    ? nextCavitySide(
+        state.position,
+        well,
+        state.cavitySide,
+        state.grounded ? state.groundNormal : undefined,
+      )
+    : undefined;
+}
+
 function updateUp(state: CharacterState, env: MotorEnvironment, dt: number): void {
-  gravityAt(state.position, env.wells, gravity);
+  updateCavitySide(state, env);
+  gravityAt(state.position, env.wells, gravity, state.cavitySide);
   const strength = gravity.length();
   if (strength > 1e-6) {
     up.copy(gravity).divideScalar(-strength);

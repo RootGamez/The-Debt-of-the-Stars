@@ -381,5 +381,35 @@
     "hilos": ["H6"],
     "frase": "En el Banco del Archivo quedan los planos del Contrapeso: con ellos se podría construir otro.",
     "enlaces": ["contrapeso.sustituye_motor"]
+  },
+  {
+    "id": "nudo.sellado",
+    "hilos": ["H2", "H5"],
+    "frase": "La primera garganta no se pudo cerrar: la sellaron, la plegaron y la mandaron lejos de Cicatriz.",
+    "enlaces": ["nudo.origen", "nudo.existe"]
+  },
+  {
+    "id": "deuda.mundo_vaciado",
+    "hilos": ["H2", "H4"],
+    "frase": "Vaciaron Cicatriz por dentro para forjar los anillos de las Puertas.",
+    "enlaces": ["deuda.filtraciones"]
+  },
+  {
+    "id": "deuda.garganta_maquina",
+    "hilos": ["H2"],
+    "frase": "En el centro de Cicatriz duerme una garganta diminuta; la máquina la rodea para que no crezca.",
+    "enlaces": ["nudo.existe", "deuda.mundo_vaciado"]
+  },
+  {
+    "id": "partida.ultimas_salidas",
+    "hilos": ["H3"],
+    "frase": "En la Sala de Partidas tacharon las salidas una a una; la última no tiene destino.",
+    "enlaces": ["partida.evacuacion"]
+  },
+  {
+    "id": "deuda.anillo_de_mordidas",
+    "hilos": ["H2"],
+    "frase": "El anillo de Cicatriz es la roca que las mordidas arrancaron y no se llevaron.",
+    "enlaces": ["casa.fragmentos_de_aqui", "deuda.filtraciones"]
   }
 ]
