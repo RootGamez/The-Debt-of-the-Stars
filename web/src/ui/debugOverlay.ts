@@ -76,8 +76,10 @@ declare global {
       warpTo?(world: string): boolean;
       /** Pilotando: la nave aparece quieta a esa altura sobre un mundo. false si no se puede. */
       shipTo?(world: string, altitude: number): boolean;
-      /** A pie: el jugador aparece junto a la escotilla de la nave. */
-      toShip?(): boolean;
+      /** A pie: el jugador aparece dentro de la nave posada, frente a un sitio (por defecto, el asiento). */
+      toShip?(station?: 'asiento' | 'registro' | 'mapa'): boolean;
+      /** Pone al jugador en el suelo al pie de la escalerilla de la nave (si está en su mundo). */
+      toLadder?(): boolean;
       /** Lleva el reloj de Umbral a ese instante del ciclo (s); devuelve dónde quedó. */
       skipTo?(seconds: number): number;
       /** El anillo de la Pista del Taller: si su reloj está en hora y si deja pasar ahora. */

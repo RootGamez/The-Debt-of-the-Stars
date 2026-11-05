@@ -11,6 +11,7 @@ import {
 } from './input';
 
 import { EMPTY_FLIGHT_KEYS, type FlightKeys } from '../ship/shipInput';
+import type { ShipAction } from '../game/shipFlight';
 
 export const IDLE_INTENT: MoveIntent = Object.freeze({ x: 0, z: 0, run: false, jump: false });
 
@@ -33,6 +34,7 @@ const FLIGHT_KEY_CODES = new Set([
   'KeyZ',
   'KeyT',
   'KeyF',
+  'KeyV',
 ]);
 
 export class InputController {
@@ -45,8 +47,8 @@ export class InputController {
   private readonly abort = new AbortController();
   /** Si devuelve true, arrastrar con el botón izquierdo también mira (juego sin pointer lock). */
   dragLookEnabled: () => boolean = () => false;
-  /** Callback para acciones discretas de la nave (F, T, Z). */
-  onActionKey?: (action: 'board' | 'target' | 'stabilize') => void;
+  /** Callback para acciones discretas de la nave (F, T, Z, V y E dentro de la nave). */
+  onActionKey?: (action: ShipAction) => void;
 
   constructor(private readonly target: HTMLElement) {
     const { signal } = this.abort;
@@ -148,6 +150,8 @@ export class InputController {
         if (event.code === 'KeyF') this.onActionKey?.('board');
         else if (event.code === 'KeyT') this.onActionKey?.('target');
         else if (event.code === 'KeyZ') this.onActionKey?.('stabilize');
+        else if (event.code === 'KeyV') this.onActionKey?.('camera');
+        else if (event.code === 'KeyE') this.onActionKey?.('use');
       }
     } else {
       this.rawKeys.delete(event.code);

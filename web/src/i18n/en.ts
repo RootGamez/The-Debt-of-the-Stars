@@ -29,8 +29,8 @@ export const EN: Readonly<Record<string, string>> = {
     'The Albatross II is waiting in the hangar, east of the Institute. Next to the hatch, tap Board',
   'Apunta a la Luna con su botón y avanza hacia ella':
     'Aim at the Moon with its button and fly toward it',
-  'Frena y baja despacio hasta posarte. Con la nave quieta en el suelo, toca Bajar':
-    'Brake and descend slowly until you land. With the ship at rest on the ground, tap Exit',
+  'Frena y baja despacio hasta posarte. Con la nave quieta en el suelo, toca Levantarse':
+    'Brake and descend slowly until you land. With the ship at rest on the ground, tap Stand up',
   'El fragmento está cerca: acércate y toca Examinar':
     'The fragment is close: walk up and tap Examine',
   'Carta desde el destino sin nombre': 'Letter from the nameless destination',
@@ -54,12 +54,13 @@ export const EN: Readonly<Record<string, string>> = {
   'Su reloj va {offset} {days} por delante: se llega {offset} {days} después de lo que se ve.':
     'Its clock runs {offset} {days} ahead: you arrive {offset} {days} after what you see.',
   'La prueba mayor es {day}.': 'The great test is {day}.',
-  'Espacio despegar · F bajar · T objetivo': 'Space take off · F exit · T target',
+  'Espacio despegar · F levantarse · V cámara · T objetivo':
+    'Space take off · F stand up · V camera · T target',
   'Modo libre: sin ayudas (Z las devuelve)': 'Free mode: no assists (Z brings them back)',
   'W avanzar · ratón girar · Espacio subir · C bajar · X frenar':
     'W forward · mouse turn · Space up · C down · X brake',
   'Mantén C para posarte': 'Hold C to land',
-  '↑ despegar · Nave para bajar · Objetivo': '↑ take off · Ship to exit · Target',
+  '↑ despegar · Nave para levantarse · Objetivo': '↑ take off · Ship to stand up · Target',
   'Modo libre: sin ayudas (Estab. las devuelve)':
     'Free mode: no assists (Stabilizer brings them back)',
   'Palanca avanzar · arrastra para girar · ↑ subir · ↓ bajar':
@@ -115,8 +116,18 @@ export const EN: Readonly<Record<string, string>> = {
   Frenar: 'Brake',
   'Pausar el juego': 'Pause the game',
   'Controles de la nave': 'Ship controls',
-  Bajar: 'Exit',
-  'F · subir a la nave': 'F · board the ship',
+  Levantarse: 'Stand up',
+  'F · sentarse a pilotar': 'F · sit down to fly',
+  'E · abrir el Registro': 'E · open the Registry',
+  'E · mirar el mapa de órbitas': 'E · look at the orbit map',
+  'Nave · sentarse a pilotar': 'Ship · sit down to fly',
+  'Nave · abrir el Registro': 'Ship · open the Registry',
+  'Nave · mirar el mapa de órbitas': 'Ship · look at the orbit map',
+  'Mapa de órbitas': 'Orbit map',
+  'La Brasa en el centro y cada mundo en su órbita':
+    'The Ember in the centre and each world on its orbit',
+  'E o Esc para cerrar': 'E or Esc to close',
+  'la nave': 'the ship',
   'Anotado en el Registro': 'Noted in the Registry',
   'Anotado en el Registro: {facts}': 'Noted in the Registry: {facts}',
   'Hay algo más aquí que aún no sabes leer.': "There is more here that you can't read yet.",

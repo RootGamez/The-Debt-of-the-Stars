@@ -9,7 +9,7 @@ import {
   SHIP_THRUST_FORWARD,
   SHIP_THRUST_LATERAL,
   SHIP_THRUST_VERTICAL,
-  SHIP_TURN_ACCEL,
+  SHIP_RCS_TANGENT_THRUST,
 } from '../../src/data/ship';
 import {
   createShipState,
@@ -137,9 +137,9 @@ describe('rotation with the stabilizer', () => {
     const state = createShipState();
     state.angularVelocity.set(0.5, -1, 0.8);
 
-    run(state, input({ stabilize: true }), SHIP_MAX_TURN_RATE / SHIP_TURN_ACCEL + 0.5);
+    run(state, input({ stabilize: true }), 2);
 
-    expect(state.angularVelocity.length()).toBeLessThan(1e-6);
+    expect(state.angularVelocity.length()).toBeLessThan(1e-3);
   });
 
   it('turns exactly by the angular speed times the time', () => {
@@ -179,10 +179,10 @@ describe('matching the velocity of a target', () => {
 
     run(state, input({ match: true }), 3, { gravity: new Vector3(), targetVelocity: target });
 
-    expect(state.velocity.distanceTo(target)).toBeLessThan(1e-6);
+    expect(state.velocity.distanceTo(target)).toBeLessThan(0.01);
   });
 
-  it('cannot change speed faster than its braking acceleration', () => {
+  it('cannot change speed faster than its braking acceleration, nor than its nozzles give', () => {
     const state = createShipState();
     state.velocity.set(60, 0, 0);
 
@@ -191,7 +191,9 @@ describe('matching the velocity of a target', () => {
       targetVelocity: new Vector3(),
     });
 
-    expect(state.velocity.x).toBeCloseTo(60 - SHIP_MATCH_ACCEL, 1);
+    // De lado solo frenan las toberas del borde: menos que el tope del ordenador.
+    expect(state.velocity.x).toBeGreaterThanOrEqual(60 - SHIP_MATCH_ACCEL - 1e-6);
+    expect(state.velocity.x).toBeCloseTo(60 - 2 * SHIP_RCS_TANGENT_THRUST, 0);
   });
 
   it('ignores the thrust while matching', () => {
@@ -239,22 +241,34 @@ describe('numerical health', () => {
 });
 
 describe('aiming with the mouse', () => {
-  it('turns the nose by exactly the aimed angle with the stabilizer on', () => {
+  it('turns the nose to the aimed angle with the stabilizer on, and stops there', () => {
+    const state = createShipState();
+
+    stepShip(state, input({ aim: { yaw: 0.3, pitch: 0 } }), NO_FORCES, DT);
+    run(state, input({}), 3);
+
+    expect(state.orientation.angleTo(new Quaternion())).toBeCloseTo(0.3, 2);
+    expect(nose(state).x).toBeLessThan(0); // guiñada positiva = proa a la izquierda
+    expect(state.angularVelocity.length()).toBeLessThan(1e-3);
+  });
+
+  it('turns with the nozzles, not at once: it takes a moment to get there', () => {
     const state = createShipState();
 
     stepShip(state, input({ aim: { yaw: 0.3, pitch: 0 } }), NO_FORCES, DT);
 
-    expect(state.orientation.angleTo(new Quaternion())).toBeCloseTo(0.3, 6);
-    expect(nose(state).x).toBeLessThan(0); // guiñada positiva = proa a la izquierda
-    expect(state.angularVelocity.length()).toBe(0);
+    expect(state.orientation.angleTo(new Quaternion())).toBeLessThan(0.05);
+    expect(state.angularVelocity.y).toBeGreaterThan(0);
+    expect(Array.from(state.thrusters).some((level) => level > 0)).toBe(true);
   });
 
   it('pitches the nose up with a positive pitch', () => {
     const state = createShipState();
 
     stepShip(state, input({ aim: { yaw: 0, pitch: 0.2 } }), NO_FORCES, DT);
+    run(state, input({}), 3);
 
-    expect(nose(state).y).toBeCloseTo(Math.sin(0.2), 6);
+    expect(nose(state).y).toBeCloseTo(Math.sin(0.2), 2);
   });
 
   it('only pushes the spin in free mode, which keeps turning afterwards', () => {
@@ -282,7 +296,8 @@ describe('flying near a world with the stabilizer on', () => {
 
     run(state, input({}), 2, near());
 
-    expect(state.velocity.length()).toBeLessThan(1e-9);
+    expect(state.velocity.length()).toBeLessThan(0.05);
+    expect(state.position.length()).toBeLessThan(0.05);
   });
 
   it('falls again with the stabilizer off', () => {
@@ -329,15 +344,22 @@ describe('flying near a world with the stabilizer on', () => {
     expect(state.orientation.angleTo(new Quaternion())).toBeCloseTo(0.6, 6);
   });
 
-  it('slows the descent close to the ground so the touchdown is soft', () => {
+  it('brakes the descent close to the ground so the touchdown is soft', () => {
     const state = createShipState();
+    state.position.set(0, SHIP_ASSIST_ALTITUDE - 1, 0);
     state.velocity.set(0, -25, 0);
 
-    stepShip(state, input({ thrust: new Vector3(0, -1, 0) }), near({ altitude: 5 }), DT);
+    // El suelo está en y = 0: se baja con C a fondo hasta tocarlo.
+    while (state.position.y > 0) {
+      stepShip(
+        state,
+        input({ thrust: new Vector3(0, -1, 0) }),
+        near({ altitude: state.position.y }),
+        DT,
+      );
+    }
 
-    expect(-state.velocity.y).toBeLessThanOrEqual(
-      Math.max(SHIP_ASSIST_MIN_DESCENT, 5 * 0.35) + 1e-9,
-    );
+    expect(-state.velocity.y).toBeLessThan(SHIP_ASSIST_MIN_DESCENT + 1.5);
   });
 
   it('lets the pilot dive fast when far from the ground', () => {
@@ -346,7 +368,7 @@ describe('flying near a world with the stabilizer on', () => {
 
     stepShip(state, input({}), near({ altitude: SHIP_ASSIST_ALTITUDE + 50 }), DT);
 
-    expect(state.velocity.y).toBeCloseTo(-25, 6);
+    expect(state.velocity.y).toBeCloseTo(-25, 2);
   });
 
   it('has no landing assist in free mode (that is how ships crash)', () => {

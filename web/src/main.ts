@@ -62,11 +62,11 @@ import { loadClues } from './data/pistas';
 import { createControls } from './game/controls';
 import { loadSystem } from './game/loadSystem';
 import { approachPoint, createHorizon } from './game/horizon';
-import { createShipFlight, type ShipFlight } from './game/shipFlight';
+import { createShipFlight, type ShipAction, type ShipFlight } from './game/shipFlight';
 import type { MotorEnvironment } from './physics/characterMotor';
 import { withEventColliders } from './physics/eventColliders';
 import { sunkInGas } from './physics/gas';
-import { withSphereObstacle } from './physics/obstacles';
+import { withMovingCollider } from './physics/movingCollider';
 import { forwardOf, upOf } from './physics/surfaceFrame';
 import { ReadingSession } from './reading/readingSession';
 import { createReadingUi, type ReadingUi } from './reading/readingUi';
@@ -78,7 +78,8 @@ import { createStarfield, dimStars } from './render/sky';
 import { finalApproach, finalLight } from './system/absorption';
 import { AMBIENT_COLOR, AMBIENT_INTENSITY, createStage } from './render/stage';
 import { createSystemScene } from './render/systemScene';
-import { loadShipModel } from './ship/loadShip';
+import { buildAlbatros } from './ship/model/albatros';
+import { createShipMap } from './ui/shipMap';
 import { createLocator, createStandaloneLocator, type WorldBody } from './system/locator';
 import { bodyPose } from './system/orbits';
 import { createDebugOverlay, type SystemSnapshot } from './ui/debugOverlay';
@@ -223,7 +224,7 @@ async function start(): Promise<void> {
   );
   // La nave espera donde diga su sistema: junto a La Boca o en el hangar del Instituto.
   const shipHome = spec?.ship !== undefined && runtimes.has(spec.ship) ? spec.ship : undefined;
-  const shipModel = shipHome ? await loadShipModel() : undefined;
+  const shipModel = shipHome ? buildAlbatros() : undefined;
   // En casa no corre el ciclo: ni eventos, ni absorciones, ni reloj doble.
   const looping = spec?.looping ?? true;
   const clues = loadClues();
@@ -275,6 +276,7 @@ async function start(): Promise<void> {
     notify: (message) => {
       game.ui?.notify(message);
     },
+    stowage: shipModel?.parts.cargo,
   });
   // El reloj de la Pista del Taller: con él en hora, el anillo lleva a la Sala del Centro durante las 7:00.
   const taller = runtimes.get(TELEPORTER.world);
@@ -338,9 +340,9 @@ async function start(): Promise<void> {
       id,
       {
         wells: [runtime.well],
-        world: withSphereObstacle(
+        world: withMovingCollider(
           withEventColliders(runtime.collision, runtime.eventCollision, () => liveEvents),
-          () => game.flight?.obstacleIn(id),
+          () => game.flight?.colliderIn(id),
         ),
         water: runtime.water,
       },
@@ -568,13 +570,24 @@ async function start(): Promise<void> {
           setReadingEnabled: (enabled) => {
             ui.setEnabled(enabled);
           },
+          openRegistry: () => {
+            ui.openRegistry();
+          },
+          openMap: () => {
+            shipMap?.open();
+          },
+          clock: () => session.director.clock,
           touch: isTouchDevice(),
         })
       : undefined;
   game.flight = flight;
   // Leyendo, muriendo o cerrado ya el viaje (la vuelta a casa), no se hace nada.
   const free = (): boolean =>
-    session.acceptsInput && !ui.blocking && !discovery.isOpen && !(homecoming?.blocking ?? false);
+    session.acceptsInput &&
+    !ui.blocking &&
+    !discovery.isOpen &&
+    !(shipMap?.isOpen ?? false) &&
+    !(homecoming?.blocking ?? false);
   // El menú principal cubre la pantalla de pausa hasta que el jugador pulsa Jugar o Continuar.
   const menu = activeMenu;
   if (menu) {
@@ -587,7 +600,7 @@ async function start(): Promise<void> {
     });
   }
   const canAct = (): boolean => overlay.playing && free();
-  function shipAction(action: 'board' | 'target' | 'stabilize'): void {
+  function shipAction(action: ShipAction): void {
     if (flight && canAct()) flight.action(action, currentWorld.id, session.director.clock.t);
   }
   input.onActionKey = shipAction;
@@ -615,6 +628,22 @@ async function start(): Promise<void> {
     return { reference: systemScene.referenceWorld ?? null, bodies: positions };
   }
   const orbitMap = spec ? createOrbitMap(spec, systemSnapshot) : undefined;
+  // La mesa del mapa de la nave (Fase 11): el mapa de órbitas del juego, con los nombres que puso el jugador.
+  const shipMap =
+    spec && flight
+      ? createShipMap({
+          spec,
+          read: systemSnapshot,
+          nameOf: (world) => shipLabel(worldNames, world),
+          shipWorld: () => flight.frame,
+          onOpen: () => {
+            overlay.releasePointer();
+          },
+          onClose: () => {
+            overlay.recapturePointer();
+          },
+        })
+      : undefined;
   if (window.__juego) {
     window.__juego.teleportTo = (clueId) => {
       if (flight?.piloting) return false;
@@ -636,7 +665,9 @@ async function start(): Promise<void> {
       return true;
     };
     window.__juego.shipTo = (world, altitude) => flight?.warpTo(world, altitude) ?? false;
-    window.__juego.toShip = () => flight?.standAtHatch(currentWorld.id) ?? false;
+    window.__juego.toShip = (station = 'asiento') =>
+      flight?.standAt(currentWorld.id, station) ?? false;
+    window.__juego.toLadder = () => flight?.standAtLadder(currentWorld.id) ?? false;
     window.__juego.audio = () => soundtrack.snapshot();
     window.__juego.lens = () => lens.snapshot();
     window.__juego.tide = () => tides.snapshot();
@@ -792,7 +823,8 @@ async function start(): Promise<void> {
     (dt) => {
       const look = input.consumeLook();
       // Leer, abrir el Registro o nombrar un mundo detiene el ciclo.
-      const timeRuns = overlay.playing && !ui.blocking && !discovery.isOpen;
+      const timeRuns =
+        overlay.playing && !ui.blocking && !discovery.isOpen && !(shipMap?.isOpen ?? false);
       // El primer despertar de la partida: el cartel del mundo (o ponerle nombre).
       if (overlay.playing && !awoke) {
         awoke = true;
@@ -1014,7 +1046,7 @@ async function start(): Promise<void> {
             knowsSomething: reading.known.size > 0,
             registryOpened,
             piloting,
-            targetingMoon: flight?.snapshot().target === WORMHOLE.world,
+            targetingMoon: flight?.targetId === WORMHOLE.world,
             moonDistance:
               moon && moonRadius !== undefined
                 ? moon.getWorldPosition(moonCenter).distanceTo(camera.position) - moonRadius

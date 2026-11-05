@@ -1,7 +1,7 @@
 // Monta el Contrapeso (Fase 10): carga su modelo, lo pone en su Banco del Laboratorio y une su estado
 // (counterweightPlay.ts) con lo que se ve (render/counterweightView.ts) y con la Sala del Motor de Cicatriz (el motor
 // viejo que sale, la cuna y sus ruedas, el núcleo). Solo si el sistema tiene el Laboratorio.
-import type { Camera, Scene, Vector3 } from 'three';
+import type { Camera, Object3D, Scene, Vector3 } from 'three';
 import type { Chronology } from '../core/timeline';
 import {
   createCounterweightView,
@@ -42,6 +42,8 @@ export interface CounterweightRigOptions {
   chronology: Chronology;
   /** Un aviso breve (el motor sale, el pulso encaja o rechaza). */
   notify: (message: string) => void;
+  /** La mesa de carga de la nave: ahí se ve mientras pilotas. */
+  stowage?: Object3D;
 }
 
 export interface CounterweightRig {
@@ -76,7 +78,12 @@ export async function createCounterweightRig(
     anchors.cradle = markerOf(machineWorld, CRADLE);
     anchors.core = { ...engineRoom.core, pose: { ...engineRoom.core.pose, scale: CORE_SCALE } };
   }
-  const view = createCounterweightView(await loadCounterweightModel(), scene, anchors);
+  const view = createCounterweightView(
+    await loadCounterweightModel(),
+    scene,
+    anchors,
+    options.stowage,
+  );
   const pulse = chronology.events.find((e) => e.id === COUNTERWEIGHT.pulseEvent);
   const play = createCounterweightPlay({
     worldClock: (world, t) =>

@@ -7,11 +7,15 @@ export const SHIP_THRUST_LATERAL = 14;
 export const SHIP_THRUST_VERTICAL = 16;
 /** Velocidad máxima respecto al marco donde vuela (m/s). */
 export const SHIP_MAX_SPEED = 80;
-/** Velocidad de giro máxima (rad/s) y lo deprisa que se alcanza o se frena (rad/s²). */
+/** Velocidad de giro máxima (rad/s) y la aceleración de giro de las teclas en modo libre (rad/s²). */
 export const SHIP_MAX_TURN_RATE = 1.5;
 export const SHIP_TURN_ACCEL = 4;
 /** Frenado al igualar la velocidad con el objetivo (m/s²). */
 export const SHIP_MATCH_ACCEL = 30;
+/** Con estabilizador: lo deprisa que el ordenador persigue la velocidad de giro pedida (1/s)… */
+export const SHIP_TURN_RESPONSE = 12;
+/** …y la que pide por cada radián que falta para llegar a donde apuntó el ratón (1/s). */
+export const SHIP_AIM_RATE = 3;
 /** Modo libre: cuánta velocidad de giro (rad/s) añade cada radián de ratón. */
 export const SHIP_FREE_AIM_GAIN = 2.5;
 
@@ -20,10 +24,24 @@ export const SHIP_FREE_AIM_GAIN = 2.5;
 export const SHIP_LEVEL_RATE = 1.5;
 /** Por debajo de esta altura (m) se suaviza el descenso… */
 export const SHIP_ASSIST_ALTITUDE = 40;
-/** …a esta velocidad por metro de altura (m/s por m)… */
-export const SHIP_ASSIST_DESCENT_PER_METER = 0.35;
+/** …frenando como mucho con esta aceleración (m/s²): la curva de frenado llega al suelo a la velocidad mínima… */
+export const SHIP_ASSIST_BRAKE = 4;
 /** …y nunca por debajo de esta (m/s): siempre se puede bajar hasta posarse. */
 export const SHIP_ASSIST_MIN_DESCENT = 2.5;
+
+// Los propulsores del Albatros II (Fase 11, src/ship/thrusters.ts): aceleración a pleno de cada tobera (m/s²).
+/** Cada uno de los dos motores principales de la popa (hacia la proa). */
+export const SHIP_MAIN_THRUST = 10;
+/** Cada uno de los dos retrocohetes de la proa (hacia la popa: frenan). */
+export const SHIP_RETRO_THRUST = 6;
+/** Cada una de las cuatro toberas de sustentación de la panza (hacia arriba). */
+export const SHIP_LIFT_THRUST = 7.5;
+/** Las toberas de maniobra del borde: arriba y abajo… */
+export const SHIP_RCS_VERTICAL_THRUST = 4;
+/** …y a los lados del borde. */
+export const SHIP_RCS_TANGENT_THRUST = 10;
+/** Inercia de giro del disco por unidad de masa (m²) en cada eje: cabeceo (x), guiñada (y) y alabeo (z). */
+export const SHIP_INERTIA = Object.freeze({ x: 6, y: 9, z: 6 });
 
 /** La nave colisiona como una esfera (el radio sale del modelo; este es el de reserva). */
 export const SHIP_DEFAULT_RADIUS = 2;

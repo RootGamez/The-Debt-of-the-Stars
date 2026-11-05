@@ -5,13 +5,32 @@ import { Quaternion, Vector3 } from 'three';
 import { SHIP_LAND_SLOPE_DEGREES, SHIP_LAND_SPEED, SHIP_STABILIZER_DEFAULT } from '../data/ship';
 import type { CollisionWorld } from '../physics/collisionWorld';
 import { alignUp, smoothingFactor } from '../physics/surfaceFrame';
-import { createShipContactResult, resolveShipContact, type ShipContactResult } from './shipContact';
+import {
+  createShipContactResult,
+  resolveShipContact,
+  type HullSphere,
+  type ShipContactResult,
+} from './shipContact';
 import { createShipState, stepShip, type ShipEnvironment, type ShipInput } from './shipPhysics';
 
 /** El suelo del mundo donde vuela la nave: colisiones y su centro (para saber qué es "arriba"). */
 export interface ShipGround {
   world: CollisionWorld;
   center: Vector3;
+}
+
+/** Cómo choca la nave: sus esferas y sus medidas. */
+export interface ShipHull {
+  /** Radio de la esfera que la envuelve entera (m): para la Brasa y lo que se mide de lejos. */
+  radius: number;
+  /** Del centro de la nave al suelo con ella posada (m): las patas. */
+  clearance: number;
+  spheres: readonly HullSphere[];
+}
+
+/** Una nave que choca como una sola esfera centrada (la de reserva y la de los tests). */
+export function sphereHull(radius: number): ShipHull {
+  return { radius, clearance: radius, spheres: [{ center: new Vector3(), radius }] };
 }
 
 export interface ShipStepResult {
@@ -50,7 +69,21 @@ export class Ship {
   private readonly previousPosition = new Vector3();
   private readonly previousOrientation = new Quaternion();
 
-  constructor(readonly radius: number) {}
+  readonly hull: ShipHull;
+
+  constructor(hull: number | ShipHull) {
+    this.hull = typeof hull === 'number' ? sphereHull(hull) : hull;
+  }
+
+  /** Radio de la esfera que la envuelve. */
+  get radius(): number {
+    return this.hull.radius;
+  }
+
+  /** Del centro al suelo, posada. */
+  get clearance(): number {
+    return this.hull.clearance;
+  }
 
   /** Olvida el paso anterior (tras colocarla o cambiarla de marco): sin saltos al interpolar. */
   syncPrevious(): void {
@@ -71,6 +104,7 @@ export class Ship {
     this.state.orientation.copy(orientation);
     this.state.velocity.set(0, 0, 0);
     this.state.angularVelocity.set(0, 0, 0);
+    this.clearAim();
     this.landed = true;
     this.syncPrevious();
   }
@@ -103,7 +137,7 @@ export class Ship {
     if (!ground) return result;
 
     up.subVectors(this.state.position, ground.center).normalize();
-    resolveShipContact(this.state, ground.world, up, this.radius, contact);
+    resolveShipContact(this.state, ground.world, up, this.hull.spheres, contact);
     result.crashed = contact.crashed;
     result.impactSpeed = contact.impactSpeed;
     if (!contact.touching || contact.crashed) return result;
@@ -120,6 +154,13 @@ export class Ship {
     alignUp(this.state.orientation, floorNormal, 1);
     this.state.velocity.set(0, 0, 0);
     this.state.angularVelocity.set(0, 0, 0);
+    this.clearAim();
     this.landed = true;
+  }
+
+  /** Posada o aparcada, la puntería que quedaba pendiente se olvida: al despegar no gira sola. */
+  private clearAim(): void {
+    this.state.aimPending.yaw = 0;
+    this.state.aimPending.pitch = 0;
   }
 }

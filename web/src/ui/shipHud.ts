@@ -1,6 +1,6 @@
 // Interfaz de vuelo, con el mismo aire discreto que el reloj doble: velocidad y altura abajo a la
 // izquierda, el objetivo arriba con una marca sobre el mundo (o en el borde, apuntando hacia él), una
-// sola sugerencia a la vez y, a pie, el aviso t("F · subir a la nave"). Todo entra como texto.
+// sola sugerencia a la vez y, a pie dentro de la nave, el aviso de lo que se tiene delante (sentarse, el Registro, el mapa). Todo entra como texto.
 import { formatDistance, formatSpeed, type MarkerPlacement } from '../ship/hudMath';
 import { t } from '../i18n';
 
@@ -14,8 +14,8 @@ export interface ShipHudTarget {
 
 export interface ShipHudState {
   piloting: boolean;
-  /** A pie y junto a la escotilla. */
-  canBoard: boolean;
+  /** A pie dentro de la nave: lo que se puede hacer con lo que tienes delante (sentarse, el Registro, el mapa). */
+  prompt: string | undefined;
   /** Velocidad respecto al mundo cercano (o al sistema en el espacio abierto). */
   speed: number;
   /** Altura sobre el suelo; `undefined` en el espacio abierto. */
@@ -62,7 +62,6 @@ export function createShipHud(): ShipHud {
   hint.setAttribute('role', 'status');
 
   const board = element('p', 'board-prompt', document.body);
-  board.textContent = t('F · subir a la nave');
   board.hidden = true;
 
   function placeMarker(placement: MarkerPlacement | undefined, name: string): void {
@@ -77,7 +76,8 @@ export function createShipHud(): ShipHud {
 
   return {
     update(state) {
-      board.hidden = state.piloting || !state.canBoard;
+      board.hidden = state.piloting || state.prompt === undefined;
+      if (state.prompt !== undefined) setText(board, state.prompt);
       root.hidden = !state.piloting;
       if (!state.piloting) return;
 

@@ -1,5 +1,6 @@
 // Controles táctiles: joystick que aparece donde se toca en la mitad izquierda, arrastre en la mitad
 // derecha para mirar, botón de salto y botón de pausa. Solo se crean en pantallas táctiles.
+import type { ShipAction } from '../game/shipFlight';
 import { intentFromStick, type MoveIntent } from '../core/input';
 import type { InputController } from '../core/inputController';
 import { MOUSE_LOOK_SENSITIVITY, TOUCH_LOOK_SENSITIVITY } from '../data/movement';
@@ -24,7 +25,7 @@ export interface TouchControls {
 export interface TouchOptions {
   isPlaying: () => boolean;
   isPiloting: () => boolean;
-  onShipAction: (action: 'board' | 'target' | 'stabilize') => void;
+  onShipAction: (action: ShipAction) => void;
   onPause: () => void;
 }
 
@@ -244,7 +245,7 @@ export function createTouchControls(
     shownPiloting = piloting;
     shipPanel.classList.toggle('piloting', piloting);
     jump.hidden = piloting;
-    board.textContent = piloting ? t('Bajar') : t('Nave');
+    board.textContent = piloting ? t('Levantarse') : t('Nave');
   };
 
   return {

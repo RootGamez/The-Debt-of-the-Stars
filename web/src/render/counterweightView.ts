@@ -1,5 +1,5 @@
 // El Contrapeso a la vista (Fase 10): el modelo de Blender (public/models/contrapeso.glb), sobre su Banco del
-// Laboratorio, en tus brazos (abajo en la vista), guardado en el relicario de la nave (no se ve), en la cuna de la
+// Laboratorio, en tus brazos (abajo en la vista), sobre la mesa de carga de la nave mientras pilotas, en la cuna de la
 // Sala del Motor y, con el pulso, subiendo al núcleo. Sus tres anillos giran siempre: es un reloj. La lógica de dónde
 // está vive en game/counterweight.ts.
 import {
@@ -22,7 +22,7 @@ export interface CounterweightModel {
   rings: { object: Object3D; spin: number }[];
 }
 
-/** Dónde se ve: en un sitio (el Banco, la cuna, el núcleo), en brazos o en ningún lado (en el relicario). */
+/** Dónde se ve: en un sitio (el Banco, la cuna, el núcleo), en brazos o guardado en la nave (sobre su mesa de carga). */
 export type CounterweightShown = 'bench' | 'cradle' | 'core' | 'held' | 'stowed';
 type Place = 'bench' | 'cradle' | 'core';
 
@@ -44,6 +44,8 @@ const RING_PREFIX = 'contrapeso_Anillo';
 const HELD_OFFSET = new Vector3(0, -0.3, -0.95);
 const HELD_SCALE = 0.6;
 const HELD_TILT = new Quaternion().setFromEuler(new Euler(0.12, 0, 0));
+/** Sobre la mesa de carga de la nave, del mismo tamaño que en brazos. */
+const STOWED_SCALE = HELD_SCALE;
 /** Lo que tarda en subir de la cuna al núcleo: lo que dura el pulso (cronologia.json). */
 export const RISE_SECONDS = 6;
 
@@ -82,6 +84,8 @@ export function createCounterweightView(
   model: CounterweightModel,
   scene: Scene,
   anchors: CounterweightAnchors,
+  /** La mesa de carga de la nave (Fase 11): ahí se ve mientras pilotas. Sin ella, guardado no se ve. */
+  stowage?: Object3D,
 ): CounterweightView {
   const { object, rings } = model;
   let placed: Place | undefined;
@@ -116,12 +120,21 @@ export function createCounterweightView(
     }
   }
 
+  function stow(): void {
+    placed = undefined;
+    if (!stowage || object.parent === stowage) return;
+    stowage.add(object);
+    object.position.set(0, 0, 0);
+    object.quaternion.identity();
+    object.scale.setScalar(STOWED_SCALE);
+  }
+
   return {
     update(shown, camera, dt) {
-      object.visible = shown !== 'stowed';
+      object.visible = shown !== 'stowed' || stowage !== undefined;
       for (const ring of rings) ring.object.rotateY(ring.spin * dt);
       if (shown === 'held') hold(camera);
-      else if (shown === 'stowed') placed = undefined;
+      else if (shown === 'stowed') stow();
       else rest(shown, dt);
     },
     dispose() {

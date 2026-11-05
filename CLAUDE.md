@@ -55,9 +55,11 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 
 ## El sistema y la nave (Fase 5)
 - Los mundos orbitan en rieles (`web/src/data/sistema.json`); todo se dibuja relativo al mundo donde estás (`render/systemScene.ts`).
-- La nave: `blender/scripts/generar_nave.py` → `blender/nave.blend` → `npm run modelos -- nave`. Espera en `PARK_Nave` (Umbral) al empezar cada ciclo.
-- Controles: **F** subir/bajar (solo posada) · ratón apuntar · **W/S** avanzar · **A/D** lateral · **Espacio/C** subir/bajar (mantener C para posarse) · **Q/E** alabeo · **X** frenar respecto al objetivo · **T** objetivo · **Z** estabilizador (sin él no hay ayudas).
-- Con `?debug`: `__juego.warpTo('archivo')` (a pie), `__juego.toShip()` (a la escotilla), `__juego.shipTo('archivo', 20)` (pilotando, sobre un mundo); `F4` mapa de órbitas.
+- La nave (el Albatros II) es por código desde la Fase 11 (plan: `docs/plan-fase-11-nave.md`); ya no usa `nave.glb`. Modelo en `web/src/ship/model/` (`albatros.ts`, medidas en `albatrosShape.ts`): un disco de 9 m con una sala por dentro, la escotilla en el suelo y la escalerilla a popa. Espera posada en `PARK_Nave` (Umbral) al empezar cada ciclo.
+- Física de 6 ejes con toberas reales (`ship/thrusters.ts`, 24 toberas, cada una con su llama; `ship/shipPhysics.ts`). Choca como esferas (`ALBATROS_HULL`, `ship/shipContact.ts`). Se anda por dentro con `physics/movingCollider.ts`. La escotilla se abre posada y se cierra al volar (`ship/hatch.ts`). Lo que se mueve en la sala (llamas, reloj de pared, planetario) está en `game/shipCabin.ts`.
+- Dentro: **F** junto al asiento lo pilota y **F** pilotando te levanta (solo posada). **E** en el atril abre el Registro y **E** en la mesa, el mapa de órbitas (`ui/shipMap.ts`). Los sitios están en `ship/stations.ts`.
+- Pilotando: ratón apuntar · **W/S** avanzar · **A/D** lateral · **Espacio/C** subir/bajar (mantener C para posarse) · **Q/E** alabeo · **X** frenar respecto al objetivo · **T** objetivo · **Z** estabilizador (sin él no hay ayudas) · **V** cámara de cabina o de fuera.
+- Con `?debug`: `__juego.warpTo('archivo')` (a pie), `__juego.toShip()` (dentro, frente al asiento; `toShip('registro'|'mapa')` frente a ese sitio), `__juego.toLadder()` (al pie de la escalerilla), `__juego.shipTo('archivo', 20)` (pilotando, sobre un mundo); `F4` mapa de órbitas.
 - E2E: no dejar el juego abierto en el panel de vista previa mientras corre `npm run e2e`.
 
 ## El ciclo (Fase 3)

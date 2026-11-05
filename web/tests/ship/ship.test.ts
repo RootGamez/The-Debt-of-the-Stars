@@ -154,7 +154,7 @@ describe('the stabilizer setting', () => {
     }
 
     expect(on.stabilize).toBe(true);
-    expect(on.state.angularVelocity.length()).toBeLessThan(1e-6);
+    expect(on.state.angularVelocity.length()).toBeLessThan(1e-3);
     expect(off.state.angularVelocity.y).toBeCloseTo(1);
   });
 });

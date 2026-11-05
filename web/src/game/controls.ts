@@ -1,4 +1,5 @@
 // Los controles del jugador: ratón, teclado, táctil y la pantalla de pausa.
+import type { ShipAction } from './shipFlight';
 import { InputController } from '../core/inputController';
 import type { LoopSession } from '../core/loopSession';
 import type { TextSettings } from '../typewriter/textPreferences';
@@ -12,7 +13,7 @@ import { createTouchControls, type TouchControls } from '../ui/touchControls';
 
 export interface TouchShipControls {
   isPiloting: () => boolean;
-  onShipAction: (action: 'board' | 'target' | 'stabilize') => void;
+  onShipAction: (action: ShipAction) => void;
 }
 
 export function createControls(

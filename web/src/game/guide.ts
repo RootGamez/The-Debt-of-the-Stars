@@ -134,7 +134,9 @@ const TOUCH: Record<GuideStep, string> = {
     'El Albatros II te espera en el hangar, al este del Instituto. Junto a la escotilla, toca Subir',
   ),
   apuntar: t('Apunta a la Luna con su botón y avanza hacia ella'),
-  posarse: t('Frena y baja despacio hasta posarte. Con la nave quieta en el suelo, toca Bajar'),
+  posarse: t(
+    'Frena y baja despacio hasta posarte. Con la nave quieta en el suelo, toca Levantarse',
+  ),
   fragmento: t('El fragmento está cerca: acércate y toca Examinar'),
 };
 

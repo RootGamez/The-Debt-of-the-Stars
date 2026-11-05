@@ -1322,3 +1322,40 @@ body {
   transform: rotate(-14deg);
   filter: blur(1px);
 }
+
+/* El mapa de órbitas de la mesa de la nave (Fase 11): una hoja del cuaderno. */
+.ship-map {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: min(560px, 92vw);
+  padding: 18px 20px 14px;
+  border-radius: 6px;
+  background: var(--paper-noise), var(--paper-a);
+  color: var(--ink-on-paper);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 45%);
+  transform: translate(-50%, -50%);
+}
+.ship-map[hidden] {
+  display: none;
+}
+.ship-map h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 22px;
+}
+.ship-map canvas {
+  width: min(500px, 84vw);
+  height: auto;
+  aspect-ratio: 1;
+}
+.ship-map p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.8;
+}

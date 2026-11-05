@@ -32,7 +32,7 @@ export interface CounterweightSnapshot {
   place: CounterweightPlace;
   /** Lo que marca su esfera (s). */
   clock: number;
-  /** Va en el relicario de la nave. */
+  /** Va en la nave (se ve sobre su mesa de carga). */
   inShip: boolean;
   motorOut: boolean;
   /** Lo que marca la máquina de Cicatriz (s). */
