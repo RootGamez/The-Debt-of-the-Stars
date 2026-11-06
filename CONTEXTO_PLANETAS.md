@@ -1,6 +1,6 @@
 # CONTEXTO DE PLANETAS — La deuda de las estrellas
 
-**Versión:** v0.15
+**Versión:** v0.16
 **Última actualización:** 2026-11-04 · Fase 11H (Cicatriz hueca, con anillo y micro agujero)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
@@ -82,6 +82,8 @@
 **Atmósfera.** Ámbar, ocre, violeta oscuro, azul hielo, arena. Sol grande y bajo, sombras largas, viento leve. Piano sparse.
 
 **Aire (✅ Anthony, 2026-11-03; aspecto 🟡).** Umbral tiene un aire fino: cielo de ocaso violeta arriba y ámbar en el horizonte que deja ver las estrellas, y que se apaga a violeta oscuro en la cara de noche; bruma lejana cálida de día y violeta de noche, que se va al subir con la nave; polvo de arena que el viento leve arrastra rozando el suelo.
+
+**Cielo y hielo (Fase 12, ✅ Anthony 2026-11-06: más denso, con nubes, día y noche según el lado y la cara de noche helada; 🟡 colores, alturas y dónde empieza el hielo).** El aire es más denso (tapa casi todas las estrellas de día) y lleva dos capas de nubes: cúmulos bajos color crema a 30 m y velos altos a 48 m, que de noche se vuelven gris violeta. Como Umbral siempre da la misma cara a la Brasa, el cielo depende del sitio: con la Brasa alta, azul pálido polvoriento con el horizonte ámbar; junto al terminador, el ocaso violeta de siempre (el Mirador); en la cara de noche, casi negro y más fino, con estrellas. La cara de noche está helada: la escarcha empieza poco después del terminador y más allá todo es nieve azulada con ventisqueros, rocas escarchadas y agujas de hielo, sin matas, con bruma fría. Se despierta justo en el borde de la escarcha, mirando a la nave caída sobre la nieve.
 
 **Más lugares (🟡, Fase 11, sin pistas).** Para dar vida y referencias a la planicie:
 - **La Vía de los Anillos:** tres anillos de pie, cada vez más pequeños, en el camino de La Boca al Muelle; se cruzan caminando.
@@ -389,3 +391,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-11-03 · Fase 11F (🟡).** El Taller se hace por código como gigante de gas: nubes en bandas de 80 m, cinco islas fijas sobre el gigante que gira, muerte `gas` bajo 74 m, puentes de luz pisables solo a las 7:00, el anillo de la Pista que se abre a las 7:00 con su reloj ajustado y la Sala del Centro con las páginas de sincronización. Cambia lo propuesto: las islas no orbitan por separado.
 - **2026-11-03 · Fase 11G (🟡).** Hogar por código: continente de día con el Instituto, la aldea, la ciudad, el campo, el embarcadero y el Motor (la Directora pasa a esperar allí); islas de noche con secretos para los curiosos; mar y cielo como el Archivo; los Ool por código, de color y luz según la edad (✅).
 - **2026-11-04 · Fase 11H.** Anthony pide rehacer Cicatriz hueca, con el micro agujero negro en el núcleo, anillo y mucho más detalle (✅ la idea, la máquina alrededor del centro, la gravedad doble, el anillo con fragmentos pisables y hechos nuevos en el grafo). Se hace por código (`web/src/worlds/procedural/cicatriz*.ts`); los lugares y textos nuevos son 🟡.
+- **2026-11-06 · Fase 12.** Anthony pide para Umbral un aire más denso con nubes, que se note el día y la noche según el lado y la cara de noche helada (✅). Colores, alturas y dónde empieza el hielo, 🟡.

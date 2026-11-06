@@ -66,7 +66,9 @@ import {
 } from './umbralLandmarks';
 import { closedHall } from './umbralHalls';
 import { HALLS, hallPad, type HallId } from './umbralHallsShape';
+import { cloudLayer } from './clouds';
 import { sunInWorld } from './sun';
+import { frostAmount } from './umbralFrost';
 import { windDust } from './wind';
 
 export const UMBRAL_ID = 'umbral';
@@ -126,6 +128,14 @@ function massifSlope(x: number, y: number, z: number): number {
   return clamp(1 - (distance - MASSIF.radius * 0.8) / 16, 0, 1);
 }
 
+/** La Brasa vista desde Umbral (fija: rotación bloqueada). */
+const SUN = sunInUmbral();
+
+/** La escarcha de la cara de noche (Fase 12), con el borde ondulado. */
+function frost(x: number, y: number, z: number): number {
+  return frostAmount({ x, y, z }, SUN, noise(x * 3, y * 3, z * 3) * 0.08);
+}
+
 function iceCap(z: number, x: number, y: number): number {
   const lat = Math.abs(Math.asin(clamp(z, -1, 1))) / DEG;
   return smoothstep(66, 73, lat + noise(x * 5, y * 5, z * 5) * 5);
@@ -139,6 +149,9 @@ function baseHeight(x: number, y: number, z: number): number {
     h += 3.5 * slope * slope * (0.7 + 0.5 * ridged(noise2, x * 3.2 + 5, y * 3.2, z * 3.2));
   const ice = iceCap(z, x, y);
   if (ice > 0) h += ice * (0.7 + 0.9 * Math.abs(fbm(noise, x * 9, y * 9, z * 9, 2)));
+  // Ventisqueros en la cara de noche.
+  const snow = frost(x, y, z);
+  if (snow > 0) h += snow * 0.45 * Math.abs(fbm(noise2, x * 6, y * 6, z * 6, 2));
   return h;
 }
 
@@ -250,6 +263,11 @@ function groundColor(
   if (talus > 0) color.lerp(mix.set(random() < 0.5 ? P.rockLight : P.sandstoneShade), talus * 0.55);
   const ice = iceCap(z, x, y);
   if (ice > 0) color.lerp(mix.set(random() < 0.5 ? P.ice : P.iceLight), ice);
+  const snow = frost(x, y, z);
+  if (snow > 0) {
+    const tone = slope > 0.45 ? P.frostRock : random() < 0.6 ? P.snow : P.iceLight;
+    color.lerp(mix.set(tone), snow * (slope > 0.45 ? 0.7 : 0.95));
+  }
   return color.offsetHSL(0, 0, vary);
 }
 
@@ -1263,6 +1281,8 @@ export interface UmbralStats {
   terrain: number;
   places: number;
   detail: number;
+  /** Las capas de nubes (esferas de coste fijo, aparte del presupuesto del suelo). */
+  sky: number;
   colliders: number;
 }
 
@@ -1352,13 +1372,14 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
   const sky = {
     day: new Color('#b89ab8').multiplyScalar(1.7),
     ground: new Color('#c48a58').multiplyScalar(1.3),
-    night: new Color(0.07, 0.06, 0.16),
-    // Aire fino de ocaso (🟡, ✅ que lo tenga: Anthony 2026-11-03): lo lejano se tiñe de ámbar o de violeta.
+    night: new Color(0.07, 0.09, 0.18), // frío: la cara helada (Fase 12)
+    // Aire de ocaso (✅ que lo tenga: Anthony 2026-11-03), más denso desde la Fase 12 (✅ 2026-11-06): lo lejano se
+    // tiñe de ámbar de día y de azul frío en la cara helada.
     haze: {
-      day: new Color('#c98a62'),
-      night: new Color('#1c1630'),
-      density: 0.016,
-      max: 0.62,
+      day: new Color('#c99070'),
+      night: new Color('#1a2038'),
+      density: 0.024,
+      max: 0.72,
       radius: UMBRAL_RADIUS,
     },
   };
@@ -1425,10 +1446,14 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
         if (r() > 0.3 + talus * 2) return null;
         const big = r() < 0.06 + talus * 0.35;
         const size = big ? 0.9 + r() * 1.6 : 0.12 + r() * 0.4;
+        const frozen = frost(d.x, d.y, d.z) > 0.5;
+        const tones = frozen
+          ? [P.frostRock, P.frostRock, P.iceLight, P.rockLight]
+          : [P.rock, P.rockLight, P.rockDark, P.sandstoneShade];
         return {
           scale: [size * (0.8 + r() * 0.5), size * (0.8 + r() * 0.5), size],
           sink: size * 0.25,
-          color: [P.rock, P.rockLight, P.rockDark, P.sandstoneShade][Math.floor(r() * 4)] ?? P.rock,
+          color: tones[Math.floor(r() * 4)] ?? P.rock,
         };
       },
     },
@@ -1444,6 +1469,7 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
       groundRadius,
       pick: (d, r) => {
         if (iceCap(d.z, d.x, d.y) > 0.05 || massifSlope(d.x, d.y, d.z) > 0.6) return null;
+        if (frost(d.x, d.y, d.z) > 0.15) return null; // nada crece en la cara helada
         if (!relief.isFree(d, 0.5) || relief.onPath(d.x, d.y, d.z) > 0.1) return null;
         if (fbm(noise, d.x * 2.4 + 3, d.y * 2.4, d.z * 2.4, 2) < -0.1) return null; // crecen en manchas
         const size = 0.7 + r() * 0.8;
@@ -1461,11 +1487,12 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
       name: 'umbral_Hielo',
       geometry: shardGeometry(),
       material: materials.ice,
-      count: 180,
+      count: 360,
       castShadow: true,
       groundRadius,
       pick: (d, r) => {
-        if (iceCap(d.z, d.x, d.y) < 0.7 || !relief.isFree(d, 1)) return null;
+        const cold = Math.max(iceCap(d.z, d.x, d.y), frost(d.x, d.y, d.z));
+        if (cold < 0.7 || !relief.isFree(d, 1) || relief.onPath(d.x, d.y, d.z) > 0.2) return null;
         const size = 0.3 + r() * 0.8;
         return {
           scale: [size, size, size],
@@ -1491,6 +1518,36 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
       size: 26,
       reach: 26,
       seed: 61,
+    }),
+  );
+  // Las nubes (Fase 12, ✅ Anthony 2026-11-06; 🟡 colores y alturas): cúmulos bajos color crema que se tiñen
+  // de gris violeta en la cara helada, y velos altos más lentos.
+  frame.add(
+    cloudLayer({
+      name: 'umbral_Nubes',
+      radius: UMBRAL_RADIUS + 30,
+      sun,
+      axis: new Vector3(0.3, -0.2, 1),
+      speed: 0.003,
+      cover: 0.46,
+      scale: 3,
+      day: new Color('#f6e2c8'),
+      night: new Color('#2c2a46'),
+      opacity: 0.9,
+      seed: 0.53,
+    }),
+    cloudLayer({
+      name: 'umbral_Velos',
+      radius: UMBRAL_RADIUS + 48,
+      sun,
+      axis: new Vector3(-0.25, 0.2, 1),
+      speed: 0.0012,
+      cover: 0.34,
+      scale: 1.5,
+      day: new Color('#f0d8c4'),
+      night: new Color('#1e1e36'),
+      opacity: 0.55,
+      seed: 0.19,
     }),
   );
   for (const g of rocks.colliders) builder.pieces.addCollider(g);
@@ -1546,6 +1603,7 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
     terrain: triangleCount(terrainGeometry),
     places: 0,
     detail: 0,
+    sky: 0,
     colliders: 0,
   };
   frame.traverse((object) => {
@@ -1558,6 +1616,7 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
       object.name.startsWith('umbral_Luces')
     )
       stats.places += count;
+    else if (object.name === 'umbral_Nubes' || object.name === 'umbral_Velos') stats.sky += count;
     else if (object !== terrain && !object.name.startsWith('EVT_')) stats.detail += count;
   });
   stats.colliders = builder.pieces.colliders.reduce((sum, g) => sum + triangleCount(g), 0);

@@ -25,6 +25,9 @@ export const PALETTE = {
   tuft: '#B89650',
   tuftDry: '#9C7E48',
   light: '#FFC070',
+  /** La cara de noche helada (Fase 12): nieve azulada y roca escarchada. */
+  snow: '#DCE6EE',
+  frostRock: '#8C97A6',
   /** Remates de los edificios cerrados (plan de la llegada, hito D): cobre y su óxido verde. */
   copper: '#A8653A',
   verdigris: '#5E9A86',

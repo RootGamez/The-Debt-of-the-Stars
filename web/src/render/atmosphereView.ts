@@ -31,12 +31,14 @@ const FRAGMENT = /* glsl */ `
 uniform vec3 uUp;
 uniform vec3 uSun;
 uniform vec3 uZenith;
+uniform vec3 uDayZenith;
 uniform vec3 uHorizon;
 uniform vec3 uGlow;
 uniform vec3 uGround;
 uniform vec3 uNight;
 uniform float uHasNight;
 uniform float uDensity;
+uniform float uNightOpacity;
 varying vec3 vDir;
 void main() {
   vec3 d = normalize(vDir);
@@ -44,15 +46,18 @@ void main() {
   float s = max(dot(d, uSun), 0.0);
   // Sin cortes en el horizonte: el resplandor sigue un poco por debajo y el suelo entra poco a poco.
   float above = max(h, 0.0);
-  vec3 sky = mix(uHorizon, uZenith, smoothstep(0.0, 0.55, above));
+  float sunHeight = dot(uUp, uSun);
+  // Con la estrella alta el cénit pasa al de mediodía; junto al terminador se queda el de ocaso.
+  vec3 zenith = mix(uZenith, uDayZenith, smoothstep(0.15, 0.75, sunHeight));
+  vec3 sky = mix(uHorizon, zenith, smoothstep(0.0, 0.55, above));
   float low = 1.0 - smoothstep(0.0, 0.6, above);
   sky = mix(sky, uGlow, clamp(pow(s, 6.0) * 0.7 * low + pow(s, 48.0) * 0.6, 0.0, 1.0));
   vec3 color = mix(sky, uGround, smoothstep(0.0, 0.35, -h));
   // Con la estrella bajo el horizonte el cielo se apaga; queda un resto de luz del lado por donde se fue.
-  float day = smoothstep(-0.25, 0.08, dot(uUp, uSun));
+  float day = smoothstep(-0.25, 0.08, sunHeight);
   vec3 night = mix(uNight, uHorizon * 0.35, pow(s, 3.0) * (1.0 - smoothstep(0.0, 0.5, h)));
   color = mix(color, night, uHasNight * (1.0 - day));
-  gl_FragColor = vec4(color, uDensity);
+  gl_FragColor = vec4(color, uDensity * mix(uNightOpacity, 1.0, max(day, 1.0 - uHasNight)));
   #include <colorspace_fragment>
 }`;
 
@@ -79,6 +84,8 @@ export function createAtmosphereView(scene: Scene): AtmosphereView {
     uUp: { value: new Vector3(0, 1, 0) },
     uSun: { value: new Vector3(1, 0, 0) },
     uZenith: { value: new Color() },
+    uDayZenith: { value: new Color() },
+    uNightOpacity: { value: 1 },
     uHorizon: { value: new Color() },
     uGlow: { value: new Color() },
     uGround: { value: new Color() },
@@ -121,6 +128,9 @@ export function createAtmosphereView(scene: Scene): AtmosphereView {
       if (shown !== world.air) {
         shown = world.air;
         uniforms.uZenith.value.setHex(world.air.zenith);
+        uniforms.uDayZenith.value.setHex(world.air.dayZenith ?? world.air.zenith);
+        const opacity = world.air.opacity ?? 1;
+        uniforms.uNightOpacity.value = Math.min(1, (world.air.nightOpacity ?? opacity) / opacity);
         uniforms.uHorizon.value.setHex(world.air.horizon);
         uniforms.uGlow.value.setHex(world.air.glow);
         uniforms.uGround.value.setHex(world.air.ground);

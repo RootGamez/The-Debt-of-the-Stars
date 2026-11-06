@@ -39,17 +39,22 @@ describe('the sky of a world with air', () => {
     expect(skyOf(scene)?.visible).toBe(false);
   });
 
-  it('lets the stars through a thin air: Umbral only covers part of them', () => {
-    const thin = ATMOSPHERES.umbral;
-    if (!thin) throw new Error('Umbral tiene aire (Fase 11)');
+  it('gives Umbral a dense day sky and a thinner night that lets the stars through (Phase 12)', () => {
+    const umbral = ATMOSPHERES.umbral;
+    if (!umbral) throw new Error('Umbral tiene aire (Fase 11)');
     const scene = new Scene();
     const view = createAtmosphereView(scene);
 
-    view.update({ eye: new Vector3(3000, 91, 0), world: { center, radius: 90, air: thin }, star });
+    view.update({
+      eye: new Vector3(3000, 91, 0),
+      world: { center, radius: 90, air: umbral },
+      star,
+    });
 
     expect(view.density).toBe(1);
-    expect(view.coverage).toBeGreaterThan(0.4);
-    expect(view.coverage).toBeLessThan(1);
+    expect(view.coverage).toBeGreaterThan(0.9);
+    expect(umbral.nightOpacity).toBeLessThan(0.75);
+    expect(umbral.dayZenith).not.toBe(umbral.zenith);
   });
 
   it('covers almost everything on Hogar, with a sky like the Archivo (Phase 11G)', () => {

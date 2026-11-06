@@ -14,6 +14,10 @@ export interface Atmosphere {
   opacity?: number;
   /** Color del cielo cuando la estrella está bajo el horizonte (la cara de noche); sin él, siempre de día. */
   night?: number;
+  /** Color del cénit con la estrella alta (mediodía); sin él, el cénit es siempre `zenith`. */
+  dayZenith?: number;
+  /** Cuánto tapa el cielo de noche (menos que `opacity` deja ver las estrellas); sin él, lo mismo que de día. */
+  nightOpacity?: number;
 }
 
 export const ATMOSPHERES: Readonly<Record<string, Atmosphere>> = {
@@ -28,15 +32,19 @@ export const ATMOSPHERES: Readonly<Record<string, Atmosphere>> = {
     opacity: 0.96,
     night: 0x0b1428,
   },
-  // 🟡 Ocaso permanente: violeta arriba, ámbar en el horizonte (CONTEXTO_PLANETAS.md §3, «Atmósfera»).
+  // Fase 12 (✅ Anthony 2026-11-06: más denso, con nubes, y que se note el día y la noche según el lado; 🟡 colores).
+  // De día, azul pálido polvoriento arriba y ámbar en el horizonte; en el terminador, el ocaso violeta de siempre
+  // (CONTEXTO_PLANETAS.md §3); de noche, casi negro y más fino, para que se vean las estrellas sobre el hielo.
   umbral: {
-    zenith: 0x3a2c58,
-    horizon: 0xd88a54,
-    glow: 0xffb066,
+    zenith: 0x4a3a6c,
+    dayZenith: 0x6f93c4,
+    horizon: 0xe09a62,
+    glow: 0xffc27a,
     ground: 0x8a5a48,
-    height: 70,
-    opacity: 0.78,
-    night: 0x140f26,
+    height: 85,
+    opacity: 0.92,
+    night: 0x0a0c1c,
+    nightOpacity: 0.6,
   },
   // 🟡 Cielo azul de mar, casi opaco de día; de noche, azul hondo con estrellas.
   archivo: {
