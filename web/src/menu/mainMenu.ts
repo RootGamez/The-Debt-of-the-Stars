@@ -85,7 +85,7 @@ export function createMainMenu(options: MainMenuOptions): MainMenu {
   const root = element('div', 'menu');
   root.setAttribute('role', 'dialog');
   root.setAttribute('aria-modal', 'true');
-  root.setAttribute('aria-label', t('Bucle de tiempo'));
+  root.setAttribute('aria-label', t('La deuda de las estrellas'));
   const canvas = element('canvas', 'menu-canvas');
   canvas.setAttribute('aria-hidden', 'true');
   const cover = element('div', 'menu-cover');
@@ -157,7 +157,7 @@ export function createMainMenu(options: MainMenuOptions): MainMenu {
   );
 
   content.append(
-    element('h1', 'menu-title', t('Bucle de tiempo')),
+    element('h1', 'menu-title', t('La deuda de las estrellas')),
     element('p', 'menu-tagline', t('Quince minutos antes del final de un mundo.')),
     actions,
     settings,

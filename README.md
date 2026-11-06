@@ -1,6 +1,4 @@
-# Juego de bucle de tiempo
-
-> Título provisional por definir.
+# La deuda de las estrellas (The Debt of the Stars)
 
 Un joven explorador, en su primer vuelo, es arrastrado por un agujero de gusano a un sistema sin vida,
 quince minutos antes de que un agujero negro se lo trague todo. Muere y despierta otra vez al principio.

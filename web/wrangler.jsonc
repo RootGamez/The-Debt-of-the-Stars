@@ -1,6 +1,7 @@
 // Publicación en Cloudflare (Workers con assets estáticos, sin script): `npm run deploy` construye y sube `dist/`.
-// Los modelos 3D (5,7 MB en total, el mayor 3,5 MB) viajan con el resto: el límite por archivo es de 25 MiB, así
-// que no hace falta R2.
+// Todo el juego se construye por código en el navegador: `dist/` solo lleva el código y las tipografías.
+// El nombre del Worker (`name`) es el de la URL y el que usa la conexión con GitHub en Cloudflare: no lo cambies
+// sin crear otro Worker.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "bucle-de-tiempo",

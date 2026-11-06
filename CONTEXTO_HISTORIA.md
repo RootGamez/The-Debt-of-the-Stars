@@ -1,6 +1,6 @@
-# CONTEXTO DE HISTORIA — Juego de bucle de tiempo
+# CONTEXTO DE HISTORIA — La deuda de las estrellas
 
-**Título provisional:** por definir (ver preguntas abiertas)
+**Título:** La deuda de las estrellas (The Debt of the Stars) ✅ decidido por Anthony
 **Versión:** v1.11 (el HUD del Cuaderno vivo y la bitácora de mundos)
 **Última actualización:** 2026-10-30 · HUD
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)

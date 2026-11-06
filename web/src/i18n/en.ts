@@ -291,7 +291,7 @@ export const EN: Readonly<Record<string, string>> = {
   'Pegado en la bitácora: {name}': 'Pasted into the logbook: {name}',
   'Cargando…': 'Loading…',
   'Vista del juego': 'Game view',
-  'Bucle de tiempo': 'Time Loop',
+  'La deuda de las estrellas': 'The Debt of the Stars',
   'Final A': 'Ending A',
   'Final B': 'Ending B',
   'Llegas tarde': 'You arrive too late',

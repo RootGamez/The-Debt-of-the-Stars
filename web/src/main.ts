@@ -196,7 +196,7 @@ function start(): void {
     });
   }
   document.getElementById('game')?.setAttribute('aria-label', t('Vista del juego'));
-  document.title = t('Bucle de tiempo');
+  document.title = t('La deuda de las estrellas');
   const canvas = requireElement('game', HTMLCanvasElement);
   const status = requireElement('status', HTMLParagraphElement);
   status.textContent = t('Cargando…');

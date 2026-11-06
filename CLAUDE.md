@@ -1,4 +1,4 @@
-# CLAUDE.md — Juego de bucle de tiempo
+# CLAUDE.md — La deuda de las estrellas (The Debt of the Stars)
 
 Juego 3D low poly que corre gratis en el navegador (Three.js + TypeScript + Vite). Los mundos se modelaron en Blender
 y desde la Fase 11 están todos hechos por código (Blender en pausa; ya no hay `.glb` ni `.blend`).

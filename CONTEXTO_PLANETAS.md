@@ -1,4 +1,4 @@
-# CONTEXTO DE PLANETAS — Juego de bucle de tiempo
+# CONTEXTO DE PLANETAS — La deuda de las estrellas
 
 **Versión:** v0.15
 **Última actualización:** 2026-11-04 · Fase 11H (Cicatriz hueca, con anillo y micro agujero)
