@@ -5,10 +5,19 @@
     "tipo": "objeto",
     "titulo": "La Sala del Motor",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.lugar"] },
+    "superficial": {
+      "texto": [
+        "Un anillo enorme de metal sobre un pozo y, en el centro, un núcleo cerrado y mudo con el motor viejo dentro. Alrededor, una consola y una cuna vacía: todo está listo para recibir algo que no llegó.",
+        "En el anillo, una placa: «Sala del Motor. Aquí se instala el Contrapeso.»"
+      ],
+      "hechos": ["contrapeso.lugar"]
+    },
     "profunda": {
       "requiere": ["contrapeso.que_es"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Ahora entiendo el mecanismo: el núcleo late, y solo durante el pulso se abre. Un motor entra cuando el otro sale, en el mismo latido.",
+        "Entre latido y latido, el núcleo está cerrado, y quien intente abrirlo a destiempo solo gasta fuerza."
+      ],
       "hechos": ["contrapeso.ventana_pulso"]
     }
   },
@@ -18,10 +27,19 @@
     "tipo": "observacion",
     "titulo": "Las Mordidas",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["deuda.filtraciones"] },
+    "superficial": {
+      "texto": [
+        "Decenas de cortes en el suelo y en las paredes, todos esféricos y perfectos, como si algo hubiese mordido el mundo. Los bordes son lisos y curvos.",
+        "Cada Puerta que se abrió dejó una cerca. Hay cortes recientes y otros viejos, uno dentro de otro."
+      ],
+      "hechos": ["deuda.filtraciones"]
+    },
     "profunda": {
       "requiere": ["casa.simbolo_partido"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "En una de las mordidas hay una pared tallada con medio símbolo: dos anillos partidos por una raya rota. Es la mitad que le falta al de mi fragmento: encajan, borde con borde.",
+        "Los fragmentos de casa salieron de aquí."
+      ],
       "hechos": ["casa.fragmentos_de_aqui"]
     }
   },
@@ -56,10 +74,20 @@
     "tipo": "texto",
     "titulo": "La bitácora de la máquina",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["partida.cascada"] },
+    "superficial": {
+      "texto": [
+        "La bitácora de la máquina: una cinta de papel con una línea que sube y baja. Cada uso de una Puerta deja un pico; los picos, al principio pequeños, se van juntando.",
+        "Hacia el final la línea se dispara. Alguien escribió al margen, con prisa: «Durante la evacuación se usaron todas a la vez. Cuanto más corrían, más subía.»"
+      ],
+      "hechos": ["partida.cascada"]
+    },
     "profunda": {
       "requiere": ["partida.evacuacion"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Ya sé de qué evacuación habla: cuarenta minutos, Puertas 2 a 6. En la cinta es un solo pico enorme.",
+        "Las últimas entradas son de otra letra, más calmada: «Se ha anotado una llamada nueva. Una boca joven, en un sistema que aún no conocemos, nos busca.»",
+        "Y debajo: «El núcleo solo se abre durante el pulso. Ahí se pondrá el Contrapeso, si llega.»"
+      ],
       "hechos": ["casa.prueba_llama", "contrapeso.lugar", "contrapeso.ventana_pulso"]
     }
   },
@@ -69,10 +97,19 @@
     "tipo": "texto",
     "titulo": "La lista de mundos conectados",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["bocas.relojes_distintos"] },
+    "superficial": {
+      "texto": [
+        "La lista de mundos conectados a la red, en una pared de placas. Cada línea tiene un nombre y una hora anotada al lado; entre unas y otras hay huecos.",
+        "Las horas no cuadran: una misma Puerta marca una hora en cada boca. Alguien ha rayado «no cuadra» y lo ha vuelto a escribir en cada fila."
+      ],
+      "hechos": ["bocas.relojes_distintos"]
+    },
     "profunda": {
       "requiere": ["casa.simbolo_partido"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "En uno de los huecos hay grabado un símbolo: dos anillos con una raya en medio. Es el mismo que partió mi fragmento, y alguien ha rellenado el hueco.",
+        "Mi sistema ya está en la red."
+      ],
       "hechos": ["casa.en_la_red"]
     }
   },
@@ -82,10 +119,19 @@
     "tipo": "observacion",
     "titulo": "La Primera Puerta",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "superficial": {
+      "texto": [
+        "Las ruinas de un anillo enorme, el primero, medio caído. La explanada que lo rodea está llena de herramientas dejadas con orden, como para volver.",
+        "En el centro del anillo no hay aire vacío: hay un punto donde la vista se tuerce, como una cicatriz."
+      ],
+      "hechos": []
+    },
     "profunda": {
       "requiere": ["nudo.existe"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Con lo que sé del punto oscuro del cielo, miro esta boca de otra manera: no se cerró bien. Lo que quedó al cerrarla mal es aquello que dobla la luz allá arriba.",
+        "De aquí nació el Nudo."
+      ],
       "hechos": ["nudo.origen"]
     }
   },
@@ -95,10 +141,19 @@
     "tipo": "observacion",
     "titulo": "El Borde",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["nudo.existe"] },
+    "superficial": {
+      "texto": [
+        "Un acantilado frente al cielo: el borde del mundo. Desde aquí se ve el cielo entero y, en él, un punto oscuro rodeado de estrellas torcidas, como estiradas.",
+        "Es pesadísimo: la luz se dobla a su alrededor. En la barandilla alguien grabó un nombre: «el Nudo». Hacia el final del ciclo parece más negro y más grande."
+      ],
+      "hechos": ["nudo.existe"]
+    },
     "profunda": {
       "requiere": ["lab.existe_lugar_lento"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Con lo que sé del sitio lento, miro las estrellas torcidas de otro modo: la luz que sale de cerca del Nudo se tuerce igual.",
+        "Lo que se esconda junto al punto oscuro lo veré donde no está."
+      ],
       "hechos": ["lab.imagen_desplazada"]
     }
   },
@@ -108,7 +163,14 @@
     "tipo": "objeto",
     "titulo": "La palanca del núcleo",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.sustituye_motor"] }
+    "superficial": {
+      "texto": [
+        "Una palanca gruesa en la consola frente al núcleo, con una placa: «Extractor. Tirar solo antes del pulso.»",
+        "Un cable la une al núcleo. Al tirar, algo grande se mueve dentro y el motor viejo sube por el hueco hasta quedar fuera.",
+        "Sin el motor viejo el núcleo espera otro: la palanca sirve para eso, no para parar la máquina."
+      ],
+      "hechos": ["contrapeso.sustituye_motor"]
+    }
   },
   {
     "id": "cicatriz.cuna",
@@ -117,10 +179,19 @@
     "lector": "ruedas",
     "titulo": "La cuna del núcleo",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "superficial": {
+      "texto": [
+        "Una cuna de metal frente al núcleo, hecha a la medida de algo del tamaño de un barril. A un lado, dos ruedas, una de minutos y otra de segundos; al otro, el reloj de la máquina, y junto a él un hueco para el reloj de lo que se ponga en la cuna.",
+        "Las ruedas giran con un clic firme, como si las hubieran hecho para no equivocarse con prisa."
+      ],
+      "hechos": []
+    },
     "profunda": {
       "requiere": ["contrapeso.que_es"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Ahora lo entiendo: lo que se ponga aquí lleva su propio reloj, y solo encaja si marca lo mismo que el de la máquina. Para igualarlos se giran las ruedas.",
+        "Es lo que decía la nota del Taller: no se debe mover sin ajustar el reloj."
+      ],
       "hechos": ["contrapeso.reloj"]
     }
   },

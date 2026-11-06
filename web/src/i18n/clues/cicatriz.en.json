@@ -1,6 +1,26 @@
 {
-  "cicatriz.sala_motor": { "titulo": "The Engine Room" },
-  "cicatriz.mordidas": { "titulo": "The Bites" },
+  "cicatriz.sala_motor": {
+    "titulo": "The Engine Room",
+    "superficial": [
+      "An enormous metal ring over a pit and, at its center, a closed and silent core with the old motor inside. Around it, a console and an empty cradle: everything is ready to receive something that never arrived.",
+      "On the ring, a plate: “Engine Room. The Counterweight is fitted here.”"
+    ],
+    "profunda": [
+      "Now I understand the mechanism: the core beats, and it opens only during the pulse. One motor goes in as the other comes out, in the same beat.",
+      "Between beats, the core is shut, and whoever tries to open it out of time only wastes strength."
+    ]
+  },
+  "cicatriz.mordidas": {
+    "titulo": "The Bites",
+    "superficial": [
+      "Dozens of cuts in the ground and the walls, all spherical and perfect, as if something had bitten the world. The edges are smooth and curved.",
+      "Every Gate that was opened left one nearby. There are recent cuts and old ones, one inside another."
+    ],
+    "profunda": [
+      "In one of the bites there is a carved wall with half a symbol: two rings split by a broken line. It is the half that my fragment lacks: they fit, edge to edge.",
+      "The fragments at home came from here."
+    ]
+  },
   "cicatriz.grabacion_esceptico": {
     "titulo": "The skeptic's recording",
     "superficial": [
@@ -14,12 +34,70 @@
       "The Council will say there is no risk. There is a Limit, and every trip brings us closer to it."
     ]
   },
-  "cicatriz.bitacora": { "titulo": "The machine's logbook" },
-  "cicatriz.lista_mundos": { "titulo": "The list of connected worlds" },
-  "cicatriz.primera_puerta": { "titulo": "The First Gate" },
-  "cicatriz.borde": { "titulo": "The Edge" },
-  "cicatriz.palanca": { "titulo": "The core lever" },
-  "cicatriz.cuna": { "titulo": "The core cradle" },
+  "cicatriz.bitacora": {
+    "titulo": "The machine's logbook",
+    "superficial": [
+      "The machine’s log: a paper tape with a line that rises and falls. Every use of a Gate leaves a spike; the spikes, small at first, gradually bunch together.",
+      "Toward the end the line shoots up. Someone wrote in the margin, in a hurry: “During the evacuation they were all used at once. The faster they ran, the higher it went.”"
+    ],
+    "profunda": [
+      "I know which evacuation it means: forty minutes, Gates 2 to 6. On the tape it is a single enormous spike.",
+      "The last entries are in another hand, calmer: “A new call has been logged. A young mouth, in a system we do not yet know, is looking for us.”",
+      "And below: “The core only opens during the pulse. That is where the Counterweight will go, if it arrives.”"
+    ]
+  },
+  "cicatriz.lista_mundos": {
+    "titulo": "The list of connected worlds",
+    "superficial": [
+      "The list of worlds connected to the network, on a wall of plates. Each line has a name and an hour written beside it; between them there are gaps.",
+      "The hours do not add up: one and the same Gate shows a different hour at each mouth. Someone has scratched “does not add up” and written it again on every row."
+    ],
+    "profunda": [
+      "In one of the gaps a symbol is carved: two rings with a line down the middle. It is the same one that split my fragment, and someone has filled in the gap.",
+      "My system is already on the network."
+    ]
+  },
+  "cicatriz.primera_puerta": {
+    "titulo": "The First Gate",
+    "superficial": [
+      "The ruins of an enormous ring, the first one, half fallen. The plaza around it is full of tools left in order, as if for coming back.",
+      "In the center of the ring there is no empty air: there is a point where the sight bends, like a scar."
+    ],
+    "profunda": [
+      "With what I know about the dark point in the sky, I look at this mouth differently: it did not close properly. What was left when it closed badly is the thing that bends light up there.",
+      "The Knot was born here."
+    ]
+  },
+  "cicatriz.borde": {
+    "titulo": "The Edge",
+    "superficial": [
+      "A cliff facing the sky: the edge of the world. From here you see the whole sky and, in it, a dark point ringed by bent stars, as if stretched.",
+      "It is enormously heavy: light bends around it. On the railing someone carved a name: “the Knot.” Toward the end of the cycle it seems blacker and bigger."
+    ],
+    "profunda": [
+      "With what I know about the Slow Site, I see the bent stars in another way: the light that leaves from near the Knot bends the same.",
+      "Whatever hides beside the dark point I will see where it is not."
+    ]
+  },
+  "cicatriz.palanca": {
+    "titulo": "The core lever",
+    "superficial": [
+      "A thick lever on the console in front of the core, with a plate: “Extractor. Pull only before the pulse.”",
+      "A cable joins it to the core. When it is pulled, something big moves inside and the old motor rises through the opening until it is out.",
+      "Without the old motor the core waits for another: the lever is for that, not for stopping the machine."
+    ]
+  },
+  "cicatriz.cuna": {
+    "titulo": "The core cradle",
+    "superficial": [
+      "A metal cradle in front of the core, made to fit something the size of a barrel. On one side, two wheels, one for minutes and one for seconds; on the other, the machine’s clock, and next to it a gap for the clock of whatever is placed in the cradle.",
+      "The wheels turn with a firm click, as if they had been made so as not to go wrong in a hurry."
+    ],
+    "profunda": [
+      "Now I understand: whatever is placed here carries its own clock, and it only fits if it shows the same as the machine’s. To match them, the wheels are turned.",
+      "It is what the note at the Workshop said: it must not be moved without adjusting the clock."
+    ]
+  },
   "cicatriz.cripta": {
     "titulo": "The Crypt of the Throat",
     "superficial": [

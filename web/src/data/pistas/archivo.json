@@ -6,7 +6,11 @@
     "titulo": "El informe oficial",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Un pliego del Consejo de Tránsito, encuadernado en piel azul y sellado con siete rombos en fila.",
+        "«Los incidentes comunicados en Puertas lejanas son aislados y se hallan dentro de lo esperado. No existe riesgo para el tránsito. Se procederá con normalidad.»",
+        "Al margen, con una letra pequeña y apretada: «¿Esperado por quién?»"
+      ],
       "hechos": ["silencio.version_oficial"]
     }
   },
@@ -17,7 +21,11 @@
     "titulo": "El Índice",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Un muro entero de fichas, una columna por asunto: Puertas, Cruces, Relojes, Mareas…",
+        "Tres columnas están vacías. No les falta tinta: les falta todo. Donde irían las fichas, un mismo rótulo: «Ver Sala Cerrada».",
+        "Alguien ha escrito debajo, a lápiz: «Deuda — ver Sala Cerrada». Y otra vez, apretando más: «Deuda — ver Sala Cerrada»."
+      ],
       "hechos": ["silencio.censura"]
     }
   },
@@ -28,12 +36,18 @@
     "titulo": "La Sala de Relojes",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Decenas de relojes en las paredes, de todos los tamaños. Cada uno lleva una etiqueta con el sitio donde se calibró: Taller, Umbral, Cicatriz…",
+        "Todos se pusieron en hora a la vez. Ya no coinciden, y sin hacer cuentas se ve cuánto se ha separado cada uno del de Umbral: basta ponerlos uno junto a otro."
+      ],
       "hechos": ["contrapeso.medir_desfase"]
     },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Hay un reloj sin nombre de mundo, en la pared del fondo. Su aguja apenas se ha movido: por cada cinco vueltas del de Umbral, da una.",
+        "Ahora sé lo que estoy mirando: el reloj de un sitio donde el tiempo casi no corre."
+      ],
       "hechos": ["lab.existe_lugar_lento"]
     }
   },
@@ -45,12 +59,18 @@
     "titulo": "Las cartas que contestan antes",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Cuatro hojas sobre la mesa larga, sin sobres y sin orden. Cada una está fechada con el día de un reloj distinto, y las respuestas parecen llegar antes que las preguntas.",
+        "Habría que ponerlas en fila según cuándo se escribió cada una, no según la fecha que lleva."
+      ],
       "hechos": []
     },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Puestas en su sitio, las hojas cuentan otra cosa: el informe de la investigadora se archivó tres veces, y cada vez se borró algo antes de guardarlo.",
+        "Las fechas no mienten: cada una está escrita en un reloj que corría a su ritmo. Lo mismo le pasa a cualquier cosa que cruza de una boca a otra: llega de una época que no es la suya."
+      ],
       "hechos": ["bocas.relojes_distintos", "silencio.borrado"]
     }
   },
@@ -61,12 +81,18 @@
     "titulo": "El escritorio del archivista",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "El escritorio del archivista: una lámpara sin aceite, una taza seca y un cuaderno abierto con notas en los márgenes, casi todas preguntas.",
+        "«A las cuatro, la luz de la Brasa entra por la ranura y se pasea por la tablilla del fondo. Hay que leerla enseguida: dura hora y media.»"
+      ],
       "hechos": ["archivo.hora_ranura"]
     },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "«Faltan cuarenta días que no recuerdo haber archivado. Las fichas están con mi letra. Las fechas, también.»",
+        "«Alguien vive en otro tiempo y me manda cosas, y yo las guardo sin saber cuándo llegaron.»"
+      ],
       "hechos": ["lab.existe_lugar_lento"]
     }
   },
@@ -78,12 +104,18 @@
     "titulo": "La tablilla de la ranura de luz",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Una tablilla de piedra con un mapa del cielo: puntos para las estrellas y, en el centro, un círculo oscuro.",
+        "Cada estrella está dibujada dos veces, una con trazo firme y otra con trazo roto, y una flecha curva las une."
+      ],
       "hechos": []
     },
     "profunda": {
       "requiere": ["lab.existe_lugar_lento"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Con lo que sé del sitio lento, la tablilla se explica sola: los puntos de trazo roto son dónde está cada estrella y los firmes, dónde se ve. Cerca del círculo oscuro, las dos posiciones se separan mucho.",
+        "El círculo es algo pesadísimo que dobla la luz. Lo que se ve cerca de él no está donde parece."
+      ],
       "hechos": ["lab.imagen_desplazada", "nudo.existe"]
     }
   },
@@ -94,12 +126,19 @@
     "titulo": "El Fondo del Cañón",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "En la zona más oscura del cañón, registros marcados «cerrados». Actas del Consejo de Tránsito, una tras otra.",
+        "«Se somete a votación comunicar el riesgo a las Puertas habitadas. Resultado: no se comunica.»",
+        "Al pie, la firma: siete rombos en fila."
+      ],
       "hechos": ["silencio.acta"]
     },
     "profunda": {
       "requiere": ["silencio.censura"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Entre las actas hay una orden de otra clase, sin nombre de nadie: «Constrúyase un aparato que sostenga el último cuarto de hora de la Boca.»",
+        "Nadie anota para qué. El apunte siguiente es una factura de materiales."
+      ],
       "hechos": ["bucle.orden_camara"]
     }
   }

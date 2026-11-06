@@ -298,6 +298,30 @@ export const EN: Readonly<Record<string, string>> = {
   'Final A': 'Ending A',
   'Final B': 'Ending B',
   'Llegas tarde': 'You arrive too late',
+  'Antes de la prueba': 'Before the test',
+  'Llegas a casa con el aire de las islas todavía en el pelo y el cuaderno lleno. La Directora lo lee de pie, despacio, sin interrumpir.':
+    'You arrive home with the air of the islands still in your hair and your notebook full. The Director reads it standing, slowly, without interrupting.',
+  'No hace falta que lo entienda todo. Le basta ver dos relojes que no coinciden y una línea que se dispara.':
+    'She does not need to understand all of it. It is enough for her to see two clocks that do not agree and a line that shoots up.',
+  'La prueba no se hace. En el Instituto nadie sabrá de qué se salvaron, y tú no podrás explicarlo: ese viaje no ocurrió para ellos.':
+    'The test is not carried out. At the Institute nobody will know what they were spared, and you will not be able to explain it: that journey never happened for them.',
+  'Allá arriba, la Luna sigue limpia. Lejos de aquí, un sistema vacío conserva su última cuenta, y nadie la paga.':
+    'Up there, the Moon is still clean. Far from here, an empty system keeps its last count, and nobody pays it.',
+  'La cuenta empieza hoy': 'The count starts today',
+  'Llegas a tiempo. Dejas los planos sobre la mesa, con las manos todavía temblando, para que vean que es verdad.':
+    'You arrive in time. You lay the plans on the table, your hands still trembling, so they can see it is true.',
+  'La Directora los abre y sonríe: «Esto es justo lo que nos faltaba.»':
+    'The Director opens them and smiles: “This is exactly what we were missing.”',
+  'Esa noche, en el Motor, la Puerta Mayor se enciende por fin con la pieza que nunca llegó. Funciona. Todo funciona.':
+    'That night, at the Engine, the Great Gate lights up at last with the piece that never arrived. It works. Everything works.',
+  'En otro sistema, tiempo atrás, alguien graba una placa en la boca de un anillo: «La cuenta empieza hoy».':
+    'In another system, long ago, someone carves a plate on the mouth of a ring: “The count starts today.”',
+  'La plaza del Instituto está en silencio. La Puerta Mayor ya se abrió: en el Motor queda un anillo apagado y, junto al mar, un corte liso y curvo en la tierra.':
+    'The Institute plaza is silent. The Great Gate has already opened: at the Engine there is a dead ring and, by the sea, a smooth curved cut in the ground.',
+  'Quien te encuentra no sabe qué decirte. Tú lo sabes todo, y ya no sirve de nada.':
+    'Whoever finds you does not know what to say. You know everything, and it no longer helps.',
+  'Esta boca no te dejó a tiempo. Vuelve al Archivo y cuenta de nuevo: los relojes no mienten, solo hay que leerlos con calma.':
+    'This mouth did not leave you in time. Go back to the Archive and count again: the clocks do not lie, they only have to be read calmly.',
   '[texto pendiente]': '[text pending]',
   Continuar: 'Continue',
   'Quince minutos antes del final de un mundo.': 'Fifteen minutes before a world ends.',

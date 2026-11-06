@@ -1,17 +1,31 @@
 {
   "A": {
-    "titulo": "Final A",
+    "titulo": "Antes de la prueba",
     "borrador": true,
-    "texto": ["[texto pendiente]"]
+    "texto": [
+      "Llegas a casa con el aire de las islas todavía en el pelo y el cuaderno lleno. La Directora lo lee de pie, despacio, sin interrumpir.",
+      "No hace falta que lo entienda todo. Le basta ver dos relojes que no coinciden y una línea que se dispara.",
+      "La prueba no se hace. En el Instituto nadie sabrá de qué se salvaron, y tú no podrás explicarlo: ese viaje no ocurrió para ellos.",
+      "Allá arriba, la Luna sigue limpia. Lejos de aquí, un sistema vacío conserva su última cuenta, y nadie la paga."
+    ]
   },
   "B": {
-    "titulo": "Final B",
+    "titulo": "La cuenta empieza hoy",
     "borrador": true,
-    "texto": ["[texto pendiente]"]
+    "texto": [
+      "Llegas a tiempo. Dejas los planos sobre la mesa, con las manos todavía temblando, para que vean que es verdad.",
+      "La Directora los abre y sonríe: «Esto es justo lo que nos faltaba.»",
+      "Esa noche, en el Motor, la Puerta Mayor se enciende por fin con la pieza que nunca llegó. Funciona. Todo funciona.",
+      "En otro sistema, tiempo atrás, alguien graba una placa en la boca de un anillo: «La cuenta empieza hoy»."
+    ]
   },
   "tarde": {
     "titulo": "Llegas tarde",
     "borrador": true,
-    "texto": ["[texto pendiente]"]
+    "texto": [
+      "La plaza del Instituto está en silencio. La Puerta Mayor ya se abrió: en el Motor queda un anillo apagado y, junto al mar, un corte liso y curvo en la tierra.",
+      "Quien te encuentra no sabe qué decirte. Tú lo sabes todo, y ya no sirve de nada.",
+      "Esta boca no te dejó a tiempo. Vuelve al Archivo y cuenta de nuevo: los relojes no mienten, solo hay que leerlos con calma."
+    ]
   }
 }

@@ -63,7 +63,7 @@ describe('the end of the journey at home', () => {
     expect(homecoming.blocking).toBe(true);
     expect(calls.seen).toEqual(['B']);
     expect(calls.outside).toBe(0);
-    expect(shown.mock.calls[0]?.[0].title).toBe('Final B');
+    expect(shown.mock.calls[0]?.[0].title).toBe('La cuenta empieza hoy');
     expect(shown.mock.calls[0]?.[2]).toBeUndefined();
     expect(lastChoices().map((c) => c.label)).toEqual(['Volver a jugar']);
     lastChoices()[0]?.run();

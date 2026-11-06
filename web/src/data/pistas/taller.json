@@ -6,7 +6,11 @@
     "titulo": "La Nave de Montaje",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Brazos mecánicos que siguen montando anillos en la penumbra, uno tras otro, para nadie. Al final de la cadena, una pila de anillos terminados llega hasta el techo.",
+        "En la pared, un panel de metas: cada semana, más anillos que la anterior. Alguien dibujó una estrella junto a la cifra más alta.",
+        "Nadie escribió «basta». Los carteles dicen «gracias» y «adelante»."
+      ],
       "hechos": ["silencio.economia"]
     }
   },
@@ -17,7 +21,10 @@
     "titulo": "La Cuna vacía",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Un pedestal vacío con una cuna de metal en lo alto y cables colgando. En el polvo, marcas de algo pesado que estuvo aquí y se fue con cuidado.",
+        "En la placa del pedestal: «Trasladado para las pruebas finales.» Y debajo, en la casilla de destino, solo un trazo largo, sin nombre."
+      ],
       "hechos": ["contrapeso.trasladado"]
     }
   },
@@ -28,7 +35,11 @@
     "titulo": "La nota pegada en la Cuna",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Una nota pegada con cinta en el borde de la cuna, con la letra del técnico:",
+        "«No lo muevan sin ajustar el reloj. Lleva la hora de aquí, y la de aquí no es la de allí. Si lo mueven a ciegas llegará con la hora equivocada, y entonces no encaja.»",
+        "Debajo, con otra letra: «Ya lo sabemos.» Y debajo de eso, con la primera: «Pues no lo parece.»"
+      ],
       "hechos": ["contrapeso.reloj"]
     }
   },
@@ -39,7 +50,12 @@
     "titulo": "El manual de instalación",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Un manual encuadernado con tornillos: «Contrapeso. Instalación.» Le faltan páginas, arrancadas con cuidado.",
+        "«El Contrapeso no frena la máquina: la sustituye. Es un motor que devuelve a cada reloj lo que la Puerta le quitó. Con él, la deuda se paga en vez de crecer.»",
+        "«Se monta en lugar del motor de la máquina de Cicatriz.»",
+        "Donde iría el capítulo de los relojes, un hueco. En la última hoja, a lápiz: «Sincronización: ver la pizarra del sitio de pruebas y la sala del Centro.»"
+      ],
       "hechos": ["contrapeso.que_es", "contrapeso.sustituye_motor"]
     }
   },
@@ -51,12 +67,18 @@
     "titulo": "Los diarios de los gemelos",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Dos diarios de los mismos meses. Uno lo escribe un técnico del Taller; el otro, su hermana, en Umbral.",
+        "Los dos anotan la misma tormenta, pero no cuentan los mismos días. Él dice que han pasado tres semanas. Ella: «Aquí, casi cuatro. Ven a comer.»"
+      ],
       "hechos": []
     },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Con los dos diarios abiertos se ve el truco: quien se queda atrás en el tiempo cuenta menos días que quien espera quieto, y la diferencia no es capricho: sale siempre en la misma proporción.",
+        "Sabiendo lo que va de atrás cada sitio, se puede calcular cuánto se desfasa un reloj según el camino que haga. Es lo que él anotó, página a página, para no perder la cuenta de su hermana."
+      ],
       "hechos": ["contrapeso.metodo_sincronia"]
     }
   },
@@ -68,12 +90,18 @@
     "titulo": "La Cabina de Control",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Una consola con una fila de relojes, uno por destino: Taller, Umbral, Archivo, Cicatriz. Todos marcan una hora distinta, cada uno con su nombre grabado, y todos avanzan a la vez, cada uno a su ritmo.",
+        "Poniéndolos uno junto a otro se mide cuánto se separan dos sitios, sin cuentas: basta ver cuál se queda atrás."
+      ],
       "hechos": ["contrapeso.medir_desfase"]
     },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "La última línea de la consola no tiene nombre, solo «Ruta 7». Su reloj anda casi parado: da una vuelta mientras el de Umbral da cinco.",
+        "Al lado, una nota del técnico sobre la ventana de transferencia: «Su imagen llega torcida hacia la Brasa. Para dar con ella de verdad, apartad la vista de la Brasa dieciocho grados.»"
+      ],
       "hechos": ["lab.existe_lugar_lento", "lab.correccion"]
     }
   },
@@ -85,7 +113,11 @@
     "titulo": "La secuencia de la fábrica",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "A las siete, la fábrica se enciende sola: grúas, brazos y luces durante dos minutos. No fabrica nada: ensaya.",
+        "Un modelo a escala del motor de una máquina baja a un pozo. Un brazo tira de una palanca y el núcleo se abre un instante; otro saca el motor viejo; un tercero encaja una pieza nueva, el Contrapeso, y la luz del núcleo se estabiliza.",
+        "Todo ocurre en el instante del pulso: el núcleo solo se abre entonces. Es un ensayo de cómo cambiar el motor sin dejar a la máquina sin latido: en vez de frenar la deuda, pagarla."
+      ],
       "hechos": ["contrapeso.que_es", "contrapeso.sustituye_motor", "contrapeso.ventana_pulso"]
     }
   },
@@ -96,7 +128,10 @@
     "titulo": "Los Dormitorios",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Literas en hilera, con las mantas dobladas. Una taza con un resto seco, una flauta de caña, un cuaderno de recetas.",
+        "En el cuaderno, entre una sopa y un pan, el técnico escribió: «Hoy hemos comido los que quedamos. La investigadora y el escéptico ya no vienen: se fueron al sitio lento y no volvieron a escribir. Les dejo su sitio en la mesa, por si acaso.»"
+      ],
       "hechos": ["silencio.dos_investigadores"]
     }
   },
@@ -108,7 +143,11 @@
     "titulo": "El reloj de la Pista de Pruebas",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Un reloj enorme junto a la línea de salida de la Pista de Pruebas. Está desajustado: va adelantado un buen rato respecto a la hora de aquí.",
+        "Debajo hay dos ruedas, una para los minutos y otra para los segundos, que se giran a mano hasta que marque lo mismo que la hora de este sitio.",
+        "Quien lo ponga en hora aprende a comparar dos relojes de sitios distintos: cada uno ha envejecido a su ritmo."
+      ],
       "hechos": ["contrapeso.medir_desfase"]
     }
   },
@@ -119,7 +158,11 @@
     "titulo": "Las páginas de sincronización",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Las hojas que faltaban del manual, cosidas con hilo rojo, en la sala del Centro.",
+        "«Sincronización. Anota cuánto tiempo pasa el Contrapeso en cada tramo y con qué reloj cuenta cada sitio. Cada tramo se corrige con el ritmo de su sitio: lo que pasa en un lugar lento cuenta menos que lo que pasa en uno rápido. Suma las correcciones: ese es el desfase que hay que quitarle.»",
+        "Un ejemplo, a lápiz: «Diez minutos en el sitio de pruebas, cinco de vuelo y cuatro en el Taller.» Y al pie: «La máquina marcha a su paso. Iguálalo en la cuna.»"
+      ],
       "hechos": ["contrapeso.cuenta_sincronia"]
     }
   }

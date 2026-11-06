@@ -1,9 +1,74 @@
 {
-  "archivo.informe_oficial": { "titulo": "The official report" },
-  "archivo.indice": { "titulo": "The Index" },
-  "archivo.sala_relojes": { "titulo": "The Clock Room" },
-  "archivo.cartas": { "titulo": "The letters that answer early" },
-  "archivo.escritorio": { "titulo": "The archivist's desk" },
-  "archivo.ranura_luz": { "titulo": "The light-slot tablet" },
-  "archivo.fondo_canon": { "titulo": "The Canyon Floor" }
+  "archivo.informe_oficial": {
+    "titulo": "The official report",
+    "superficial": [
+      "A sheet from the Transit Council, bound in blue leather and sealed with seven diamonds in a row.",
+      "“The incidents reported at distant Gates are isolated and within what was expected. There is no risk to transit. Business will proceed as normal.”",
+      "In the margin, in small cramped writing: “Expected by whom?”"
+    ]
+  },
+  "archivo.indice": {
+    "titulo": "The Index",
+    "superficial": [
+      "A whole wall of index cards, one column for each subject: Gates, Crossings, Clocks, Tides…",
+      "Three columns are empty. They are not missing ink; they are missing everything. Where the cards would go, the same label: “See Sealed Room.”",
+      "Someone has written underneath, in pencil: “Debt — see Sealed Room.” And again, pressing harder: “Debt — see Sealed Room.”"
+    ]
+  },
+  "archivo.sala_relojes": {
+    "titulo": "The Clock Room",
+    "superficial": [
+      "Dozens of clocks on the walls, in every size. Each carries a label with the place where it was calibrated: Workshop, Threshold, Scar…",
+      "They were all set to the same hour at once. They no longer agree, and without any sums you can see how far each has drifted from the one in Threshold: just put them side by side."
+    ],
+    "profunda": [
+      "There is one clock with no world on its label, on the far wall. Its hand has barely moved: for every five turns of the Threshold clock, it makes one.",
+      "Now I know what I am looking at: the clock of a place where time hardly runs."
+    ]
+  },
+  "archivo.cartas": {
+    "titulo": "The letters that answer early",
+    "superficial": [
+      "Four sheets on the long table, with no envelopes and in no order. Each is dated with the day of a different clock, and the replies seem to arrive before the questions.",
+      "They would have to be put in a row by when each was written, not by the date it carries."
+    ],
+    "profunda": [
+      "Put in their places, the sheets tell something else: the researcher’s report was filed three times, and each time something was erased before it was put away.",
+      "The dates do not lie: each was written on a clock that ran at its own pace. The same happens to anything that crosses from one mouth to another: it arrives from an age that is not its own."
+    ]
+  },
+  "archivo.escritorio": {
+    "titulo": "The archivist's desk",
+    "superficial": [
+      "The archivist’s desk: a lamp with no oil, a dry cup and an open notebook with notes in the margins, almost all of them questions.",
+      "“At four, the light of the Ember comes in through the slot and wanders over the tablet at the back. You have to read it at once: it lasts an hour and a half.”"
+    ],
+    "profunda": [
+      "“There are forty days I do not remember filing. The cards are in my handwriting. So are the dates.”",
+      "“Someone lives in another time and sends me things, and I file them without knowing when they arrived.”"
+    ]
+  },
+  "archivo.ranura_luz": {
+    "titulo": "The light-slot tablet",
+    "superficial": [
+      "A stone tablet with a map of the sky: dots for the stars and, in the middle, a dark circle.",
+      "Each star is drawn twice, once with a firm line and once with a broken one, and a curved arrow joins them."
+    ],
+    "profunda": [
+      "With what I know about the Slow Site, the tablet explains itself: the broken dots are where each star is and the firm ones, where it is seen. Near the dark circle, the two positions drift far apart.",
+      "The circle is something enormously heavy that bends light. Whatever is seen near it is not where it seems."
+    ]
+  },
+  "archivo.fondo_canon": {
+    "titulo": "The Canyon Floor",
+    "superficial": [
+      "In the darkest part of the canyon, records marked “closed.” Minutes of the Transit Council, one after another.",
+      "“A vote is put on whether to report the risk to the inhabited Gates. Result: it is not reported.”",
+      "At the bottom, the signature: seven diamonds in a row."
+    ],
+    "profunda": [
+      "Among the minutes there is an order of another kind, with nobody’s name on it: “Let an apparatus be built that holds the last quarter hour of the Mouth.”",
+      "Nobody writes down what for. The next entry is a bill of materials."
+    ]
+  }
 }

@@ -45,7 +45,7 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 
 ## Leer y el Registro (Fase 4)
 - Las pistas están en `web/src/data/pistas/` (un archivo por mundo + `hilos.json`, `hechos.json`, `conclusiones.json`); se validan al cargar y las 7 reglas de `CONTEXTO_PISTAS.md` se comprueban en `npm test`.
-- Los textos de Umbral son **borradores provisionales** (`"borrador": true`); el resto son esqueleto ("[texto pendiente]").
+- Todos los textos son **borradores provisionales** (`"borrador": true`, de Claude, a la espera de Anthony); ya no queda ningún «[texto pendiente]» (lo comprueba `tests/registry/realClues.test.ts`). Las tarjetas de final están en `web/src/data/finales.json` y su inglés en `i18n/en.ts`.
 - Una fuente = marca `INT_` del mundo (en su constructor de `worlds/procedural/`) con `clue_id` y `kind` (texto, grabacion, objeto, observacion) que coincide con el `id` de la fuente; los eventos son marcas `TRIG_` con `event`.
 - Controles: **E** lee (o botón Leer), **R** o **Tab** abren el Registro, **Esc** cierra. Mientras se lee, el tiempo del ciclo se detiene.
 - Con `?debug`: `window.__juego.teleportTo('umbral.placa')` coloca al jugador frente a una fuente.

@@ -1,12 +1,87 @@
 {
-  "taller.montaje": { "titulo": "The Assembly Hall" },
-  "taller.cuna": { "titulo": "The empty Cradle" },
-  "taller.nota_cuna": { "titulo": "The note stuck to the Cradle" },
-  "taller.manual": { "titulo": "The installation manual" },
-  "taller.gemelos": { "titulo": "The twins' diaries" },
-  "taller.cabina": { "titulo": "The Control Booth" },
-  "taller.secuencia": { "titulo": "The factory sequence" },
-  "taller.dormitorios": { "titulo": "The Dormitories" },
-  "taller.pista": { "titulo": "The Test Track clock" },
-  "taller.paginas": { "titulo": "The synchronization pages" }
+  "taller.montaje": {
+    "titulo": "The Assembly Hall",
+    "superficial": [
+      "Mechanical arms still assembling rings in the half-light, one after another, for nobody. At the end of the line, a stack of finished rings reaches the ceiling.",
+      "On the wall, a board of targets: every week, more rings than the last. Someone drew a star beside the highest figure.",
+      "Nobody wrote “enough.” The posters say “thank you” and “keep going.”"
+    ]
+  },
+  "taller.cuna": {
+    "titulo": "The empty Cradle",
+    "superficial": [
+      "An empty pedestal with a metal cradle on top and cables hanging down. In the dust, marks of something heavy that was here and was carried off with care.",
+      "On the pedestal’s plate: “Moved for the final tests.” And below, in the destination box, only a long dash, with no name."
+    ]
+  },
+  "taller.nota_cuna": {
+    "titulo": "The note stuck to the Cradle",
+    "superficial": [
+      "A note taped to the edge of the cradle, in the technician’s handwriting:",
+      "“Do not move it without adjusting the clock. It carries the time from here, and the time here is not the time there. If you move it blind it will arrive with the wrong time, and then it will not fit.”",
+      "Underneath, in another hand: “We know.” And under that, in the first: “It does not look like it.”"
+    ]
+  },
+  "taller.manual": {
+    "titulo": "The installation manual",
+    "superficial": [
+      "A manual bound with screws: “Counterweight. Installation.” Pages are missing, torn out with care.",
+      "“The Counterweight does not brake the machine: it replaces it. It is a motor that gives each clock back what the Gate took from it. With it, the debt is paid instead of growing.”",
+      "“It is fitted in place of the motor of the machine at Scar.”",
+      "Where the chapter on clocks should be, a gap. On the last sheet, in pencil: “Synchronization: see the blackboard at the testing site and the Core Room.”"
+    ]
+  },
+  "taller.gemelos": {
+    "titulo": "The twins' diaries",
+    "superficial": [
+      "Two diaries covering the same months. One is written by a technician at the Workshop; the other by his sister, in Threshold.",
+      "Both note down the same storm, but they do not count the same days. He says three weeks have gone by. She says: “Here, almost four. Come and eat.”"
+    ],
+    "profunda": [
+      "With both diaries open the trick shows: whoever lags behind in time counts fewer days than whoever waits still, and the difference is no whim: it always comes out in the same proportion.",
+      "Knowing how far behind each place runs, you can work out how much a clock drifts according to the road it takes. It is what he wrote down, page by page, so as not to lose count of his sister."
+    ]
+  },
+  "taller.cabina": {
+    "titulo": "The Control Booth",
+    "superficial": [
+      "A console with a row of clocks, one for each destination: Workshop, Threshold, Archive, Scar. Each shows a different time, each with its name engraved, and they all advance together, every one at its own pace.",
+      "Setting them side by side shows how far two places drift apart, without any sums: you only have to see which one falls behind."
+    ],
+    "profunda": [
+      "The last line of the console has no name, only “Route 7.” Its clock is almost stopped: it makes one turn while the one for Threshold makes five.",
+      "Beside it, a note from the technician about the transfer window: “Its image arrives bent toward the Ember. To find it for real, look away from the Ember by eighteen degrees.”"
+    ]
+  },
+  "taller.secuencia": {
+    "titulo": "The factory sequence",
+    "superficial": [
+      "At seven, the factory switches itself on: cranes, arms and lights for two minutes. It makes nothing: it rehearses.",
+      "A scale model of a machine’s motor is lowered into a pit. One arm pulls a lever and the core opens for an instant; another lifts out the old motor; a third fits a new piece, the Counterweight, and the light in the core steadies.",
+      "It all happens at the instant of the pulse: the core only opens then. It is a rehearsal of how to change the motor without leaving the machine without a heartbeat: instead of stopping the debt, paying it."
+    ]
+  },
+  "taller.dormitorios": {
+    "titulo": "The Dormitories",
+    "superficial": [
+      "Bunks in a row, with the blankets folded. A cup with a dry residue, a reed flute, a notebook of recipes.",
+      "In the notebook, between a soup and a bread, the technician wrote: “Today those of us who are left ate together. The researcher and the skeptic no longer come: they went to the Slow Site and never wrote again. I leave their place at the table, just in case.”"
+    ]
+  },
+  "taller.pista": {
+    "titulo": "The Test Track clock",
+    "superficial": [
+      "A huge clock by the starting line of the Test Track. It is out of adjustment: it runs a good while ahead of the time here.",
+      "Below it are two wheels, one for the minutes and one for the seconds, turned by hand until it shows the same as the time at this place.",
+      "Whoever sets it right learns to compare two clocks from different places: each has aged at its own pace."
+    ]
+  },
+  "taller.paginas": {
+    "titulo": "The synchronization pages",
+    "superficial": [
+      "The pages missing from the manual, sewn in with red thread, in the Core Room.",
+      "“Synchronization. Note how long the Counterweight spends on each leg and the clock each place keeps. Each leg is corrected with the pace of its place: what happens in a slow place counts for less than what happens in a fast one. Add the corrections: that is the drift to take off.”",
+      "An example, in pencil: “Ten minutes at the testing site, five in flight and four at the Workshop.” And at the foot: “The machine keeps its own pace. Match it in the cradle.”"
+    ]
+  }
 }

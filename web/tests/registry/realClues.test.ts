@@ -81,35 +81,15 @@ describe('the real clue data', () => {
     });
   });
 
-  const CICATRIZ_DRAFTS = [
-    'cicatriz.cripta',
-    'cicatriz.friso',
-    'cicatriz.nucleo',
-    'cicatriz.partidas',
-    'cicatriz.anillo',
-  ];
-
-  it('gives Umbral, home and the recordings readable draft texts and leaves the rest as skeleton', () => {
-    // Las grabaciones necesitan un borrador para que su mecánica se pueda probar (Fase 7); casa, para el
-    // prólogo (Fase 9).
-    // Las fuentes nuevas de Cicatriz (Fase 11H) llegan con borrador para que se lean en su sitio, y el Observatorio
-    // (Fase 11), con el que se cuenta el lugar.
-    const drafted = (s: { id: string; world: string; kind: string }) =>
-      s.world === 'umbral' ||
-      s.world === 'hogar' ||
-      s.world === 'luna' ||
-      s.world === 'observatorio' ||
-      s.world === 'laboratorio' ||
-      s.world === 'puertas' ||
-      s.kind === 'grabacion' ||
-      CICATRIZ_DRAFTS.includes(s.id);
-    const readable = clues.sources.filter(drafted);
-    const others = clues.sources.filter((s) => !drafted(s));
-
-    expect(readable.map((s) => s.id)).toContain('cicatriz.grabacion_esceptico');
-    expect(readable.every((s) => s.draft)).toBe(true);
-    expect(readable.every((s) => !s.surface.text.includes('[texto pendiente]'))).toBe(true);
-    expect(others.every((s) => s.surface.text[0] === '[texto pendiente]')).toBe(true);
+  it('has a readable draft text in every source: no skeleton is left (milestone T3)', () => {
+    // Todo texto es todavía un borrador para Anthony, pero ya se lee: ninguno queda como «[texto pendiente]».
+    expect(clues.sources.every((s) => s.draft)).toBe(true);
+    for (const source of clues.sources) {
+      const paragraphs = [...source.surface.text, ...(source.deep?.text ?? [])];
+      expect(paragraphs.length, source.id).toBeGreaterThan(0);
+      for (const paragraph of paragraphs)
+        expect(paragraph, source.id).not.toContain('[texto pendiente]');
+    }
   });
 
   it('every recording carries the clock it was recorded with', () => {
