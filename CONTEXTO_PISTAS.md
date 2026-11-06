@@ -229,6 +229,13 @@ Llegar aquí cuesta casi un ciclo entero (modo B ✅): cada minuto real son cinc
 | `lab.contrapeso` | Objeto (se coge) | El Contrapeso | Se lleva a Cicatriz **en el mismo ciclo** (los objetos no persisten) | — · H6 |
 | `lab.camara` | Objeto + texto | La Cámara (✅ está aquí) | Notas de quien la construyó, con su culpa (H1) | `bucle.camara`, `bucle.culpa` · H1 |
 
+🟡 **Propuesta de la Fase 11 (Laboratorio por código):** las siete fuentes llevan **borradores** (`"borrador": true`) con
+los mismos hechos; la firma de la orden sigue sin decidirse (está emborronada, ❓). Además, cinco fuentes de
+**ambiente** (fuera del grafo, sin hechos) cuentan cómo se vivía aquí: `lab.mediciones` (el Archivo de Mediciones,
+relojes «Dentro» y «Fuera»), `lab.radio` (el último mensaje del Consejo y la respuesta que nunca se envió),
+`lab.comedor` (la mesa para dos), `lab.calendario` (las rayas de «aquí» y «fuera») y `lab.invernadero` (los tallos
+que crecen hacia la semilla). Para que Anthony las revise.
+
 ### 5.8 Epílogo — el Archivo de las Puertas
 
 Fuera del bucle, dentro del agujero negro. **Usa** K7 y K8 para elegir la boca de salida (puzzle final). Ver

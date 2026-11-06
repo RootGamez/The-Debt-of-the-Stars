@@ -1,9 +1,101 @@
 {
-  "lab.pizarra": { "titulo": "The blackboard" },
-  "lab.notas_investigadora": { "titulo": "The researcher's notes" },
-  "lab.notas_esceptico": { "titulo": "The skeptic's notes" },
-  "lab.orden_silencio": { "titulo": "The order of silence" },
-  "lab.dormitorio": { "titulo": "The shared dormitory" },
-  "lab.contrapeso": { "titulo": "The Counterweight" },
-  "lab.camara": { "titulo": "The Chamber" }
+  "lab.pizarra": {
+    "titulo": "The blackboard",
+    "superficial": [
+      "A blackboard full to the edges. A long equation that stops halfway; beside it, the broken chalk.",
+      "In a corner, in small letters: \"If it leaves through the Mouth, add. If it leaves through the Well, subtract. DO NOT forget the delay of the journey.\""
+    ],
+    "profunda": [
+      "Now you know what is missing: the reckoning for the Counterweight's clock. It depends on the route it takes to Scar.",
+      "However long the trip takes, at the rate time runs wherever it passes, has to be subtracted from the machine's clock."
+    ]
+  },
+  "lab.notas_investigadora": {
+    "titulo": "The researcher's notes",
+    "superficial": [
+      "\"Day 61 in here. Out there, almost ten months must have passed. It is finished. We have not tested it: testing it means switching it on, and switching it on means putting it in place of the engine.\"",
+      "\"It is a replacement engine. It does not fix the debt: it pays it, little by little, instead of letting it be collected all at once.\"",
+      "\"If anyone reads this: take it to the machine on Scar. It goes where the old engine goes.\""
+    ],
+    "profunda": [
+      "One more page, folded under the others: \"There is a new call. A young system, very far away, has opened a Mouth and is calling ours.\"",
+      "\"They don't know what they are doing. Neither did we.\""
+    ]
+  },
+  "lab.notas_esceptico": {
+    "titulo": "The skeptic's notes",
+    "superficial": [
+      "\"I said it out loud three times. There is a limit: every crossing through a Gate pulls the clocks a little further apart, and one day the network cannot hold.\"",
+      "\"They asked me for figures. I brought them. They asked me not to repeat them.\"",
+      "At the end of the last page, pressed harder: \"It is too late to warn anyone. Whatever leaves this place will arrive late.\""
+    ]
+  },
+  "lab.orden_silencio": {
+    "titulo": "The order of silence",
+    "superficial": [
+      "An envelope with the Council's seal, carefully opened and closed again. Inside, a single sheet:",
+      "\"For the good of the network and of all who depend on it, the conclusions of the Slow Site group will not leave this place. No measurements will be sent. No warnings will be given. Any communication will first pass through the Council.\"",
+      "The signature is smudged, as if someone had run a thumb over it many times."
+    ]
+  },
+  "lab.dormitorio": {
+    "titulo": "The shared dormitory",
+    "superficial": [
+      "A room without a roof, with two beds. One is made, the blanket folded at its foot. The other is rumpled, sunken where someone slept in it many times.",
+      "Beside the used bed, a candle burned down to its dish. Someone stayed here when the others no longer came back."
+    ]
+  },
+  "lab.contrapeso": {
+    "titulo": "The Counterweight",
+    "superficial": [
+      "On its stand, between two supports, a device the size of an arm: brass rings nested one inside another, with a small clock at the centre.",
+      "It is finished. It has not a single mark of use."
+    ]
+  },
+  "lab.camara": {
+    "titulo": "The Chamber",
+    "superficial": [
+      "Two crossed rings around a seat. A dial with twenty-four marks: the last six, lit.",
+      "The last quarter of an hour of the day, held. Over and over."
+    ],
+    "profunda": [
+      "Under the seat, a few handwritten pages: \"I built it to buy time. So that the last quarter of an hour would never end and we could finish.\"",
+      "\"I left it on. I don't know how to switch it off without losing what it holds. Forgive me.\""
+    ]
+  },
+  "lab.mediciones": {
+    "titulo": "The Archive of Measurements",
+    "superficial": [
+      "Shelves of tape boxes, labelled by cycle. On the wall, two clocks: \"Inside\" and \"Outside\". The outside one turns five times for every turn of the inside one.",
+      "On the table, a column of figures climbing and climbing: \"How long a message from outside takes to arrive here. How long one of ours takes to leave.\" At the bottom, underlined: \"Always late.\""
+    ]
+  },
+  "lab.radio": {
+    "titulo": "The Radio Room",
+    "superficial": [
+      "A slate cabinet with five dials; a red light that no longer blinks. On the wall, strips of paper pinned up: messages received, each with two dates, the one outside and the one in here.",
+      "The last one: \"Council to Slow Site. Keep silent. The Gates remain open.\" Under it, a reply written and never sent: \"Close them.\""
+    ]
+  },
+  "lab.comedor": {
+    "titulo": "The dining room",
+    "superficial": [
+      "A table set for two. One cup upright; the other knocked over, with the dried stain around it. Nobody picked it up.",
+      "In the cupboard the jars are almost empty and lined up from fullest to emptiest, as if someone had counted the days that were left."
+    ]
+  },
+  "lab.calendario": {
+    "titulo": "The tally calendar",
+    "superficial": [
+      "A whole wall of tally marks, in fives. At the top, \"here\": a few months. Below, in red, \"outside\": the count does not fit and runs on along the edge of the wall.",
+      "At the end of the \"here\" row, one mark shorter than the rest, as if whoever made it had tired halfway through."
+    ]
+  },
+  "lab.invernadero": {
+    "titulo": "The greenhouse",
+    "superficial": [
+      "Beds of dry soil with very long stalks, all leaning towards the centre of the cavity, towards the seed, as if it were the sun.",
+      "In the growth notebook, the last entry: \"They no longer grow towards the lamps. They grow towards that. We turned the lamps off to see if they would stop. They don't.\""
+    ]
+  }
 }

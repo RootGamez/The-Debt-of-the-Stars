@@ -270,6 +270,13 @@ Sustituye a la "plataforma exterior para mirar" (fuera no hay aire).
 6. **La Cámara.** Dos anillos cruzados, un asiento y un dial de 24 marcas con el último cuarto encendido.
 7. **El Recibidor.** La Puerta gemela por donde se entra.
 
+🟡 **Propuesta de la Fase 11 (por código):** la cara interior es un **tablero de ajedrez en espiral** que se enrosca de
+polo a polo (casillas que se estrechan en remolino hacia los polos, juntas con el frío de la Puerta y una onda lenta
+que las recorre): mires arriba o abajo, el suelo parece girar. Alrededor de la semilla **orbitan en anillos lentos**
+las cosas que el Laboratorio perdió por la gravedad invertida (papeles, libros, tazas, sillas, tizas). Y cuatro salas
+más, unidas por senderos: el **Archivo de Mediciones**, el **Cuarto de la Radio**, el **Comedor** (con el calendario de
+rayas) y el **Invernadero**.
+
 **Textos clave:** las últimas notas de la investigadora; las del escéptico; el documento que ordena callar (y quién lo firma ❓).
 
 **Atmósfera.** Verde grisáceo clínico, blanco roto, luz de lámpara cálida. Un tictac lentísimo. Es el lugar más triste y humano del juego.

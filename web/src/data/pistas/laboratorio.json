@@ -6,10 +6,19 @@
     "lector": "pizarra",
     "titulo": "La pizarra",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "superficial": {
+      "texto": [
+        "Una pizarra llena hasta los bordes. Una ecuación larga que se interrumpe a la mitad; al lado, la tiza partida.",
+        "En una esquina, en letra pequeña: «Si sale por la Boca, sumar. Si sale por el Pozo, restar. NO olvidar el retraso del camino»."
+      ],
+      "hechos": []
+    },
     "profunda": {
       "requiere": ["contrapeso.que_es"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Ahora sabes qué es lo que falta: la cuenta del reloj del Contrapeso. Depende del camino que siga hasta Cicatriz.",
+        "Lo que tarde en llegar, a la velocidad a la que corra el tiempo por donde pase, hay que restárselo al reloj de la máquina."
+      ],
       "hechos": ["contrapeso.cuenta_sincronia"]
     }
   },
@@ -20,12 +29,19 @@
     "titulo": "Las notas de la investigadora",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "«Día 61 de aquí. Allí fuera habrán pasado casi diez meses. Está terminado. No lo hemos probado: probarlo es encenderlo, y encenderlo es ponerlo en lugar del motor.»",
+        "«Es un motor de reemplazo. No arregla la deuda: la paga, poco a poco, en vez de dejar que se cobre de golpe.»",
+        "«Si alguien lee esto: llévalo a la máquina de Cicatriz. Va donde va el motor viejo.»"
+      ],
       "hechos": ["contrapeso.terminado", "contrapeso.que_es", "contrapeso.sustituye_motor"]
     },
     "profunda": {
       "requiere": ["contrapeso.que_es"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Una hoja más, doblada debajo de las otras: «Hay una llamada nueva. Un sistema joven, muy lejos, ha abierto una Boca y está llamando a las nuestras.»",
+        "«No saben lo que hacen. Nosotros tampoco lo sabíamos.»"
+      ],
       "hechos": ["casa.prueba_llama"]
     }
   },
@@ -35,7 +51,14 @@
     "tipo": "texto",
     "titulo": "Las notas del escéptico",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.advertencia"] }
+    "superficial": {
+      "texto": [
+        "«Lo dije en voz alta tres veces. Hay un límite: cada paso por una Puerta separa un poco más los relojes, y llega un día en que la red no aguanta.»",
+        "«Me pidieron cifras. Las traje. Me pidieron que no las repitiera.»",
+        "Al final de la última página, con otra presión: «Ya no se puede avisar. Lo que llegue de aquí llegará tarde.»"
+      ],
+      "hechos": ["silencio.advertencia"]
+    }
   },
   {
     "id": "lab.orden_silencio",
@@ -43,7 +66,14 @@
     "tipo": "texto",
     "titulo": "La orden de silencio",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.orden"] }
+    "superficial": {
+      "texto": [
+        "Un sobre con el sello del Consejo, abierto con cuidado y vuelto a cerrar. Dentro, una sola hoja:",
+        "«Por el bien de la red y de quienes dependen de ella, las conclusiones del grupo del Sitio Lento no saldrán de este lugar. No se enviarán mediciones. No se harán advertencias. Cualquier comunicación pasará antes por el Consejo.»",
+        "La firma está emborronada, como si alguien hubiera pasado el pulgar por encima muchas veces."
+      ],
+      "hechos": ["silencio.orden"]
+    }
   },
   {
     "id": "lab.dormitorio",
@@ -51,7 +81,13 @@
     "tipo": "objeto",
     "titulo": "El dormitorio compartido",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.uno_se_quedo"] }
+    "superficial": {
+      "texto": [
+        "Un cuarto sin techo, con dos camas. Una está hecha, con la manta doblada a los pies. La otra está revuelta, hundida en el sitio de alguien que durmió en ella muchas veces.",
+        "Junto a la cama usada, una vela consumida hasta el plato. Alguien se quedó aquí cuando los demás ya no volvían."
+      ],
+      "hechos": ["silencio.uno_se_quedo"]
+    }
   },
   {
     "id": "lab.contrapeso",
@@ -59,7 +95,13 @@
     "tipo": "objeto",
     "titulo": "El Contrapeso",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.terminado"] }
+    "superficial": {
+      "texto": [
+        "Sobre su peana, entre dos soportes, un aparato del tamaño de un brazo: anillos de latón encajados unos dentro de otros, con un reloj pequeño en el centro.",
+        "Está terminado. No tiene ni una marca de uso."
+      ],
+      "hechos": ["contrapeso.terminado"]
+    }
   },
   {
     "id": "lab.camara",
@@ -67,11 +109,95 @@
     "tipo": "objeto",
     "titulo": "La Cámara",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["bucle.camara"] },
+    "superficial": {
+      "texto": [
+        "Dos anillos cruzados alrededor de un asiento. Un dial de veinticuatro marcas: las seis últimas, encendidas.",
+        "El último cuarto de hora del día, sostenido. Una y otra vez."
+      ],
+      "hechos": ["bucle.camara"]
+    },
     "profunda": {
       "requiere": ["bucle.orden_camara"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Bajo el asiento, unas hojas a mano: «Lo construí para ganar tiempo. Para que el último cuarto de hora no acabara nunca y pudiéramos terminar.»",
+        "«Lo dejé encendido. No sé cómo se apaga sin que se pierda lo que sostiene. Perdonad.»"
+      ],
       "hechos": ["bucle.culpa"]
+    }
+  },
+  {
+    "id": "lab.mediciones",
+    "mundo": "laboratorio",
+    "tipo": "texto",
+    "titulo": "El Archivo de Mediciones",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Estanterías de cajas de cinta, etiquetadas por ciclos. En la pared, dos relojes: «Dentro» y «Fuera». El de fuera da cinco vueltas por cada una del de dentro.",
+        "En la mesa, una columna de cifras que sube y sube: «Lo que tarda en llegar aquí un mensaje de fuera. Lo que tarda en salir uno nuestro». Al final, subrayado: «Siempre tarde»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "lab.radio",
+    "mundo": "laboratorio",
+    "tipo": "texto",
+    "titulo": "El Cuarto de la Radio",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un aparato de pizarra con cinco diales; una luz roja que ya no parpadea. En el muro, tiras de papel clavadas: mensajes recibidos, cada uno con dos fechas, la de fuera y la de aquí.",
+        "El último: «Consejo a Sitio Lento. Mantengan el silencio. Las Puertas siguen abiertas». Debajo, una respuesta escrita y nunca enviada: «Cerradlas»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "lab.comedor",
+    "mundo": "laboratorio",
+    "tipo": "objeto",
+    "titulo": "El comedor",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Una mesa puesta para dos. Una taza en pie; la otra, volcada, con la mancha seca alrededor. Nadie la recogió.",
+        "En la alacena, los tarros están casi vacíos y ordenados del más lleno al menos lleno, como si alguien hubiera hecho la cuenta de los días que quedaban."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "lab.calendario",
+    "mundo": "laboratorio",
+    "tipo": "objeto",
+    "titulo": "El calendario de rayas",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Una pared entera de rayas, de cinco en cinco. Arriba, «aquí»: unos pocos meses. Abajo, en rojo, «fuera»: la cuenta no cabe y sigue por el borde de la pared.",
+        "Al final de la fila de «aquí», una raya más corta que las demás, como si quien la hacía se hubiera cansado a mitad."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "lab.invernadero",
+    "mundo": "laboratorio",
+    "tipo": "objeto",
+    "titulo": "El invernadero",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Bancales de tierra seca con tallos larguísimos, todos inclinados hacia el centro de la cavidad, hacia la semilla, como si fuera el sol.",
+        "En la libreta de crecimiento, la última anotación: «Ya no crecen hacia las lámparas. Crecen hacia eso. Hemos apagado las lámparas para ver si paran. No paran»."
+      ],
+      "hechos": []
     }
   }
 ]

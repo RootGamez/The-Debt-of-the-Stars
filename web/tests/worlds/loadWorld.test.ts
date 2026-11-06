@@ -95,7 +95,7 @@ describe('buildWorld (worlds modelled in code, Phase 11)', () => {
   });
 
   it('leaves the worlds not migrated yet to their exported model', () => {
-    expect(buildWorld('laboratorio')).toBeUndefined();
+    expect(buildWorld('puertas')).toBeUndefined();
   });
 
   it('is what loadWorld returns for a world modelled in code (no download)', async () => {

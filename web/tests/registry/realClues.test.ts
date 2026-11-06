@@ -39,7 +39,9 @@ describe('the real clue data', () => {
     expect(
       ambient.every(
         (s) =>
-          ['hogar', 'observatorio'].includes(s.world) && s.surface.facts.length === 0 && !s.deep,
+          ['hogar', 'observatorio', 'laboratorio'].includes(s.world) &&
+          s.surface.facts.length === 0 &&
+          !s.deep,
       ),
     ).toBe(true);
     expect(ambient.map((s) => s.id)).toContain('hogar.bitacora_albatros');
@@ -97,6 +99,7 @@ describe('the real clue data', () => {
       s.world === 'hogar' ||
       s.world === 'luna' ||
       s.world === 'observatorio' ||
+      s.world === 'laboratorio' ||
       s.kind === 'grabacion' ||
       CICATRIZ_DRAFTS.includes(s.id);
     const readable = clues.sources.filter(drafted);
