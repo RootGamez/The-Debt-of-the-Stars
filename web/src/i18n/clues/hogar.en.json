@@ -61,11 +61,13 @@
     "titulo": "The Director",
     "superficial": [
       "The Director is waiting for you at the Engine, at the foot of the Great Gate, looking at the Moon above the Institute's hill.",
-      "\"Yesterday the largest fragment of all appeared up there, stuck in the ground. I want you to see it before anyone else: it will be your first official flight.\"",
-      "\"The Albatross II is ready in the hangar. Go, look, and come back and tell me.\""
+      "\"Yesterday the largest fragment of all appeared up there, stuck in the ground. But I will not send you empty-handed: to understand it you must compare it with a small piece, and the only loose one was left by the first Albatross on an island, to the west, beyond the sea.\"",
+      "\"Follow the lantern buoys along the coast. Bring me that piece and it will be your first official flight.\"",
+      "She speaks of the great test the way others speak of a child. She has been preparing it for years: it is the one that will greet those who left all this behind."
     ],
     "profunda": [
-      "She speaks of the great test the way others speak of a child. She has been preparing it for years: it is the one that will greet those who left all this behind.",
+      "The Director turns the piece between her fingers, her filaments glowing. The curved edge matches what she was told about the Moon.",
+      "\"It is what I expected. Now, yes: go to the Moon, look at the big fragment and come back and tell me. The Albatross II is ready and the hangar is open.\"",
       "If anyone has to hear the truth, it is her. And she is the one who will least want to hear it."
     ]
   },
@@ -74,7 +76,8 @@
     "superficial": [
       "\"Have you read the irrigation tablet yet? Always start there: the everyday is what is best understood.\"",
       "\"We have read their language for years and still do not know how they laughed. That is not on any stone.\"",
-      "\"Go and see the Director before she runs out of patience. And come back and tell me everything, all right?\""
+      "\"The Director will not let you fly to the Moon without a piece to compare. The first Albatross was lost to the west, beyond the sea, and its pilot left a small stone with curved edges on an island.\"",
+      "\"Ask the hangar mechanic for the ship, bring that stone to the Director and she will give you the mission. And come back and tell me everything, all right?\""
     ]
   },
   "instituto.tecnico": {
@@ -88,7 +91,8 @@
     "titulo": "The hangar mechanic",
     "superficial": [
       "\"The Albatross II is ready: tanks full and the reliquary empty, waiting for your fragment.\"",
-      "\"Climb in with F. In there the dashboard tells you everything: aim at the Moon with T and, if everything spins, Z steadies it.\"",
+      "\"Climb in with F, next to the hatch. In there the dashboard points out the destination by itself; if everything spins, Z steadies it, and X brakes. To land, descend slowly.\"",
+      "\"The first Albatross's island is to the west, beyond the sea. Follow the lantern buoys.\"",
       "\"And do not scratch her. She is the only one we have.\""
     ]
   },
@@ -121,7 +125,8 @@
   "aldea.arbol": {
     "titulo": "The neighbor by the tree",
     "superficial": [
-      "\"Today everyone has come out to the square to see you take off. Act natural, or they will get nervous.\""
+      "\"Today everyone has come out to the square to see you take off. Act natural, or they will get nervous.\"",
+      "\"Oh, and the Teacher has been looking for you: she is in her classroom, at the top of the Institute's hill, along the flagstone path.\""
     ]
   },
   "hogar.diario_maestra": {
@@ -188,6 +193,18 @@
       "\"Altitude test. On the way up, the mast lantern went out and the wind carried me west. I came down at night on an island where the plants give light.\"",
       "\"I am staying here until they come. There is water, and the night is lovely.\"",
       "The last page: \"They have come. I am leaving. I leave the notebook in case someone else gets lost: let them know that this is home too.\""
+    ]
+  },
+  "hogar.fragmento_isla": {
+    "titulo": "The first Albatross's stone",
+    "superficial": [
+      "Next to the split hull, stuck on its edge in the sand and half covered in moss, a pale slab the size of a small door. It is the piece the pilot left.",
+      "It has a smooth, curved edge, like the stones in the Institute's display cases, and on its face, three notches and a ring of clock marks, almost worn away.",
+      "It is light. You wrap it in your scarf and carry it to the ship: the Director is waiting for it."
+    ],
+    "profunda": [
+      "Now you see the whole bite: the edge did not break, it was torn out in a perfect sphere, and the sphere is still there, somewhere.",
+      "This stone did not travel alone either. It came from somewhere else, just like those in the display cases."
     ]
   },
   "hogar.placa_primera_piedra": {

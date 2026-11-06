@@ -44,6 +44,7 @@ export class ReadingSession {
   private facts: ReadonlySet<string>;
   private open_: OpenReading | null = null;
   private failed = false;
+  private readonly opened_ = new Set<string>();
   private readonly listeners = new Set<Listener>();
 
   /**
@@ -60,6 +61,11 @@ export class ReadingSession {
 
   get known(): KnownFacts {
     return this.facts;
+  }
+
+  /** Las fuentes abiertas en esta sesión (las charlas sin hechos también cuentan: sirve para las tareas). */
+  get opened(): ReadonlySet<string> {
+    return this.opened_;
   }
 
   get current(): OpenReading | null {
@@ -94,6 +100,7 @@ export class ReadingSession {
       return null;
     if (source.reader) this.open_ = this.puzzle(source, source.reader);
     else this.open_ = source.recordedRate === undefined ? this.read(source) : this.listen(source);
+    this.opened_.add(sourceId);
     return this.open_;
   }
 

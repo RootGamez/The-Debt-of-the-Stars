@@ -215,6 +215,7 @@ body {
 .discover,
 .notice,
 .guia,
+.tareas,
 .registry-face.paper,
 .registry-cover-label {
   --ink: var(--ink-on-paper);
@@ -1578,4 +1579,213 @@ body {
   gap: 8px;
   align-items: center;
   justify-content: center;
+}
+
+/* ---------- Las tareas del prólogo: lista a la izquierda, indicador en pantalla y página del cuaderno ---------- */
+.tareas {
+  position: fixed;
+  left: 16px;
+  top: 110px;
+  z-index: 4;
+  display: none;
+  width: min(300px, calc(100vw - 32px));
+  padding: 8px 12px 10px;
+  background: var(--paper-a) var(--paper-noise);
+  color: var(--ink);
+  font: 500 19px/1.15 var(--f-hand);
+  text-shadow: var(--halo);
+  box-shadow: 0 3px 10px rgb(0 0 0 / 45%);
+  clip-path: var(--torn-top);
+  transform: rotate(-1deg);
+}
+.tareas.tareas-visible {
+  display: block;
+}
+.tareas.tareas-oculta {
+  display: none;
+}
+.tareas-ocultar,
+.tareas-mostrar {
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pencil);
+  font: 700 20px/1 var(--f-hand);
+  cursor: pointer;
+}
+.tareas-ocultar {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+}
+.tareas-cabecera {
+  padding-right: 40px !important;
+}
+.tareas-mostrar {
+  position: fixed;
+  left: 16px;
+  top: 110px;
+  z-index: 4;
+  display: none;
+  border-radius: 8px;
+  background: var(--paper-a) var(--paper-noise);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 45%);
+  color: var(--ink-on-paper);
+}
+.tareas-mostrar.tareas-mostrar-visible {
+  display: block;
+}
+.tareas-cabecera {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tareas-titulo {
+  font: 700 20px/1.1 var(--f-hand);
+  color: var(--amber);
+  text-shadow: var(--halo-amber);
+}
+.tareas-tecla {
+  align-self: start;
+  min-width: 1.5em;
+  padding: 0 6px;
+  border: 1px solid var(--pencil);
+  border-radius: 4px;
+  font-size: 15px;
+  text-align: center;
+  color: var(--pencil);
+}
+.tareas-tecla:empty {
+  display: none;
+}
+.tareas-ahora {
+  grid-column: 1 / -1;
+}
+.tareas.tareas-desplegada .tareas-ahora {
+  display: none;
+}
+.tareas-lista,
+.tareas-pista {
+  display: none;
+}
+.tareas.tareas-desplegada .tareas-lista {
+  display: grid;
+  gap: 4px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.tareas.tareas-desplegada .tareas-pista {
+  display: block;
+  margin: 8px 0 0;
+  padding-top: 6px;
+  border-top: 1px dashed var(--pencil);
+  font-size: 16px;
+  color: var(--pencil);
+}
+.tarea {
+  display: grid;
+  grid-template-columns: 1.3em 1fr;
+  color: var(--pencil);
+}
+.tarea-actual {
+  color: var(--ink);
+  font-weight: 700;
+}
+.tarea-hecha .tarea-texto {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+.meta-tarea {
+  position: fixed;
+  z-index: 3;
+  display: none;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.meta-tarea.meta-visible {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+.meta-rombo {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--amber-on-paper);
+  background: rgb(246 238 214 / 85%);
+  box-shadow: 0 0 10px 3px rgb(var(--glow-rgb) / 60%);
+  transform: rotate(45deg);
+}
+.meta-flecha {
+  display: none;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--glow);
+  text-shadow:
+    0 0 6px rgb(var(--glow-rgb) / 80%),
+    0 1px 3px #000;
+}
+.meta-tarea.meta-borde .meta-rombo {
+  display: none;
+}
+.meta-tarea.meta-borde .meta-flecha {
+  display: block;
+}
+.meta-texto {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgb(var(--night-rgb) / 70%);
+  color: #fff;
+  font: 700 17px/1.2 var(--f-hand);
+  white-space: nowrap;
+  text-shadow: 0 1px 3px #000;
+}
+.registry-tasks {
+  gap: 0.55em !important;
+}
+.registry-task {
+  display: grid;
+  grid-template-columns: 1.3em 1fr;
+  text-shadow: var(--halo);
+}
+.registry-task-done .registry-task-title {
+  text-decoration: line-through;
+  color: var(--pencil);
+}
+.registry-task-current {
+  font-weight: 700;
+  color: var(--amber);
+  text-shadow: var(--halo-amber);
+}
+.registry-task-hint {
+  grid-column: 2;
+  margin: 0.1em 0 0;
+  font-size: 0.78em;
+  font-weight: 500;
+  color: var(--pencil);
+}
+@media (max-width: 639px) {
+  .tareas {
+    top: 84px;
+    width: min(240px, calc(100vw - 32px));
+    font-size: 17px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tareas {
+    transform: none;
+  }
 }

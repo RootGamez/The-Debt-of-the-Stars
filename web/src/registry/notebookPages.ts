@@ -2,6 +2,7 @@
 // mundos (worlds/worldLog.ts) a las páginas del libro. Tapa, guarda, «Lo que sé», una o más páginas por pregunta
 // (una pregunta larga sigue en la siguiente), el índice de mundos, una página por mundo y la contratapa. Las
 // páginas van de dos en dos (cada hoja tiene anverso y reverso). Pura: el panel solo pinta lo que sale de aquí.
+import type { TaskItem } from '../game/tasks';
 import type { WorldPage } from '../worlds/worldLog';
 import type { RegistryView, ThreadView } from './registryView';
 
@@ -46,8 +47,19 @@ export type NotebookPage =
       /** El mundo se nombró desde la última vez: su nombre se escribe al llegar a la página. */
       fresh: boolean;
     }
+  /** El prólogo: las tareas con su casilla (solo en casa, antes del primer ciclo). */
+  | { kind: 'tasks'; items: readonly TaskItem[] }
+  /** El prólogo: lo que se ha aprendido hasta ahora, en el orden en que se aprendió. */
+  | { kind: 'learned'; facts: readonly LearnedFact[]; part: number; total: number }
   | { kind: 'blank' }
   | { kind: 'back' };
+
+export interface LearnedFact {
+  id: string;
+  line: string;
+  /** Anotado desde la última vez que se abrió el cuaderno. */
+  fresh: boolean;
+}
 
 export interface FreshMarks {
   facts: ReadonlySet<string>;
@@ -153,8 +165,35 @@ export function spreadOf(page: number): number {
   return Math.ceil(page / 2);
 }
 
+/**
+ * El cuaderno del prólogo: solo lo que se sabe de verdad. Sin las preguntas sobre los Ausentes ni lo que falta por
+ * saber (eso se va llenando al salir de casa); la tapa, la guarda, las tareas y lo aprendido en casa, en orden.
+ */
+export function prologuePages(
+  tasks: readonly TaskItem[],
+  learned: readonly LearnedFact[],
+): NotebookPage[] {
+  const pages: NotebookPage[] = [
+    { kind: 'cover' },
+    { kind: 'flyleaf' },
+    { kind: 'tasks', items: tasks },
+  ];
+  const lineWeight = (fact: LearnedFact): number => (fact.line.length > LONG_LINE ? 1.5 : 1);
+  const parts = chunk(learned, lineWeight, PAGE_CAPACITY);
+  for (const [index, facts] of parts.entries()) {
+    pages.push({ kind: 'learned', facts, part: index, total: learned.length });
+  }
+  // La contratapa es el reverso de la última hoja: el total tiene que ser par.
+  if (pages.length % 2 === 0) pages.push({ kind: 'blank' });
+  pages.push({ kind: 'back' });
+  return pages;
+}
+
 /** La primera página de una sección (las pestañas del canto): 0 si no la hay. */
-export function sectionPage(pages: readonly NotebookPage[], kind: 'thread' | 'worlds'): number {
+export function sectionPage(
+  pages: readonly NotebookPage[],
+  kind: 'thread' | 'worlds' | 'tasks' | 'learned',
+): number {
   return Math.max(
     0,
     pages.findIndex((page) => page.kind === kind),

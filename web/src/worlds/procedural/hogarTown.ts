@@ -99,6 +99,8 @@ function aldea(b: HogarBuilder): void {
   );
   b.ool({ id: 'vecina_arbol', age: 0.55, outfit: 'vecino', seed: 51 }, f, [2.6, -2.2, 0], 200);
   b.source('aldea.arbol', 'charla', f, [2.6, -2.2, 1.2]);
+  // Donde despierta quien juega y adonde vuelve tras un accidente: la plaza, mirando al árbol.
+  b.mark('SPAWN_Plaza', f, [0.4, -6.5, 0.3]);
   b.ool({ id: 'cria', age: 0.05, outfit: 'cria', seed: 52 }, f, [-2.4, -3.2, 0], 160);
   b.source('aldea.cria', 'charla', f, [-2.4, -3.2, 0.8]);
   // El pozo con su tejadillo.

@@ -317,4 +317,77 @@ export const EN: Readonly<Record<string, string>> = {
   'Índice: restar un grado': 'Index: subtract a degree',
   'Índice: sumar un grado': 'Index: add a degree',
   'El ocular está a oscuras.': 'The eyepiece is dark.',
+  // Las tareas del prólogo
+  'Aprende a moverte': 'Learn to move',
+  Moverte: 'Moving',
+  'Ratón para mirar · W A S D para andar · Mayús para correr · Espacio para saltar':
+    'Mouse to look · W A S D to walk · Shift to run · Space to jump',
+  'Habla con la vecina del árbol': 'Talk to the neighbor by the tree',
+  Vecina: 'Neighbor',
+  'Acércate a la vecina del árbol de la plaza y pulsa E para hablar':
+    'Walk up to the neighbor by the tree in the square and press E to talk',
+  'Acércate a la vecina del árbol de la plaza y toca Hablar':
+    'Walk up to the neighbor by the tree in the square and tap Talk',
+  'Sube al Instituto y habla con la Maestra': 'Go up to the Institute and talk to the Teacher',
+  Maestra: 'Teacher',
+  'El Instituto está en la colina, siguiendo el camino de losas. La Maestra está en su aula: pulsa E para hablar':
+    'The Institute is on the hill, along the flagstone path. The Teacher is in her classroom: press E to talk',
+  'El Instituto está en la colina, siguiendo el camino de losas. La Maestra está en su aula: toca Hablar':
+    'The Institute is on the hill, along the flagstone path. The Teacher is in her classroom: tap Talk',
+  'Lee la ficha de riego del aula': 'Read the irrigation tablet in the classroom',
+  Ficha: 'Tablet',
+  'La ficha de barro está sobre la mesa de la Maestra: mírala y pulsa E para leerla':
+    "The clay tablet is on the Teacher's desk: look at it and press E to read it",
+  'La ficha de barro está sobre la mesa de la Maestra: mírala y toca Leer':
+    "The clay tablet is on the Teacher's desk: look at it and tap Read",
+  'Abre el cuaderno y repasa lo aprendido': 'Open the notebook and review what you have learned',
+  Cuaderno: 'Notebook',
+  'Lo que aprendes queda en el cuaderno: ábrelo con Tab (T abre tus tareas)':
+    'What you learn is kept in the notebook: open it with Tab (T opens your tasks)',
+  'Lo que aprendes queda en el cuaderno: ábrelo con su botón':
+    'What you learn is kept in the notebook: open it with its button',
+  'Pide la nave a la mecánica del hangar': 'Ask the hangar mechanic for the ship',
+  Mecánica: 'Mechanic',
+  'El hangar está al este del Instituto. La mecánica te espera en su cobertizo: pulsa E para hablar':
+    'The hangar is east of the Institute. The mechanic is waiting in her shed: press E to talk',
+  'El hangar está al este del Instituto. La mecánica te espera en su cobertizo: toca Hablar':
+    'The hangar is east of the Institute. The mechanic is waiting in her shed: tap Talk',
+  'Sube al Albatros II': 'Board the Albatross II',
+  'Albatros II': 'Albatross II',
+  'El Albatros II espera en la plataforma del hangar. Junto a la escotilla, F para subir; sentado en el asiento, F para pilotar':
+    'The Albatross II is waiting on the hangar pad. Next to the hatch, press F to climb aboard; at the seat, press F to pilot',
+  'El Albatros II espera en la plataforma del hangar. Junto a la escotilla, toca Subir; sentado en el asiento, toca Pilotar':
+    'The Albatross II is waiting on the hangar pad. Next to the hatch, tap Board; at the seat, tap Pilot',
+  'Busca la pieza en la isla del primer Albatros': "Find the piece on the first Albatross's island",
+  Isla: 'Island',
+  'Vuela al oeste, más allá del mar, siguiendo las boyas con farol. Ratón para apuntar · W avanzar · Espacio/C subir y bajar · X frena. Posa la nave con F y examina la pieza con E':
+    'Fly west, beyond the sea, following the lantern buoys. Mouse to aim · W forward · Space/C up and down · X brakes. Land the ship, get out with F and examine the piece with E',
+  'Vuela al oeste, más allá del mar, siguiendo las boyas con farol. Posa la nave, bájate y toca Examinar junto a la pieza':
+    'Fly west, beyond the sea, following the lantern buoys. Land the ship, get out and tap Examine next to the piece',
+  'Lleva la pieza a la Directora': 'Take the piece to the Director',
+  Directora: 'Director',
+  'La Directora espera en el Motor, junto al mar, al este del Instituto. Vuela de vuelta y habla con ella con E':
+    'The Director is waiting at the Engine, by the sea, east of the Institute. Fly back and talk to her with E',
+  'La Directora espera en el Motor, junto al mar, al este del Instituto. Vuela de vuelta y toca Hablar':
+    'The Director is waiting at the Engine, by the sea, east of the Institute. Fly back and tap Talk',
+  'Vuela a la Luna y pósate': 'Fly to the Moon and land',
+  'Sube con la nave: el tablero ya apunta a la Luna. W para ir hacia ella. Cerca, frena con X y baja despacio; con la nave quieta en el suelo, F para bajar':
+    'Take off: the dashboard already points to the Moon. W to fly toward it. When close, brake with X and descend slowly; with the ship at rest on the ground, press F to get out',
+  'Sube con la nave: el tablero ya apunta a la Luna. Cerca, frena y baja despacio; con la nave quieta en el suelo, toca Levantarse':
+    'Take off: the dashboard already points to the Moon. When close, brake and descend slowly; with the ship at rest on the ground, tap Get up',
+  'Examina el fragmento de la Luna': 'Examine the fragment on the Moon',
+  Fragmento: 'Fragment',
+  Tareas: 'Tasks',
+  'Todo hecho': 'All done',
+  '{done} de {total} hechas': '{done} of {total} done',
+  'Lo que he aprendido': 'What I have learned',
+  'Todavía no he aprendido nada. Habla con la gente y lee.':
+    'I have not learned anything yet. Talk to people and read.',
+  Aprendido: 'Learned',
+  'Espacio despegar · F levantarse · V cámara · T tareas':
+    'Space take off · F get up · V camera · T tasks',
+  '↑ despegar · Nave para levantarse · Objetivo: tareas':
+    '↑ take off · Ship to get up · Objective: tasks',
+  'Ocultar tareas': 'Hide tasks',
+  'Mostrar tareas': 'Show tasks',
 };

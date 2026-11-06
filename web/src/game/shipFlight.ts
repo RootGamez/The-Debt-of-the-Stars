@@ -60,6 +60,8 @@ export interface ShipFlightOptions {
   openRegistry?: () => void;
   /** La mesa del mapa, dentro de la nave: abre el mapa de órbitas. */
   openMap?: () => void;
+  /** En el prólogo la nave apunta sola a lo que toca y T son las tareas: el aviso no habla de «T objetivo». */
+  autoTarget?: boolean;
   /** Los relojes del ciclo, para el reloj doble de pared y el planetario. */
   clock?: () => { t: number; tau: number; duration: number };
 }
@@ -100,6 +102,8 @@ export interface ShipFlight {
   readonly frame: string | undefined;
   /** El mundo fijado como objetivo (o `undefined`). */
   readonly targetId: string | undefined;
+  /** Fija el objetivo de la nave (o lo quita con `undefined`): en el prólogo lo pone la tarea de ahora. */
+  setTarget(id: string | undefined): void;
   /** La nave posada, con su casco, su sala y su escalerilla, para quien camina por ese mundo. */
   colliderIn(world: string): PlacedCollider | undefined;
   /** La mesa de carga de la nave: lo que se deja en la nave se ve ahí. */
@@ -166,6 +170,8 @@ const KEY_HINTS = {
   controls: t('W avanzar · ratón girar · Espacio subir · C bajar · X frenar'),
   land: t('Mantén C para posarte'),
 };
+const AUTO_KEY_LANDED = t('Espacio despegar · F levantarse · V cámara · T tareas');
+const AUTO_TOUCH_LANDED = t('↑ despegar · Nave para levantarse · Objetivo: tareas');
 const TOUCH_HINTS = {
   landed: t('↑ despegar · Nave para levantarse · Objetivo'),
   free: t('Modo libre: sin ayudas (Estab. las devuelve)'),
@@ -431,7 +437,10 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
     options.setReadingEnabled(true);
   }
 
-  const hints = options.touch ? TOUCH_HINTS : KEY_HINTS;
+  const base = options.touch ? TOUCH_HINTS : KEY_HINTS;
+  const hints = options.autoTarget
+    ? { ...base, landed: options.touch ? AUTO_TOUCH_LANDED : AUTO_KEY_LANDED }
+    : base;
 
   function prompt(onFootWorld: string, active: boolean): string | undefined {
     if (!active || boarding.isPiloting) return undefined;
@@ -478,6 +487,10 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
     },
     get targetId() {
       return targeting.currentTarget?.id;
+    },
+    setTarget(id) {
+      if (id === undefined) targeting.clearTarget();
+      else if (targeting.currentTarget?.id !== id) targeting.setTarget(id);
     },
     colliderIn(world) {
       if (boarding.isPiloting || ship.frame !== world) return undefined;

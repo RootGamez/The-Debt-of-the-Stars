@@ -78,8 +78,14 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   );
   expect(await value(page, 'world')).toBe('umbral');
   expect(await loopValue(page, 'loops')).toBe(0);
-  // El primer despertar frente a La Boca: aparece el reloj de Umbral.
+  // El primer despertar frente a La Boca: al empezar a jugar se le pone nombre (Intro lo deja en «Umbral») y
+  // aparece su reloj.
   await play(page);
+  const naming = page.getByRole('dialog', { name: 'Un mundo nuevo' });
+  await expect(naming).toBeVisible({ timeout: 15_000 });
+  await naming.getByRole('textbox').press('Enter');
+  await expect(naming).toBeHidden();
+  if (await page.locator('.overlay').isVisible()) await play(page);
   await expect(page.locator('.clock-hud')).toBeVisible();
   expect((await page.evaluate(() => window.__juego?.sky?.()))?.density).toBe(1); // aire fino (Fase 11)
   expect(new URL(page.url()).searchParams.has('mundo')).toBe(false);
@@ -113,9 +119,10 @@ function ool(page: Page) {
   return page.evaluate(() => window.__juego?.ool?.() ?? null);
 }
 
-test('the Directora gives you the mission and your filaments glow while she talks', async ({
+test('the Directora only gives the mission once you bring the piece from the island', async ({
   page,
 }) => {
+  test.setTimeout(120_000); // dos saltos de punta a punta de Hogar
   await newGame(page);
   await play(page);
 
@@ -124,10 +131,27 @@ test('the Directora gives you the mission and your filaments glow while she talk
   await expect.poll(async () => (await ool(page))?.filaments.glowing).toBe(true);
   await closeReader(page);
 
-  expect((await snapshot(page))?.registry.facts).toContain('casa.mision_luna');
+  // La primera vez pide la pieza de la isla: aún no hay misión.
+  let facts = (await snapshot(page))?.registry.facts ?? [];
+  expect(facts).toContain('casa.directora_dirige');
+  expect(facts).not.toContain('casa.mision_luna');
   expect((await ool(page))?.filaments.beats).toBeGreaterThan(0);
   expect((await ool(page))?.filaments.glowing).toBe(false);
   expect(Object.keys((await ool(page))?.turns ?? {})).toContain('directora');
+
+  // Con la pieza en la mano, la misma charla da la misión.
+  expect(
+    await page.evaluate(() => window.__juego?.teleportTo?.('hogar.fragmento_isla') ?? false),
+  ).toBe(true);
+  await page.keyboard.press('KeyE');
+  await expect(page.locator('.reader')).toBeVisible();
+  await closeReader(page);
+  expect((await snapshot(page))?.registry.facts).toContain('casa.fragmento_isla');
+
+  await talkTo(page, 'instituto.directora');
+  await closeReader(page);
+  facts = (await snapshot(page))?.registry.facts ?? [];
+  expect(facts).toContain('casa.mision_luna');
 });
 
 test('the people of the village just talk: nothing goes into the Registro', async ({ page }) => {
@@ -141,12 +165,12 @@ test('the people of the village just talk: nothing goes into the Registro', asyn
 });
 
 // Revisión del 9B: los suelos altos tienen falda; desde donde despiertas se entra andando, sin saltar.
-test('from where you wake up you walk into the Instituto without jumping', async ({ page }) => {
+test('from the square where you wake up you walk without jumping', async ({ page }) => {
   await newGame(page);
   await play(page);
 
   await page.keyboard.down('KeyW');
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(1000);
   const speed = await value(page, 'speed');
   const takeoffs = await value(page, 'takeoffs');
   await page.keyboard.up('KeyW');
@@ -169,23 +193,106 @@ test('climbing in the Albatros II the sky gives way to space', async ({ page }) 
     .toBe(0);
 });
 
-// Hito 9D: la guía del prólogo enseña una cosa cada vez y no repite lo aprendido.
-function guide(page: Page) {
-  return page.evaluate(() => window.__juego?.guide?.() ?? null);
+// Las tareas del prólogo: una lista a la izquierda, el aviso de arriba, un indicador hacia lo que toca y el cuaderno
+// con una página de tareas (T) y sin las preguntas sobre los Ausentes.
+function tasks(page: Page) {
+  return page.evaluate(() => window.__juego?.tasks?.() ?? null);
 }
 
-test('the guide teaches one thing at a time and moves on once it is done', async ({ page }) => {
+test('you wake up on the square and the tasks teach one thing at a time', async ({ page }) => {
+  test.setTimeout(120_000); // andar y hablar a pocos fotogramas por segundo
   await newGame(page);
   await play(page);
 
-  await expect.poll(async () => (await guide(page))?.shown).toBe('andar');
+  // El primer aviso, la lista desplegada a la izquierda y la tarea de ahora.
+  await expect.poll(async () => (await tasks(page))?.current).toBe('andar');
+  await expect.poll(async () => (await tasks(page))?.hint).toBe('andar');
+  await expect(page.locator('.tareas')).toBeVisible();
+  await expect(page.locator('.tarea-actual')).toContainText('Aprende a moverte');
+  // Se despierta en la plaza de la aldea: la vecina del árbol está a pocos pasos.
+  expect(await value(page, 'world')).toBe('hogar');
+
   await page.keyboard.down('KeyW');
-  await expect.poll(async () => (await guide(page))?.shown, { timeout: 10_000 }).toBe('directora');
+  await expect.poll(async () => (await tasks(page))?.current, { timeout: 10_000 }).toBe('vecina');
   await page.keyboard.up('KeyW');
 
-  await talkTo(page, 'instituto.directora');
-  expect((await guide(page))?.shown).toBeNull(); // mientras hablas, no
-  await page.keyboard.press('KeyE');
-  await expect.poll(async () => (await guide(page))?.shown).toBe('registro');
-  expect((await guide(page))?.done).toEqual(['andar', 'directora']);
+  await talkTo(page, 'aldea.arbol');
+  expect((await tasks(page))?.hint).toBeNull(); // mientras hablas, no
+  await closeReader(page);
+  await expect.poll(async () => (await tasks(page))?.current).toBe('maestra');
+  expect((await tasks(page))?.done).toEqual(['andar', 'vecina']);
+  // El indicador señala a la Maestra, lejos en la colina (a la vista o como flecha en el borde).
+  await expect.poll(async () => (await tasks(page))?.waypoint?.label).toBe('Maestra');
+  await expect(page.locator('.tarea-hecha')).toHaveCount(2);
+});
+
+test('O folds the list and brings it back, and T opens the tasks in the notebook', async ({
+  page,
+}) => {
+  await newGame(page);
+  await play(page);
+  await expect(page.locator('.tareas.tareas-desplegada')).toBeVisible();
+
+  await page.keyboard.press('KeyO');
+  await expect(page.locator('.tareas.tareas-desplegada')).toHaveCount(0);
+  await expect(page.locator('.tareas')).toContainText('Aprende a moverte'); // plegada, sigue la tarea de ahora
+  await page.keyboard.press('KeyO');
+  await expect(page.locator('.tareas.tareas-desplegada')).toBeVisible();
+
+  await page.keyboard.press('KeyT');
+  await expect(page.locator('.registry')).toBeVisible();
+  await expect(page.locator('.registry-tasks')).toBeVisible({ timeout: 5000 });
+  await expect(page.locator('.registry-task-current')).toContainText('Aprende a moverte');
+  // En casa el cuaderno no tiene las preguntas sobre los Ausentes.
+  await expect(page.locator('.registry-question')).toHaveCount(0);
+  await expect(page.locator('.registry-tab')).toHaveText(['Tareas', 'Aprendido']);
+  // T otra vez lo cierra.
+  await page.keyboard.press('KeyT');
+  await expect(page.locator('.registry')).toBeHidden();
+});
+
+test('in the ship the target follows the task and T does not cycle the targets', async ({
+  page,
+}) => {
+  await newGame(page);
+  await play(page);
+  expect(await page.evaluate(() => window.__juego?.toShip?.() ?? false)).toBe(true);
+  await page.keyboard.press('KeyF');
+  await expect.poll(async () => (await snapshot(page))?.ship?.piloting).toBe(true);
+
+  // Aún no es la tarea de la Luna: la nave no apunta a nada.
+  expect((await snapshot(page))?.ship?.target).toBeNull();
+  await page.keyboard.press('KeyT');
+  await expect(page.locator('.registry')).toBeVisible();
+  expect((await snapshot(page))?.ship?.target).toBeNull();
+});
+
+test('H hides all the help and the small button brings it back (it is remembered)', async ({
+  page,
+}) => {
+  test.setTimeout(120_000); // recarga la página
+  await newGame(page);
+  await play(page);
+  await expect.poll(async () => (await tasks(page))?.hint).toBe('andar');
+  await expect(page.locator('.tareas')).toBeVisible();
+
+  await page.keyboard.press('KeyH');
+  await expect(page.locator('.tareas')).toBeHidden();
+  await expect.poll(async () => (await tasks(page))?.hint).toBeNull();
+  await expect(page.locator('.tareas-mostrar')).toBeVisible();
+
+  // Recargar no la vuelve a mostrar.
+  await page.reload();
+  await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
+  await play(page);
+  expect((await tasks(page))?.hidden).toBe(true);
+  await expect(page.locator('.tareas')).toBeHidden();
+
+  // Con el ratón capturado se usa H; los botones son para el dedo (un toque).
+  await page.locator('.tareas-mostrar').dispatchEvent('click');
+  await expect(page.locator('.tareas')).toBeVisible();
+  await page.locator('.tareas-ocultar').dispatchEvent('click');
+  await expect(page.locator('.tareas')).toBeHidden();
+  await page.keyboard.press('KeyO'); // O también la trae de vuelta
+  await expect(page.locator('.tareas.tareas-desplegada')).toBeVisible();
 });

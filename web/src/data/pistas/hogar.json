@@ -121,18 +121,20 @@
     "superficial": {
       "texto": [
         "La Directora te espera en el Motor, al pie de la Puerta Mayor, mirando la Luna por encima de la colina del Instituto.",
-        "«Ayer apareció allí el fragmento más grande de todos, clavado en el suelo. Quiero que lo veas tú antes que nadie: será tu primer vuelo oficial».",
-        "«El Albatros II está listo en el hangar. Ve, mira y vuelve a contármelo»."
-      ],
-      "hechos": ["casa.mision_luna"]
-    },
-    "profunda": {
-      "requiere": ["casa.prueba_plazo"],
-      "texto": [
-        "Habla de la prueba mayor como otros hablan de un hijo. Lleva años preparándola: es la que va a saludar a quienes dejaron todo esto.",
-        "Si alguien tiene que oír la verdad, es ella. Y es quien menos querrá oírla."
+        "«Ayer apareció allí el fragmento más grande de todos, clavado en el suelo. Pero no te enviaré con las manos vacías: para entenderlo hay que compararlo con una pieza pequeña, y la única que queda suelta la dejó el primer Albatros en una isla, al oeste, más allá del mar».",
+        "«Sigue las boyas con farol de la costa. Tráeme esa pieza y será tu primer vuelo oficial».",
+        "Habla de la prueba mayor como otros hablan de un hijo. Lleva años preparándola: es la que va a saludar a quienes dejaron todo esto."
       ],
       "hechos": ["casa.directora_dirige"]
+    },
+    "profunda": {
+      "requiere": ["casa.fragmento_isla"],
+      "texto": [
+        "La Directora gira la pieza entre los dedos, con los filamentos encendidos. El borde curvo encaja con lo que le contaron de la Luna.",
+        "«Es lo que esperaba. Ahora sí: ve a la Luna, mira el fragmento grande y vuelve a contármelo. El Albatros II está listo y el hangar, abierto».",
+        "Si alguien tiene que oír la verdad, es ella. Y es quien menos querrá oírla."
+      ],
+      "hechos": ["casa.mision_luna"]
     }
   },
   {
@@ -145,7 +147,8 @@
       "texto": [
         "«¿Ya has leído la ficha de riego? Empieza siempre por ahí: lo de todos los días es lo que mejor se entiende».",
         "«Leemos su lengua desde hace años y todavía no sabemos cómo se reían. Eso no viene en ninguna piedra».",
-        "«Ve a ver a la Directora antes de que se impaciente. Y vuelve a contármelo todo, ¿eh?»."
+        "«La Directora no te dejará volar a la Luna sin una pieza para comparar. El primer Albatros se perdió al oeste, más allá del mar, y su piloto dejó en una isla una piedra pequeña de bordes curvos».",
+        "«Pídele la nave a la mecánica del hangar, tráeme esa piedra a la Directora y ella te dará la misión. Y vuelve a contármelo todo, ¿eh?»."
       ],
       "hechos": []
     }
@@ -173,7 +176,8 @@
     "superficial": {
       "texto": [
         "«El Albatros II está listo: depósitos llenos y el relicario vacío, esperando tu fragmento».",
-        "«Sube con F. Ahí dentro el tablero te lo va diciendo todo: apunta a la Luna con T y, si todo da vueltas, Z lo estabiliza».",
+        "«Sube con F, junto a la escotilla. Ahí dentro el tablero te señala el destino él solo; si todo da vueltas, Z lo estabiliza, y X frena. Para posarte, baja despacio».",
+        "«La isla del primer Albatros está al oeste, más allá del mar. Sigue las boyas con farol».",
         "«Y no la rayes. Es la única que tenemos»."
       ],
       "hechos": []
@@ -241,7 +245,8 @@
     "borrador": true,
     "superficial": {
       "texto": [
-        "«Hoy todo el mundo ha salido a la plaza para verte despegar. Disimula, que si no se ponen nerviosos»."
+        "«Hoy todo el mundo ha salido a la plaza para verte despegar. Disimula, que si no se ponen nerviosos».",
+        "«Ah, y la Maestra te anda buscando: está en su aula, en lo alto de la colina del Instituto, siguiendo el camino de losas»."
       ],
       "hechos": []
     }
@@ -374,6 +379,29 @@
         "La última hoja: «Han venido. Me voy. Dejo el cuaderno por si otro se pierde: que sepa que esto también es casa»."
       ],
       "hechos": []
+    }
+  },
+  {
+    "id": "hogar.fragmento_isla",
+    "mundo": "hogar",
+    "tipo": "objeto",
+    "titulo": "La piedra del primer Albatros",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Junto al casco partido, clavada de canto en la arena y medio cubierta de musgo, una losa clara del tamaño de una puerta pequeña. Es la pieza que el piloto dejó.",
+        "Tiene un borde liso y curvo, como las piedras de las vitrinas del Instituto, y en la cara, tres muescas y un aro de marcas de reloj, casi borradas.",
+        "Es ligera. La envuelves en tu bufanda y la subes a la nave: la Directora la espera."
+      ],
+      "hechos": ["casa.fragmento_isla"]
+    },
+    "profunda": {
+      "requiere": ["casa.bordes_son_mordidas"],
+      "texto": [
+        "Ahora ves la mordida entera: el borde no se rompió, lo arrancaron en una esfera perfecta, y la esfera sigue ahí, en algún lado.",
+        "Esta piedra tampoco viajó sola. Salió de otra parte, igual que las de las vitrinas."
+      ],
+      "hechos": ["casa.fragmentos_de_aqui"]
     }
   },
   {

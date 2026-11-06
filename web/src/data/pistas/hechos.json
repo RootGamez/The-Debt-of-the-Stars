@@ -305,6 +305,12 @@
     "enlaces": ["casa.prueba_plazo"]
   },
   {
+    "id": "casa.fragmento_isla",
+    "hilos": ["H7"],
+    "frase": "En la isla del primer Albatros encontré una pieza pequeña, de borde liso y curvo.",
+    "enlaces": ["casa.fragmentos_curvos", "casa.mision_luna"]
+  },
+  {
     "id": "casa.mision_luna",
     "hilos": ["H7"],
     "frase": "La directora me envía a la Luna a estudiar el fragmento más grande.",
@@ -313,7 +319,7 @@
   {
     "id": "casa.directora_dirige",
     "hilos": ["H7"],
-    "frase": "La directora dirige la prueba mayor, y es a quien tendré que convencer.",
+    "frase": "La directora dirige la prueba mayor del Instituto.",
     "enlaces": ["casa.prueba_plazo"]
   },
   {

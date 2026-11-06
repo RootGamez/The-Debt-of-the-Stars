@@ -44,6 +44,8 @@ const env: MotorEnvironment = {
 const toGltf = (v: Vector3): Vector3 => new Vector3(v.x, v.z, -v.y);
 const instituto = frameAt(hogarSurface, SITES.instituto.lat, SITES.instituto.lon);
 const atInstituto = (p: Triple): Vector3 => toGltf(instituto.point(p));
+const aldea = frameAt(hogarSurface, SITES.aldea.lat, SITES.aldea.lon);
+const atAldea = (p: Triple): Vector3 => toGltf(aldea.point(p));
 const positionOf = (object: Object3D): Vector3 => object.getWorldPosition(new Vector3());
 
 /** Anda hacia cada punto en orden (como el jugador, sin saltar). */
@@ -134,15 +136,15 @@ describe('Hogar built in code', () => {
 });
 
 describe('the Instituto', () => {
-  it('wakes you up on its square, above the sea', () => {
+  it('wakes you up on the square of the village, above the sea', () => {
     const feet = runtime.spawn.feet;
-    expect(feet.distanceTo(atInstituto([...INSTITUTO_LAYOUT.spawn, 0]))).toBeLessThan(0.6);
-    expect(feet.length()).toBeGreaterThan(SEA_LEVEL + 5);
+    expect(feet.distanceTo(atAldea([0.4, -6.5, 0]))).toBeLessThan(1);
+    expect(feet.length()).toBeGreaterThan(SEA_LEVEL + 1);
   });
 
-  it('lets you walk from where you wake up into the Sala de Fragmentos without jumping', () => {
+  it('lets you walk from the square of the Instituto into the Sala de Fragmentos without jumping', () => {
     const [x, y] = INSTITUTO_LAYOUT.rotunda;
-    const { reached, state } = walk(runtime.spawn.feet, [
+    const { reached, state } = walk(atInstituto([0, -5, 0.3]), [
       atInstituto([x, y - 7.5, 0]),
       atInstituto([x, y - 2, 0]),
     ]);

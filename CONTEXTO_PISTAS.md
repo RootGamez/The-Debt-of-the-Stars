@@ -1,7 +1,7 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.11
-**Última actualización:** 2026-11-04 · Fase 11H (Cicatriz hueca: cinco fuentes nuevas)
+**Versión:** v0.12
+**Última actualización:** 2026-11-05 · Prólogo con tareas (la pieza de la isla)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
 > Este documento dice **qué se puede aprender, dónde y en qué orden**. Es el puente entre la historia y el
@@ -134,7 +134,8 @@ final se entiende como aviso.
 | `instituto.simbolo_partido` | Objeto | Medio símbolo tallado, sin significado conocido | Es la mitad de la pared de una Mordida de Cicatriz: este fragmento salió de allí (con `cicatriz.mordidas`) | H2, H7 |
 | `instituto.informe_deuda` | Texto (incompleto) | "Cada paso deja una deuda que…" — el resto ilegible; el Instituto lo interpreta como un coste de energía | La deuda es de **tiempo** (con K4 o H2 completo) | H2, H6 |
 | `instituto.mesa_puerta` | Objeto + diálogo | Un anillo del tamaño de la mano; "pruebas menores"; la prueba mayor "dentro de N días" | Están construyendo una Puerta sin el estabilizador que nunca llegó; esos N días son el plazo del final A (K8) | H7 |
-| `instituto.directora` | Diálogo | La misión: ir a la Luna a estudiar el fragmento más grande | Ella dirige la prueba y es quien más la quiere (a quien hay que convencer en el final A) | H7 |
+| `instituto.directora` | Diálogo | Dirige la prueba mayor; antes de enviarte a la Luna pide la pieza de la isla del primer Albatros. Con la pieza en la mano (`casa.fragmento_isla`) da la misión: ir a la Luna a estudiar el fragmento más grande | Ella dirige la prueba y es quien más la quiere (a quien hay que convencer en el final A) | H7 |
+| `hogar.fragmento_isla` | Objeto (isla del primer Albatros, cara de noche) | Una losa de borde curvo que dejó el piloto del primer Albatros; la Directora la necesita para comparar con la de la Luna (tarea del prólogo) | Salió de otra parte, como las de las vitrinas (`casa.fragmentos_de_aqui`) | H2, H7 |
 | `instituto.fragmento_luna` | Objeto (Luna) | El fragmento más grande, con su fecha tallada: es **más antiguo** que los que llegaron antes | Las bocas tienen relojes distintos: llegó después pero viene de antes (K7) | H7 |
 
 ### 5.2 Umbral — la llegada (reloj 1,00)
@@ -291,7 +292,7 @@ fuentes en Taller y Archivo además del Laboratorio, así que no depende de lleg
 
 | Lugar | Fuentes | De ellas, esenciales |
 |---|---|---|
-| Prólogo (Instituto + Luna) | 7 | 3 (K4, K7, K8 por lectura profunda o directa) |
+| Prólogo (Instituto + Luna) | 8 | 3 (K4, K7, K8 por lectura profunda o directa) |
 | Umbral | 8 | 3 |
 | Archivo | 7 | 4 |
 | Taller | 10 | 5 |
@@ -354,4 +355,5 @@ textos de ambiente sin peso en el grafo.
 - **2026-11-03 · Fase 11E (🟡).** Nueva fuente `umbral.hoja_entrada` en el tablón del Muelle de Envíos (texto borrador) con el hecho `archivo.entrada` (H4): la puerta del pozo bajo la tercera torre, marcada con tres bandas. Total: 53 fuentes y 61 hechos.
 - **2026-11-03 · Fase 11F (🟡).** Dos fuentes nuevas en el Taller: `taller.pista` (lector `pista`, da `contrapeso.medir_desfase`) y `taller.paginas`, en la Sala del Centro (da `contrapeso.cuenta_sincronia`, que sigue también en `lab.pizarra`: dos fuentes en dos mundos). Total: 55 fuentes y 61 hechos. `taller.manual` remite ahora a los dos sitios.
 - **2026-11-03 · Fase 11G (🟡).** Hogar rehecho: doce fuentes nuevas de ambiente (once notas y la charla de la astrónoma), sin hechos. La Directora espera ahora en el Motor (cambia su primera línea). Total: 67 fuentes y 61 hechos.
+- **2026-11-05 · Prólogo con tareas (🟡).** Nueva fuente `hogar.fragmento_isla` (isla del primer Albatros) con el hecho `casa.fragmento_isla` (H7): la Maestra manda a buscar una pieza pequeña y la Directora solo da la misión (`casa.mision_luna`, ahora su lectura profunda) cuando se la llevas. `casa.directora_dirige` pasa a ser su lectura superficial y su frase pierde «a quien tendré que convencer». En el cuaderno del prólogo no aparecen las preguntas sobre los Ausentes: solo las tareas y lo aprendido. Total: 61 fuentes del grafo.
 - **2026-11-04 · Fase 11H (🟡).** Cicatriz pasa a ser hueca, con micro agujero en el centro y anillo (✅ la idea, Anthony). Cinco fuentes nuevas con texto borrador: `cicatriz.cripta`, `cicatriz.friso`, `cicatriz.nucleo`, `cicatriz.partidas` y `cicatriz.anillo`, y cinco hechos nuevos (`nudo.sellado`, `deuda.mundo_vaciado`, `deuda.garganta_maquina`, `partida.ultimas_salidas`, `deuda.anillo_de_mordidas`), todos 🟡 para que Anthony los decida. Total: 72 fuentes y 66 hechos.

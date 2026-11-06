@@ -48,7 +48,7 @@ describe('the real clue data', () => {
     expect(ambient.map((s) => s.id)).toContain('observatorio.registrador');
   });
 
-  it('contains the 7 threads, the 9 conclusions and the 60 sources of CONTEXTO_PISTAS.md', () => {
+  it('contains the 7 threads, the 9 conclusions and the 61 sources of CONTEXTO_PISTAS.md', () => {
     expect(clues.threads.map((t) => t.id)).toEqual(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7']);
     expect(clues.conclusions.map((c) => c.id)).toEqual([
       'K1',
@@ -61,7 +61,7 @@ describe('the real clue data', () => {
       'K7',
       'K8',
     ]);
-    expect(graph).toHaveLength(60);
+    expect(graph).toHaveLength(61);
   });
 
   it('spreads the sources over the places of the document', () => {
@@ -69,7 +69,7 @@ describe('the real clue data', () => {
     for (const s of graph) perWorld.set(s.world, (perWorld.get(s.world) ?? 0) + 1);
 
     expect(Object.fromEntries(perWorld)).toEqual({
-      hogar: 6,
+      hogar: 7,
       luna: 1,
       umbral: 9,
       archivo: 7,

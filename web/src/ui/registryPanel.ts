@@ -25,7 +25,8 @@ const BOOK_RATIO = 1.5;
 const DRAG_COMMIT_ANGLE = 60;
 
 export interface RegistryPanel {
-  open(pages: readonly NotebookPage[]): void;
+  /** `focus: 'tasks'` abre por la página de las tareas (la tecla T) en vez de por lo último anotado. */
+  open(pages: readonly NotebookPage[], focus?: 'tasks'): void;
   close(): void;
   readonly isOpen: boolean;
   dispose(): void;
@@ -144,6 +145,51 @@ function pageContent(page: NotebookPage): HTMLElement[] {
       }
       parts.push(list);
       return parts;
+    }
+    case 'tasks': {
+      const done = page.items.filter((item) => item.done).length;
+      const list = node('ul', 'registry-facts registry-tasks');
+      for (const item of page.items) {
+        const row = node('li', 'registry-task');
+        row.classList.toggle('registry-task-done', item.done);
+        row.classList.toggle('registry-task-current', item.current);
+        row.append(
+          node('span', 'registry-task-box', item.done ? '☑' : '☐'),
+          node('span', 'registry-task-title', item.title),
+        );
+        if (item.current) row.append(node('p', 'registry-task-hint', item.hint));
+        list.append(row);
+      }
+      return [
+        node('h3', 'registry-known-title', t('Tareas')),
+        node(
+          'p',
+          'registry-count',
+          t('{done} de {total} hechas', { done, total: page.items.length }),
+        ),
+        list,
+      ];
+    }
+    case 'learned': {
+      const name = node('h3', 'registry-known-title', t('Lo que he aprendido'));
+      if (page.part > 0) name.dataset['sigue'] = 'true';
+      const list = node('ul', 'registry-facts');
+      for (const fact of page.facts) {
+        const item = node('li', 'registry-fact');
+        if (fact.fresh) item.classList.add('entry-new');
+        item.append(node('span', 'registry-line', fact.line));
+        list.append(item);
+      }
+      if (page.total === 0) {
+        list.append(
+          node(
+            'li',
+            'registry-empty',
+            t('Todavía no he aprendido nada. Habla con la gente y lee.'),
+          ),
+        );
+      }
+      return [name, list];
     }
     case 'thread': {
       const section = node('section', 'registry-thread');
@@ -401,10 +447,17 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
       setAngle(leaf, 0);
     }
     const tabs = node('div', 'registry-tabs');
-    for (const [text, kind] of [
-      [t('Preguntas'), 'thread'],
-      [t('Mundos'), 'worlds'],
-    ] as const) {
+    const inPrologue = pages.some((page) => page.kind === 'tasks');
+    const tabList = inPrologue
+      ? ([
+          [t('Tareas'), 'tasks'],
+          [t('Aprendido'), 'learned'],
+        ] as const)
+      : ([
+          [t('Preguntas'), 'thread'],
+          [t('Mundos'), 'worlds'],
+        ] as const);
+    for (const [text, kind] of tabList) {
       const tab = node('button', 'registry-tab', text);
       tab.type = 'button';
       tab.setAttribute('aria-label', `Ir a ${text}`);
@@ -544,7 +597,7 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
   );
 
   return {
-    open(next) {
+    open(next, focus) {
       pages = next;
       build();
       backdrop.hidden = false;
@@ -554,10 +607,12 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
       const fresh = pages.findIndex(
         (page) =>
           (page.kind === 'thread' && page.entries.some((e) => e.fresh)) ||
+          (page.kind === 'learned' && page.facts.some((f) => f.fresh)) ||
           (page.kind === 'world' && page.fresh),
       );
       flip(1, () => {
-        if (fresh > 2) goToPage(fresh);
+        if (focus === 'tasks') goToPage(sectionPage(pages, 'tasks'));
+        else if (fresh > 2) goToPage(fresh);
       });
     },
     close() {

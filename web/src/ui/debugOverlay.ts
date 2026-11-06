@@ -94,7 +94,14 @@ declare global {
       /** El gusano de la Luna: si se ha abierto y cuánto (0–1). */
       wormhole?(): { active: boolean; progress: number };
       /** La guía del prólogo: el aviso a la vista y lo ya aprendido. */
-      guide?(): { shown: string | null; done: string[] };
+      tasks?(): {
+        current: string | null;
+        done: readonly string[];
+        hint: string | null;
+        expanded: boolean;
+        hidden: boolean;
+        waypoint: { label: string; onScreen: boolean } | null;
+      } | null;
       /** Los Ool: cuánto se ha girado cada uno hacia ti (rad) y tus filamentos (si brillan, cuántas veces latieron). */
       ool?(): { turns: Record<string, number>; filaments: { glowing: boolean; beats: number } };
       /** Tú: si se te ve, primera persona, velocidad, fase del paso, mezclas y triángulos; y la cámara exterior. */

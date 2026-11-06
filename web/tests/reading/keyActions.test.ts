@@ -7,6 +7,7 @@ const context = (overrides: Partial<KeyContext> = {}): KeyContext => ({
   registryOpen: false,
   canInteract: true,
   hasTarget: true,
+  hasTasks: false,
   ...overrides,
 });
 
@@ -68,6 +69,19 @@ describe('R and Tab', () => {
   it('Tab opens the Registro only while playing, so it can still move the focus in the pause screen', () => {
     expect(keyAction(context(), key('Tab'))).toBe('open-registry');
     expect(keyAction(context({ playing: false }), key('Tab'))).toBe('none');
+  });
+});
+
+describe('T', () => {
+  it('does nothing without tasks (outside the prologue it is the ship targeting key)', () => {
+    expect(keyAction(context(), key('KeyT'))).toBe('none');
+  });
+
+  it('opens the tasks page of the notebook in the prologue, and closes it again', () => {
+    expect(keyAction(context({ hasTasks: true }), key('KeyT'))).toBe('open-tasks');
+    expect(keyAction(context({ hasTasks: true, registryOpen: true }), key('KeyT'))).toBe(
+      'close-registry',
+    );
   });
 });
 

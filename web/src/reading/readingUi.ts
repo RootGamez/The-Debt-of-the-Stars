@@ -19,7 +19,8 @@ import {
 } from '../registry/interaction';
 import { canGiveNew } from '../registry/knowledge';
 import { keyAction } from './keyActions';
-import { notebookPages } from '../registry/notebookPages';
+import { notebookPages, prologuePages } from '../registry/notebookPages';
+import type { TaskItem } from '../game/tasks';
 import { buildRegistryView } from '../registry/registryView';
 import type { TextSettings } from '../typewriter/textPreferences';
 import { createBookButton } from '../ui/bookButton';
@@ -56,6 +57,11 @@ export interface ReadingUiOptions {
   reducedMotion: boolean;
   /** Los mundos nombrados (la bitácora del cuaderno). */
   worldNames: () => WorldNames;
+  /**
+   * El prólogo: el cuaderno solo muestra las tareas y lo aprendido en casa (sin las preguntas sobre los Ausentes),
+   * y T abre la página de las tareas. Fuera del prólogo no se pasa.
+   */
+  prologue?: { tasks: () => readonly TaskItem[] };
   /** Cada pocas letras escritas, con el tono de quien habla. */
   onLetters?: (pitch: number) => void;
 }
@@ -103,6 +109,8 @@ export interface ReadingUi {
   /** Una grabación está sonando (para el murmullo), o null. */
   readonly listening: ListeningState | null;
   openRegistry(): void;
+  /** Abre el cuaderno por la página de las tareas (solo en el prólogo). */
+  openTasks(): void;
   /** Cierra la lectura abierta, si la hay (al cruzar una boca del Archivo desde su lector). */
   closeReading(): void;
   /** Un aviso breve, el mismo de "Anotado en el Registro". */
@@ -317,7 +325,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     }
   }
 
-  function openRegistry(): void {
+  function openRegistry(focus?: 'tasks'): void {
     if (reading.frozen) closeReading();
     if (overlay.playing) overlay.pause();
     overlay.setInert(true); // detrás del Registro no se puede reanudar con el teclado
@@ -327,8 +335,17 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       facts: new Set([...reading.known, ...rumors].filter((id) => !inNotebook.has(id))),
       worlds: new Set(Object.keys(names).filter((id) => !namedInNotebook.has(id))),
     };
-    const view = buildRegistryView(clues, reading.known);
-    registryPanel.open(notebookPages(view, worldPages(names, clues, reading.known), fresh));
+    if (options.prologue) {
+      const learned = [...reading.known].map((id) => ({
+        id,
+        line: lineOf(id),
+        fresh: !inNotebook.has(id),
+      }));
+      registryPanel.open(prologuePages(options.prologue.tasks(), learned), focus);
+    } else {
+      const view = buildRegistryView(clues, reading.known);
+      registryPanel.open(notebookPages(view, worldPages(names, clues, reading.known), fresh));
+    }
     for (const id of [...reading.known, ...rumors]) inNotebook.add(id);
     for (const id of Object.keys(names)) namedInNotebook.add(id);
   }
@@ -341,6 +358,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
         registryOpen: registryPanel.isOpen,
         canInteract: canInteract(),
         hasTarget: target !== undefined,
+        hasTasks: options.prologue !== undefined,
       },
       event,
     );
@@ -350,7 +368,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     else if (action === 'open-registry') {
       if (event.code === 'Tab') event.preventDefault();
       openRegistry();
-    }
+    } else if (action === 'open-tasks') openRegistry('tasks');
   }
   window.addEventListener('keydown', onKey, { signal: abort.signal });
 
@@ -424,7 +442,12 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
         current.markers.hide();
       }
     },
-    openRegistry,
+    openRegistry: () => {
+      openRegistry();
+    },
+    openTasks: () => {
+      if (options.prologue) openRegistry('tasks');
+    },
     closeReading() {
       if (reading.frozen) closeReading();
     },

@@ -21,7 +21,6 @@ const DEG = Math.PI / 180;
 
 /** Dónde está cada parte, en metros desde el centro de la plaza. */
 export const INSTITUTO_LAYOUT = {
-  spawn: [0, -5] as const,
   rotunda: [0, 14] as const,
   tower: [-19, 3] as const,
   hangar: [17, -3] as const,
@@ -149,7 +148,6 @@ function plaza(b: HogarBuilder, f: Frame): void {
   b.mossTree(f, [-9, -10, 0], 1.1, 5);
   b.mossTree(f, [9.5, 8, 0], 0.9, 3);
   b.mossTree(f, [-10.5, 12, 0], 1, 4);
-  b.mark('SPAWN_Instituto', f, [INSTITUTO_LAYOUT.spawn[0], INSTITUTO_LAYOUT.spawn[1], 0.3]);
 }
 
 /** La Sala de Fragmentos: una rotonda de lona clara con vitrinas por dentro y una luz de cenit. */

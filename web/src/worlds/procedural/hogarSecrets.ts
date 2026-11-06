@@ -88,6 +88,31 @@ function albatros(b: HogarBuilder): void {
   );
   b.pieces.add(P.glowWarm, ball(0.1, 1), f.at([-2.6, 2.7, 0.15]), 'light', { glow: 1.4, vary: 0 });
   b.source('hogar.bitacora_albatros', 'texto', f, [-2.2, 3.2, 0.6]);
+  // La pieza que dejó el piloto (la tarea del prólogo): una losa clara de canto, con el borde curvo cortado de una
+  // mordida, medio hundida en la arena, con un hilo de luz. Se ve desde lejos por su brillo.
+  const stone: Triple = [3.6, -1.4, 0];
+  b.pieces.add(
+    P.sandstone,
+    box(),
+    f.at([stone[0], stone[1], 0.7], [0.12, 0.28, 0.5], [1.5, 0.3, 1.5]),
+    'stone',
+    { solid: true },
+  );
+  b.pieces.add(
+    P.sandstone,
+    torus(0.78, 0.07, 20, 4),
+    f.at([stone[0] - 0.05, stone[1] + 0.02, 1.45], [Math.PI / 2 + 0.12, 0.28, 0.5], [1, 0.4, 1]),
+    'stone',
+    { solid: false },
+  );
+  b.pieces.add(
+    P.glowWarm,
+    cone(0.07, 0, 5),
+    f.at([stone[0], stone[1] - 0.2, 1.1], [0.12, 0.28, 0.5], [1, 1, 4]),
+    'light',
+    { glow: 1.8, vary: 0 },
+  );
+  b.source('hogar.fragmento_isla', 'objeto', f, [stone[0], stone[1], 1.0]);
 }
 
 /** Donde cayó la primera piedra: un corro de piedras de musgo alrededor de un hoyo de borde liso, y su placa. */

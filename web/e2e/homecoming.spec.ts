@@ -60,8 +60,8 @@ test('ending A: the earlier home, the view turns to the Moon and the card offers
   const home = await homecoming(page);
   expect(home).toMatchObject({ ending: 'A', phase: 'playing' });
   expect(home?.without).toContain('luna_Fragmento');
-  // No es el prólogo: ni guía ni gusano.
-  expect(await page.evaluate(() => window.__juego?.guide?.().shown ?? null)).toBeNull();
+  // No es el prólogo: ni tareas ni gusano.
+  expect(await page.evaluate(() => window.__juego?.tasks?.() ?? null)).toBeNull();
   expect(await page.evaluate(() => window.__juego?.wormhole?.().active)).toBe(false);
   // El fragmento de la Luna aún no ha llegado: no hay nada que examinar allí.
   await standAt(page, 'instituto.fragmento_luna');

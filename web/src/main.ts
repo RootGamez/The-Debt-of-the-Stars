@@ -47,9 +47,9 @@ import { createLoopSession } from './core/loopSession';
 import { browserStore, clearSave, loadSave, markEndingSeen, type SaveData } from './core/save';
 import { createMainMenu, type MainMenu } from './menu/mainMenu';
 import { createPrologueGate, WORMHOLE } from './game/prologue';
-import { Guide } from './game/guide';
+import { TaskTracker } from './game/tasks';
+import { createTaskRig } from './game/taskRig';
 import { wormholeCenter } from './game/wormhole';
-import { createGuideView } from './ui/guideView';
 import { createWormholeView } from './render/wormholeView';
 import { Player } from './core/player';
 import { absorptionWindow, quietChronology, triggersAsEvents } from './core/timeline';
@@ -492,7 +492,9 @@ function start(): void {
     {
       isPiloting: () => game.flight?.piloting ?? false,
       onShipAction: (action) => {
-        shipAction(action);
+        // En el prólogo el botón Objetivo abre las tareas (la nave ya apunta sola a lo que toca).
+        if (action === 'target' && inPrologue) ui.openTasks();
+        else shipAction(action);
       },
     },
   );
@@ -540,6 +542,10 @@ function start(): void {
     alignedNow: () => session.activeEventIds.includes(ALIGNMENT_EVENT),
     observatory: OBSERVATORY,
   });
+  // El prólogo (casa, antes del primer ciclo): tareas, indicador y un cuaderno sin lo que aún no se sabe.
+  const inPrologue = !looping && runtimes.has(WORMHOLE.world) && !homecoming;
+  const taskTracker = new TaskTracker();
+  const touchUi = isTouchDevice();
   const ui = createReadingUi({
     camera,
     sources: startSources,
@@ -559,6 +565,7 @@ function start(): void {
     settings: textSettings,
     reducedMotion,
     worldNames: () => worldNames,
+    prologue: inPrologue ? { tasks: () => taskTracker.items(touchUi) } : undefined,
     onLetters: (pitch) => {
       soundtrack.blip(pitch);
     },
@@ -593,6 +600,7 @@ function start(): void {
           },
           clock: () => session.director.clock,
           touch: isTouchDevice(),
+          autoTarget: inPrologue,
         })
       : undefined;
   game.flight = flight;
@@ -616,6 +624,8 @@ function start(): void {
   }
   const canAct = (): boolean => overlay.playing && free();
   function shipAction(action: ShipAction): void {
+    // En el prólogo, T son las tareas (las abre la lectura): la nave ya apunta sola a lo que toca.
+    if (action === 'target' && inPrologue) return;
     if (flight && canAct()) flight.action(action, currentWorld.id, session.director.clock.t);
   }
   input.onActionKey = shipAction;
@@ -710,10 +720,7 @@ function start(): void {
       active: wormholeView?.active ?? false,
       progress: wormholeView?.progress ?? 0,
     });
-    window.__juego.guide = () => ({
-      shown: guideView?.shown ?? null,
-      done: [...(guide?.done ?? [])],
-    });
+    window.__juego.tasks = () => taskRig?.snapshot() ?? null;
     window.__juego.absorption = () => absorption?.snapshot() ?? null;
     window.__juego.counterweight = () => counterweight?.play.snapshot() ?? null;
     window.__juego.horizon = () => {
@@ -782,15 +789,24 @@ function start(): void {
   let shipDeath: DeathCause | undefined;
   // El final del prólogo: el gusano junto al fragmento de la Luna (solo en casa).
   // (solo el prólogo: el Archivo de las Puertas tampoco tiene ciclo, pero no es casa)
-  const inPrologue = !looping && runtimes.has(WORMHOLE.world) && !homecoming;
   const prologue = inPrologue ? createPrologueGate() : undefined;
-  // La guía del prólogo: un aviso cada vez, hasta que se hace lo que pide.
-  const guide = inPrologue ? new Guide() : undefined;
-  const guideView = guide ? createGuideView(isTouchDevice()) : undefined;
-  const guideFeet = new Vector3();
-  const moonCenter = new Vector3();
-  let walked = 0;
-  let registryOpened = false;
+  // Las tareas del prólogo: la lista de la izquierda, el aviso de arriba y el indicador hacia lo que toca.
+  const taskRig =
+    inPrologue && flight
+      ? createTaskRig({
+          tracker: taskTracker,
+          reading,
+          touch: touchUi,
+          camera,
+          systemScene,
+          sources,
+          radiusOf: (world) => runtimes.get(world)?.world.info.radius,
+          moonWorld: WORMHOLE.world,
+          setShipTarget: (world) => {
+            flight.setTarget(world);
+          },
+        })
+      : undefined;
   // El gusano junto al fragmento de la Luna: se abre, y al terminar llega el fundido a blanco de la Cámara.
   const wormholeView = inPrologue ? createWormholeView() : undefined;
   let crossingAsked = false;
@@ -1044,34 +1060,14 @@ function start(): void {
       ui.update(performance.now() / 1000);
       ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);
       filaments.update(reading.current !== null, reading.known.size);
-      if (guide && guideView) {
-        // Lo andado (a pie y sin saltos grandes, que serían teletransportes de depuración).
-        if (!piloting) {
-          const step = guideFeet.distanceTo(player.state.position);
-          if (step < 1) walked += step;
-          guideFeet.copy(player.state.position);
-        }
-        if (ui.blocking && reading.current === null) registryOpened = true;
-        const moon = systemScene.groupOf(WORMHOLE.world);
-        const moonRadius = runtimes.get(WORMHOLE.world)?.world.info.radius;
-        guideView.update(
-          guide.current({
-            walked,
-            hasMission: reading.known.has('casa.mision_luna'),
-            knowsSomething: reading.known.size > 0,
-            registryOpened,
-            piloting,
-            targetingMoon: flight?.targetId === WORMHOLE.world,
-            moonDistance:
-              moon && moonRadius !== undefined
-                ? moon.getWorldPosition(moonCenter).distanceTo(camera.position) - moonRadius
-                : undefined,
-            onMoon: !piloting && currentWorld.id === WORMHOLE.world,
-            sawFragment: reading.known.has(WORMHOLE.fact),
-          }),
-          overlay.playing && !ui.blocking,
-        );
-      }
+      taskRig?.update({
+        dt: timeRuns ? dt : 0,
+        visible: overlay.playing && !ui.blocking,
+        piloting,
+        world: currentWorld.id,
+        position: player.state.position,
+        registryOpen: ui.blocking && reading.current === null,
+      });
       sight.update();
       touch?.update();
       debug.update(dt, overlay.playing);

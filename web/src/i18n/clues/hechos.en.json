@@ -126,11 +126,14 @@
   "casa.pruebas_menores": {
     "frase": "At home they are building a small Gate and running \"minor tests\"."
   },
+  "casa.fragmento_isla": {
+    "frase": "On the island of the first Albatross I found a small piece with a smooth, curved edge."
+  },
   "casa.mision_luna": {
     "frase": "The Director sends me to the Moon to study the largest fragment."
   },
   "casa.directora_dirige": {
-    "frase": "The Director leads the great test, and she is the one I will have to convince."
+    "frase": "The Director leads the Institute's great test."
   },
   "casa.fragmentos_curvos": { "frase": "The fragments at home have smooth, curved edges." },
   "casa.bordes_son_mordidas": { "frase": "Those curved edges are bites from micro wormholes." },

@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { loadClues } from '../../src/data/pistas';
+import { TaskTracker } from '../../src/game/tasks';
 import { buildRegistryView } from '../../src/registry/registryView';
 import {
   PAGE_CAPACITY,
   notebookPages,
+  prologuePages,
   sectionPage,
   spreadOf,
   type NotebookPage,
@@ -108,5 +110,49 @@ describe('turning to a page', () => {
     expect(pages[sectionPage(pages, 'thread')]?.kind).toBe('thread');
     expect(pages[sectionPage(pages, 'worlds')]?.kind).toBe('worlds');
     expect(sectionPage([{ kind: 'cover' }, { kind: 'back' }], 'worlds')).toBe(0);
+  });
+});
+
+describe('the notebook of the prologue', () => {
+  const tasks = new TaskTracker().items(false);
+  const learned = (n: number) =>
+    Array.from({ length: n }, (_, k) => ({
+      id: `casa.hecho${String(k)}`,
+      line: `Hecho ${String(k)}`,
+      fresh: k === 0,
+    }));
+
+  it('has only the cover, the flyleaf, the tasks and what has been learned: nothing about the Absent', () => {
+    const pages = prologuePages(tasks, learned(3));
+    expect(pages.map((p) => p.kind)).toEqual([
+      'cover',
+      'flyleaf',
+      'tasks',
+      'learned',
+      'blank',
+      'back',
+    ]);
+    expect(
+      pages.some((p) => p.kind === 'thread' || p.kind === 'known' || p.kind === 'worlds'),
+    ).toBe(false);
+  });
+
+  it('puts the tasks on the first page you see when you open it', () => {
+    const pages = prologuePages(tasks, []);
+    expect(sectionPage(pages, 'tasks')).toBe(2);
+    expect(spreadOf(2)).toBe(1);
+  });
+
+  it('keeps whole leaves and spills what is learned onto more pages when it does not fit', () => {
+    const pages = prologuePages(tasks, learned(PAGE_CAPACITY * 2 + 1));
+    expect(pages.filter((p) => p.kind === 'learned').length).toBeGreaterThan(2);
+    expect(pages.length % 2).toBe(0);
+    expect(pages.at(-1)?.kind).toBe('back');
+  });
+
+  it('shows an empty page of lessons when nothing is learned yet', () => {
+    const pages = prologuePages(tasks, []);
+    const page = pages.find((p) => p.kind === 'learned');
+    expect(page).toMatchObject({ kind: 'learned', total: 0 });
   });
 });
