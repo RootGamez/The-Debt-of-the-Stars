@@ -7,6 +7,8 @@ import { t } from '../i18n';
 export interface FactView {
   id: string;
   line: string;
+  /** Dibujo del cuaderno que acompaña al hecho. */
+  sketch?: string;
   related: { id: string; line: string }[];
 }
 
@@ -35,6 +37,8 @@ export interface DeductionPiece {
   met: boolean;
   line: string;
   lead?: string;
+  /** El dibujo del hecho que ya se sabe. */
+  sketch?: string;
 }
 
 /** La página de deducción de una conclusión empezada (plan de historia y puzzles, §5.1). */
@@ -68,7 +72,10 @@ function pieceOf(
   if (metId !== undefined) {
     const fact = clues.facts.get(metId);
     const conclusion = clues.conclusionById.get(metId);
-    return { met: true, line: fact?.line ?? conclusion?.title ?? metId };
+    const line = fact?.line ?? conclusion?.title ?? metId;
+    return fact?.sketch === undefined
+      ? { met: true, line }
+      : { met: true, line, sketch: fact.sketch };
   }
   const first = group[0] ?? '';
   const fact = clues.facts.get(first);
@@ -115,6 +122,7 @@ export function buildRegistryView(clues: Clues, known: KnownFacts): RegistryView
         .map((f) => ({
           id: f.id,
           line: f.line,
+          ...(f.sketch === undefined ? {} : { sketch: f.sketch }),
           related: relatedFacts(clues, known, f.id).map((id) => ({ id, line: lineOf(id) })),
         })),
       rumors: rumors

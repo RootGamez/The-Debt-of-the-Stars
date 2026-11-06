@@ -12,6 +12,7 @@ import {
 import type { DeductionView } from '../registry/registryView';
 import type { WorldPage } from '../worlds/worldLog';
 import { worldDrawing } from './worldDrawings';
+import { SKETCH_HEIGHT, SKETCH_WIDTH, sketchOf } from './notebookSketches';
 import { t } from '../i18n';
 
 /** Lo que tarda una hoja en dar la vuelta entera (ms). */
@@ -44,6 +45,45 @@ function node<K extends keyof HTMLElementTagNameMap>(
   return element;
 }
 
+/** El croquis a tinta de un hecho (trazos de notebookSketches.ts), con su texto alternativo. */
+function sketchFigure(id: string): HTMLElement | undefined {
+  const sketch = sketchOf(id);
+  if (!sketch) return undefined;
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${String(SKETCH_WIDTH)} ${String(SKETCH_HEIGHT)}`);
+  svg.setAttribute('class', 'registry-sketch');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', sketch.alt);
+  for (const shape of sketch.shapes) {
+    if (shape.type === 'path') {
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', shape.d);
+      if (shape.accent) path.setAttribute('class', 'sketch-accent');
+      if (shape.dashed) path.setAttribute('stroke-dasharray', '4 3');
+      svg.append(path);
+    } else if (shape.type === 'dot') {
+      const dot = document.createElementNS(ns, 'circle');
+      dot.setAttribute('cx', String(shape.x));
+      dot.setAttribute('cy', String(shape.y));
+      dot.setAttribute('r', String(shape.r));
+      dot.setAttribute('class', shape.accent ? 'sketch-dot sketch-accent' : 'sketch-dot');
+      svg.append(dot);
+    } else {
+      const label = document.createElementNS(ns, 'text');
+      label.setAttribute('x', String(shape.x));
+      label.setAttribute('y', String(shape.y));
+      label.setAttribute('text-anchor', shape.anchor ?? 'middle');
+      label.setAttribute('class', shape.accent ? 'sketch-label sketch-accent' : 'sketch-label');
+      label.textContent = shape.text;
+      svg.append(label);
+    }
+  }
+  const figure = node('figure', 'registry-sketch-figure');
+  figure.append(svg);
+  return figure;
+}
+
 function entryItem(entry: NotebookEntry): HTMLElement {
   if (entry.kind === 'rumor') {
     const item = node('li', 'registry-rumor', `? ${entry.question}`);
@@ -53,6 +93,8 @@ function entryItem(entry: NotebookEntry): HTMLElement {
   const item = node('li', 'registry-fact');
   if (entry.fresh) item.classList.add('entry-new');
   item.append(node('span', 'registry-line', entry.line));
+  const sketch = entry.sketch === undefined ? undefined : sketchFigure(entry.sketch);
+  if (sketch) item.append(sketch);
   if (entry.related.length > 0) {
     const related = node('ul', 'registry-related');
     related.setAttribute('aria-label', t('Ver también'));
@@ -144,6 +186,8 @@ function deductionContent(deduction: DeductionView): HTMLElement[] {
   for (const piece of deduction.pieces) {
     const item = node('li', piece.met ? 'registry-piece' : 'registry-piece registry-piece-missing');
     item.append(node('span', 'registry-line', `${piece.met ? '✓' : '?'} ${piece.line}`));
+    const sketch = piece.sketch === undefined ? undefined : sketchFigure(piece.sketch);
+    if (sketch) item.append(sketch);
     if (!piece.met && piece.lead !== undefined) {
       item.append(node('p', 'registry-lead', piece.lead));
     }

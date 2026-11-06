@@ -400,6 +400,28 @@ export const EN: Readonly<Record<string, string>> = {
   'Mostrar tareas': 'Show tasks',
   'Ocultar o mostrar la interfaz': 'Hide or show the interface',
   'Pantalla completa': 'Full screen',
+  'donde está': 'where it is',
+  'donde parece': 'where it seems',
+  'Dibujo: una estrella se ve dieciocho grados más allá de donde está, junto a un punto oscuro que dobla la luz':
+    'Drawing: a star seems eighteen degrees away from where it is, beside a dark point that bends the light',
+  'Dibujo: dos relojes lado a lado; el de un mundo va por delante y el del otro se queda atrás':
+    'Drawing: two clocks side by side; one world runs ahead and the other falls behind',
+  'el mismo viaje, dos relojes': 'the same trip, two clocks',
+  'Dibujo: dos columnas de días; el gemelo que viajó cuenta veinte y el que esperó cuenta cien':
+    'Drawing: two columns of days; the twin who traveled counts twenty and the one who waited counts a hundred',
+  'Dibujo: a las cuatro, un rayo de luz de la Brasa atraviesa la ranura de un muro y cae sobre el suelo':
+    'Drawing: at four sharp a ray of light from the Ember goes through a slot in a wall and falls on the floor',
+  'el núcleo se abre': 'the core opens',
+  'Dibujo: una línea de quince minutos; a las nueve en punto hay un pico y el núcleo se abre un instante, antes de las trece y media':
+    'Drawing: a fifteen minute line; at nine sharp there is a spike and the core opens for an instant, before thirteen and a half minutes',
+  'Dibujo: la mitad izquierda de un símbolo de dos anillos, con el borde roto':
+    'Drawing: the left half of a symbol made of two rings, with a broken edge',
+  'mi fragmento': 'my fragment',
+  'la pared': 'the wall',
+  'Dibujo: las dos mitades de un símbolo de dos anillos juntas: la de mi fragmento y la de la pared':
+    'Drawing: the two halves of a two-ring symbol together: the one on my fragment and the one on the wall',
+  'Dibujo: tres bocas de una Puerta, cada una con un reloj que marca una hora distinta':
+    'Drawing: three mouths of a Gate, each with a clock showing a different hour',
   'Detener el colapso': 'Stop the collapse',
   'Aún no lo entiendo: en el cuaderno, las páginas de deducción dicen qué me falta':
     'I do not understand it yet: the deduction pages in the notebook say what I am missing',

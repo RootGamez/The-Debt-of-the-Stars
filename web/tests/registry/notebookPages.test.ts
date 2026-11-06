@@ -8,6 +8,7 @@ import {
   prologuePages,
   sectionPage,
   spreadOf,
+  weightOf,
   type NotebookPage,
 } from '../../src/registry/notebookPages';
 import { withDiscovery, worldPages } from '../../src/worlds/worldLog';
@@ -169,5 +170,12 @@ describe('the notebook of the prologue', () => {
 
   it('has no deduction pages when nothing is known', () => {
     expect(pagesFor(new Set()).some((page) => page.kind === 'deduction')).toBe(false);
+  });
+
+  it('gives a fact with a sketch more room, so its page fills up sooner', () => {
+    const plain = { kind: 'fact' as const, id: 'a', line: 'x', related: [], fresh: false };
+    const sketched = { ...plain, sketch: 'mapa_cielo' };
+
+    expect(weightOf(sketched)).toBeGreaterThan(weightOf(plain));
   });
 });

@@ -100,4 +100,23 @@ describe('buildRegistryView', () => {
       line: 'La placa habla de una cuenta.',
     });
   });
+
+  it('carries the sketch of a known fact to its entry and to its piece of a deduction', () => {
+    const d = raw();
+    Object.assign(at(d.hechos, 1), { dibujo: 'mapa_cielo' });
+    const view = buildRegistryView(parse(d), known('lab.existe_lugar_lento'));
+
+    expect(view.threads[1]?.facts[0]?.sketch).toBe('mapa_cielo');
+    expect(view.deductions[0]?.pieces[0]?.sketch).toBe('mapa_cielo');
+    expect(view.threads[0]?.facts[0]?.sketch).toBeUndefined();
+  });
+
+  it('does not draw a sketch for a fact that is only a rumor', () => {
+    const d = raw();
+    Object.assign(at(d.hechos, 2), { dibujo: 'mapa_cielo' });
+    const view = buildRegistryView(parse(d), known('lab.existe_lugar_lento'));
+
+    expect(view.deductions[1]?.pieces[0]?.sketch).toBeUndefined();
+    expect(view.deductions[1]?.pieces[1]?.sketch).toBeUndefined();
+  });
 });

@@ -808,6 +808,41 @@ body {
 .registry-empty {
   color: var(--pencil);
 }
+.registry-sketch-figure {
+  margin: 0.2em 0 0.3em;
+}
+.registry-sketch {
+  display: block;
+  width: 78%;
+  margin: 0 auto;
+  fill: none;
+  stroke: rgb(var(--ink-rgb) / 75%);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#wobble);
+}
+.registry-sketch .sketch-accent {
+  stroke: var(--glow);
+  filter: drop-shadow(0 0 2px rgb(var(--glow-rgb)));
+}
+.registry-sketch .sketch-dot {
+  fill: rgb(var(--ink-rgb) / 75%);
+  stroke: none;
+}
+.registry-sketch .sketch-dot.sketch-accent {
+  fill: var(--glow);
+}
+.registry-sketch .sketch-label {
+  fill: var(--pencil);
+  stroke: none;
+  font: 500 11px var(--f-hand);
+  filter: none;
+}
+.registry-sketch .sketch-label.sketch-accent {
+  fill: var(--ink);
+  filter: none;
+}
 .registry-doodle {
   width: 55%;
   margin-top: auto;

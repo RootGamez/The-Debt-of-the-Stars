@@ -19,6 +19,8 @@ export type NotebookEntry =
       id: string;
       line: string;
       related: readonly string[];
+      /** Dibujo pegado junto al hecho. */
+      sketch?: string;
       /** Anotado desde la última vez que se abrió el cuaderno: se escribe delante del jugador. */
       fresh: boolean;
     }
@@ -71,9 +73,13 @@ export interface FreshMarks {
   worlds: ReadonlySet<string>;
 }
 
-function weightOf(entry: NotebookEntry): number {
+/** Un dibujo ocupa más o menos lo que dos hechos. */
+const SKETCH_WEIGHT = 2;
+
+export function weightOf(entry: NotebookEntry): number {
   if (entry.kind === 'rumor') return 1;
-  return 1 + entry.related.length * 0.5 + (entry.line.length > LONG_LINE ? 0.5 : 0);
+  const drawn = entry.sketch === undefined ? 0 : SKETCH_WEIGHT;
+  return 1 + entry.related.length * 0.5 + (entry.line.length > LONG_LINE ? 0.5 : 0) + drawn;
 }
 
 /** Parte una lista en trozos que caben en una página; la primera puede tener menos sitio. */
@@ -102,6 +108,7 @@ function threadPages(view: ThreadView, fresh: FreshMarks): NotebookPage[] {
       id: fact.id,
       line: fact.line,
       related: fact.related.map((r) => r.line),
+      ...(fact.sketch === undefined ? {} : { sketch: fact.sketch }),
       fresh: fresh.facts.has(fact.id),
     })),
     ...view.rumors.map((rumor): NotebookEntry => ({

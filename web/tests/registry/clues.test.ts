@@ -224,4 +224,15 @@ describe('parseClues with something that is not a clue file', () => {
     expect(() => parse(lead)).toThrow(WorldDataError);
     expect(() => parse(action)).toThrow(WorldDataError);
   });
+
+  it('reads the sketch of a fact and rejects an empty one', () => {
+    const d = raw();
+    Object.assign(at(d.hechos, 1), { dibujo: 'mapa_cielo' });
+    const empty = raw();
+    Object.assign(at(empty.hechos, 0), { dibujo: ' ' });
+
+    expect(parse(d).facts.get('lab.existe_lugar_lento')?.sketch).toBe('mapa_cielo');
+    expect(parse(d).facts.get('deuda.palabra')?.sketch).toBeUndefined();
+    expect(() => parse(empty)).toThrow(WorldDataError);
+  });
 });

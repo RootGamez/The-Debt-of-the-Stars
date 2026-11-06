@@ -59,6 +59,8 @@ export interface Fact {
    * La enseña la página de deducción de la conclusión que lo necesita mientras falta.
    */
   lead: string | undefined;
+  /** Dibujo del cuaderno que se pega junto al hecho al saberlo (`dibujo`, ui/notebookSketches.ts). */
+  sketch: string | undefined;
 }
 
 /** Una lectura de una fuente; la profunda exige haber aprendido antes `requires`. */
@@ -199,6 +201,7 @@ function parseFacts(raw: unknown, threadIds: ReadonlySet<string>): Map<string, F
       links: ids(r.enlaces, `${id}.enlaces`),
       rumor: optionalText(r.rumor, `${id}.rumor`),
       lead: optionalText(r.pista, `${id}.pista`),
+      sketch: optionalText(r.dibujo, `${id}.dibujo`),
     });
   }
   return facts;

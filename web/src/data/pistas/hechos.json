@@ -76,7 +76,8 @@
     "hilos": ["H2"],
     "frase": "La deuda es de tiempo, no de energía: cada paso separa un poco más los dos relojes de una Puerta.",
     "rumor": "¿Qué se debía exactamente?",
-    "enlaces": ["deuda.relojes_se_separan", "deuda.coste_energia"]
+    "enlaces": ["deuda.relojes_se_separan", "deuda.coste_energia"],
+    "dibujo": "relojes_separan"
   },
   {
     "id": "deuda.uso_diario",
@@ -220,7 +221,8 @@
     "rumor": "¿Dónde está ese sitio, si lo que se ve no está donde parece?",
     "menciona": ["lab.correccion"],
     "enlaces": ["nudo.existe"],
-    "pista": "Alguien que miraba el cielo de oficio lo habría anotado; o una luz que solo entra un rato."
+    "pista": "Alguien que miraba el cielo de oficio lo habría anotado; o una luz que solo entra un rato.",
+    "dibujo": "mapa_cielo"
   },
   {
     "id": "lab.correccion",
@@ -234,7 +236,8 @@
     "id": "archivo.hora_ranura",
     "hilos": ["H5"],
     "frase": "A las cuatro, la luz de la Brasa entra por la ranura del Archivo.",
-    "enlaces": ["lab.imagen_desplazada"]
+    "enlaces": ["lab.imagen_desplazada"],
+    "dibujo": "ranura"
   },
   {
     "id": "nudo.existe",
@@ -281,7 +284,8 @@
     "hilos": ["H2", "H6"],
     "frase": "Un reloj que viaja se desfasa; los diarios de los gemelos enseñan a calcular cuánto.",
     "enlaces": ["contrapeso.reloj", "contrapeso.cuenta_sincronia"],
-    "pista": "Dos personas que contaron los mismos días en sitios distintos."
+    "pista": "Dos personas que contaron los mismos días en sitios distintos.",
+    "dibujo": "gemelos"
   },
   {
     "id": "contrapeso.medir_desfase",
@@ -310,7 +314,8 @@
     "hilos": ["H6"],
     "frase": "El núcleo de la máquina solo se abre durante el pulso.",
     "enlaces": ["contrapeso.lugar"],
-    "pista": "La máquina no siempre está abierta: alguien anotó cuándo late."
+    "pista": "La máquina no siempre está abierta: alguien anotó cuándo late.",
+    "dibujo": "pulso"
   },
   {
     "id": "contrapeso.terminado",
@@ -323,7 +328,8 @@
     "hilos": ["H7"],
     "frase": "Cada boca de una Puerta lleva su propio tiempo; por eso las cosas llegan de épocas distintas.",
     "enlaces": ["deuda.relojes_se_separan", "casa.fragmento_antiguo"],
-    "pista": "Cartas que contestan antes de tiempo, o una lista de mundos con sus horas."
+    "pista": "Cartas que contestan antes de tiempo, o una lista de mundos con sus horas.",
+    "dibujo": "bocas"
   },
   {
     "id": "casa.prueba_llama",
@@ -379,7 +385,8 @@
     "id": "casa.simbolo_partido",
     "hilos": ["H7"],
     "frase": "Un fragmento de casa lleva medio símbolo sin significado conocido.",
-    "enlaces": ["casa.simbolo_encaja"]
+    "enlaces": ["casa.simbolo_encaja"],
+    "dibujo": "medio_simbolo"
   },
   {
     "id": "casa.fragmentos_de_aqui",
@@ -391,7 +398,8 @@
     "id": "casa.simbolo_encaja",
     "hilos": ["H7"],
     "frase": "El otro medio símbolo sigue en una pared de Cicatriz: aquel fragmento salió de allí.",
-    "enlaces": ["casa.simbolo_partido", "casa.fragmentos_de_aqui"]
+    "enlaces": ["casa.simbolo_partido", "casa.fragmentos_de_aqui"],
+    "dibujo": "simbolo_entero"
   },
   {
     "id": "casa.fragmento_antiguo",
