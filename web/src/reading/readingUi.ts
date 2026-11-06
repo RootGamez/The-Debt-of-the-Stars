@@ -350,7 +350,9 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       registryPanel.open(prologuePages(options.prologue.tasks(), learned), focus);
     } else {
       const view = buildRegistryView(clues, reading.known);
-      registryPanel.open(notebookPages(view, worldPages(names, clues, reading.known), fresh));
+      registryPanel.open(
+        notebookPages(view, worldPages(names, clues, reading.known, reading.opened), fresh),
+      );
     }
     for (const id of [...reading.known, ...rumors]) inNotebook.add(id);
     for (const id of Object.keys(names)) namedInNotebook.add(id);

@@ -458,6 +458,10 @@ function start(): void {
   const reading = new ReadingSession(clues, session.savedFacts, (facts) =>
     session.saveFacts(facts),
   );
+  // Lo abierto en otras partidas: el cuaderno dice en cada mundo si queda algo por leer (plan de la llegada, C).
+  reading.restoreOpened(session.savedOpened, (opened) => {
+    session.saveOpened(opened);
+  });
   // En el Archivo de las Puertas: los planos del Contrapeso y las bocas de casa (cruzar una decide el final).
   const epilogue = createEpilogueRig({
     runtimes,

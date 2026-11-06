@@ -61,6 +61,7 @@ describe('loadSave', () => {
       endings: ['B'],
       worlds: { umbral: { name: 'Primera luz', loop: 2 } },
       tasks: [],
+      opened: [],
     });
 
     expect(loadSave(store).data).toEqual({
@@ -71,6 +72,7 @@ describe('loadSave', () => {
       endings: ['B'],
       worlds: { umbral: { name: 'Primera luz', loop: 2 } },
       tasks: [],
+      opened: [],
     });
   });
 
@@ -91,6 +93,7 @@ describe('loadSave', () => {
         endings: [],
         worlds: {},
         tasks: [],
+        opened: [],
       },
       readOnly: false,
     });
@@ -107,6 +110,7 @@ describe('loadSave', () => {
       endings: [],
       worlds: {},
       tasks: [],
+      opened: [],
     });
   });
 
@@ -233,6 +237,7 @@ describe('saveProgress (two tabs never lose facts)', () => {
     endings: [],
     worlds: {},
     tasks: [],
+    opened: [],
   });
 
   it('never forgets that the prologue was played, whichever tab saves last', () => {
@@ -395,7 +400,13 @@ describe('the named worlds (version 4)', () => {
     };
     store.setItem(SAVE_KEY, JSON.stringify(v3));
 
-    expect(loadSave(store).data).toEqual({ ...v3, version: SAVE_VERSION, worlds: {}, tasks: [] });
+    expect(loadSave(store).data).toEqual({
+      ...v3,
+      version: SAVE_VERSION,
+      worlds: {},
+      tasks: [],
+      opened: [],
+    });
   });
 
   it.each([
@@ -464,6 +475,7 @@ describe('the named worlds (version 4)', () => {
       facts: ['a.b'],
       worlds: { umbral: { name: 'Primera luz', loop: 4 } },
       tasks: [],
+      opened: [],
     });
     const newer = JSON.stringify({ version: SAVE_VERSION + 1, loopsCompleted: 3, facts: [] });
     const other = memoryStore({ [SAVE_KEY]: newer });
@@ -499,5 +511,28 @@ describe('the loop tasks in the save (version 5)', () => {
       const store = memoryStore({ [SAVE_KEY]: JSON.stringify({ ...freshSave(), tasks }) });
       expect(loadSave(store).warning).toBeDefined();
     }
+  });
+});
+
+describe('the opened sources in the save (version 5, milestone C)', () => {
+  it('reads a version 5 save from before them with nothing opened', () => {
+    const store = memoryStore({
+      [SAVE_KEY]: JSON.stringify({ ...freshSave(), opened: undefined }),
+    });
+    expect(loadSave(store)).toEqual({ data: freshSave(), readOnly: false });
+  });
+
+  it('keeps the sources opened by every tab', () => {
+    const store = memoryStore();
+    saveProgress(store, { ...freshSave(), opened: ['umbral.mural'] });
+    saveProgress(store, { ...freshSave(), opened: ['umbral.placa', 'umbral.mural'] });
+    expect(new Set(loadSave(store).data.opened)).toEqual(new Set(['umbral.mural', 'umbral.placa']));
+  });
+
+  it('throws away a save whose opened sources are not ids', () => {
+    const store = memoryStore({
+      [SAVE_KEY]: JSON.stringify({ ...freshSave(), opened: ['<b>'] }),
+    });
+    expect(loadSave(store).warning).toBeDefined();
   });
 });

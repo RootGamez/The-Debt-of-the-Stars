@@ -105,3 +105,29 @@ describe('the pages of the log', () => {
     expect(pages.find((page) => page.id === 'archivo')?.facts).toEqual([]);
   });
 });
+
+describe('the note of what is left to read (milestone C)', () => {
+  const log = withDiscovery({}, 'umbral', 'Umbral', 0);
+  const umbral = clues.sources.filter((s) => s.world === 'umbral').map((s) => s.id);
+
+  it('says something is left until every source of the world is open', () => {
+    const page = worldPages(log, clues, new Set(), new Set(umbral.slice(1))).find(
+      (p) => p.id === 'umbral',
+    );
+    expect(page?.note).toBe('Aún queda algo por leer aquí');
+    expect(page?.complete).toBe(false);
+  });
+
+  it('says it is all read once every source is open', () => {
+    const page = worldPages(log, clues, new Set(), new Set(umbral)).find((p) => p.id === 'umbral');
+    expect(page?.note).toBe('Aquí ya lo he leído todo');
+    expect(page?.complete).toBe(true);
+  });
+});
+
+describe('home in the log', () => {
+  it('has no note of what is left: there is no going back during the loop', () => {
+    const page = worldPages({}, clues, new Set(), new Set()).find((p) => p.id === 'hogar');
+    expect(page?.note).toBeUndefined();
+  });
+});

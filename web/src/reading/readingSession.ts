@@ -59,11 +59,25 @@ export class ReadingSession {
     this.facts = new Set([...initialFacts].filter((id) => clues.facts.has(id)));
   }
 
+  /** Lo abierto en otras partidas (se ignora lo que ya no existe) y a quién avisar al abrir algo nuevo. */
+  restoreOpened(ids: Iterable<string>, onNew?: (opened: string[]) => void): void {
+    for (const id of ids) if (this.clues.sourceById.has(id)) this.opened_.add(id);
+    this.onOpened = onNew;
+  }
+
+  private onOpened: ((opened: string[]) => void) | undefined;
+
+  private markOpened(sourceId: string): void {
+    if (this.opened_.has(sourceId)) return;
+    this.opened_.add(sourceId);
+    this.onOpened?.([...this.opened_]);
+  }
+
   get known(): KnownFacts {
     return this.facts;
   }
 
-  /** Las fuentes abiertas en esta sesión (las charlas sin hechos también cuentan: sirve para las tareas). */
+  /** Las fuentes abiertas alguna vez (las charlas sin hechos y los eventos presenciados también cuentan). */
   get opened(): ReadonlySet<string> {
     return this.opened_;
   }
@@ -100,7 +114,7 @@ export class ReadingSession {
       return null;
     if (source.reader) this.open_ = this.puzzle(source, source.reader);
     else this.open_ = source.recordedRate === undefined ? this.read(source) : this.listen(source);
-    this.opened_.add(sourceId);
+    this.markOpened(sourceId);
     return this.open_;
   }
 
@@ -173,6 +187,7 @@ export class ReadingSession {
     const source = this.clues.sourceById.get(sourceId);
     if (source?.kind !== 'evento' || !this.isAvailable(sourceId, activeEvents)) return [];
     const { newFacts } = readSource(source, this.facts);
+    this.markOpened(sourceId);
     this.learn(newFacts);
     return newFacts;
   }

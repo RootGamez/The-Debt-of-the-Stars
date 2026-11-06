@@ -793,6 +793,26 @@ body {
   font-size: 13px;
 }
 
+/* Lo que queda por leer en cada mundo (plan de la llegada, hito C): una nota a mano, ladeada. */
+.registry-world-note {
+  display: inline-block;
+  margin: 0 0 10px;
+  padding: 2px 8px;
+  color: var(--amber);
+  font-style: italic;
+  font-size: 14px;
+  border-bottom: 1px dashed currentColor;
+  transform: rotate(-1.5deg);
+}
+
+.registry-world-note-done {
+  color: var(--muted);
+}
+
+.registry-world-mark {
+  color: var(--muted);
+}
+
 .reader-noted-title,
 .recorder-noted-title {
   margin: 16px 0 4px;

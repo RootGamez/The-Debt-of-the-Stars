@@ -217,6 +217,14 @@ function pageContent(page: NotebookPage): HTMLElement[] {
       for (const world of page.worlds) {
         const item = node('li', 'registry-world-item', world.name);
         item.append(node('span', 'registry-world-page', ` · ${t('p.')} ${world.page}`));
+        // Una marca a mano: ✓ si ya se leyó todo allí; si no, un «…» de lo que queda.
+        if (world.complete !== undefined) {
+          const mark = node('span', 'registry-world-mark', world.complete ? ' ✓' : ' …');
+          mark.title = world.complete
+            ? t('Aquí ya lo he leído todo')
+            : t('Aún queda algo por leer aquí');
+          item.append(mark);
+        }
         list.append(item);
       }
       return [
@@ -235,6 +243,11 @@ function pageContent(page: NotebookPage): HTMLElement[] {
       if (page.part > 0) name.dataset['sigue'] = 'true';
       const parts: HTMLElement[] = page.part === 0 ? [worldPhoto(page.world), name] : [name];
       if (page.part === 0) parts.push(node('p', 'registry-count', worldMeta(page.world)));
+      if (page.part === 0 && page.world.note !== undefined) {
+        const note = node('p', 'registry-world-note', page.world.note);
+        note.classList.toggle('registry-world-note-done', page.world.complete === true);
+        parts.push(note);
+      }
       const list = node('ul', 'registry-facts');
       for (const fact of page.facts) list.append(node('li', 'registry-fact', fact.line));
       if (page.part === 0 && page.facts.length === 0) {

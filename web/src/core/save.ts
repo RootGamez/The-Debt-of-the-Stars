@@ -1,7 +1,7 @@
 // Guardado entre ciclos. Lo único que persiste es el conocimiento (CONTEXTO_HISTORIA.md §8): el número de
 // ciclos, la lista de hechos descubiertos (Fase 4), si ya se jugó el prólogo en casa (Fase 9, versión 2) y los
 // finales vistos (Fase 10, versión 3), los nombres que el jugador puso a cada mundo de su bitácora (versión 4) y las
-// tareas del bucle ya hechas (plan de la llegada, hito B, versión 5).
+// tareas del bucle ya hechas y las fuentes abiertas (plan de la llegada, hitos B y C, versión 5).
 // Lo leído de localStorage se trata como dato externo: se valida y, si está dañado o manipulado,
 // se descarta y se empieza de cero con un aviso. Sin almacenamiento (modo privado) se juega igual.
 
@@ -16,6 +16,8 @@ const WORLD_ID = /^[a-z0-9_-]{1,32}$/;
 /** Ids de tareas ("nave_umbral"…) y cuántas puede haber como mucho. */
 const TASK_ID = /^[a-z0-9_]{1,32}$/;
 export const MAX_TASKS = 64;
+/** Cuántas fuentes abiertas se guardan como mucho (los ids son como los de los hechos). */
+export const MAX_OPENED = 2000;
 /** Los nombres de mundo se escriben a mano: sin caracteres de control (U+0000–U+001F y U+007F). */
 export function isControlChar(char: string): boolean {
   const code = char.charCodeAt(0);
@@ -40,6 +42,8 @@ export interface SaveData {
   worlds: Readonly<Record<string, NamedWorld>>;
   /** Las tareas del bucle ya hechas (game/tasks.ts decide cuáles existen). */
   tasks: readonly string[];
+  /** Las fuentes abiertas alguna vez (lo que queda por leer en cada mundo). */
+  opened: readonly string[];
 }
 
 export interface NamedWorld {
@@ -70,6 +74,7 @@ export function freshSave(): SaveData {
     endings: [],
     worlds: {},
     tasks: [],
+    opened: [],
   };
 }
 
@@ -135,17 +140,25 @@ function tasksOf(version: unknown, tasks: unknown): string[] | null {
   return [...new Set(tasks)];
 }
 
+/** Antes de la versión 5, o una 5 de antes del hito C: nada abierto. */
+function openedOf(version: unknown, opened: unknown): string[] | null {
+  if (version !== SAVE_VERSION || opened === undefined) return [];
+  if (!Array.isArray(opened) || opened.length > MAX_OPENED) return null;
+  if (!opened.every((id): id is string => typeof id === 'string' && FACT_ID.test(id))) return null;
+  return [...new Set(opened)];
+}
+
 function validate(raw: unknown): SaveData | null {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
-  const { version, loopsCompleted, facts, prologueDone, endings, worlds, tasks } = raw as Record<
-    string,
-    unknown
-  >;
+  const { version, loopsCompleted, facts, prologueDone, endings, worlds, tasks, opened } =
+    raw as Record<string, unknown>;
   const prologue = prologueOf(version, prologueDone);
   const seen = endingsOf(version, endings);
   const named = worldsOf(version, worlds);
   const done = tasksOf(version, tasks);
-  if (prologue === null || seen === null || named === null || done === null) return null;
+  const read = openedOf(version, opened);
+  if (prologue === null || seen === null || named === null || done === null || read === null)
+    return null;
   if (!Number.isInteger(loopsCompleted)) return null;
   const loops = loopsCompleted as number;
   if (loops < 0 || loops > MAX_LOOPS) return null;
@@ -159,6 +172,7 @@ function validate(raw: unknown): SaveData | null {
     endings: seen,
     worlds: named,
     tasks: done,
+    opened: read,
   };
 }
 
@@ -237,6 +251,7 @@ export function saveProgress(store: KeyValueStore | null, data: SaveData): boole
   const endings = [...new Set([...stored.data.endings, ...data.endings])];
   const worlds = { ...stored.data.worlds, ...data.worlds };
   const tasks = [...new Set([...stored.data.tasks, ...data.tasks])].slice(0, MAX_TASKS);
+  const opened = [...new Set([...data.opened, ...stored.data.opened])].slice(0, MAX_OPENED);
   return writeSave(store, {
     ...data,
     loopsCompleted,
@@ -245,6 +260,7 @@ export function saveProgress(store: KeyValueStore | null, data: SaveData): boole
     endings,
     worlds,
     tasks,
+    opened,
   });
 }
 
@@ -291,6 +307,16 @@ export function markTasksDone(
 ): boolean {
   if (loaded.readOnly) return false;
   return saveProgress(store, { ...loaded.data, tasks });
+}
+
+/** Al abrir fuentes nuevas: las apunta en lo guardado, con lo demás que ya había. false si no se pudo. */
+export function markSourcesOpened(
+  store: KeyValueStore | null,
+  loaded: LoadResult,
+  opened: readonly string[],
+): boolean {
+  if (loaded.readOnly) return false;
+  return saveProgress(store, { ...loaded.data, opened });
 }
 
 /**

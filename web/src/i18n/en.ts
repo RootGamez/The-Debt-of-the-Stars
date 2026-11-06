@@ -419,4 +419,7 @@ export const EN: Readonly<Record<string, string>> = {
     'While flying, T picks another world as your target; the orbit map is on the ship table. Name each world when you arrive',
   'Pilotando, elige otro mundo como objetivo; el mapa de órbitas está en la mesa de la nave. Al llegar a cada mundo, ponle nombre':
     'While flying, pick another world as your target; the orbit map is on the ship table. Name each world when you arrive',
+  // Lo que queda por leer en cada mundo (plan de la llegada, hito C).
+  'Aún queda algo por leer aquí': 'There is still something to read here',
+  'Aquí ya lo he leído todo': "I've read everything here",
 };

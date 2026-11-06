@@ -15,6 +15,7 @@ import {
   isSaveErased,
   loadSave,
   markPrologueDone,
+  markSourcesOpened,
   markWorldNamed,
   saveProgress,
   SAVE_VERSION,
@@ -68,6 +69,9 @@ export interface LoopSession {
   saveWorld(world: string, name: string): boolean;
   /** Guarda los hechos (fusionados con lo guardado); false si no se pudo. */
   saveFacts(facts: readonly string[]): boolean;
+  /** Las fuentes abiertas en otras partidas, y guardar las de ahora (fusionadas); false si no se pudo. */
+  readonly savedOpened: readonly string[];
+  saveOpened(opened: readonly string[]): boolean;
   /** Ids de los eventos en curso, recalculados una vez por fotograma. */
   readonly activeEventIds: readonly string[];
   /** El progreso se está guardando (falso en modo privado o con una partida más nueva). */
@@ -182,9 +186,14 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
           endings: loaded.data.endings,
           worlds: {},
           tasks: [],
+          opened: [],
         });
       factsFailed = !ok;
       return ok;
+    },
+    savedOpened: loaded.data.opened,
+    saveOpened(opened) {
+      return markSourcesOpened(store, loaded, opened);
     },
     savedWorlds: loaded.data.worlds,
     saveWorld(world, name) {

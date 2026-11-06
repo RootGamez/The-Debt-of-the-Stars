@@ -38,7 +38,10 @@ export type NotebookPage =
       /** 0 = la primera página de la pregunta; 1, 2… = las que la continúan. */
       part: number;
     }
-  | { kind: 'worlds'; worlds: readonly { id: string; name: string; page: number }[] }
+  | {
+      kind: 'worlds';
+      worlds: readonly { id: string; name: string; page: number; complete?: boolean }[];
+    }
   | {
       kind: 'world';
       world: WorldPage;
@@ -144,10 +147,15 @@ export function notebookPages(
   ];
   const indexAt = pages.length;
   const worldPagesList = worlds.map((world) => worldPagesOf(world, fresh));
-  const index: { id: string; name: string; page: number }[] = [];
+  const index: { id: string; name: string; page: number; complete?: boolean }[] = [];
   let next = indexAt + 1;
   for (const [i, world] of worlds.entries()) {
-    index.push({ id: world.id, name: world.name, page: next });
+    index.push({
+      id: world.id,
+      name: world.name,
+      page: next,
+      ...(world.complete !== undefined && { complete: world.complete }),
+    });
     next += worldPagesList[i]?.length ?? 0;
   }
   pages.push({ kind: 'worlds', worlds: index }, ...worldPagesList.flat());

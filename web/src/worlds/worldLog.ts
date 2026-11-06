@@ -4,6 +4,7 @@
 // solo se usa en el cuaderno y en la nave: las placas y grabaciones de los Ausentes siguen diciendo «Umbral».
 import { MAX_WORLD_NAME, isControlChar, type NamedWorld } from '../core/save';
 import type { Clues } from '../registry/clues';
+import { progressNote, worldProgress } from '../registry/worldProgress';
 import { worldTitle } from './worldSelection';
 import { t } from '../i18n';
 
@@ -95,6 +96,10 @@ export interface WorldPage {
   loop: number | undefined;
   /** Lo anotado allí, en el orden de los datos. */
   facts: readonly { id: string; line: string }[];
+  /** La nota a mano: si queda algo por leer allí (sin ella, allí no hay nada que leer). */
+  note?: string;
+  /** Ya se ha leído todo lo de allí. */
+  complete?: boolean;
 }
 
 /** De qué mundo es cada hecho: el de la primera fuente que lo da. */
@@ -119,18 +124,28 @@ export function worldPages(
   names: WorldNames,
   clues: Clues,
   known: ReadonlySet<string>,
+  opened: ReadonlySet<string> = new Set(),
 ): WorldPage[] {
   const worlds = worldOfFacts(clues);
+  const progress = worldProgress(clues, opened);
   return WORLD_LOG.filter((world) => PRENAMED.has(world.id) || names[world.id] !== undefined).map(
-    (world) => ({
-      id: world.id,
-      name: displayName(names, world.id),
-      official: world.name,
-      where: world.where,
-      loop: names[world.id]?.loop,
-      facts: [...worlds]
-        .filter(([fact, owner]) => owner === world.id && known.has(fact))
-        .map(([fact]) => ({ id: fact, line: clues.facts.get(fact)?.line ?? fact })),
-    }),
+    (world): WorldPage => {
+      const page: WorldPage = {
+        id: world.id,
+        name: displayName(names, world.id),
+        official: world.name,
+        where: world.where,
+        loop: names[world.id]?.loop,
+        facts: [...worlds]
+          .filter(([fact, owner]) => owner === world.id && known.has(fact))
+          .map(([fact]) => ({ id: fact, line: clues.facts.get(fact)?.line ?? fact })),
+      };
+      // Casa no lleva nota: en el bucle no se vuelve, y quedaría para siempre «aún queda algo».
+      if (PRENAMED.has(world.id)) return page;
+      const here = progress.get(world.id);
+      const note = progressNote(here);
+      if (!here || note === undefined) return page;
+      return { ...page, note, complete: here.opened >= here.total };
+    },
   );
 }
