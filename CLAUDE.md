@@ -1,7 +1,7 @@
 # CLAUDE.md — Juego de bucle de tiempo
 
 Juego 3D low poly que corre gratis en el navegador (Three.js + TypeScript + Vite). Los mundos se modelaron en Blender
-y desde la Fase 11 se migran a código (Blender en pausa).
+y desde la Fase 11 están todos hechos por código (Blender en pausa; ya no hay `.glb` ni `.blend`).
 
 ## Antes de trabajar
 1. Carga la skill `juego-bucle-tiempo` (y `tiny-planets-blender` si se modela).
@@ -21,9 +21,8 @@ y desde la Fase 11 se migran a código (Blender en pausa).
 ```
 CONTEXTO_*.md         historia, planetas y grafo de pistas: fuente de verdad (versionada)
 docs/                 planes (local, ignorada)
-blender/              <mundo>.blend, marcas/<mundo>.json, scripts/
+blender/              marcas/<mundo>.json y scripts/ de antes (solo como referencia del diseño)
 web/                  proyecto Vite + TypeScript + Three.js
-  public/models/      .glb exportados
   src/                core, physics, worlds, registry, reading, ui, data
 ```
 
@@ -39,7 +38,6 @@ web/                  proyecto Vite + TypeScript + Three.js
 | `npm run format` | Prettier |
 | `npm run check` | Todo lo anterior (tipos, lint, formato, cobertura, build) |
 | `npm run e2e` | Pruebas de extremo a extremo con Playwright (Chromium) |
-| `npm run modelos` | Exporta cada `blender/*.blend` a `public/models/*.glb` y lo comprime (`-- <mundo>` para uno) |
 
 En el navegador: `?mundo=<id>` carga otro mundo base y `?debug` muestra el panel F3 y expone
 `window.__juego.snapshot()` (lo usan las pruebas de Playwright). Solo con `?debug`: `&ciclo=<s>`
@@ -48,10 +46,10 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 ## Leer y el Registro (Fase 4)
 - Las pistas están en `web/src/data/pistas/` (un archivo por mundo + `hilos.json`, `hechos.json`, `conclusiones.json`); se validan al cargar y las 7 reglas de `CONTEXTO_PISTAS.md` se comprueban en `npm test`.
 - Los textos de Umbral son **borradores provisionales** (`"borrador": true`); el resto son esqueleto ("[texto pendiente]").
-- Una fuente = marca `INT_` en Blender con `clue_id` y `kind` (texto, grabacion, objeto, observacion) que coincide con el `id` de la fuente; los eventos son marcas `TRIG_` con `event`.
+- Una fuente = marca `INT_` del mundo (en su constructor de `worlds/procedural/`) con `clue_id` y `kind` (texto, grabacion, objeto, observacion) que coincide con el `id` de la fuente; los eventos son marcas `TRIG_` con `event`.
 - Controles: **E** lee (o botón Leer), **R** o **Tab** abren el Registro, **Esc** cierra. Mientras se lee, el tiempo del ciclo se detiene.
 - Con `?debug`: `window.__juego.teleportTo('umbral.placa')` coloca al jugador frente a una fuente.
-- Al añadir un mundo con fuentes: añade su `.glb` a `BUILT_WORLDS` en `web/tests/registry/umbralMarkers.test.ts` (regla 5).
+- Al añadir un mundo con fuentes: añade su id a `BUILT_WORLDS` en `web/tests/registry/umbralMarkers.test.ts` (regla 5).
 
 ## El sistema y la nave (Fase 5)
 - Los mundos orbitan en rieles (`web/src/data/sistema.json`); todo se dibuja relativo al mundo donde estás (`render/systemScene.ts`).
@@ -67,13 +65,10 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - La cronología (eventos, absorción, curvas de reloj) está en `web/src/data/cronologia.json`: se ajusta ahí, sin tocar código.
 - El guardado (`bucle-tiempo:partida` en localStorage) solo guarda ciclos y hechos; se valida al leerlo.
 
-## Blender
-- Blender 5.2: `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` (o variable `BLENDER_PATH`).
-- Base nueva de un mundo (sobrescribe el `.blend`):
-  `blender -b --factory-startup --python blender/scripts/generar_mundo.py -- <mundo>`
-- 1 unidad = 1 metro. Marcas: `COL_`, `INT_<id>`, `SPAWN_<nombre>`, `TRIG_<nombre>`, `PARK_`, `PASO_` (anillo de una Puerta plegada, con `destino`); objetos `EVT_` (solo durante un evento) y `ANIM_` (giran); las propiedades viajan como `userData`.
-- Cada mundo se viste con `blender/scripts/arte_<mundo>.py` sobre su base (reproducible, sin tocar el `.blend` a mano).
-- Mundos huecos (el Nudo, mundo `laboratorio`): `inner_radius` en la raíz; dentro la gravedad empuja hacia fuera. En `blender/marcas/laboratorio.json`, `"dentro": true` pone la marca en la cara interior; `"rumbo"` la orienta.
+## Marcas de los mundos
+- 1 unidad = 1 metro, y se diseña en el marco de Blender (Z arriba; la raíz se gira −90° en X). Marcas: `COL_`, `INT_<id>`, `SPAWN_<nombre>`, `TRIG_<nombre>`, `PARK_`, `PASO_` (anillo de una Puerta plegada, con `destino`); objetos `EVT_` (solo durante un evento) y `ANIM_` (giran sobre su Y local); las propiedades van en `userData`.
+- Mundos huecos (el Nudo, mundo `laboratorio`): `inner_radius` en la raíz; dentro la gravedad empuja hacia fuera.
+- Blender está en pausa y ya no hay `.blend` (se pueden recuperar de git). `blender/scripts/` y `blender/marcas/` se quedan como referencia del diseño original, que los constructores citan.
 
 ## Relatividad jugable (Fase 7)
 - Grabaciones: las fuentes `grabacion` llevan `reloj` (ritmo con que se grabaron) y se entienden con la rueda de velocidad (velocidad × reloj ≈ 1). La M silencia el juego.
@@ -84,13 +79,13 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 ## Publicación (Cloudflare)
 - Está en https://bucle-de-tiempo.anthonygamez2858.workers.dev (cuenta de Anthony, Workers con assets estáticos, sin script: `web/wrangler.jsonc`).
 - `npm run deploy` (en `web/`) construye y sube `dist/`; `npm run deploy:dry` solo comprueba. Hace falta haber entrado con `npx wrangler login`.
-- Los modelos `.glb` (5,7 MB) van dentro de `dist/models/`: el límite por archivo es de 25 MiB, así que no se usa R2. Si algún día los modelos pasan de unos 100 MB en total, sí convendría un bucket.
-- `web/public/_headers` pone la caché (`/assets/*` inmutable, `/models/*` revalidando) y `web/public/.assetsignore` deja fuera los `.map`.
+- Los mundos se construyen en el navegador: `dist/` solo lleva el código y las fuentes de letra (no hay modelos que subir).
+- `web/public/_headers` pone la caché (`/assets/*` inmutable) y `web/public/.assetsignore` deja fuera los `.map`.
 
 ## Mundos por código (Fase 11)
-- Blender está en pausa: los mundos se migran a TypeScript en `web/src/worlds/procedural/` (plan: `docs/plan-fase-11-modelado-por-codigo.md`).
+- Blender está en pausa: todos los mundos son TypeScript en `web/src/worlds/procedural/` (plan: `docs/plan-fase-11-modelado-por-codigo.md`).
 - `kit.ts` (primitivas, marcos lat/lon, piezas con colisión, terreno, dispersión, luz de cielo y bruma), `noise.ts`, `wind.ts` (polvo).
-- Un mundo por código cumple el mismo contrato que su `.glb` (raíz con datos, `COL_`, `INT_`, `SPAWN_`, `PARK_`, `TRIG_`, `EVT_`); `loadWorld` lo usa si existe en `procedural/index.ts` y si no descarga el `.glb`.
+- Un mundo por código cumple el contrato que tenían los `.glb` (raíz con datos, `COL_`, `INT_`, `SPAWN_`, `PARK_`, `TRIG_`, `EVT_`); se registra en `procedural/index.ts` y `loadWorld` lo construye (sin descargar nada; un id sin constructor es un error).
 - Umbral ya es por código (`umbral.ts`, lugares nuevos en `umbralLandmarks.ts`, colores en `umbralPalette.ts`) y tiene aire (`data/atmospheres.ts`).
 - El Archivo es por código y es de agua (`archivo.ts`, `archivoGallery.ts`, medidas en `archivoShape.ts`). La raíz lleva `sea_level`, `dry_ring_major` y `dry_ring_minor`: el mar es una esfera y el tubo de la Galería, un toro seco. La única entrada es la esclusa bajo la tercera torre.
 - El Taller es por código y es un gigante de gas (`taller.ts`, medidas en `tallerShape.ts`): nubes sin suelo (`render/gasGiant.ts`, reutilizable) y cinco islas fijas encima. La raíz lleva `gas_lethal_radius` y `gas_safe_radius`: bajo el primero se muere (`gas`, `physics/gas.ts`) salvo dentro del segundo (la Sala del Centro). Las colisiones COL_ con `event` solo existen durante ese evento (`physics/eventColliders.ts`, los puentes de las 7:00). Un PASO_ con `cerradura` solo deja pasar si el juego lo abre (`game/teleporter.ts`). En un mundo que gira, la luz de cielo sigue a la Brasa con `followSun` (`procedural/sun.ts`).
@@ -100,6 +95,7 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - `rampMatrix` da una matriz local al marco del sitio: multiplícala por `f.base`. `snapToGround` levanta en vertical (no por la normal) para no atascarse en la cima de una rampa.
 - Cicatriz es por código y es hueca (`cicatriz.ts`; medidas y mordidas en `cicatrizShape.ts`; cáscaras en `cicatrizCrust.ts`; la Sala del Motor alrededor del centro en `cicatrizCore.ts`; fuera `cicatrizSurface.ts`, dentro `cicatrizInterior.ts`, anillo `cicatrizRing.ts`). La raíz lleva `inner_radius` 60, `cavity_limit` 61 (la gravedad cambia de lado justo bajo la cara interior) y `cavity_tide: nucleo` (marea del micro agujero, `coreTide`). Los cuencos atraviesan la cáscara: la raíz lleva `cavity_holes` (eje y radio angular de cada ojo); el personaje recuerda de qué lado está y, dentro de un ojo, la gravedad se tuerce hacia la cara interior junto al borde, así que quien cae por él aterriza de pie al otro lado (`physics/cavityThroat.ts`). Los anillos de los ojos no chocan y no hay pretiles: nada atrapa en un cuenco. Las Puertas plegadas `PASO_Pozo`↔`PASO_Fondo` y `PASO_Eje`↔`PASO_Sala` unen fuera, dentro y la máquina.
 - El Laboratorio (dentro del Nudo) es por código (`laboratorio.ts`; zonas y senderos en `laboratorioShape.ts`, piezas en `laboratorioKit.ts`, salas en `laboratorioRooms.ts` y `laboratorioLife.ts`). La cara interior es un tablero de ajedrez en espiral hecho en el shader (`laboratorioFloor.ts`, `boardCell` es el mismo cálculo en TS). El suelo es llano bajo cada zona y a lo largo de cada sendero: al añadir una sala, añádela a `INNER_SITES` y únela con `PATHS`.
+- El Archivo de las Puertas es por código (`puertas.ts`; sitios y senderos en `puertasShape.ts`, piezas y la boca de pie en `puertasKit.ts`, las bocas de casa en `puertasHome.ts`, muro, ofrendas y primera Puerta en `puertasLore.ts`). Los anillos de luz del suelo son del shader (`puertasFloor.ts`; `ripplePhase` es el mismo cálculo). `puertas_Planos` va suelto (el epílogo lo esconde) y cada `puertas_VistaCasa_k` lleva su propio color. El Contrapeso también es por código (`procedural/contrapeso.ts`, `buildCounterweight`). Desde entonces se borraron los `.glb`, los `.blend` y `npm run modelos`.
 - Detalle de cerca (`render/nearDetail.ts`): `userData.near_only` solo se dibuja estando en el marco de su mundo (lo de dentro de Cicatriz); `userData.far_hidden`, en su marco o a menos de 8 radios (estructuras de fuera, rocas del anillo).
 - Las primitivas de `kit.ts` (`box()`, `cylinder()`…) están en caché y se comparten: clónalas antes de `applyMatrix4`.
 - Para mirar un mundo de cerca sin jugar, una página temporal en `web/` que llame a `buildUmbral()` sirve (no la dejes en el repo).

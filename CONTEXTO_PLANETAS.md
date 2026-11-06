@@ -330,6 +330,13 @@ y fuera del tiempo**: sin ciclo, sin reloj doble y sin nave.
 | **El Banco** | Como el del Laboratorio, con los planos del Contrapeso enrollados encima: se cogen y se dejan |
 | **Arte** | Unos 22.500 triángulos; cada vista de las bocas de casa tiene su propio brillo (el resto de luces del mundo, uno solo) |
 
+🟡 **Propuesta de la Fase 11 (por código):** el suelo **enseña el tiempo**: desde las bocas de casa salen anillos de luz
+que recorren el planetoide entero, despacio, uno tras otro, cruzados por meridianos tenues. Las bocas del cielo
+**giran** alrededor en tres corros, y más allá, el **horizonte**, un aro de luz enorme. Senderos de losas con un hilo
+de luz unen los sitios. Dos sitios nuevos: **lo que dejaron** otros viajeros (un casco de tres visores, una
+herramienta, piedras apiladas, un cuaderno, velas) y **la primera Puerta** de los Ausentes, partida en dos, con su fecha
+tallada. El Contrapeso también es ya por código, con el mismo aspecto.
+
 ---
 
 ## 11. Orden sugerido de exploración (🟡, no obligatorio)

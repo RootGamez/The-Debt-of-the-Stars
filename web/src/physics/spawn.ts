@@ -47,7 +47,7 @@ export function spawnOnGround(
   const distance = world.raycast(origin, down, PROBE_DEPTH);
   if (distance === null) {
     throw new WorldDataError(
-      `${marker.name}: no hay suelo en ${PROBE_DEPTH} m bajo la marca (revisa blender/marcas)`,
+      `${marker.name}: no hay suelo en ${PROBE_DEPTH} m bajo la marca (revisa su constructor en worlds/procedural)`,
     );
   }
   return { feet: origin.addScaledVector(down, distance), body };

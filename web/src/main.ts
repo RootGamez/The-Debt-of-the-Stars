@@ -183,7 +183,7 @@ function wantsMenu(): boolean {
 const hasProgress = (data: Readonly<SaveData>): boolean =>
   data.loopsCompleted > 0 || data.prologueDone || data.facts.length > 0;
 
-async function start(): Promise<void> {
+function start(): void {
   const display = setUpDisplay();
   if (wantsMenu()) {
     activeMenu = createMainMenu({
@@ -220,7 +220,7 @@ async function start(): Promise<void> {
   const homecomingEnding = endingFromQuery(window.location.search);
   const home = homecomingEnding ? homeLook(homecomingEnding) : undefined;
   // Una partida de una versión más nueva (que no se toca) ya pasó por casa: se empieza en Umbral.
-  const { spec, startWorld, runtimes } = await loadSystem(
+  const { spec, startWorld, runtimes } = loadSystem(
     firstWorld(window.location.search, saved.data.prologueDone || saved.readOnly),
     home?.without,
   );
@@ -271,7 +271,7 @@ async function start(): Promise<void> {
   const game: { ui?: ReadingUi; flight?: ShipFlight } = {};
   // El Contrapeso espera en su Banco del Laboratorio; se coge, se lleva (su reloj va al tablero) y se instala en
   // la Sala del Motor de Cicatriz, en el núcleo de la máquina, donde nace el agujero negro.
-  const counterweight = await createCounterweightRig({
+  const counterweight = createCounterweightRig({
     scene,
     runtimes,
     chronology,
@@ -1092,7 +1092,9 @@ function setupCamera(camera: PerspectiveCamera): void {
   camera.updateProjectionMatrix();
 }
 
-start().catch((error: unknown) => {
+try {
+  start();
+} catch (error: unknown) {
   console.error(error);
   // Que se lea el aviso, sin el blanco del gusano.
   endArrivingPaint();
@@ -1101,4 +1103,4 @@ start().catch((error: unknown) => {
   const message = t('No se pudo cargar el mundo. Revisa la consola.');
   if (status) status.textContent = message;
   activeMenu?.fail(message);
-});
+}

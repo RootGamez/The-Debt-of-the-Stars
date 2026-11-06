@@ -1,4 +1,4 @@
-// El Contrapeso a la vista (Fase 10): el modelo de Blender (public/models/contrapeso.glb), sobre su Banco del
+// El Contrapeso a la vista (Fase 10): el modelo por código (worlds/procedural/contrapeso.ts), sobre su Banco del
 // Laboratorio, en tus brazos (abajo en la vista), sobre la mesa de carga de la nave mientras pilotas, en la cuna de la
 // Sala del Motor y, con el pulso, subiendo al núcleo. Sus tres anillos giran siempre: es un reloj. La lógica de dónde
 // está vive en game/counterweight.ts.
@@ -11,9 +11,6 @@ import {
   type Object3D,
   type Scene,
 } from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
-import { WorldDataError } from '../worlds/markers';
 import { blendPose, ease, placeAt, type Anchor } from './poseTween';
 
 export interface CounterweightModel {
@@ -34,9 +31,6 @@ export interface CounterweightView {
   dispose(): void;
 }
 
-const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-const RING_PREFIX = 'contrapeso_Anillo';
-
 /**
  * En brazos: abajo y delante de los ojos (ejes de la cámara), más pequeño y algo inclinado hacia ti; por encima
  * del reloj del tablero y sin tapar el centro de la vista.
@@ -48,37 +42,6 @@ const HELD_TILT = new Quaternion().setFromEuler(new Euler(0.12, 0, 0));
 const STOWED_SCALE = HELD_SCALE;
 /** Lo que tarda en subir de la cuna al núcleo: lo que dura el pulso (cronologia.json). */
 export const RISE_SECONDS = 6;
-
-export function counterweightModelUrl(): string {
-  return `${import.meta.env.BASE_URL}models/contrapeso.glb`;
-}
-
-export async function parseCounterweightModel(data: ArrayBuffer): Promise<CounterweightModel> {
-  const gltf = await loader.parseAsync(data, '');
-  const object = gltf.scene;
-  object.name = 'Contrapeso';
-  const rings: CounterweightModel['rings'] = [];
-  object.traverse((child) => {
-    if (!child.name.startsWith(RING_PREFIX)) return;
-    const spin: unknown = child.userData.spin;
-    if (typeof spin !== 'number' || !Number.isFinite(spin)) {
-      throw new WorldDataError(`contrapeso.glb: ${child.name} necesita "spin" (rad/s)`);
-    }
-    rings.push({ object: child, spin });
-  });
-  if (rings.length === 0) throw new WorldDataError('contrapeso.glb: faltan los anillos');
-  return { object, rings };
-}
-
-export async function loadCounterweightModel(): Promise<CounterweightModel> {
-  const url = counterweightModelUrl();
-  const response = await fetch(url);
-  const type = response.headers.get('content-type') ?? '';
-  if (!response.ok || type.includes('text/html')) {
-    throw new WorldDataError(`No se pudo cargar el Contrapeso: ${url} (${response.status})`);
-  }
-  return parseCounterweightModel(await response.arrayBuffer());
-}
 
 export function createCounterweightView(
   model: CounterweightModel,

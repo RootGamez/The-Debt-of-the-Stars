@@ -1,4 +1,4 @@
-// El sistema real (sistema.json + los .glb) cumple lo que el diseño espera, sea cual sea la fase de las órbitas.
+// El sistema real (sistema.json + los mundos por código) cumple lo que el diseño espera, sea cual sea la fase de las órbitas.
 import { Vector3 } from 'three';
 import { describe, expect, it } from 'vitest';
 import systemData from '../../src/data/sistema.json';

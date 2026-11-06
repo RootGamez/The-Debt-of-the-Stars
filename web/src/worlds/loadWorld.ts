@@ -1,8 +1,6 @@
-// Carga un mundo y lee sus datos y marcas: construido por código (Fase 11, `procedural/`) o, mientras no se
-// migre, desde el glTF exportado de Blender. Las dos vías dan la misma forma de escena.
+// Carga un mundo y lee sus datos y marcas. Desde la Fase 11 todos se construyen por código (`procedural/`), con la
+// misma forma de escena que tenían los .glb exportados de Blender: ya no se descarga ningún modelo.
 import { Points, type Group, type Material, type Object3D } from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import {
   collectMarkers,
   isMesh,
@@ -19,38 +17,18 @@ export interface LoadedWorld {
   markers: WorldMarkers;
 }
 
-const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
-
-export function worldUrl(worldId: string): string {
-  return `${import.meta.env.BASE_URL}models/${worldId}.glb`;
-}
-
-/** Interpreta un .glb ya descargado (separado de la red para poder probarlo). */
-export async function parseWorld(data: ArrayBuffer, worldId: string): Promise<LoadedWorld> {
-  const gltf = await loader.parseAsync(data, '');
-  const scene = gltf.scene;
-  scene.updateMatrixWorld(true);
-  return { scene, info: readWorldInfo(scene, worldId), markers: collectMarkers(scene) };
-}
-
-/** El mundo construido por código, o `undefined` si ese mundo aún llega como .glb. */
+/** El mundo construido por código, o `undefined` si no hay constructor para ese id. */
 export function buildWorld(worldId: string): LoadedWorld | undefined {
   const scene = buildProceduralScene(worldId);
   if (!scene) return undefined;
   return { scene, info: readWorldInfo(scene, worldId), markers: collectMarkers(scene) };
 }
 
-export async function loadWorld(worldId: string): Promise<LoadedWorld> {
+/** El mundo `worldId`, construido por código; falla si no existe. */
+export function loadWorld(worldId: string): LoadedWorld {
   const built = buildWorld(worldId);
-  if (built) return built;
-  const url = worldUrl(worldId);
-  const response = await fetch(url);
-  // Vite devuelve index.html con 200 si el archivo no existe: comprobamos también el tipo.
-  const type = response.headers.get('content-type') ?? '';
-  if (!response.ok || type.includes('text/html')) {
-    throw new WorldDataError(`No se encontró el modelo del mundo: ${url} (${response.status})`);
-  }
-  return parseWorld(await response.arrayBuffer(), worldId);
+  if (!built) throw new WorldDataError(`No hay ningún mundo llamado «${worldId}»`);
+  return built;
 }
 
 function disposeMaterial(material: Material): void {

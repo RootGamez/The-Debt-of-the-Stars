@@ -24,15 +24,10 @@ export function systemOf(world: string): SystemSpec | undefined {
     .find((system) => system.bodyOf(world));
 }
 
-export async function loadSystem(
-  startWorld: string,
-  without: readonly string[] = [],
-): Promise<LoadedSystem> {
+export function loadSystem(startWorld: string, without: readonly string[] = []): LoadedSystem {
   const spec = systemOf(startWorld);
   const ids = spec ? spec.bodies.map((body) => body.world) : [startWorld];
-  const worlds = (await Promise.all(ids.map((id) => loadWorld(id)))).map((world) =>
-    leaveOut(world, without),
-  );
+  const worlds = ids.map((id) => leaveOut(loadWorld(id), without));
   const runtimes = new Map(worlds.map((world) => [world.info.id, createWorldRuntime(world)]));
   return { spec, startWorld, runtimes };
 }

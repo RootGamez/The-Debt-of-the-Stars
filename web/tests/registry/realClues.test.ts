@@ -39,7 +39,7 @@ describe('the real clue data', () => {
     expect(
       ambient.every(
         (s) =>
-          ['hogar', 'observatorio', 'laboratorio'].includes(s.world) &&
+          ['hogar', 'observatorio', 'laboratorio', 'puertas'].includes(s.world) &&
           s.surface.facts.length === 0 &&
           !s.deep,
       ),
@@ -100,6 +100,7 @@ describe('the real clue data', () => {
       s.world === 'luna' ||
       s.world === 'observatorio' ||
       s.world === 'laboratorio' ||
+      s.world === 'puertas' ||
       s.kind === 'grabacion' ||
       CICATRIZ_DRAFTS.includes(s.id);
     const readable = clues.sources.filter(drafted);

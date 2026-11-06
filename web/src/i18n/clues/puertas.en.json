@@ -1,5 +1,52 @@
 {
-  "puertas.rastros": { "titulo": "The wall of traces" },
-  "puertas.bocas": { "titulo": "The mouths of home" },
-  "puertas.planos": { "titulo": "The Counterweight plans" }
+  "puertas.rastros": {
+    "titulo": "The wall of traces",
+    "superficial": [
+      "A curved wall, facing whoever arrives. Six rows of signs, each in a different script: dots, dashes, wedges, rings, hooks, diamonds. Names, perhaps. Or dates.",
+      "The last row is smooth. No one has written on it yet."
+    ],
+    "profunda": [
+      "You look for the marks of the Absent among the rows and find them: the names of the Council, of those who crossed before the silence.",
+      "The three from the Laboratory are not there. They never crossed: they stayed behind, finishing, while years went by outside."
+    ]
+  },
+  "puertas.bocas": {
+    "titulo": "The mouths of home",
+    "superficial": [
+      "Four sandstone mouths in an arc, like the ones at home. Through each one you can see Home: the Hall of Fragments full, the Institute younger, Home at dusk. The fourth is sealed with a slab and an open ring: \"soon\".",
+      "Beside each mouth, a stele with its clock. No two show the same hour."
+    ],
+    "profunda": [
+      "What you see on the other side is not the day you arrive on. Each mouth runs its view by its own lag.",
+      "Only one leaves you home before the test."
+    ]
+  },
+  "puertas.planos": {
+    "titulo": "The Counterweight plans",
+    "superficial": [
+      "On the Bench, just like the one in the Laboratory, three rolls of paper and a loose sheet with a ring drawn on it: the plans of the Counterweight.",
+      "Whoever takes them back could build another. Or could choose not to."
+    ]
+  },
+  "puertas.ofrendas": {
+    "titulo": "What they left",
+    "superficial": [
+      "On a low slab, other people's things: a long helmet with three visors, a long-handled tool you cannot guess the use of, five stacked stones, a notebook open in a script you cannot read, and three snuffed candles.",
+      "No one took them when they crossed. Or no one came back for them."
+    ]
+  },
+  "puertas.primera": {
+    "titulo": "The first Gate",
+    "superficial": [
+      "A mouth of the Absent, larger than the rest and split in two: one piece standing, the other fallen beside it. A thread of light from its side still leaks through the crack.",
+      "On the plinth, three rows of notches: a date. Below, smaller, the same sign as on the plaque at Threshold. It is the first one they opened. The one that closed badly."
+    ]
+  },
+  "puertas.cielo": {
+    "titulo": "The sky of mouths",
+    "superficial": [
+      "Above, there are no stars: there are mouths. Hundreds, turning slowly around you, each with a different sky inside. Beyond them, an enormous ring of light surrounds everything.",
+      "Rings of light run across the ground from the mouths of home, one after another, unhurried. Here time does not pass: it shows."
+    ]
+  }
 }

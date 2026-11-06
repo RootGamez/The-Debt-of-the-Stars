@@ -251,6 +251,11 @@ los necesita. Textos `[texto pendiente]` para Anthony.
 | `puertas.bocas` 🟡 | Objeto (lector `bocas`) | Las cuatro bocas de casa y lo que se ve al otro lado (una cerrada: "pronto"); con K7, su desfase; con K8, el día de la prueba | (con `bocas.relojes_distintos`) Se anota al cruzar por la que deja antes de la prueba | `bocas.vuelta_antes` · H7 |
 | `puertas.planos` 🟡 | Objeto ("E · coger" / "E · dejar") | Los planos del Contrapeso en el Banco; llevarlos o no es la decisión última | — | `contrapeso.planos` · H6 |
 
+🟡 **Propuesta de la Fase 11 (Puertas por código):** las tres fuentes tienen ya **borradores** con los mismos hechos, y
+hay tres de **ambiente** (fuera del grafo, sin hechos): `puertas.ofrendas` (lo que dejaron otros viajeros),
+`puertas.primera` (la primera Puerta de los Ausentes, partida, con el mismo signo que la placa de Umbral) y
+`puertas.cielo` (observación: el cielo de bocas y los anillos de luz del suelo). Para que Anthony los revise.
+
 ---
 
 ## 6. Lecturas dobles del prólogo (el momento de reconocimiento)

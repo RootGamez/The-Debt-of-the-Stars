@@ -1,5 +1,5 @@
-// Regla 5 de CONTEXTO_PISTAS.md con los modelos reales: las fuentes de cada mundo y sus marcas (del modelo
-// por código o del .glb exportado de Blender) se corresponden. Cuando se construya otro mundo se añade aquí.
+// Regla 5 de CONTEXTO_PISTAS.md con los mundos reales: las fuentes de cada mundo y sus marcas (construidos por
+// código) se corresponden. Cuando se construya otro mundo se añade aquí.
 import { describe, expect, it } from 'vitest';
 import { loadClues, TRIGGER_EVENTS } from '../../src/data/pistas';
 import { checkMarkers } from '../../src/registry/graphRules';

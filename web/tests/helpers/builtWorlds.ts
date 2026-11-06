@@ -1,20 +1,11 @@
-// Carga los mundos reales para las pruebas que dependen del tamaño o de las marcas: construidos por código
-// (Fase 11) o, los que aún no se han migrado, desde su .glb de public/models.
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { buildWorld, parseWorld, type LoadedWorld } from '../../src/worlds/loadWorld';
+// Carga los mundos reales para las pruebas que dependen del tamaño o de las marcas: desde la Fase 11 todos se
+// construyen por código.
+import { loadWorld, type LoadedWorld } from '../../src/worlds/loadWorld';
 import type { WorldInfo } from '../../src/worlds/markers';
 
-export async function loadBuiltWorld(world: string): Promise<LoadedWorld> {
-  const built = buildWorld(world);
-  if (built) return built;
-  const bytes = readFileSync(
-    fileURLToPath(new URL(`../../public/models/${world}.glb`, import.meta.url)),
-  );
-  return parseWorld(
-    bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength),
-    world,
-  );
+/** El mundo real `world` (en una promesa, para las pruebas que lo esperan). */
+export function loadBuiltWorld(world: string): Promise<LoadedWorld> {
+  return Promise.resolve(loadWorld(world));
 }
 
 const infos = new Map<string, Promise<WorldInfo>>();

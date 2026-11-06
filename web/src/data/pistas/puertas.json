@@ -6,12 +6,18 @@
     "titulo": "El muro de los rastros",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Un muro curvo, de cara a quien llega. Seis filas de signos, cada una en una escritura distinta: puntos, rayas, cuñas, aros, ganchos, rombos. Nombres, quizá. O fechas.",
+        "La última fila está lisa. Nadie ha escrito en ella todavía."
+      ],
       "hechos": ["puertas.otros_viajeros"]
     },
     "profunda": {
       "requiere": ["silencio.dos_investigadores"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Buscas las marcas de los Ausentes entre las filas y las encuentras: los nombres del Consejo, los de quienes cruzaron antes del silencio.",
+        "Los tres del Laboratorio no están. No llegaron a cruzar: se quedaron allí, terminando, mientras fuera pasaban los años."
+      ],
       "hechos": ["silencio.no_cruzaron"]
     }
   },
@@ -23,12 +29,18 @@
     "titulo": "Las bocas de casa",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Cuatro bocas de arenisca en arco, como las de casa. Al otro lado de cada una se ve Hogar: la Sala de Fragmentos llena, el Instituto más joven, Hogar al anochecer. La cuarta está tapada con una losa y un aro abierto: «pronto».",
+        "Junto a cada boca, una estela con su reloj. Ninguno marca la misma hora."
+      ],
       "hechos": []
     },
     "profunda": {
       "requiere": ["bocas.relojes_distintos"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Lo que se ve al otro lado no es el día al que se llega. Cada boca corre su vista según su desfase.",
+        "Solo una deja en casa antes de la prueba."
+      ],
       "hechos": ["bocas.vuelta_antes"]
     }
   },
@@ -39,8 +51,56 @@
     "titulo": "Los planos del Contrapeso",
     "borrador": true,
     "superficial": {
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Sobre el Banco, igual que el del Laboratorio, tres rollos de papel y una hoja suelta con un aro dibujado: los planos del Contrapeso.",
+        "Quien los lleve de vuelta podrá construir otro. O podrá no hacerlo."
+      ],
       "hechos": ["contrapeso.planos"]
+    }
+  },
+  {
+    "id": "puertas.ofrendas",
+    "mundo": "puertas",
+    "tipo": "objeto",
+    "titulo": "Lo que dejaron",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Sobre una losa baja, cosas de otros: un casco alargado con tres visores, una herramienta de mango largo que no sabes para qué sirve, cinco piedras apiladas, un cuaderno abierto en una escritura que no entiendes y tres velas apagadas.",
+        "Nadie se las llevó al cruzar. O nadie volvió a por ellas."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "puertas.primera",
+    "mundo": "puertas",
+    "tipo": "texto",
+    "titulo": "La primera Puerta",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Una boca de los Ausentes, más grande que las demás y partida en dos: un trozo de pie y el otro caído a su lado. Por la grieta se escapa todavía un hilo de luz de su lado.",
+        "En el zócalo, tres filas de muescas: una fecha. Debajo, más pequeño, el mismo signo que hay en la placa de Umbral. Es la primera que abrieron. La que se cerró mal."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "puertas.cielo",
+    "mundo": "puertas",
+    "tipo": "observacion",
+    "titulo": "El cielo de bocas",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Arriba no hay estrellas: hay bocas. Cientos, girando despacio alrededor, cada una con un cielo distinto dentro. Más allá, un aro de luz enorme lo rodea todo.",
+        "Por el suelo corren anillos de luz desde las bocas de casa, uno tras otro, sin prisa. Aquí el tiempo no pasa: se ve."
+      ],
+      "hechos": []
     }
   }
 ]

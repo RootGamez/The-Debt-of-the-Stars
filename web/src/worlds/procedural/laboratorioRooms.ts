@@ -6,7 +6,7 @@ import { ball, box, cone, cylinder, pieceMatrix, torus, type Frame, type Triple 
 import { FLOOR, LabBuilder, PALETTE as P } from './laboratorioKit';
 import { INNER_SITES, insideFrame, insideHeading, type InnerSiteId } from './laboratorioShape';
 
-/** Del centro del Contrapeso (contrapeso.glb) a la base de su pie. */
+/** Del centro del Contrapeso (contrapeso.ts) a la base de su pie. */
 const COUNTERWEIGHT_BASE = 0.425;
 const TAU = Math.PI * 2;
 
@@ -97,7 +97,7 @@ function banco(b: LabBuilder): void {
   const z = FLOOR;
   b.platform(f, 5.5, 4.0);
   b.table(f, 0, -0.4, 3.6, 1.1);
-  // El Contrapeso (contrapeso.glb, se coge y se lleva) va sobre su peana entre dos soportes; al lado, un prototipo
+  // El Contrapeso (contrapeso.ts, se coge y se lleva) va sobre su peana entre dos soportes; al lado, un prototipo
   // tumbado del motor, piezas sueltas y cables.
   for (const dx of [-0.6, 0.6])
     b.view(s, P.grey, box(), f.at([dx, -0.4, z + 1.0], undefined, [0.08, 0.5, 0.34]));

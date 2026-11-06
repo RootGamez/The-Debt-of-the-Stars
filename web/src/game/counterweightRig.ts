@@ -1,13 +1,10 @@
 // Monta el Contrapeso (Fase 10): carga su modelo, lo pone en su Banco del Laboratorio y une su estado
 // (counterweightPlay.ts) con lo que se ve (render/counterweightView.ts) y con la Sala del Motor de Cicatriz (el motor
 // viejo que sale, la cuna y sus ruedas, el núcleo). Solo si el sistema tiene el Laboratorio.
+import { buildCounterweight } from '../worlds/procedural/contrapeso';
 import type { Camera, Object3D, Scene, Vector3 } from 'three';
 import type { Chronology } from '../core/timeline';
-import {
-  createCounterweightView,
-  loadCounterweightModel,
-  type CounterweightAnchors,
-} from '../render/counterweightView';
+import { createCounterweightView, type CounterweightAnchors } from '../render/counterweightView';
 import { createEngineRoomView, type EngineRoomView } from '../render/engineRoomView';
 import { anchorAt } from '../render/poseTween';
 import type { CustomReaders } from '../ui/puzzlePanel';
@@ -63,9 +60,9 @@ function markerOf(runtime: WorldRuntime, clueId: string) {
   return anchor;
 }
 
-export async function createCounterweightRig(
+export function createCounterweightRig(
   options: CounterweightRigOptions,
-): Promise<CounterweightRig | undefined> {
+): CounterweightRig | undefined {
   const { scene, runtimes, chronology, notify } = options;
   const lab = runtimes.get(COUNTERWEIGHT.world);
   if (!lab) return undefined;
@@ -78,12 +75,7 @@ export async function createCounterweightRig(
     anchors.cradle = markerOf(machineWorld, CRADLE);
     anchors.core = { ...engineRoom.core, pose: { ...engineRoom.core.pose, scale: CORE_SCALE } };
   }
-  const view = createCounterweightView(
-    await loadCounterweightModel(),
-    scene,
-    anchors,
-    options.stowage,
-  );
+  const view = createCounterweightView(buildCounterweight(), scene, anchors, options.stowage);
   const pulse = chronology.events.find((e) => e.id === COUNTERWEIGHT.pulseEvent);
   const play = createCounterweightPlay({
     worldClock: (world, t) =>
