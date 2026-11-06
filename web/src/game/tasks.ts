@@ -4,6 +4,8 @@ import { t } from '../i18n';
 // que ir a buscarla a la isla del primer Albatros y llevársela a la Directora, que entonces da la misión. Cada tarea
 // dice dónde está lo que pide (`target`) para que el indicador de la pantalla la señale. Lógica pura: la lista de la
 // izquierda (ui/taskPanel.ts), la página del cuaderno y el indicador (ui/taskWaypoint.ts) solo la pintan.
+// Desde el plan de la llegada (hito B) hay un segundo juego de tareas, el del bucle en el sistema de los Ausentes:
+// "Primeros pasos en lo desconocido" y, ya con la nave, "Explora cada planeta del sistema". Ese sí se guarda.
 
 export type TaskId =
   | 'andar'
@@ -17,11 +19,21 @@ export type TaskId =
   | 'directora'
   | 'luna'
   | 'fragmento'
-  | 'volver';
+  | 'volver'
+  | 'explorar'
+  | 'ubicarse'
+  | 'nave_umbral'
+  | 'planetas';
 
-/** Adónde señala el indicador: una fuente del Registro (su marca INT_), un cuerpo del sistema o a nada. */
+/** Los juegos de tareas: el del prólogo en casa y el del bucle. */
+export type TaskSetId = 'prologo' | 'bucle';
+
+/** Adónde señala el indicador: una fuente del Registro (su marca INT_), un cuerpo del sistema, la nave o nada. */
 export type TaskTarget =
-  { kind: 'none' } | { kind: 'source'; id: string } | { kind: 'world'; world: string };
+  | { kind: 'none' }
+  | { kind: 'source'; id: string }
+  | { kind: 'world'; world: string }
+  | { kind: 'ship' };
 
 /** Lo que las tareas necesitan saber de la partida en cada momento. */
 export interface TaskState {
@@ -36,16 +48,25 @@ export interface TaskState {
   piloting: boolean;
   /** Estás a pie en la Luna. */
   onMoon: boolean;
+  /** Los mundos ya visitados (los que tienen nombre en la bitácora) y los que hay que visitar (solo el bucle). */
+  visited?: ReadonlySet<string>;
+  explorable?: readonly string[];
 }
 
 interface TaskDef {
   id: TaskId;
+  /** La misión a la que pertenece (el título de la lista mientras es la de ahora). */
+  mission?: string;
+  /** No sale en la lista hasta que esta otra esté hecha. */
+  after?: TaskId;
   title: string;
   /** El nombre corto de lo que señala el indicador. */
   label: string;
   hint: { keys: string; touch: string };
   target: TaskTarget;
   done(state: TaskState): boolean;
+  /** Cuánto lleva hecho (se pinta tras el título: "2/5"). */
+  progress?(state: TaskState): { done: number; total: number };
 }
 
 /** Hecho que da la Directora al encargar la misión, y el que da la pieza de la isla. */
@@ -58,7 +79,7 @@ const WALK_LESSON = 4;
 
 const opened = (id: string) => (s: TaskState) => s.opened.has(id);
 
-const DEFS: readonly TaskDef[] = [
+const PROLOGUE_DEFS: readonly TaskDef[] = [
   {
     id: 'andar',
     title: t('Aprende a moverte'),
@@ -218,10 +239,107 @@ const DEFS: readonly TaskDef[] = [
   },
 ];
 
-export const TASK_IDS: readonly TaskId[] = DEFS.map((d) => d.id);
+/** El hecho que dan el mural y la consola de la Sala de Mando (plan de la llegada, D8). */
+export const HOME_FACT = 'umbral.hogar_ausentes';
+const FIRST_STEPS = t('Primeros pasos en lo desconocido');
+const EXPLORE_ALL = t('Explora cada planeta del sistema');
+
+/** Los mundos explorables ya visitados, de los que hay. */
+function visitedOf(s: TaskState): { done: number; total: number } {
+  const all = s.explorable ?? [];
+  return { done: all.filter((w) => s.visited?.has(w)).length, total: all.length };
+}
+
+// Plan de la llegada, hito B (✅ la misión, Anthony 2026-11-06; 🟡 cómo se cumple cada paso, D8).
+const LOOP_DEFS: readonly TaskDef[] = [
+  {
+    id: 'explorar',
+    mission: FIRST_STEPS,
+    title: t('Explora el edificio junto al que despertaste'),
+    label: t('Casa de Estudio'),
+    hint: {
+      keys: t(
+        'La Casa de Estudio está a unos pasos de donde despertaste. Entra y mira el mural del muro de la izquierda con E',
+      ),
+      touch: t(
+        'La Casa de Estudio está a unos pasos de donde despertaste. Entra y toca Examinar junto al mural',
+      ),
+    },
+    target: { kind: 'source', id: 'umbral.mural' },
+    done: opened('umbral.mural'),
+  },
+  {
+    id: 'ubicarse',
+    mission: FIRST_STEPS,
+    title: t('Averigua dónde estás'),
+    label: t('Sala de Mando'),
+    hint: {
+      keys: t('La Sala de Mando está junto a La Boca. Lee su consola con E'),
+      touch: t('La Sala de Mando está junto a La Boca. Toca Leer junto a su consola'),
+    },
+    target: { kind: 'source', id: 'umbral.consola_mando' },
+    done: opened('umbral.consola_mando'),
+  },
+  {
+    id: 'nave_umbral',
+    mission: FIRST_STEPS,
+    title: t('Vuelve al Albatros II'),
+    label: t('Albatros II'),
+    hint: {
+      keys: t(
+        'La nave está donde cayó, sobre el hielo. Sube por la escalerilla con F y, en el asiento, F para pilotar',
+      ),
+      touch: t(
+        'La nave está donde cayó, sobre el hielo. Toca Subir junto a la escalerilla y, en el asiento, Pilotar',
+      ),
+    },
+    target: { kind: 'ship' },
+    done: (s) => s.piloting,
+  },
+  {
+    id: 'planetas',
+    mission: EXPLORE_ALL,
+    after: 'nave_umbral',
+    title: t('Visita cada mundo del sistema'),
+    label: t('Mundos'),
+    hint: {
+      keys: t(
+        'Pilotando, T elige otro mundo como objetivo; el mapa de órbitas está en la mesa de la nave. Al llegar a cada mundo, ponle nombre',
+      ),
+      touch: t(
+        'Pilotando, elige otro mundo como objetivo; el mapa de órbitas está en la mesa de la nave. Al llegar a cada mundo, ponle nombre',
+      ),
+    },
+    target: { kind: 'none' },
+    done: (s) => {
+      const { done, total } = visitedOf(s);
+      return total > 0 && done >= total;
+    },
+    progress: visitedOf,
+  },
+];
+
+const SETS: Readonly<Record<TaskSetId, { defs: readonly TaskDef[]; chain: boolean }>> = {
+  // En el prólogo hacer algo de más adelante da por hecho lo anterior; en el bucle cada paso cuenta por sí solo.
+  prologo: { defs: PROLOGUE_DEFS, chain: true },
+  bucle: { defs: LOOP_DEFS, chain: false },
+};
+
+/** Las tareas de cada juego, en orden. */
+export function taskIds(set: TaskSetId): readonly TaskId[] {
+  return SETS[set].defs.map((d) => d.id);
+}
+
+/** Las del prólogo (las de siempre). */
+export const TASK_IDS: readonly TaskId[] = taskIds('prologo');
+
+/** Para validar lo guardado: las tareas del bucle. */
+export function isLoopTask(id: unknown): id is TaskId {
+  return typeof id === 'string' && LOOP_DEFS.some((d) => d.id === id);
+}
 
 function defOf(id: TaskId): TaskDef {
-  const def = DEFS.find((d) => d.id === id);
+  const def = [...PROLOGUE_DEFS, ...LOOP_DEFS].find((d) => d.id === id);
   if (!def) throw new Error(`Tarea desconocida: ${id}`);
   return def;
 }
@@ -241,6 +359,8 @@ export function taskHint(id: TaskId, touch: boolean): string {
 /** Una tarea tal como la pintan la lista y el cuaderno. */
 export interface TaskItem {
   id: TaskId;
+  /** La misión (el título de la lista cuando esta tarea es la de ahora). */
+  mission?: string;
   title: string;
   done: boolean;
   current: boolean;
@@ -253,18 +373,40 @@ export interface TaskItem {
  */
 export class TaskTracker {
   private readonly done = new Set<TaskId>();
+  private readonly defs: readonly TaskDef[];
+  private readonly chain: boolean;
+  private state: TaskState | undefined;
+
+  /** @param already lo hecho en otras partidas (las del bucle se guardan). */
+  constructor(
+    readonly set: TaskSetId = 'prologo',
+    already: Iterable<TaskId> = [],
+  ) {
+    this.defs = SETS[set].defs;
+    this.chain = SETS[set].chain;
+    for (const id of already) if (this.defs.some((d) => d.id === id)) this.done.add(id);
+  }
 
   /** Apunta lo hecho con este estado y devuelve la tarea que toca ahora (o ninguna si ya están todas). */
   update(state: TaskState): TaskId | undefined {
-    let last = -1;
-    DEFS.forEach((def, index) => {
-      if (this.done.has(def.id) || def.done(state)) last = index;
-    });
-    for (let index = 0; index <= last; index++) {
-      const def = DEFS[index];
-      if (def) this.done.add(def.id);
+    this.state = state;
+    if (this.chain) {
+      let last = -1;
+      this.defs.forEach((def, index) => {
+        if (this.done.has(def.id) || def.done(state)) last = index;
+      });
+      for (let index = 0; index <= last; index++) {
+        const def = this.defs[index];
+        if (def) this.done.add(def.id);
+      }
+    } else {
+      for (const def of this.defs) if (def.done(state)) this.done.add(def.id);
     }
-    return DEFS.find((def) => !this.done.has(def.id))?.id;
+    return this.currentDef()?.id;
+  }
+
+  private currentDef(): TaskDef | undefined {
+    return this.defs.find((def) => !this.done.has(def.id));
   }
 
   isDone(id: TaskId): boolean {
@@ -272,19 +414,27 @@ export class TaskTracker {
   }
 
   get doneIds(): readonly TaskId[] {
-    return TASK_IDS.filter((id) => this.done.has(id));
+    return this.defs.filter((d) => this.done.has(d.id)).map((d) => d.id);
   }
 
-  /** La lista entera para pintarla. */
+  /** La lista para pintarla (sin las que aún no se han abierto). */
   items(touch: boolean): TaskItem[] {
-    const current = DEFS.find((def) => !this.done.has(def.id))?.id;
-    return DEFS.map((def) => ({
-      id: def.id,
-      title: def.title,
-      done: this.done.has(def.id),
-      current: def.id === current,
-      hint: touch ? def.hint.touch : def.hint.keys,
-    }));
+    const current = this.currentDef()?.id;
+    return this.defs
+      .filter((def) => def.after === undefined || this.done.has(def.after))
+      .map((def) => {
+        const progress = this.state && def.progress?.(this.state);
+        const item: TaskItem = {
+          id: def.id,
+          title: progress
+            ? `${def.title} (${String(progress.done)}/${String(progress.total)})`
+            : def.title,
+          done: this.done.has(def.id),
+          current: def.id === current,
+          hint: touch ? def.hint.touch : def.hint.keys,
+        };
+        return def.mission === undefined ? item : { ...item, mission: def.mission };
+      });
   }
 }
 

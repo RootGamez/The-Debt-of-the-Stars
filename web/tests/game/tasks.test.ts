@@ -6,6 +6,8 @@ import {
   MOON_FRAGMENT_FACT,
   SHEET_FACT,
   TASK_IDS,
+  isLoopTask,
+  taskIds,
   TaskHints,
   TaskTracker,
   taskHint,
@@ -141,5 +143,59 @@ describe('the hint of the task', () => {
   it('shows nothing when every task is done', () => {
     const hints = new TaskHints();
     expect(hints.update(undefined, 1)).toBeUndefined();
+  });
+});
+
+describe('the tasks of the loop (first steps in the unknown, then every planet)', () => {
+  const LOOP: TaskState = {
+    ...START,
+    visited: new Set(['umbral']),
+    explorable: ['umbral', 'archivo', 'taller'],
+  };
+
+  it('start with the building next to where you woke, then where you are, then the ship', () => {
+    const tracker = new TaskTracker('bucle');
+    expect(tracker.update(LOOP)).toBe('explorar');
+    expect(taskTarget('explorar')).toEqual({ kind: 'source', id: 'umbral.mural' });
+    expect(tracker.update({ ...LOOP, opened: new Set(['umbral.mural']) })).toBe('ubicarse');
+    expect(taskTarget('ubicarse')).toEqual({ kind: 'source', id: 'umbral.consola_mando' });
+    expect(tracker.update({ ...LOOP, opened: new Set(['umbral.consola_mando']) })).toBe(
+      'nave_umbral',
+    );
+    expect(taskTarget('nave_umbral')).toEqual({ kind: 'ship' });
+  });
+
+  it('counts each step on its own: going to the ship first does not tick the others', () => {
+    const tracker = new TaskTracker('bucle');
+    expect(tracker.update({ ...LOOP, piloting: true })).toBe('explorar');
+    expect(tracker.doneIds).toEqual(['nave_umbral']);
+  });
+
+  it('opens "every planet" only with the ship, and counts the worlds visited', () => {
+    const tracker = new TaskTracker('bucle');
+    tracker.update(LOOP);
+    expect(tracker.items(false).map((i) => i.id)).toEqual(['explorar', 'ubicarse', 'nave_umbral']);
+    expect(tracker.items(false)[0]?.mission).toBe('Primeros pasos en lo desconocido');
+    tracker.update({ ...LOOP, piloting: true, visited: new Set(['umbral', 'archivo']) });
+    const planets = tracker.items(false).find((i) => i.id === 'planetas');
+    expect(planets?.title).toBe('Visita cada mundo del sistema (2/3)');
+    expect(planets?.mission).toBe('Explora cada planeta del sistema');
+    expect(planets?.done).toBe(false);
+    tracker.update({ ...LOOP, visited: new Set(['umbral', 'archivo', 'taller']) });
+    expect(tracker.isDone('planetas')).toBe(true);
+  });
+
+  it('remembers what was done in earlier games and ignores what is not of the loop', () => {
+    const tracker = new TaskTracker('bucle', ['explorar', 'andar']);
+    expect(tracker.update(LOOP)).toBe('ubicarse');
+    expect(tracker.doneIds).toEqual(['explorar']);
+    expect(isLoopTask('ubicarse')).toBe(true);
+    expect(isLoopTask('andar')).toBe(false);
+    expect(isLoopTask(7)).toBe(false);
+  });
+
+  it('keeps the prologue as it was', () => {
+    expect(taskIds('prologo')).toEqual(TASK_IDS);
+    expect(taskIds('bucle')).toEqual(['explorar', 'ubicarse', 'nave_umbral', 'planetas']);
   });
 });

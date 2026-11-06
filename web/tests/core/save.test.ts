@@ -6,7 +6,9 @@ import {
   loadSave,
   markEndingSeen,
   markPrologueDone,
+  markTasksDone,
   markWorldNamed,
+  MAX_TASKS,
   MAX_WORLDS,
   MAX_FACTS,
   MAX_LOOPS,
@@ -58,6 +60,7 @@ describe('loadSave', () => {
       prologueDone: true,
       endings: ['B'],
       worlds: { umbral: { name: 'Primera luz', loop: 2 } },
+      tasks: [],
     });
 
     expect(loadSave(store).data).toEqual({
@@ -67,6 +70,7 @@ describe('loadSave', () => {
       prologueDone: true,
       endings: ['B'],
       worlds: { umbral: { name: 'Primera luz', loop: 2 } },
+      tasks: [],
     });
   });
 
@@ -86,6 +90,7 @@ describe('loadSave', () => {
         prologueDone: true,
         endings: [],
         worlds: {},
+        tasks: [],
       },
       readOnly: false,
     });
@@ -101,6 +106,7 @@ describe('loadSave', () => {
       version: SAVE_VERSION,
       endings: [],
       worlds: {},
+      tasks: [],
     });
   });
 
@@ -226,6 +232,7 @@ describe('saveProgress (two tabs never lose facts)', () => {
     prologueDone,
     endings: [],
     worlds: {},
+    tasks: [],
   });
 
   it('never forgets that the prologue was played, whichever tab saves last', () => {
@@ -388,7 +395,7 @@ describe('the named worlds (version 4)', () => {
     };
     store.setItem(SAVE_KEY, JSON.stringify(v3));
 
-    expect(loadSave(store).data).toEqual({ ...v3, version: SAVE_VERSION, worlds: {} });
+    expect(loadSave(store).data).toEqual({ ...v3, version: SAVE_VERSION, worlds: {}, tasks: [] });
   });
 
   it.each([
@@ -456,10 +463,41 @@ describe('the named worlds (version 4)', () => {
       loopsCompleted: 4,
       facts: ['a.b'],
       worlds: { umbral: { name: 'Primera luz', loop: 4 } },
+      tasks: [],
     });
     const newer = JSON.stringify({ version: SAVE_VERSION + 1, loopsCompleted: 3, facts: [] });
     const other = memoryStore({ [SAVE_KEY]: newer });
     expect(markWorldNamed(other, loadSave(other), 'umbral', 'x', 0)).toBe(false);
     expect(other.data.get(SAVE_KEY)).toBe(newer);
+  });
+});
+
+describe('the loop tasks in the save (version 5)', () => {
+  it('reads a save from before them (version 4) with none done, keeping the rest', () => {
+    const v4 = { ...freshSave(), version: 4, facts: ['llegada.gusano'], tasks: undefined };
+    const store = memoryStore({ [SAVE_KEY]: JSON.stringify(v4) });
+    const { data, warning } = loadSave(store);
+    expect(warning).toBeUndefined();
+    expect(data.tasks).toEqual([]);
+    expect(data.facts).toEqual(['llegada.gusano']);
+  });
+
+  it('keeps the tasks done, merged with what another tab saved', () => {
+    const store = memoryStore();
+    expect(markTasksDone(store, loadSave(store), ['explorar'])).toBe(true);
+    expect(markTasksDone(store, loadSave(store), ['nave_umbral', 'explorar'])).toBe(true);
+    expect(loadSave(store).data.tasks).toEqual(['explorar', 'nave_umbral']);
+  });
+
+  it('throws away a save whose tasks are not a short list of ids', () => {
+    for (const tasks of [
+      'explorar',
+      [3],
+      ['<script>'],
+      Array.from({ length: MAX_TASKS + 1 }, (_, i) => `t${String(i)}`),
+    ]) {
+      const store = memoryStore({ [SAVE_KEY]: JSON.stringify({ ...freshSave(), tasks }) });
+      expect(loadSave(store).warning).toBeDefined();
+    }
   });
 });

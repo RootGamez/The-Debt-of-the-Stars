@@ -181,6 +181,7 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
           prologueDone: loaded.data.prologueDone,
           endings: loaded.data.endings,
           worlds: {},
+          tasks: [],
         });
       factsFailed = !ok;
       return ok;

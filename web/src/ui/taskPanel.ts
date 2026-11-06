@@ -92,13 +92,15 @@ export function createTaskPanel(
       }
       const current = items.find((item) => item.current);
       const stateKey = items
-        .map((i) => `${i.id}${i.done ? '1' : '0'}${i.current ? '*' : ''}`)
+        .map((i) => `${i.id}${i.done ? '1' : '0'}${i.current ? '*' : ''}${i.title}`)
         .join();
       if (stateKey === lastKey) return;
       lastKey = stateKey;
       const done = items.filter((i) => i.done).length;
       now.textContent = current ? current.title : t('Todo hecho');
-      title.textContent = `${t('Tareas')} ${String(done)}/${String(items.length)}`;
+      // En el bucle, la lista lleva el nombre de la misión de ahora (o de la última, con todo hecho).
+      const mission = (current ?? items[items.length - 1])?.mission ?? t('Tareas');
+      title.textContent = `${mission} ${String(done)}/${String(items.length)}`;
       hint.textContent = current?.hint ?? '';
       list.replaceChildren(
         ...items.map((item) => {

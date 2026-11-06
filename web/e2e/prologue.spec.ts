@@ -98,6 +98,9 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   await expect(page.locator('.clock-hud')).toBeVisible();
   expect((await page.evaluate(() => window.__juego?.sky?.()))?.density).toBe(1); // aire fino (Fase 11)
   expect(new URL(page.url()).searchParams.has('mundo')).toBe(false);
+  // Las tareas del bucle (plan de la llegada, hito B): primero, el edificio junto al despertar.
+  await expect.poll(async () => (await tasks(page))?.current).toBe('explorar');
+  await expect(page.locator('.tareas-titulo')).toContainText('Primeros pasos en lo desconocido');
 
   await page.reload();
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);

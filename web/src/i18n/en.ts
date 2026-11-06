@@ -395,4 +395,28 @@ export const EN: Readonly<Record<string, string>> = {
     '↑ take off · Ship to get up · Objective: tasks',
   'Ocultar tareas': 'Hide tasks',
   'Mostrar tareas': 'Show tasks',
+  // Las tareas del bucle (plan de la llegada, hito B).
+  'Primeros pasos en lo desconocido': 'First steps into the unknown',
+  'Explora cada planeta del sistema': 'Explore every planet in the system',
+  'Explora el edificio junto al que despertaste': 'Explore the building next to where you woke up',
+  'Casa de Estudio': 'Study House',
+  'La Casa de Estudio está a unos pasos de donde despertaste. Entra y mira el mural del muro de la izquierda con E':
+    'The Study House is a few steps from where you woke up. Go in and look at the mural on the left wall with E',
+  'La Casa de Estudio está a unos pasos de donde despertaste. Entra y toca Examinar junto al mural':
+    'The Study House is a few steps from where you woke up. Go in and tap Examine by the mural',
+  'Averigua dónde estás': 'Find out where you are',
+  'Sala de Mando': 'Command Room',
+  'La Sala de Mando está junto a La Boca. Lee su consola con E':
+    'The Command Room is next to the Mouth. Read its console with E',
+  'La Sala de Mando está junto a La Boca. Toca Leer junto a su consola':
+    'The Command Room is next to the Mouth. Tap Read by its console',
+  'La nave está donde cayó, sobre el hielo. Sube por la escalerilla con F y, en el asiento, F para pilotar':
+    'The ship is where it fell, on the ice. Climb the ladder with F and, in the seat, F to fly',
+  'La nave está donde cayó, sobre el hielo. Toca Subir junto a la escalerilla y, en el asiento, Pilotar':
+    'The ship is where it fell, on the ice. Tap Board by the ladder and, in the seat, Fly',
+  'Visita cada mundo del sistema': 'Visit every world in the system',
+  'Pilotando, T elige otro mundo como objetivo; el mapa de órbitas está en la mesa de la nave. Al llegar a cada mundo, ponle nombre':
+    'While flying, T picks another world as your target; the orbit map is on the ship table. Name each world when you arrive',
+  'Pilotando, elige otro mundo como objetivo; el mapa de órbitas está en la mesa de la nave. Al llegar a cada mundo, ponle nombre':
+    'While flying, pick another world as your target; the orbit map is on the ship table. Name each world when you arrive',
 };

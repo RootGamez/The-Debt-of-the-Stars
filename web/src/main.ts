@@ -44,10 +44,17 @@ import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
-import { browserStore, clearSave, loadSave, markEndingSeen, type SaveData } from './core/save';
+import {
+  browserStore,
+  clearSave,
+  loadSave,
+  markEndingSeen,
+  markTasksDone,
+  type SaveData,
+} from './core/save';
 import { createMainMenu, type MainMenu } from './menu/mainMenu';
 import { createPrologueGate, WORMHOLE } from './game/prologue';
-import { TaskTracker } from './game/tasks';
+import { isLoopTask, TaskTracker } from './game/tasks';
 import { createTaskRig } from './game/taskRig';
 import { cinematicCenter, cinematicShipPosition } from './game/wormholeCinematic';
 import { awakeningPose } from './game/awakening';
@@ -554,7 +561,11 @@ function start(): void {
   });
   // El prólogo (casa, antes del primer ciclo): tareas, indicador y un cuaderno sin lo que aún no se sabe.
   const inPrologue = !looping && runtimes.has(WORMHOLE.world) && !homecoming;
-  const taskTracker = new TaskTracker();
+  // En el sistema de los Ausentes, las tareas del bucle (plan de la llegada, hito B), con lo ya hecho guardado.
+  const loopTasks = looping && exploring && !homecoming;
+  const taskTracker = inPrologue
+    ? new TaskTracker()
+    : new TaskTracker('bucle', saved.data.tasks.filter(isLoopTask));
   const touchUi = isTouchDevice();
   const ui = createReadingUi({
     camera,
@@ -822,7 +833,7 @@ function start(): void {
   const prologue = inPrologue ? createPrologueGate() : undefined;
   // Las tareas del prólogo: la lista de la izquierda, el aviso de arriba y el indicador hacia lo que toca.
   const taskRig =
-    inPrologue && flight
+    (inPrologue || loopTasks) && flight
       ? createTaskRig({
           tracker: taskTracker,
           reading,
@@ -833,7 +844,13 @@ function start(): void {
           radiusOf: (world) => runtimes.get(world)?.world.info.radius,
           moonWorld: WORMHOLE.world,
           setShipTarget: (world) => {
-            flight.setTarget(world);
+            if (inPrologue) flight.setTarget(world);
+          },
+          shipPlace: () => flight.shipPlace,
+          visited: () => new Set(Object.keys(worldNames)),
+          explorable: spec?.bodies.filter((body) => !body.hidden).map((body) => body.world),
+          onDone: (done) => {
+            if (!inPrologue) markTasksDone(browserStore(), loadSave(browserStore()), done);
           },
         })
       : undefined;
@@ -1151,7 +1168,7 @@ function start(): void {
       filaments.update(reading.current !== null, reading.known.size);
       taskRig?.update({
         dt: timeRuns ? dt : 0,
-        visible: overlay.playing && !ui.blocking,
+        visible: overlay.playing && !ui.blocking && awakening === undefined && !cinematic.active,
         piloting,
         world: currentWorld.id,
         position: player.state.position,

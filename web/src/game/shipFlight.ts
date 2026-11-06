@@ -100,6 +100,8 @@ export interface ShipFlight {
   readonly position: Vector3;
   /** Marco donde está quien juega cuando pilota (`undefined` = espacio abierto). */
   readonly frame: string | undefined;
+  /** Dónde está la nave aunque no se pilote: su marco y su posición en él (`undefined` en espacio abierto). */
+  readonly shipPlace: { world: string; local: Vector3 } | undefined;
   /** El mundo fijado como objetivo (o `undefined`). */
   readonly targetId: string | undefined;
   /** Fija el objetivo de la nave (o lo quita con `undefined`): en el prólogo lo pone la tarea de ahora. */
@@ -504,6 +506,11 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
     },
     get frame() {
       return ship.frame;
+    },
+    get shipPlace() {
+      return ship.frame === undefined
+        ? undefined
+        : { world: ship.frame, local: ship.state.position };
     },
     get targetId() {
       return targeting.currentTarget?.id;

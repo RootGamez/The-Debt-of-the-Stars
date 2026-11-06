@@ -1,17 +1,21 @@
 // Guardado entre ciclos. Lo único que persiste es el conocimiento (CONTEXTO_HISTORIA.md §8): el número de
 // ciclos, la lista de hechos descubiertos (Fase 4), si ya se jugó el prólogo en casa (Fase 9, versión 2) y los
-// finales vistos (Fase 10, versión 3) y los nombres que el jugador puso a cada mundo de su bitácora (versión 4).
+// finales vistos (Fase 10, versión 3), los nombres que el jugador puso a cada mundo de su bitácora (versión 4) y las
+// tareas del bucle ya hechas (plan de la llegada, hito B, versión 5).
 // Lo leído de localStorage se trata como dato externo: se valida y, si está dañado o manipulado,
 // se descarta y se empieza de cero con un aviso. Sin almacenamiento (modo privado) se juega igual.
 
 export const SAVE_KEY = 'bucle-tiempo:partida';
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 export const MAX_LOOPS = 1_000_000;
 export const MAX_FACTS = 5000;
 /** Ids de hechos: "mundo.nombre" con letras, números, guiones y puntos. */
 const FACT_ID = /^[a-z0-9_.-]{1,64}$/i;
 /** Ids de mundos ("umbral", "laboratorio"…). */
 const WORLD_ID = /^[a-z0-9_-]{1,32}$/;
+/** Ids de tareas ("nave_umbral"…) y cuántas puede haber como mucho. */
+const TASK_ID = /^[a-z0-9_]{1,32}$/;
+export const MAX_TASKS = 64;
 /** Los nombres de mundo se escriben a mano: sin caracteres de control (U+0000–U+001F y U+007F). */
 export function isControlChar(char: string): boolean {
   const code = char.charCodeAt(0);
@@ -34,6 +38,8 @@ export interface SaveData {
   endings: readonly SeenEnding[];
   /** Los mundos que el jugador ya nombró (su bitácora): el nombre y el ciclo en que lo encontró. */
   worlds: Readonly<Record<string, NamedWorld>>;
+  /** Las tareas del bucle ya hechas (game/tasks.ts decide cuáles existen). */
+  tasks: readonly string[];
 }
 
 export interface NamedWorld {
@@ -63,6 +69,7 @@ export function freshSave(): SaveData {
     prologueDone: false,
     endings: [],
     worlds: {},
+    tasks: [],
   };
 }
 
@@ -79,7 +86,7 @@ export function browserStore(): KeyValueStore | null {
 function prologueOf(version: unknown, prologueDone: unknown): boolean | null {
   if (version === 1) return true;
   if (
-    (version !== 2 && version !== 3 && version !== SAVE_VERSION) ||
+    (version !== 2 && version !== 3 && version !== 4 && version !== SAVE_VERSION) ||
     typeof prologueDone !== 'boolean'
   )
     return null;
@@ -92,7 +99,7 @@ function isSeenEnding(value: unknown): value is SeenEnding {
 
 /** Versiones 1 y 2 (antes de los finales): ninguno visto. */
 function endingsOf(version: unknown, endings: unknown): SeenEnding[] | null {
-  if (version !== 3 && version !== SAVE_VERSION) return [];
+  if (version !== 3 && version !== 4 && version !== SAVE_VERSION) return [];
   if (!Array.isArray(endings) || !endings.every(isSeenEnding)) return null;
   return [...new Set(endings)];
 }
@@ -108,7 +115,7 @@ function isNamedWorld(value: unknown): value is NamedWorld {
 
 /** Versiones 1 a 3 (antes de la bitácora): ningún mundo nombrado. */
 function worldsOf(version: unknown, worlds: unknown): Record<string, NamedWorld> | null {
-  if (version !== SAVE_VERSION) return {};
+  if (version !== 4 && version !== SAVE_VERSION) return {};
   if (typeof worlds !== 'object' || worlds === null || Array.isArray(worlds)) return null;
   const entries = Object.entries(worlds);
   if (entries.length > MAX_WORLDS) return null;
@@ -120,16 +127,25 @@ function worldsOf(version: unknown, worlds: unknown): Record<string, NamedWorld>
   return valid;
 }
 
+/** Versiones 1 a 4 (antes de las tareas del bucle): ninguna hecha. */
+function tasksOf(version: unknown, tasks: unknown): string[] | null {
+  if (version !== SAVE_VERSION) return [];
+  if (!Array.isArray(tasks) || tasks.length > MAX_TASKS) return null;
+  if (!tasks.every((id): id is string => typeof id === 'string' && TASK_ID.test(id))) return null;
+  return [...new Set(tasks)];
+}
+
 function validate(raw: unknown): SaveData | null {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
-  const { version, loopsCompleted, facts, prologueDone, endings, worlds } = raw as Record<
+  const { version, loopsCompleted, facts, prologueDone, endings, worlds, tasks } = raw as Record<
     string,
     unknown
   >;
   const prologue = prologueOf(version, prologueDone);
   const seen = endingsOf(version, endings);
   const named = worldsOf(version, worlds);
-  if (prologue === null || seen === null || named === null) return null;
+  const done = tasksOf(version, tasks);
+  if (prologue === null || seen === null || named === null || done === null) return null;
   if (!Number.isInteger(loopsCompleted)) return null;
   const loops = loopsCompleted as number;
   if (loops < 0 || loops > MAX_LOOPS) return null;
@@ -142,6 +158,7 @@ function validate(raw: unknown): SaveData | null {
     prologueDone: prologue,
     endings: seen,
     worlds: named,
+    tasks: done,
   };
 }
 
@@ -219,7 +236,16 @@ export function saveProgress(store: KeyValueStore | null, data: SaveData): boole
   const prologueDone = data.prologueDone || stored.data.prologueDone;
   const endings = [...new Set([...stored.data.endings, ...data.endings])];
   const worlds = { ...stored.data.worlds, ...data.worlds };
-  return writeSave(store, { ...data, loopsCompleted, facts, prologueDone, endings, worlds });
+  const tasks = [...new Set([...stored.data.tasks, ...data.tasks])].slice(0, MAX_TASKS);
+  return writeSave(store, {
+    ...data,
+    loopsCompleted,
+    facts,
+    prologueDone,
+    endings,
+    worlds,
+    tasks,
+  });
 }
 
 /**
@@ -255,6 +281,16 @@ export function markWorldNamed(
 ): boolean {
   if (loaded.readOnly) return false;
   return saveProgress(store, { ...loaded.data, worlds: { [world]: { name, loop } } });
+}
+
+/** Al hacer tareas del bucle: las apunta en lo guardado, con lo demás que ya había. false si no se pudo. */
+export function markTasksDone(
+  store: KeyValueStore | null,
+  loaded: LoadResult,
+  tasks: readonly string[],
+): boolean {
+  if (loaded.readOnly) return false;
+  return saveProgress(store, { ...loaded.data, tasks });
 }
 
 /**

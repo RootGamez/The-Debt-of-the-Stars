@@ -1,6 +1,7 @@
 // El prólogo por dentro: reúne las tareas (game/tasks.ts), su lista de la izquierda, el aviso de arriba y el
 // indicador de la pantalla, y cada fotograma los pone al día con la partida. La tecla O despliega o recoge la lista
-// (y, al desplegarla, vuelve a mostrar el aviso). Mientras se pilota, la nave apunta sola a lo que toca.
+// (y, al desplegarla, vuelve a mostrar el aviso). Mientras se pilota, la nave apunta sola a lo que toca. Sirve igual
+// para las tareas del bucle (plan de la llegada, hito B), que además señalan la nave y se guardan al hacerse.
 import { Vector3, type PerspectiveCamera } from 'three';
 import type { WorldSources } from '../reading/worldSources';
 import type { ReadingSession } from '../reading/readingSession';
@@ -13,6 +14,8 @@ import { TaskHints, taskHint, taskLabel, taskTarget, type TaskId, type TaskTrack
 
 /** Más cerca que esto de lo que señala, el indicador se quita (ya lo tienes delante: manda el aviso de E). */
 const ARRIVED_DISTANCE = 3;
+/** Junto a la nave el indicador sobra (se ve la escalerilla). */
+const SHIP_ARRIVED_DISTANCE = 7;
 /** Un paso mayor que esto en un fotograma es un salto (depuración), no andar. */
 const MAX_WALK_STEP = 1;
 
@@ -44,6 +47,13 @@ export interface TaskRigOptions {
   moonWorld: string;
   /** Fija el objetivo de la nave (o lo quita). */
   setShipTarget: (world: string | undefined) => void;
+  /** Dónde está la nave (su mundo y su posición en él), para las tareas que la señalan. */
+  shipPlace?: () => Place | undefined;
+  /** Los mundos ya visitados y los que hay que visitar (tareas del bucle). */
+  visited?: () => ReadonlySet<string>;
+  explorable?: readonly string[];
+  /** Avisa cuando cambia lo hecho (para guardarlo). */
+  onDone?: (done: readonly TaskId[]) => void;
 }
 
 export interface TaskRig {
@@ -80,7 +90,7 @@ function saveHidden(hidden: boolean): void {
   }
 }
 
-interface Place {
+export interface Place {
   world: string;
   local: Vector3;
 }
@@ -107,6 +117,7 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
   let registryOpened = false;
   let current: TaskId | undefined;
   let visible = false;
+  let doneCount = tracker.doneIds.length;
 
   window.addEventListener(
     'keydown',
@@ -138,7 +149,7 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
       group.getWorldPosition(point);
       return { radius: options.radiusOf(target.world) ?? 0 };
     }
-    const place = places.get(target.id);
+    const place = target.kind === 'ship' ? options.shipPlace?.() : places.get(target.id);
     if (!place) return undefined;
     point.copy(place.local);
     systemScene.groupOf(place.world)?.localToWorld(point);
@@ -152,7 +163,11 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
       return;
     }
     const meters = Math.max(0, point.distanceTo(camera.position) - where.radius);
-    if (taskTarget(id).kind === 'source' && meters < ARRIVED_DISTANCE) {
+    const kind = taskTarget(id).kind;
+    const arrived =
+      (kind === 'source' && meters < ARRIVED_DISTANCE) ||
+      (kind === 'ship' && meters < SHIP_ARRIVED_DISTANCE);
+    if (arrived) {
       waypoint.update(undefined);
       return;
     }
@@ -182,7 +197,13 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
         registryOpened,
         piloting: frame.piloting,
         onMoon: !frame.piloting && frame.world === options.moonWorld,
+        visited: options.visited?.(),
+        explorable: options.explorable,
       });
+      if (tracker.doneIds.length !== doneCount) {
+        doneCount = tracker.doneIds.length;
+        options.onDone?.(tracker.doneIds);
+      }
       panel.update(tracker.items(touch), frame.visible);
       const hintId = hints.update(current, frame.dt);
       guideView.update(
