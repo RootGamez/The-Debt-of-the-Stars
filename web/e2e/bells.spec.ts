@@ -25,7 +25,7 @@ async function setBell(page: Page, mark: number): Promise<void> {
 /** Salta lo bastante para que ruede una bola entera (cada 20 s; llega a la última marca a los 4). */
 async function ringOnce(page: Page): Promise<void> {
   const now = await loopValue(page, 'umbral');
-  await page.evaluate((to) => window.__juego?.skipTo?.(to), now + 25);
+  await page.evaluate((to) => window.__juego?.skipTo?.(to), (now ?? 0) + 25);
 }
 
 test('four bells at marks 1, 4, 9 and 16 ring in time and open the lectern', async ({ page }) => {
@@ -44,7 +44,7 @@ test('four bells at marks 1, 4, 9 and 16 ring in time and open the lectern', asy
   await expect(page.locator('.puzzle-title')).toHaveText('El atril de las campanas');
   await expect(page.locator('.puzzle-status')).toContainText('abierta');
   await closeReader(page);
-  const facts = await page.evaluate(() => window.__juego?.snapshot()?.registry?.facts ?? []);
+  const facts = await page.evaluate(() => window.__juego?.snapshot()?.registry.facts ?? []);
   expect(facts).toContain('mundos.cancion');
   expect(facts).toContain('mundos.compas');
 });
