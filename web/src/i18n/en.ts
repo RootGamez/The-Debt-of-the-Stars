@@ -298,4 +298,23 @@ export const EN: Readonly<Record<string, string>> = {
   '[texto pendiente]': '[text pending]',
   Continuar: 'Continue',
   'Quince minutos antes del final de un mundo.': 'Fifteen minutes before a world ends.',
+  'Mueve el campo (arrastra o con las flechas), acerca la vista y gira el índice de latón. Con la alineación, lo que ves del Nudo está torcido: busca dónde está de verdad.':
+    'Move the field (drag or use the arrow keys), zoom in and turn the brass index. During the alignment, what you see of the Nudo is bent: find where it really is.',
+  'El campo del ocular': 'The eyepiece field',
+  'La alineación: la imagen junto a la Brasa se ve limpia.':
+    'The alignment: the image beside the Ember shows clearly.',
+  'Fuera de la alineación, lo que hay junto a la Brasa tiembla y se pierde. Vuelve hacia las 6:30.':
+    'Outside the alignment, what lies beside the Ember trembles and fades. Come back around 6:30.',
+  'El cielo no se deja ver.': 'The sky will not show itself.',
+  'Cruz: a {n}° de la Brasa · Aumento ×{z} · Índice: {d}°':
+    'Crosshair: {n}° from the Brasa · Zoom ×{z} · Index: {d}°',
+  'Rumbo fijado: el Nudo de verdad está a {n}° de la Brasa.':
+    'Bearing fixed: the real Nudo is {n}° from the Brasa.',
+  'Alejar la vista': 'Zoom out',
+  'Acercar la vista': 'Zoom in',
+  Aumento: 'Zoom',
+  Índice: 'Index',
+  'Índice: restar un grado': 'Index: subtract a degree',
+  'Índice: sumar un grado': 'Index: add a degree',
+  'El ocular está a oscuras.': 'The eyepiece is dark.',
 };

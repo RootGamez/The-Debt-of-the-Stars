@@ -32,14 +32,18 @@ describe('the real clue data', () => {
     ]);
   });
 
-  it('keeps the notes for the curious at home out of the graph (Phase 11G)', () => {
+  it('keeps the notes for the curious (home, Observatorio) out of the graph (Phase 11G)', () => {
     const ambient = clues.sources.filter((s) => s.ambient);
 
     expect(ambient.length).toBeGreaterThanOrEqual(10);
     expect(
-      ambient.every((s) => s.world === 'hogar' && s.surface.facts.length === 0 && !s.deep),
+      ambient.every(
+        (s) =>
+          ['hogar', 'observatorio'].includes(s.world) && s.surface.facts.length === 0 && !s.deep,
+      ),
     ).toBe(true);
     expect(ambient.map((s) => s.id)).toContain('hogar.bitacora_albatros');
+    expect(ambient.map((s) => s.id)).toContain('observatorio.registrador');
   });
 
   it('contains the 7 threads, the 9 conclusions and the 60 sources of CONTEXTO_PISTAS.md', () => {
@@ -86,11 +90,13 @@ describe('the real clue data', () => {
   it('gives Umbral, home and the recordings readable draft texts and leaves the rest as skeleton', () => {
     // Las grabaciones necesitan un borrador para que su mecánica se pueda probar (Fase 7); casa, para el
     // prólogo (Fase 9).
-    // Las fuentes nuevas de Cicatriz (Fase 11H) llegan con borrador para que se lean en su sitio.
+    // Las fuentes nuevas de Cicatriz (Fase 11H) llegan con borrador para que se lean en su sitio, y el Observatorio
+    // (Fase 11), con el que se cuenta el lugar.
     const drafted = (s: { id: string; world: string; kind: string }) =>
       s.world === 'umbral' ||
       s.world === 'hogar' ||
       s.world === 'luna' ||
+      s.world === 'observatorio' ||
       s.kind === 'grabacion' ||
       CICATRIZ_DRAFTS.includes(s.id);
     const readable = clues.sources.filter(drafted);

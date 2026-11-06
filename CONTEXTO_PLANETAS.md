@@ -234,6 +234,12 @@
 
 **Atmósfera.** Índigo, negro, puntos blancos. Casi silencio.
 
+🟡 **Propuesta (2026-11-05, Fase 11, por código):** los Ausentes adaptaron el asteroide para buscar y estudiar las
+fluctuaciones de la luz. Tallaron una terraza donde la Brasa se ve a 52° (la rotación está bloqueada, así que no se
+mueve de su cielo) y levantaron un edificio cerrado al vacío: la cúpula con el telescopio apuntando a la Brasa, un
+hangar con techo de cristal donde se posa la nave, una esclusa, el cuarto del turno y la Sala de las Fluctuaciones.
+Sustituye a la "plataforma exterior para mirar" (fuera no hay aire).
+
 **Papel en el final del ciclo.** Es el último mundo en caer y sirve de **palco** para ver el sistema ser devorado y entender el fenómeno desde fuera.
 
 ---

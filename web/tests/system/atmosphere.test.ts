@@ -20,8 +20,14 @@ describe('the air of a world', () => {
     expect(airDensity(10, 0)).toBe(0);
   });
 
-  it('home, Umbral, the Archivo and the Taller have air; the other worlds of the alien system are dead', () => {
-    expect(Object.keys(ATMOSPHERES).sort()).toEqual(['archivo', 'hogar', 'taller', 'umbral']);
+  it('home, Umbral, the Archivo, the Taller and the Observatorio have air; the other worlds of the alien system are dead', () => {
+    expect(Object.keys(ATMOSPHERES).sort()).toEqual([
+      'archivo',
+      'hogar',
+      'observatorio',
+      'taller',
+      'umbral',
+    ]);
     expect(ATMOSPHERES.hogar?.height).toBeGreaterThan(0);
   });
 
@@ -42,5 +48,20 @@ describe('the air of a world', () => {
     expect(archivo?.night).toBeDefined();
     // Azul: el cénit tiene más azul que rojo.
     expect((archivo?.zenith ?? 0) & 0xff).toBeGreaterThan(((archivo?.zenith ?? 0) >> 16) & 0xff);
+  });
+
+  it('gives the Observatorio a dark, thin air: nearly black and clear enough to see the stars', () => {
+    const observatorio = ATMOSPHERES.observatorio;
+    const umbral = ATMOSPHERES.umbral;
+    const brightness = (color: number): number =>
+      ((color >> 16) & 0xff) + ((color >> 8) & 0xff) + (color & 0xff);
+
+    expect(observatorio?.height).toBeGreaterThan(0);
+    expect(observatorio?.opacity ?? 1).toBeLessThan(umbral?.opacity ?? 0);
+    expect(brightness(observatorio?.zenith ?? 0xffffff)).toBeLessThan(60);
+    expect(brightness(observatorio?.horizon ?? 0xffffff)).toBeLessThan(
+      brightness(umbral?.horizon ?? 0),
+    );
+    expect(observatorio?.night).toBeDefined();
   });
 });

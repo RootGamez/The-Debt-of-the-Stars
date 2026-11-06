@@ -190,8 +190,11 @@ export interface PlaceOptions {
   sink?: number;
   /** Radio del círculo donde se mide el suelo (m): los edificios no flotan en las cuestas. */
   footprint?: number;
-  /** Con qué altura del círculo se queda: la más baja o la media (plataformas: la roca asoma por el lado alto). */
-  ground?: 'lowest' | 'mean';
+  /**
+   * Con qué altura del círculo se queda: la más baja, la media (plataformas: la roca asoma por el lado alto) o la
+   * más alta (una base honda que tapa el desnivel por el lado bajo).
+   */
+  ground?: 'lowest' | 'mean' | 'highest';
 }
 
 export interface Surface {
@@ -228,7 +231,11 @@ export function frameAt(
     }
   }
   const height =
-    ground === 'mean' ? heights.reduce((s, v) => s + v, 0) / heights.length : Math.min(...heights);
+    ground === 'mean'
+      ? heights.reduce((s, v) => s + v, 0) / heights.length
+      : ground === 'highest'
+        ? Math.max(...heights)
+        : Math.min(...heights);
   const origin = up.clone().multiplyScalar(height - sink);
   return new Frame(new Matrix4().makeBasis(right, forward, up).setPosition(origin));
 }

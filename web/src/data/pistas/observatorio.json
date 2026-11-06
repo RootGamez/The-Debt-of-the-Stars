@@ -5,10 +5,20 @@
     "tipo": "texto",
     "titulo": "El libro de turnos",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "superficial": {
+      "texto": [
+        "Un libro de turnos, grueso, de hojas cosidas. Cada noche, la misma letra apretada: la hora, el cielo, hacia dónde apuntaba el telescopio.",
+        "Y al final de cada noche, la misma línea: «Señal junto a la Brasa. Sin confirmar».",
+        "Años de noches. Ninguna dice otra cosa."
+      ],
+      "hechos": []
+    },
     "profunda": {
       "requiere": ["lab.existe_lugar_lento"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Ahora lo entiendes: la señal no se movía como una estrella porque no era una estrella. Era el Sitio Lento, visto donde no está.",
+        "Lo anotaron cada noche, durante años, y cada noche lo dejaron sin confirmar."
+      ],
       "hechos": ["lab.imagen_desplazada"]
     }
   },
@@ -16,13 +26,22 @@
     "id": "observatorio.telescopio",
     "mundo": "observatorio",
     "tipo": "observacion",
-    "cuando": "alineacion",
+    "lector": "ocular",
     "titulo": "El telescopio",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "superficial": {
+      "texto": [
+        "El gran telescopio apunta por la ranura de cristal. Por el ocular se ven la Brasa, los mundos del sistema y un fondo de estrellas muy quieto.",
+        "Junto a la Brasa hay un punto que no se mueve como las estrellas. Casi siempre tiembla y se pierde; en la alineación de las 6:30 se ve limpio."
+      ],
+      "hechos": []
+    },
     "profunda": {
       "requiere": ["lab.existe_lugar_lento"],
-      "texto": ["[texto pendiente]"],
+      "texto": [
+        "Con el índice corregido, la cruz cae sobre un anillo finísimo de estrellas dobladas: ahí, y no donde se ve el punto, está lo que dobla la luz.",
+        "La imagen está desplazada. Lo que la tuerce está en medio, oscuro y pesado."
+      ],
       "hechos": ["lab.imagen_desplazada"]
     }
   },
@@ -32,6 +51,87 @@
     "tipo": "texto",
     "titulo": "El informe del observatorio",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.calma_aparente"] }
+    "superficial": {
+      "texto": [
+        "«Informe del turno de noche para el Consejo. Desde aquí todo parece en calma: las órbitas son estables, la Brasa no ha cambiado y los relojes de la red coinciden con el nuestro dentro de lo esperado.»",
+        "Debajo, a lápiz, otra letra: «Dentro de lo esperado no es lo mismo que igual»."
+      ],
+      "hechos": ["silencio.calma_aparente"]
+    }
+  },
+  {
+    "id": "observatorio.registrador",
+    "mundo": "observatorio",
+    "tipo": "objeto",
+    "titulo": "El registrador de fluctuaciones",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un tambor de papel que gira despacio bajo una aguja. La aguja está unida al telescopio: tiembla cuando tiembla la luz que llega por él.",
+        "Metros y metros de papel enrollado por el suelo. En los primeros rollos la línea es casi recta. En los últimos, la aguja salta de un borde a otro."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "observatorio.placas",
+    "mundo": "observatorio",
+    "tipo": "objeto",
+    "titulo": "Las placas de cristal",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Cientos de placas de cristal en su mesa de luz, una por noche, todas del mismo trozo de cielo junto a la Brasa.",
+        "De una placa a otra, las estrellas cambian de sitio, como deben. Un punto, a la izquierda, está en todas exactamente igual."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "observatorio.relojes",
+    "mundo": "observatorio",
+    "tipo": "objeto",
+    "titulo": "Los dos relojes",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Dos relojes iguales en la pared del fondo. Uno lleva una placa que dice «Umbral»; el otro, «Aquí».",
+        "Los pusieron en hora a la vez. El de aquí va por delante, y cada día un poco más. Alguien rayó la pared con la diferencia, día tras día, hasta llenarla."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "observatorio.carta",
+    "mundo": "observatorio",
+    "tipo": "texto",
+    "titulo": "La carta sellada",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Una carta con el sello del Consejo, abierta y vuelta a doblar muchas veces.",
+        "«Las mediciones de las fluctuaciones no se enviarán a la red. Se anotarán aquí y se guardarán aquí. No hay motivo de alarma, y no queremos que lo haya.»"
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "observatorio.relevo",
+    "mundo": "observatorio",
+    "tipo": "texto",
+    "titulo": "El registro del hangar",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "El registro de llegadas del hangar: naves de relevo cada diez días, con víveres, cartas y rollos de papel para el registrador.",
+        "Las últimas casillas están en blanco. Junto a la última llegada, a lápiz: «No traen papel. Dicen que ya no hará falta»."
+      ],
+      "hechos": []
+    }
   }
 ]

@@ -212,6 +212,8 @@ export function createPuzzlePanel(
         return { body: element('p', 'puzzle-hint', t('Todas las bocas están quietas.')) };
       case 'pista':
         return { body: element('p', 'puzzle-hint', t('El reloj de la Pista está parado.')) };
+      case 'ocular':
+        return { body: element('p', 'puzzle-hint', t('El ocular está a oscuras.')) };
     }
   }
 

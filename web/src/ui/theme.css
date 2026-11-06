@@ -1547,3 +1547,35 @@ body {
     transition: none;
   }
 }
+
+/* El ocular del telescopio del Observatorio (🟡): un campo redondo de cielo, su lectura y los mandos. */
+.ocular-field {
+  display: block;
+  width: 360px;
+  max-width: 100%;
+  aspect-ratio: 1;
+  margin: 12px auto;
+  border-radius: 50%;
+  background: #05060d;
+  box-shadow:
+    0 0 0 4px #a88a50,
+    0 0 24px rgba(0, 0, 0, 0.6);
+  touch-action: none;
+  cursor: grab;
+}
+.ocular-field:active {
+  cursor: grabbing;
+}
+.ocular-readout {
+  margin: 4px 0 8px;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.85;
+}
+.ocular-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}

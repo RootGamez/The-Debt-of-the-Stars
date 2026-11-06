@@ -1,6 +1,6 @@
 // Los mundos con aire: desde su suelo se ve un cielo en vez del espacio. Hogar (Fase 9), el único mundo vivo, con
 // su cielo de mañana (Fase 11G); Umbral (Fase 11, ✅ Anthony 2026-11-03), con un aire fino de ocaso que deja ver las estrellas; y el
-// Archivo (Fase 11, ✅ Anthony 2026-11-03), con un cielo azul de mar y nubes; y el Taller (Fase 11F), sobre su gigante.
+// Archivo (Fase 11, ✅ Anthony 2026-11-03), con un cielo azul de mar y nubes; el Taller (Fase 11F), sobre su gigante; y el Observatorio, con un aire oscuro (Fase 11).
 
 export interface Atmosphere {
   /** Color del cielo arriba, en el horizonte, alrededor de la estrella y bajo el horizonte. */
@@ -58,5 +58,17 @@ export const ATMOSPHERES: Readonly<Record<string, Atmosphere>> = {
     height: 90,
     opacity: 0.85,
     night: 0x10131f,
+  },
+  // 🟡 El Observatorio (Anthony 2026-11-05, «una atmósfera oscura»): un aire finísimo y casi negro, índigo en el
+  // horizonte y con apenas un resplandor violeta junto a la estrella; deja ver las estrellas y la imagen del Nudo, que
+  // es para lo que está allí. De noche, negro azulado.
+  observatorio: {
+    zenith: 0x04050e,
+    horizon: 0x1b2050,
+    glow: 0x5b4f94,
+    ground: 0x0a0c20,
+    height: 55,
+    opacity: 0.5,
+    night: 0x02030a,
   },
 };

@@ -207,6 +207,13 @@ final se entiende como aviso.
 | `observatorio.telescopio` | Observación | 6:30, 1 min (alineación) | Un punto que no se mueve como una estrella | Es la imagen desplazada del Laboratorio (K2) | `lab.imagen_desplazada` · H5 |
 | `observatorio.informe` | Texto | Siempre | "Desde fuera todo parecía en calma" | Mientras tanto, los colapsos ya habían empezado (H4) | `silencio.calma_aparente` · H4 |
 
+🟡 **Propuesta (2026-11-05):** el telescopio se puede usar siempre (lector `ocular`, el cielo en vivo); solo durante la
+alineación de las 6:30 se ve limpia la imagen y el anillo de estrellas, así que el hecho sigue dándose solo entonces.
+Además hay cinco fuentes de ambiente (fuera del grafo, sin hechos) que cuentan el lugar: `observatorio.registrador`
+(el tambor que registra las fluctuaciones), `observatorio.placas` (una placa por noche, el punto que no se mueve),
+`observatorio.relojes` («Umbral» y «Aquí», que se separan), `observatorio.carta` (el Consejo ordena no enviar las
+mediciones) y `observatorio.relevo` (el registro del hangar; el último relevo «no trae papel»). Textos en borrador.
+
 ### 5.7 Laboratorio Oculto — el Sitio Lento (reloj 0,20)
 
 Llegar aquí cuesta casi un ciclo entero (modo B ✅): cada minuto real son cinco de fuera. Lo que se lee aquí

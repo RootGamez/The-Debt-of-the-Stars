@@ -1,5 +1,67 @@
 {
-  "observatorio.libro": { "titulo": "The shift book" },
-  "observatorio.telescopio": { "titulo": "The telescope" },
-  "observatorio.informe": { "titulo": "The observatory report" }
+  "observatorio.libro": {
+    "titulo": "The shift book",
+    "superficial": [
+      "A thick shift book with sewn pages. Every night, the same cramped hand: the time, the sky, where the telescope was pointing.",
+      "And at the end of every night, the same line: \"Signal beside the Ember. Unconfirmed.\"",
+      "Years of nights. None of them says anything else."
+    ],
+    "profunda": [
+      "Now you understand: the signal didn't move like a star because it wasn't a star. It was the Slow Site, seen where it isn't.",
+      "They wrote it down every night, for years, and every night they left it unconfirmed."
+    ]
+  },
+  "observatorio.telescopio": {
+    "titulo": "The telescope",
+    "superficial": [
+      "The great telescope points through the glass slit. Through the eyepiece you can see the Ember, the worlds of the system and a very still field of stars.",
+      "Beside the Ember there is a point that doesn't move like the stars. Most of the time it trembles and fades; during the 6:30 alignment it shows clearly."
+    ],
+    "profunda": [
+      "With the index corrected, the crosshair falls on a very thin ring of bent stars: there, and not where the point appears, is what bends the light.",
+      "The image is displaced. What twists it lies in between, dark and heavy."
+    ]
+  },
+  "observatorio.informe": {
+    "titulo": "The observatory report",
+    "superficial": [
+      "\"Night shift report for the Council. From here everything looks calm: the orbits are stable, the Ember has not changed and the clocks of the network match ours within expectations.\"",
+      "Below it, in pencil, in another hand: \"Within expectations is not the same as equal.\""
+    ]
+  },
+  "observatorio.registrador": {
+    "titulo": "The fluctuation recorder",
+    "superficial": [
+      "A paper drum turning slowly under a needle. The needle is linked to the telescope: it trembles when the light coming through it trembles.",
+      "Metres and metres of rolled paper on the floor. In the first rolls the line is almost straight. In the last ones, the needle jumps from edge to edge."
+    ]
+  },
+  "observatorio.placas": {
+    "titulo": "The glass plates",
+    "superficial": [
+      "Hundreds of glass plates on their light table, one per night, all of the same patch of sky beside the Ember.",
+      "From plate to plate the stars shift, as they should. One point, on the left, is exactly the same on all of them."
+    ]
+  },
+  "observatorio.relojes": {
+    "titulo": "The two clocks",
+    "superficial": [
+      "Two identical clocks on the back wall. One has a plate that says \"Threshold\"; the other, \"Here\".",
+      "They were set at the same time. The one from here runs ahead, a little more every day. Someone scratched the difference into the wall, day after day, until it was full."
+    ]
+  },
+  "observatorio.carta": {
+    "titulo": "The sealed letter",
+    "superficial": [
+      "A letter with the Council's seal, opened and folded again many times.",
+      "\"The fluctuation measurements will not be sent to the network. They will be recorded here and kept here. There is no cause for alarm, and we do not want there to be one.\""
+    ]
+  },
+  "observatorio.relevo": {
+    "titulo": "The hangar log",
+    "superficial": [
+      "The hangar's arrivals log: relief ships every ten days, with supplies, letters and rolls of paper for the recorder.",
+      "The last boxes are blank. Beside the last arrival, in pencil: \"They brought no paper. They say it won't be needed any more.\""
+    ]
+  }
 }

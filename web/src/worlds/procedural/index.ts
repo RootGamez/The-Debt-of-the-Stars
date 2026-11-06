@@ -5,6 +5,7 @@ import { buildArchivo } from './archivo';
 import { buildCicatriz } from './cicatriz';
 import { buildHogar } from './hogar';
 import { buildLuna } from './luna';
+import { buildObservatorio } from './observatorio';
 import { buildTaller } from './taller';
 import { buildUmbral } from './umbral';
 
@@ -15,6 +16,7 @@ const BUILDERS: ReadonlyMap<string, () => Group> = new Map([
   ['hogar', () => buildHogar()],
   ['cicatriz', () => buildCicatriz()],
   ['luna', () => buildLuna()],
+  ['observatorio', () => buildObservatorio()],
 ]);
 
 /** Si ese mundo se construye por código. */

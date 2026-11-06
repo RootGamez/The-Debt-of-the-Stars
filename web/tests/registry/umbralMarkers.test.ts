@@ -53,7 +53,8 @@ describe('the Observatorio', () => {
   it('leaves the displaced image of the Nudo to the game (it moves on its rails)', async () => {
     const { markers } = await load('observatorio');
 
-    expect(markers.eventProps).toEqual([]);
+    // Solo los faroles de la alineación (luz del lugar): la imagen del Nudo no es un punto fijo del modelo.
+    expect(markers.eventProps.map((p) => p.object.name)).toEqual(['EVT_alineacion_Luces']);
   });
 });
 

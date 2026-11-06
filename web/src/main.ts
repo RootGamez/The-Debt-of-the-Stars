@@ -32,6 +32,8 @@ import { createAtmosphereView } from './render/atmosphereView';
 import { createOolView } from './render/oolView';
 import { createFilaments } from './ui/filaments';
 import { trackClockBody } from './ui/trackClockBody';
+import { createOcularSource } from './game/ocularSky';
+import { ocularBody } from './ui/ocularBody';
 import { ATMOSPHERES } from './data/atmospheres';
 import { createBlackHoleView } from './render/blackHoleView';
 import { growthFor } from './system/blackHole';
@@ -526,6 +528,18 @@ async function start(): Promise<void> {
     : undefined;
   const startSources = sources.get(startWorld);
   if (!startSources) throw new Error(`Faltan las fuentes de ${startWorld}`);
+  // El ocular del telescopio del Observatorio (🟡): mira el cielo en vivo desde donde está el jugador.
+  const ocularSource = createOcularSource({
+    eye: camera,
+    star: sun,
+    groupOf: (world) => systemScene.groupOf(world),
+    radiusOf: (world) => runtimes.get(world)?.world.info.radius,
+    worlds: [...runtimes.keys()],
+    hidden: hiddenWorld,
+    reference: () => systemScene.referenceWorld,
+    alignedNow: () => session.activeEventIds.includes(ALIGNMENT_EVENT),
+    observatory: OBSERVATORY,
+  });
   const ui = createReadingUi({
     camera,
     sources: startSources,
@@ -540,6 +554,7 @@ async function start(): Promise<void> {
       ...counterweight?.readers,
       ...epilogue?.readers,
       ...(track && { pista: (status, _solved, solve) => trackClockBody(track, status, solve) }),
+      ocular: (status, solved, solve) => ocularBody(ocularSource, status, solved, solve),
     },
     settings: textSettings,
     reducedMotion,
