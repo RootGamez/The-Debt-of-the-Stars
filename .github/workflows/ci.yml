@@ -58,13 +58,13 @@ jobs:
           path: web/test-results
           retention-days: 7
 
-  # Publica en Cloudflare (Workers con assets estáticos) cuando todo lo anterior pasa en main.
+  # Publica en Cloudflare (Workers con assets estáticos) cuando pasan tipos, lint, formato y tests en main (las e2e no lo frenan).
   # Necesita los secretos CLOUDFLARE_API_TOKEN y CLOUDFLARE_ACCOUNT_ID del repositorio.
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [web, e2e]
+    needs: web
     concurrency:
       group: deploy
       cancel-in-progress: false
