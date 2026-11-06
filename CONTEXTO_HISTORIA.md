@@ -1,7 +1,7 @@
 # CONTEXTO DE HISTORIA — La deuda de las estrellas
 
 **Título:** La deuda de las estrellas (The Debt of the Stars) ✅ decidido por Anthony
-**Versión:** v1.11 (el HUD del Cuaderno vivo y la bitácora de mundos)
+**Versión:** v1.12 (el aspecto de los Ausentes)
 **Última actualización:** 2026-10-30 · HUD
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)
 
@@ -315,7 +315,7 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 7. ✅ **Cuándo se instala el Contrapeso:** durante el pulso de las 9:00. ✅ **Los pasos** (Anthony, 2026-10-29): en §9. ❓ Falta: de qué piezas está hecho.
 8. ✅ **Justificación física** de que el agujero negro se trague el sistema (Anthony, 2026-10-28): **la deuda de la red se descarga en él**. Las Puertas están acopladas: al colapsar la garganta de la máquina de Cicatriz, el tiempo que debían todas las demás fluye por ella y la hace crecer. Crece deprisa al principio y se calma al final. ✅ **Nace en Cicatriz**, en la Sala del Motor; el Nudo es la semilla que llama.
 9. ❓ **Sabor cultural:** nombres, música e identidad de ambos pueblos (el del protagonista y los Ausentes).
-10. ❓ **Aspecto de los Ausentes:** humanos, parecidos a humanos o algo muy distinto.
+10. ✅ **Aspecto de los Ausentes** (Anthony, 2026-11-06): de más de 2,5 m, con la cabeza **sin rostro**, un óvalo de **vidrio mineral oscuro** con **dibujos geométricos que brillan** (rombos y triángulos; nunca espirales ni hexágonos), y **circuitos de cobre** que recorren una **piel cerámica**. Nunca se ven vivos: solo en **murales tallados** y en **proyecciones de luz** (en Umbral, el mural de la Casa de Estudio, la proyección de anillos de la Sala de Mando y el panel a medio tallar del Tallista).
 11. ✅ **Qué entiende el Instituto:** resuelto. No saben si está viva o muerta, pero esperan que esté viva.
 12. ❓ **Qué tan avanzada está la prueba** del Instituto cuando empieza el juego (¿ya hicieron una, o están a punto?).
 13. ✅ **Cómo son las ruinas:** resuelto. Fragmentos de pared o roca tallada, incompletos y aleatorios. Falta decidir cuál es la de la luna (🟡 un fragmento más grande que los anteriores).
@@ -357,3 +357,4 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-30 · Fase 10 (hito 10D, 🟡).** El epílogo se puede jugar: con el Contrapeso instalado se baja con la nave al horizonte estable (tira de la nave, la marea se nota, el reloj de Umbral se acelera) y al cruzarlo, fundido a negro, se despierta en el Archivo de las Puertas. Se proponen los números del puzzle de las bocas de casa (§9) y que los planos se puedan dejar. La boca y los planos ya deciden el final (A, B o "llega tarde"); las escenas de cada final son el hito siguiente.
 - **2026-10-30 · Fase 10 (hito 10E, 🟡).** Los finales se pueden jugar: la vuelta a casa por la boca elegida (el Hogar de antes con A y B; el de siempre si se llega tarde), la Directora que cierra el viaje con la tarjeta del final, la Luna sin fragmento en el final A y los finales vistos en el guardado. Los textos de las tarjetas y las escenas son de Anthony.
 - **2026-10-30 · HUD (Cuaderno vivo).** Implementado el rediseño del HUD con las decisiones de Anthony (§8 «Interfaz»): textos que se escriben y se pasan frase a frase, charlas con retrato, el Registro como libro y la bitácora de mundos (nombrar cada mundo al llegar y pegar su dibujo). Viendo el juego, Anthony pide el papel crema de la propuesta A con solo la tinta brillando.
+- **2026-11-06 · La llegada.** Anthony decide el aspecto de los Ausentes (pregunta 10, ✅) y que la primera llegada a Umbral sea por el gusano de la Luna, despertando junto a la nave caída; Umbral es el hogar de los Ausentes y se fueron hace poco y con prisa.

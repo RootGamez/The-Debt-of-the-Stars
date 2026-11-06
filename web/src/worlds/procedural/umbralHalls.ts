@@ -1,10 +1,12 @@
 // Los edificios cerrados de Umbral (plan de la llegada, hito D, 🟡 el contenido): la Casa de Estudio junto al
 // despertar, la Sala de Mando al norte de La Boca y el Taller del Tallista junto a las Casas. Por dentro cuentan que
 // se fueron hace poco y con prisa: aparatos con su piloto en espera, tablillas a medio leer, un taburete volcado,
-// herramientas sobre la mesa y un panel a medio tallar. Los murales y lo que se lee llegan en el hito E.
-import { box, cylinder, torus, type Frame, type PieceSet, type Triple } from './kit';
+// herramientas sobre la mesa y un panel a medio tallar. Desde el hito E, los Ausentes: un mural en la Casa de Estudio,
+// su proyección de anillos en la Sala de Mando y el panel del Tallista, y una fuente que leer en cada edificio.
+import { box, cylinder, torus, torusArc, type Frame, type PieceSet, type Triple } from './kit';
 import { seededRandom } from './noise';
 import { PALETTE as P } from './umbralPalette';
+import { absentRelief, absentRings, projectionBeam } from './umbralAbsent';
 import { hallShell, pilot } from './umbralHallsKit';
 import { HALL, HALLS, type HallId } from './umbralHallsShape';
 import type { LandmarkBuilder } from './umbralLandmarks';
@@ -174,6 +176,30 @@ function studyHall(v: PieceSet, f: Frame): void {
   );
   tablets(v, f, 3.8, 3.2, F, 3, 23);
   pilot(v, f, [5.45, 2.6, 1.6]);
+  mural(v, f);
+}
+
+/** El mural de la Casa de Estudio, en el muro de la izquierda: un Ausente tallado de cuerpo entero bajo un anillo. */
+function mural(v: PieceSet, f: Frame): void {
+  const x = -HALL_INNER.study;
+  const y = 2.6;
+  v.add(P.sandstoneShade, box(), f.at([x + 0.03, y, F + 1.9], undefined, [0.06, 1.6, 3]), 'stone', {
+    solid: false,
+  });
+  for (const z of [F + 0.42, F + 3.38]) {
+    v.add(P.copper, box(), f.at([x + 0.07, y, z], undefined, [0.06, 1.66, 0.07]), 'metal', {
+      solid: false,
+    });
+  }
+  // El anillo de Puerta sobre la cabeza, como en las puertas de los edificios.
+  v.add(
+    P.copper,
+    torusArc(0.62, 0.04, 0, Math.PI * 2, 24, 4),
+    f.at([x + 0.07, y, F + 2.9], [0, 0, Math.PI / 2]),
+    'metal',
+    { solid: false },
+  );
+  absentRelief(v, f, { at: [x + 0.09, y, F + 0.55], turn: -Math.PI / 2, scale: 0.84, depth: 0.28 });
 }
 
 /** La Sala de Mando: un arco de consolas alrededor de la mesa de proyección, con diales de anillo en el muro. */
@@ -191,6 +217,9 @@ function commandHall(v: PieceSet, f: Frame): void {
     solid: false,
   });
   pilot(v, f, [0, -0.5, F + 0.95], 0.12);
+  // Sobre la mesa, la proyección que nadie apagó: un Ausente hecho de anillos de luz.
+  projectionBeam(v, f, [0, -0.5, F + 0.95], 0.35);
+  absentRings(v, f, [0, -0.5, F + 1.05], 0.65);
   // El arco de consolas, de cara a la mesa, por detrás.
   for (let k = 0; k < 7; k++) {
     const a = Math.PI + (Math.PI * (k + 0.5)) / 7;
@@ -276,17 +305,14 @@ function carverHall(v: PieceSet, f: Frame): void {
   cup(v, f, [-3.3, 0.1, F + 1]);
   // El panel en su caballete: abajo, tallado en estratos; arriba, la piedra lisa marcada para seguir.
   v.add(P.sandstone, box(), f.at([1.8, 0.6, F + 1.5], undefined, [2.2, 0.25, 2.8]));
-  for (let k = 0; k < 5; k++) {
-    v.add(
-      k % 2 ? P.sandstoneShade : P.sandstoneLight,
-      box(),
-      f.at([1.8, 0.75, F + 0.4 + k * 0.22], undefined, [2.0, 0.08, 0.12]),
-      'stone',
-      {
-        solid: false,
-      },
-    );
-  }
+  // Tallado hasta la cintura: lo de arriba sigue siendo piedra lisa con las líneas de guía.
+  absentRelief(v, f, {
+    at: [1.8, 0.77, F + 0.3],
+    turn: 0,
+    scale: 0.75,
+    depth: 0.3,
+    carvedUpTo: 0.55,
+  });
   v.add(P.slate, box(), f.at([1.3, 0.74, F + 1.6], undefined, [1.2, 0.02, 0.02]), 'metal', {
     solid: false,
   });
@@ -345,6 +371,33 @@ const CONTENTS: Record<HallId, (v: PieceSet, f: Frame) => void> = {
   carver: carverHall,
 };
 
+/** Cara de dentro del muro izquierdo de cada edificio (m desde el centro). */
+const HALL_INNER: Record<HallId, number> = {
+  study: HALLS.study.width / 2 - HALL.wall,
+  command: HALLS.command.width / 2 - HALL.wall,
+  carver: HALLS.carver.width / 2 - HALL.wall,
+};
+
+/** Lo que se lee en cada edificio (hito E): la marca INT_ y su fuente. */
+export const HALL_SOURCES: Record<
+  HallId,
+  { mark: string; at: Triple; clue: string; kind: 'texto' | 'objeto' | 'observacion' }
+> = {
+  study: { mark: 'INT_mural', at: [-4.9, 2.6, 1.6], clue: 'umbral.mural', kind: 'observacion' },
+  command: {
+    mark: 'INT_consola_mando',
+    at: [0, -3.3, 1.3],
+    clue: 'umbral.consola_mando',
+    kind: 'texto',
+  },
+  carver: {
+    mark: 'INT_mesa_tallista',
+    at: [-3, 1.3, 1.2],
+    clue: 'umbral.mesa_tallista',
+    kind: 'objeto',
+  },
+};
+
 /** Construye el edificio `id` mirando a `heading` (grados): el armazón y lo que se dejaron dentro. */
 export function closedHall(b: LandmarkBuilder, id: HallId, heading: number): Frame {
   const shape = HALLS[id];
@@ -357,5 +410,7 @@ export function closedHall(b: LandmarkBuilder, id: HallId, heading: number): Fra
   });
   hallShell(b.pieces, f, shape);
   CONTENTS[id](b.pieces, f);
+  const source = HALL_SOURCES[id];
+  b.mark(source.mark, f, source.at, { clue_id: source.clue, kind: source.kind });
   return f;
 }

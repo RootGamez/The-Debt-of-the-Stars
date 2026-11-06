@@ -33,6 +33,8 @@ export const PALETTE = {
   verdigris: '#5E9A86',
   /** Pilotos de los aparatos en espera. */
   standby: '#FFB45A',
+  /** Los dibujos de luz de los Ausentes (hito E): un verde agua pálido, distinto del ámbar de los pilotos. */
+  absentGlow: '#8FE3E8',
 } as const;
 /** Estratos de las mesas de roca, de abajo arriba. */
 export const STRATA = ['#C9A57A', '#B48A62', '#D6BA8E', '#A47A56', '#C2966C', '#9A7458'] as const;

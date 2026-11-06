@@ -45,6 +45,7 @@ export type LandmarkId = keyof typeof LANDMARKS;
 export interface LandmarkBuilder {
   readonly pieces: PieceSet;
   place(site: PlaceOptions & { lat: number; lon: number }): Frame;
+  mark(name: string, frame: Frame, at: Triple, props?: Record<string, string | number>): void;
   lamp(f: Frame, x: number, y: number, z?: number): void;
   strata(
     f: Frame,

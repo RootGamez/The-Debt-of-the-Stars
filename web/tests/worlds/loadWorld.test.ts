@@ -32,10 +32,13 @@ describe('buildWorld (worlds modelled in code, Phase 11)', () => {
       'umbral.boca',
       'umbral.carta',
       'umbral.casas',
+      'umbral.consola_mando',
       'umbral.cuaderno',
       'umbral.envios',
       'umbral.hoja_entrada',
       'umbral.llegada',
+      'umbral.mesa_tallista',
+      'umbral.mural',
       'umbral.placa',
     ]);
     expect(world?.markers.triggers.map((t) => t.event)).toEqual(['boca_destello']);

@@ -187,5 +187,58 @@
       ],
       "hechos": ["deuda.puertas_se_buscan"]
     }
+  },
+  {
+    "id": "umbral.mural",
+    "mundo": "umbral",
+    "tipo": "observacion",
+    "titulo": "El mural",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una figura tallada de cuerpo entero, mucho más alta que tú: casi dos veces un Ool.",
+        "No tiene rostro. La cabeza es un óvalo de vidrio oscuro con rombos incrustados que todavía brillan; por la piel, lisa como la porcelana, corren hilos de cobre.",
+        "Sobre ella, el anillo de una Puerta. Así se veían a sí mismos: así eran los Ausentes."
+      ],
+      "hechos": ["umbral.hogar_ausentes"]
+    }
+  },
+  {
+    "id": "umbral.consola_mando",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "titulo": "La consola de la Sala de Mando",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "La pantalla sigue en espera. Al tocarla se enciende un mapa: líneas de luz que salen todas de aquí hacia cada mundo del sistema.",
+        "Junto a este punto, una sola palabra repetida en cada línea: «Origen».",
+        "Este no era un puesto más. Desde aquí se abrió la primera Puerta: estás en el hogar de los Ausentes."
+      ],
+      "hechos": ["umbral.hogar_ausentes"]
+    }
+  },
+  {
+    "id": "umbral.mesa_tallista",
+    "mundo": "umbral",
+    "tipo": "objeto",
+    "titulo": "La mesa del Tallista",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Los cinceles están ordenados por tamaño, salvo uno, tirado junto a la taza. El té se secó en el fondo.",
+        "En el panel, la figura está tallada hasta la cintura; arriba, las líneas de guía siguen esperando.",
+        "Quien trabajaba aquí no terminó. Dejó el cincel y salió."
+      ],
+      "hechos": ["partida.precipitada"]
+    },
+    "profunda": {
+      "requiere": ["partida.evacuacion"],
+      "texto": [
+        "Ahora conoces el aviso: cuarenta minutos.",
+        "No le dio tiempo ni a guardar las herramientas."
+      ],
+      "hechos": []
+    }
   }
 ]

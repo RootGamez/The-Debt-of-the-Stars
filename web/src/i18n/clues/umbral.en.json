@@ -91,5 +91,33 @@
       "The Mouth opens for an instant. Its light reaches other worlds.",
       "Something, very far away, called it; and it answered."
     ]
+  },
+  "umbral.mural": {
+    "titulo": "The mural",
+    "superficial": [
+      "A full-length carved figure, much taller than you: almost twice an Ool.",
+      "It has no face. The head is an oval of dark glass with inlaid diamonds that still glow; copper threads run across its skin, smooth as porcelain.",
+      "Above it, the ring of a Gate. This is how they saw themselves: this is what the Absent were like."
+    ]
+  },
+  "umbral.consola_mando": {
+    "titulo": "The Command Room console",
+    "superficial": [
+      "The screen is still on standby. When you touch it, a map lights up: lines of light that all start here and reach every world of the system.",
+      "Next to this point, a single word repeated on every line: «Origin».",
+      "This was not just another post. The first Gate was opened from here: you are in the home of the Absent."
+    ]
+  },
+  "umbral.mesa_tallista": {
+    "titulo": "The Carver's table",
+    "superficial": [
+      "The chisels are sorted by size, except one, dropped next to the cup. The tea dried at the bottom.",
+      "On the panel, the figure is carved down to the waist; above, the guide lines are still waiting.",
+      "Whoever worked here didn't finish. They put down the chisel and left."
+    ],
+    "profunda": [
+      "Now you know about the notice: forty minutes.",
+      "There wasn't even time to put the tools away."
+    ]
   }
 }

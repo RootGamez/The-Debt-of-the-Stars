@@ -1,6 +1,6 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.12
+**Versión:** v0.13
 **Última actualización:** 2026-11-05 · Prólogo con tareas (la pieza de la isla)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
@@ -150,6 +150,10 @@ final se entiende como aviso.
 | `umbral.aula` | Texto | Siempre | Inscripciones infantiles: números y la forma de escribir horas | Una canción de cuna: "no cruces dos veces la misma Puerta en el mismo día" (H2) | `lectura.horas`, `deuda.cancion` · H2 |
 | `umbral.casas` | Objeto | Siempre | Seis casas con las mesas servidas, sin violencia | El aviso de evacuación pegado en una puerta: "40 minutos, Puertas 2 a 6" | `partida.evacuacion` · H3 |
 | `umbral.destello` | Evento (`TRIG_LaBoca_Destello`) | 10:00, 3 s | La Boca se abre un instante; su luz se ve desde otros mundos | Las Puertas "se buscan": La Boca responde a una llamada lejana (la de casa) | `deuda.puertas_se_buscan` · H2, H7 |
+| `umbral.llegada` (🟡, la llegada) | Texto | La primera llegada (y releíble donde se despierta) | La primera nota del cuaderno: un gusano me trajo; creo que es el sistema de los Ausentes | — | `llegada.gusano` · H7 |
+| `umbral.mural` (🟡, hito E) | Observación | Siempre (Casa de Estudio) | Un Ausente tallado de cuerpo entero bajo el anillo de una Puerta: sin rostro, vidrio oscuro, cobre y rombos de luz | — | `umbral.hogar_ausentes` · H3 |
+| `umbral.consola_mando` (🟡, hito E) | Texto | Siempre (Sala de Mando) | El mapa de la red: todas las líneas salen de aquí, «Origen». Desde aquí se abrió la primera Puerta | — | `umbral.hogar_ausentes` · H3 |
+| `umbral.mesa_tallista` (🟡, hito E) | Objeto | Siempre (Taller del Tallista) | Cinceles en la mesa, un té seco y un Ausente tallado hasta la cintura | "Cuarenta minutos": no le dio tiempo ni a guardar las herramientas (con `partida.evacuacion`) | `partida.precipitada` · H3 |
 | `umbral.hoja_entrada` (🟡, Fase 11E) | Texto | Siempre | Una hoja suelta del registro en el tablón del Muelle: las cargas al Archivo no entraban por el vidrio | "Bajo la tercera torre, en el fondo, la puerta del pozo. Busca las tres bandas" | `archivo.entrada` · H4 |
 
 ### 5.3 Archivo — la biblioteca (reloj 0,80)
@@ -357,3 +361,4 @@ textos de ambiente sin peso en el grafo.
 - **2026-11-03 · Fase 11G (🟡).** Hogar rehecho: doce fuentes nuevas de ambiente (once notas y la charla de la astrónoma), sin hechos. La Directora espera ahora en el Motor (cambia su primera línea). Total: 67 fuentes y 61 hechos.
 - **2026-11-05 · Prólogo con tareas (🟡).** Nueva fuente `hogar.fragmento_isla` (isla del primer Albatros) con el hecho `casa.fragmento_isla` (H7): la Maestra manda a buscar una pieza pequeña y la Directora solo da la misión (`casa.mision_luna`, ahora su lectura profunda) cuando se la llevas. `casa.directora_dirige` pasa a ser su lectura superficial y su frase pierde «a quien tendré que convencer». En el cuaderno del prólogo no aparecen las preguntas sobre los Ausentes: solo las tareas y lo aprendido. Total: 61 fuentes del grafo.
 - **2026-11-04 · Fase 11H (🟡).** Cicatriz pasa a ser hueca, con micro agujero en el centro y anillo (✅ la idea, Anthony). Cinco fuentes nuevas con texto borrador: `cicatriz.cripta`, `cicatriz.friso`, `cicatriz.nucleo`, `cicatriz.partidas` y `cicatriz.anillo`, y cinco hechos nuevos (`nudo.sellado`, `deuda.mundo_vaciado`, `deuda.garganta_maquina`, `partida.ultimas_salidas`, `deuda.anillo_de_mordidas`), todos 🟡 para que Anthony los decida. Total: 72 fuentes y 66 hechos.
+- **2026-11-06 · Llegada e hito E (🟡).** Umbral gana cuatro fuentes: `umbral.llegada` (la primera nota), `umbral.mural`, `umbral.consola_mando` y `umbral.mesa_tallista`, y tres hechos encadenados: `llegada.gusano` → `umbral.hogar_ausentes` → `partida.precipitada` → `partida.evacuacion`. Total: 65 fuentes. Textos en borrador.

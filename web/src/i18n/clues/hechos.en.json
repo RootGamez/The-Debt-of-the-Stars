@@ -211,5 +211,11 @@
   },
   "deuda.anillo_de_mordidas": {
     "frase": "Scar's ring is the rock the bites tore off and did not take."
+  },
+  "umbral.hogar_ausentes": {
+    "frase": "Umbral was the home of the Absent: the first Gate was opened from here."
+  },
+  "partida.precipitada": {
+    "frase": "They left recently and in a hurry: devices on standby, tools on the table, work half done."
   }
 }

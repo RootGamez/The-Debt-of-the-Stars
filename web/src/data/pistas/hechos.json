@@ -11,7 +11,21 @@
     "hilos": ["H7"],
     "frase": "Un agujero de gusano me arrancó de mi primer vuelo y me trajo a un sistema que no es el mío.",
     "menciona": [],
-    "enlaces": ["bucle.llegada"]
+    "enlaces": ["bucle.llegada", "umbral.hogar_ausentes"]
+  },
+  {
+    "id": "umbral.hogar_ausentes",
+    "hilos": ["H3"],
+    "frase": "Umbral era el hogar de los Ausentes: desde aquí se abrió la primera Puerta.",
+    "menciona": [],
+    "enlaces": ["llegada.gusano", "partida.precipitada"]
+  },
+  {
+    "id": "partida.precipitada",
+    "hilos": ["H3"],
+    "frase": "Se fueron hace poco y con prisa: aparatos en espera, herramientas sobre la mesa, trabajos a medias.",
+    "menciona": [],
+    "enlaces": ["umbral.hogar_ausentes", "partida.evacuacion"]
   },
   {
     "id": "bucle.orden_camara",
