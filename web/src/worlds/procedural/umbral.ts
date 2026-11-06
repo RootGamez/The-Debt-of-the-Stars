@@ -962,6 +962,28 @@ class UmbralBuilder {
         'metal',
       );
     }
+    // La cuenta de la bola (P1): una tira de pizarra bajo el tablero, con el canal dibujado y la bola marcada en
+    // las posiciones uno, cuatro y nueve; la última queda en blanco.
+    v.add(P.slate, box(), f.at([0, 2.37, 0.78], undefined, [3.4, 0.04, 0.42]), 'metal');
+    for (let mark = 1; mark <= 16; mark++) {
+      const x = -1.55 + (mark - 1) * 0.2;
+      const chalk = mark === 1 || mark === 4 || mark === 9;
+      v.add(
+        chalk ? P.amber : P.porcelain,
+        box(),
+        f.at([x, 2.34, chalk ? 0.8 : 0.72], undefined, [
+          chalk ? 0.1 : 0.03,
+          0.02,
+          chalk ? 0.1 : 0.1,
+        ]),
+        'metal',
+        { vary: 0, solid: false },
+      );
+    }
+    this.mark('INT_cuenta_ninos', f, [0, 2.0, 0.85], {
+      clue_id: 'umbral.cuenta_ninos',
+      kind: 'texto',
+    });
     this.lamp(f, -3.9, -2.8, 0.15);
     this.mark('INT_aula', f, [0.2, 1.7, 1.5], { clue_id: 'umbral.aula', kind: 'texto' });
   }

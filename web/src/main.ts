@@ -11,7 +11,9 @@ import { Quaternion, Timer, Vector3, type PerspectiveCamera, type WebGLRenderer 
 import { loadChronology } from './core/chronology';
 import { createSoundtrack } from './audio/soundtrack';
 import { machineTime } from './game/counterweight';
+import { createBellsRig } from './game/bellsRig';
 import { createCounterweightRig } from './game/counterweightRig';
+import { composeActions } from './reading/composeActions';
 import type { Ending } from './game/epilogue';
 import { createEpilogueRig } from './game/epilogueRig';
 import { aimToward } from './game/aim';
@@ -451,6 +453,7 @@ function start(): void {
       diving.reset();
       waterPlay.reset();
       counterweight?.play.reset();
+      bells?.play.reset();
       track?.reset();
       arrive(startWorld);
     },
@@ -474,6 +477,14 @@ function start(): void {
   });
   // El sonido se sintetiza (sin archivos) y arranca con el primer gesto del jugador.
   const soundtrack = createSoundtrack();
+  // Las campanas del Anfiteatro de Umbral (P1): coger, poner en el canal y oír a la bola pasar.
+  const bells = createBellsRig({
+    scene,
+    runtimes,
+    chime: (frequency) => {
+      soundtrack.chime(frequency);
+    },
+  });
   // La bitácora de mundos: los nombres que el jugador les puso (se guardan con la partida).
   let worldNames: WorldNames = session.savedWorlds;
   const discovery = createWorldDiscovery(
@@ -580,9 +591,15 @@ function start(): void {
     overlay,
     player,
     touch: isTouchDevice(),
-    actions: counterweight?.play.actions ?? epilogue?.play.actions ?? homecoming?.play.actions,
+    actions: composeActions([
+      counterweight?.play.actions,
+      bells?.play.actions,
+      epilogue?.play.actions,
+      homecoming?.play.actions,
+    ]),
     readers: {
       ...counterweight?.readers,
+      ...bells?.readers,
       ...epilogue?.readers,
       ...(track && { pista: (status, _solved, solve) => trackClockBody(track, status, solve) }),
       ocular: (status, solved, solve) => ocularBody(ocularSource, status, solved, solve),
@@ -768,6 +785,10 @@ function start(): void {
     window.__juego.tasks = () => taskRig?.snapshot() ?? null;
     window.__juego.absorption = () => absorption?.snapshot() ?? null;
     window.__juego.counterweight = () => counterweight?.play.snapshot() ?? null;
+    window.__juego.bells = () => bells?.play.snapshot() ?? null;
+    window.__juego.bellsMark = (mark) => {
+      bells?.forceMark(mark);
+    };
     window.__juego.horizon = () => {
       const { frame, position } = viewer();
       return { radius: horizon.radius, closeness: horizon.closeness(frame, position) };
@@ -1170,6 +1191,7 @@ function start(): void {
         { t, carrierRate: session.director.rate, piloting },
         timeRuns ? dt : 0,
       );
+      bells?.update(camera, t, timeRuns ? dt : 0);
       if (counterweight?.play.place === 'installed' && !stable) session.director.stabilize();
       epilogue?.update();
       homecoming?.update(dt);

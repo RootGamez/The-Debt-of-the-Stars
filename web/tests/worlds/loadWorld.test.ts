@@ -28,12 +28,19 @@ describe('buildWorld (worlds modelled in code, Phase 11)', () => {
     ]);
     expect([...(world?.markers.parks.keys() ?? [])].sort()).toEqual(['PARK_Caida', 'PARK_Nave']);
     expect(world?.markers.interactions.map((i) => i.clueId).sort()).toEqual([
+      'umbral.atril',
       'umbral.aula',
       'umbral.boca',
+      'umbral.campanas',
+      'umbral.canal',
+      'umbral.canal',
+      'umbral.canal',
+      'umbral.canal',
       'umbral.carta',
       'umbral.casas',
       'umbral.consola_mando',
       'umbral.cuaderno',
+      'umbral.cuenta_ninos',
       'umbral.envios',
       'umbral.hoja_entrada',
       'umbral.llegada',

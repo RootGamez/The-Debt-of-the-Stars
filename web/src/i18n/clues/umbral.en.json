@@ -119,5 +119,35 @@
       "Now you know about the notice: forty minutes.",
       "There wasn't even time to put the tools away."
     ]
+  },
+  "umbral.campanas": {
+    "titulo": "The bells of the Amphitheatre",
+    "superficial": [
+      "Four bronze bells hang from a crossbar, as if waiting for someone to carry them off.",
+      "They weigh what a full jug weighs. None has a number or a mark: all four are alike."
+    ]
+  },
+  "umbral.canal": {
+    "titulo": "The stone channel",
+    "superficial": [
+      "A stone channel, sloping, with sixteen bronze marks along it. At the top, a stop.",
+      "Every twenty seconds a bronze ball sets off down it, faster and faster.",
+      "A bell would fit on each mark. If they stood at equal distances, they would ring closer and closer together."
+    ]
+  },
+  "umbral.cuenta_ninos": {
+    "titulo": "The count of the ball",
+    "superficial": [
+      "A strip of slate under the board in the Classroom. Above, sixteen little marks in a row; below, a rhyme in a child's handwriting:",
+      "“The ball counts one, counts four, counts nine… and the next one, where does it fall?”",
+      "Three marks are filled with amber chalk: the first, the fourth and the ninth. The next one is empty."
+    ]
+  },
+  "umbral.atril": {
+    "titulo": "The lectern of the bells",
+    "superficial": [
+      "A sandstone lectern with its lid closed and a slit of light beneath it.",
+      "From the mechanism below comes, now and then, a small tap, like someone waiting for their turn."
+    ]
   }
 }

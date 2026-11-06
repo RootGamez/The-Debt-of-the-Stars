@@ -472,5 +472,27 @@
     "hilos": ["H2"],
     "frase": "El anillo de Cicatriz es la roca que las mordidas arrancaron y no se llevaron.",
     "enlaces": ["casa.fragmentos_de_aqui", "deuda.filtraciones"]
+  },
+  {
+    "id": "mundos.cuenta",
+    "hilos": ["H5"],
+    "frase": "En el Aula cuentan una rima de una bola que rueda: uno, cuatro, nueve… cada vez más lejos.",
+    "rumor": "¿Qué cuenta la rima de la bola del Aula?",
+    "enlaces": ["mundos.compas"]
+  },
+  {
+    "id": "mundos.compas",
+    "hilos": ["H5"],
+    "frase": "Las campanas suenan a compás en las marcas 1, 4, 9 y 16: la bola acelera y cada una debe quedar más lejos.",
+    "rumor": "¿Dónde hay que poner las campanas para que suenen a compás?",
+    "enlaces": ["mundos.cancion"],
+    "dibujo": "campanas"
+  },
+  {
+    "id": "mundos.cancion",
+    "hilos": ["H5"],
+    "frase": "Una canción nombra los mundos desde la Brasa: Taller corre, Cicatriz arde, Archivo pesa, Umbral espera… Observatorio vela.",
+    "rumor": "¿Qué canta el atril de las campanas?",
+    "dibujo": "cancion"
   }
 ]

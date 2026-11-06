@@ -199,3 +199,26 @@ describe('the voice of the letters', () => {
     expect(oscillators).toBe(1);
   });
 });
+
+describe('the bell', () => {
+  it('stays silent until unlocked and then plays two partials', async () => {
+    let oscillators = 0;
+    const context = fakeContext();
+    const counting = new Proxy(context, {
+      get(target, key) {
+        if (key === 'createOscillator') oscillators++;
+        return Reflect.get(target, key) as unknown;
+      },
+    });
+    const engine = createAudioEngine(() => counting);
+
+    engine.chime(440);
+    expect(oscillators).toBe(0);
+
+    engine.unlock();
+    await Promise.resolve();
+    engine.chime(440);
+
+    expect(oscillators).toBe(2);
+  });
+});

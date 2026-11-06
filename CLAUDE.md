@@ -100,6 +100,11 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - Las primitivas de `kit.ts` (`box()`, `cylinder()`…) están en caché y se comparten: clónalas antes de `applyMatrix4`.
 - Para mirar un mundo de cerca sin jugar, una página temporal en `web/` que llame a `buildUmbral()` sirve (no la dejes en el repo).
 
+## Puzzles físicos (plan: `docs/plan-historia-y-puzzles-fisicos.md`)
+- `game/carry.ts` es coger, llevar y encajar (puro: manos, estante, encajes; todo vuelve al estante con cada ciclo). Las acciones de varias fuentes se juntan con `reading/composeActions.ts`.
+- P1, las campanas del Anfiteatro de Umbral: `puzzles/bells.ts` (el compás), `game/bellsPlay.ts` y `bellsRig.ts`, `render/bellsView.ts`, estructura en `worlds/procedural/umbralBells*.ts`. Las marcas `INT_canal_N` comparten `clue_id` (se alcanza desde cualquier punto del canal). Con `?debug`: `__juego.bells()` y `__juego.bellsMark(n)` (fija la marca más cercana para probar sin andar al milímetro).
+- Los croquis del cuaderno (`dibujo` en los hechos) están en `ui/notebookSketches.ts` (trazos puros, con texto alternativo en los dos idiomas).
+
 ## El explorador (el jugador, por código)
 - Ool joven con traje acolchado remendado y casco de burbuja (lámina de Anthony): `web/src/character/`. `gait.ts` es la lógica pura del andar (fase por distancia, quieto/andar/correr/aire/nadar), `explorerBody.ts` y `explorerGear.ts` las piezas, `explorerModel.ts` el muñeco articulado (un `Group` por articulación, marco de diseño Z arriba y frente +Y).
 - ✅ Mide como un Ool adulto: `EYE_HEIGHT` 1,08 y `PLAYER_HEIGHT` 1,45 (`data/movement.ts`).

@@ -22,6 +22,12 @@ const BLIP_LEVEL = 0.05;
 const BLIP_ATTACK = 0.008;
 const BLIP_LENGTH = 0.07;
 const BLIP_WOBBLE = 0.14;
+/** La campana: ataque (s) y sus parciales [razón con la fundamental, volumen, duración (s)]. */
+const CHIME_ATTACK = 0.006;
+const CHIME_PARTIALS: readonly (readonly [number, number, number])[] = [
+  [1, 0.12, 1.6],
+  [2.76, 0.05, 0.7],
+];
 
 export interface AudioEngine {
   /** Voces vivas (sonando o apagándose). */
@@ -39,6 +45,8 @@ export interface AudioEngine {
    * volumen general: el silencio (M) también lo calla, pero no lo apaga el filtro de leer.
    */
   blip(frequency: number): void;
+  /** El toque de una campana de bronce (las campanas del Anfiteatro): un tono con su armónico que se apaga despacio. */
+  chime(frequency: number): void;
   /** Pestaña oculta: el audio se detiene con el tiempo del juego. */
   suspend(): void;
   resume(): void;
@@ -332,6 +340,24 @@ export function createAudioEngine(createContext: () => AudioContext = defaultCon
       level.connect(master);
       tone.start(now);
       tone.stop(now + BLIP_LENGTH + 0.01);
+    },
+    chime(frequency) {
+      if (!context || !master || context.state !== 'running') return;
+      const now = context.currentTime;
+      // Fundamental y un armónico inarmónico (2,76×), como el bronce; el segundo se apaga antes.
+      for (const [ratio, level, length] of CHIME_PARTIALS) {
+        const tone = context.createOscillator();
+        const gain = context.createGain();
+        tone.type = 'sine';
+        tone.frequency.value = frequency * ratio;
+        gain.gain.setValueAtTime(SILENCE, now);
+        gain.gain.exponentialRampToValueAtTime(level, now + CHIME_ATTACK);
+        gain.gain.exponentialRampToValueAtTime(SILENCE, now + length);
+        tone.connect(gain);
+        gain.connect(master);
+        tone.start(now);
+        tone.stop(now + length + 0.01);
+      }
     },
     suspend() {
       heldBack = true;

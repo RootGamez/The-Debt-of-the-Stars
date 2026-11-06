@@ -373,6 +373,60 @@ const BUILDERS: Readonly<Record<string, () => Sketch>> = {
     };
   },
 
+  /** `mundos.compas`: el canal inclinado con las campanas en las marcas 1, 4, 9 y 16. */
+  campanas() {
+    const pen = new Pen(97);
+    const at = (mark: number): Pt => [20 + mark * 10.5, 28 + mark * 4.4];
+    pen.line([20, 28], [190, 100]);
+    for (let mark = 1; mark <= 16; mark++) {
+      const [x, y] = at(mark);
+      pen.line([x, y - 3], [x, y + 3]);
+    }
+    for (const mark of [1, 4, 9, 16]) {
+      const [x, y] = at(mark);
+      pen.arc(x, y - 8, 7, 180, 360, true);
+      pen.line([x - 7, y - 8], [x + 7, y - 8], true);
+      pen.dot(x, y - 12, 1.3, true);
+      pen.label(x, y + 14, String(mark), 'middle', true);
+    }
+    pen.circle(26, 24, 3);
+    pen.label(100, 14, t('cada vez más lejos'));
+    return {
+      alt: t(
+        'Dibujo: un canal inclinado con dieciséis marcas y cuatro campanas puestas en las marcas 1, 4, 9 y 16',
+      ),
+      shapes: pen.shapes,
+    };
+  },
+
+  /** `mundos.cancion`: la fila de mundos desde la Brasa, con un hueco entre Umbral y el Observatorio. */
+  cancion() {
+    const pen = new Pen(101);
+    pen.circle(14, 66, 9, true);
+    pen.dot(14, 66, 3, true);
+    pen.label(14, 92, t('la Brasa'), 'middle', true);
+    const worlds = [t('Taller'), t('Cicatriz'), t('Archivo'), t('Umbral'), '', t('Observatorio')];
+    worlds.forEach((name, index) => {
+      const x = 50 + index * 28;
+      if (name === '') {
+        pen.circle(x, 66, 6, true, true);
+        pen.label(x, 52, '?', 'middle', true);
+        return;
+      }
+      pen.circle(x, 66, 6);
+      pen.dot(x, 66, 1.6);
+      pen.label(x, index % 2 === 0 ? 44 : 92, name);
+    });
+    pen.line([28, 66], [40, 66], false, true);
+    pen.label(100, 18, t('un verso que nadie canta'), 'middle', true);
+    return {
+      alt: t(
+        'Dibujo: una fila de mundos desde la Brasa: Taller, Cicatriz, Archivo, Umbral, un hueco punteado y el Observatorio',
+      ),
+      shapes: pen.shapes,
+    };
+  },
+
   /** `bocas.relojes_distintos`: tres bocas de Puerta, cada una con su hora. */
   bocas() {
     const pen = new Pen(79);

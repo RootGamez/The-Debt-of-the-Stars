@@ -24,6 +24,8 @@ export interface Soundtrack {
   update(input: Omit<MixInput, 'muted'>): void;
   /** La voz de letras de un texto que se escribe (no suena en silencio). */
   blip(frequency: number): void;
+  /** El toque de una campana (no suena en silencio). */
+  chime(frequency: number): void;
   dispose(): void;
 }
 
@@ -82,6 +84,9 @@ export function createSoundtrack(engine: AudioEngine = createAudioEngine()): Sou
     },
     blip(frequency) {
       if (!muted) engine.blip(frequency);
+    },
+    chime(frequency) {
+      if (!muted) engine.chime(frequency);
     },
     dispose() {
       abort.abort();

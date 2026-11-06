@@ -240,5 +240,66 @@
       ],
       "hechos": []
     }
+  },
+  {
+    "id": "umbral.campanas",
+    "mundo": "umbral",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "Las campanas del Anfiteatro",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Cuatro campanas de bronce cuelgan de un travesaño, como esperando a que alguien las lleve.",
+        "Pesan lo que pesa un cántaro lleno. Ninguna lleva número ni marca: las cuatro son iguales."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "umbral.canal",
+    "mundo": "umbral",
+    "tipo": "observacion",
+    "ambiente": true,
+    "titulo": "El canal de piedra",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Un canal de piedra, inclinado, con dieciséis marcas de bronce a lo largo. Arriba, un tope.",
+        "Cada veinte segundos una bola de bronce echa a rodar por él, y cada vez más deprisa.",
+        "Sobre cada marca cabría una campana. Si estuvieran a distancias iguales, sonarían cada vez más seguidas."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "umbral.cuenta_ninos",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "titulo": "La cuenta de la bola",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una tira de pizarra bajo el tablero del Aula. Arriba, dieciséis marquitas en fila; debajo, una rima con letra de niño:",
+        "«La bola cuenta uno, cuenta cuatro, cuenta nueve… y la que sigue, ¿dónde cae?»",
+        "Tres marcas están rellenas de tiza ámbar: la primera, la cuarta y la novena. La siguiente, vacía."
+      ],
+      "hechos": ["mundos.cuenta"]
+    }
+  },
+  {
+    "id": "umbral.atril",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "lector": "campanas",
+    "titulo": "El atril de las campanas",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Un atril de arenisca con la tapa cerrada y una ranura de luz bajo ella.",
+        "Del mecanismo de debajo sale, de vez en cuando, un golpecito, como de alguien que espera su turno."
+      ],
+      "hechos": ["mundos.compas", "mundos.cancion"]
+    }
   }
 ]

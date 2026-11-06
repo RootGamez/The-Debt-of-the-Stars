@@ -214,6 +214,8 @@ export function createPuzzlePanel(
         return { body: element('p', 'puzzle-hint', t('El reloj de la Pista está parado.')) };
       case 'ocular':
         return { body: element('p', 'puzzle-hint', t('El ocular está a oscuras.')) };
+      case 'campanas':
+        return { body: element('p', 'puzzle-hint', t('La tapa no cede.')) };
     }
   }
 

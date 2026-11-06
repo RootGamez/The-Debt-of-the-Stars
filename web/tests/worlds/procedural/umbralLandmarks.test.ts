@@ -54,15 +54,19 @@ describe('the new places of Umbral', () => {
   });
 
   it('keeps away from the places with clues and from where the ship waits', () => {
-    const taken = [
-      ...runtime.world.markers.interactions.map((i) => i.object),
-      ...runtime.world.markers.parks.values(),
-    ].map((o) => o.getWorldPosition(new Vector3()));
+    // El Anfiteatro lleva sus propias fuentes (las campanas, P1): lo demás debe quedar lejos de él.
+    const own = new Set(['umbral.campanas', 'umbral.canal', 'umbral.atril']);
+    const parks = [...runtime.world.markers.parks.values()];
+    const others = runtime.world.markers.interactions.filter((i) => !own.has(i.clueId));
 
-    for (const site of Object.values(LANDMARKS)) {
+    for (const [name, site] of Object.entries(LANDMARKS)) {
+      const marks = name === 'amphitheatre' ? others : runtime.world.markers.interactions;
+      const taken = [...marks.map((i) => i.object), ...parks].map((o) =>
+        o.getWorldPosition(new Vector3()),
+      );
       const center = surfaceAt(site.lat, site.lon);
       const closest = Math.min(...taken.map((t) => t.distanceTo(center)));
-      expect(closest).toBeGreaterThan(site.pad + 4);
+      expect(closest, name).toBeGreaterThan(site.pad + 4);
     }
   });
 });

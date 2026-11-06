@@ -424,6 +424,23 @@ export const EN: Readonly<Record<string, string>> = {
   'Mostrar tareas': 'Show tasks',
   'Ocultar o mostrar la interfaz': 'Hide or show the interface',
   'Pantalla completa': 'Full screen',
+  'Las cuatro campanas suenan a compás. La tapa se ha abierto.':
+    'The four bells ring in time. The lid has opened.',
+  'La tapa no cede. Debajo se oye un mecanismo que espera algo: un compás.':
+    'The lid will not give. Beneath it you can hear a mechanism waiting for something: a beat.',
+  'La tapa no cede. Hay {placed} de {total} campanas en el canal.':
+    'The lid will not give. There are {placed} of {total} bells on the channel.',
+  'La tapa no cede: las campanas suenan, pero no a compás.':
+    'The lid will not give: the bells ring, but not in time.',
+  'La tapa del atril está abierta.': 'The lid of the lectern is open.',
+  'La tapa no cede.': 'The lid will not give.',
+  'cada vez más lejos': 'farther each time',
+  'Dibujo: un canal inclinado con dieciséis marcas y cuatro campanas puestas en las marcas 1, 4, 9 y 16':
+    'Drawing: a sloping channel with sixteen marks and four bells set on marks 1, 4, 9 and 16',
+  'la Brasa': 'the Ember',
+  'un verso que nadie canta': 'a verse nobody sings',
+  'Dibujo: una fila de mundos desde la Brasa: Taller, Cicatriz, Archivo, Umbral, un hueco punteado y el Observatorio':
+    'Drawing: a row of worlds from the Ember: Workshop, Scar, Archive, Threshold, a dotted gap and the Observatory',
   'donde está': 'where it is',
   'donde parece': 'where it seems',
   'Dibujo: una estrella se ve dieciocho grados más allá de donde está, junto a un punto oscuro que dobla la luz':

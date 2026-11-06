@@ -17,6 +17,7 @@ import {
   type Triple,
 } from './kit';
 import { seededRandom } from './noise';
+import { bellsChannel, bellsLectern, bellsMarks, bellsRack } from './umbralBells';
 import { PALETTE as P } from './umbralPalette';
 
 /** Brillo del faro de la Atalaya: se ve desde la otra punta de la planicie. */
@@ -283,6 +284,11 @@ export function amphitheatre(b: LandmarkBuilder): void {
     const x = side * 5.6 * Math.sin(gap);
     b.lamp(f, x * 1.25, -10.3, 0);
   }
+  // El canal de las campanas (P1), su estante y el atril cerrado.
+  bellsChannel(b, f);
+  bellsRack(b, f);
+  bellsLectern(b, f);
+  bellsMarks(b, f);
 }
 
 /** El Anillo Caído: un primer anillo roto, medio enterrado, con dovelas sueltas por la arena. */

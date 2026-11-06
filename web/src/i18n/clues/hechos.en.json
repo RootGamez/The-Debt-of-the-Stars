@@ -237,5 +237,17 @@
   },
   "casa.planos_completan": {
     "frase": "These plans are exactly what the Institute's Gate is missing: with them, its test would work."
+  },
+  "mundos.cuenta": {
+    "frase": "In the Classroom they count a rhyme about a rolling ball: one, four, nine… farther each time.",
+    "rumor": "What does the rhyme of the ball in the Classroom count?"
+  },
+  "mundos.compas": {
+    "frase": "The bells ring in time at marks 1, 4, 9 and 16: the ball speeds up, so each bell must sit farther down.",
+    "rumor": "Where must the bells go to ring in time?"
+  },
+  "mundos.cancion": {
+    "frase": "A song names the worlds from the Ember: Workshop runs, Scar burns, Archive weighs, Threshold waits… Observatory watches.",
+    "rumor": "What does the lectern of the bells sing?"
   }
 }
