@@ -16,7 +16,8 @@ export type TaskId =
   | 'isla'
   | 'directora'
   | 'luna'
-  | 'fragmento';
+  | 'fragmento'
+  | 'volver';
 
 /** Adónde señala el indicador: una fuente del Registro (su marca INT_), un cuerpo del sistema o a nada. */
 export type TaskTarget =
@@ -202,6 +203,18 @@ const DEFS: readonly TaskDef[] = [
     },
     target: { kind: 'source', id: 'instituto.fragmento_luna' },
     done: (s) => s.facts.has(MOON_FRAGMENT_FACT),
+  },
+  {
+    // ✅ (Anthony, 2026-11-06): al sentarse empieza la cinemática del gusano (game/wormholeCinematic.ts).
+    id: 'volver',
+    title: t('Vuelve al Albatros II'),
+    label: t('Albatros II'),
+    hint: {
+      keys: t('Vuelve a la nave: junto a la escotilla, F para subir; sentado en el asiento, F'),
+      touch: t('Vuelve a la nave: junto a la escotilla toca Subir y, en el asiento, Pilotar'),
+    },
+    target: { kind: 'none' },
+    done: (s) => s.piloting && s.facts.has(MOON_FRAGMENT_FACT),
   },
 ];
 

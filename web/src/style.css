@@ -262,6 +262,40 @@ body {
   opacity: 0;
 }
 
+/* El destello del gusano (plan de la llegada, A.1): una luz cálida que crece desde el centro mientras arrastra la
+   nave; debajo del fundido a blanco. */
+.gusano-destello {
+  position: fixed;
+  inset: -20%;
+  z-index: 25;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      #fff6e4 0%,
+      #ffd9a0 8%,
+      rgb(255 170 90 / 0.35) 22%,
+      transparent 48%
+    ),
+    conic-gradient(
+      from 0deg at 50% 45%,
+      transparent 0deg,
+      rgb(255 230 190 / 0.25) 6deg,
+      transparent 14deg,
+      transparent 80deg,
+      rgb(255 230 190 / 0.2) 88deg,
+      transparent 96deg,
+      transparent 170deg,
+      rgb(255 230 190 / 0.25) 178deg,
+      transparent 186deg,
+      transparent 260deg,
+      rgb(255 230 190 / 0.2) 268deg,
+      transparent 276deg
+    );
+}
+
 /* La tarjeta del final (Fase 10E): encima de todo, abajo, para que la escena (la Luna del final A) siga a la vista. */
 .ending {
   position: fixed;

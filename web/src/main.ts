@@ -49,7 +49,10 @@ import { createMainMenu, type MainMenu } from './menu/mainMenu';
 import { createPrologueGate, WORMHOLE } from './game/prologue';
 import { TaskTracker } from './game/tasks';
 import { createTaskRig } from './game/taskRig';
-import { wormholeCenter } from './game/wormhole';
+import { cinematicCenter, cinematicShipPosition } from './game/wormholeCinematic';
+import { awakeningPose } from './game/awakening';
+import { spawnOnGround } from './physics/spawn';
+import { createWarpDistortion } from './ui/warpDistortion';
 import { createWormholeView } from './render/wormholeView';
 import { Player } from './core/player';
 import { absorptionWindow, quietChronology, triggersAsEvents } from './core/timeline';
@@ -107,6 +110,13 @@ import {
 } from './worlds/worldLog';
 import type { WorldRuntime } from './worlds/worldRuntime';
 import { startWorld as firstWorld, worldTitle } from './worlds/worldSelection';
+
+/** La primera llegada al sistema ajeno: dónde se despierta y la nota que escribe al levantarse. */
+const FIRST_ARRIVAL = {
+  world: 'umbral',
+  spawn: 'SPAWN_Despertar',
+  note: 'umbral.llegada',
+} as const;
 
 const NEAR_PLANE = 0.05;
 /** Desde aquí, durante este evento, la imagen del Nudo se ve con claridad (cronologia.json). */
@@ -604,8 +614,28 @@ function start(): void {
         })
       : undefined;
   game.flight = flight;
+  // La cinemática del gusano del prólogo: mientras dura, la nave se pilota sola y no se controla nada.
+  const cinematic: {
+    active: boolean;
+    elapsed: number;
+    center: Vector3 | undefined;
+    start: Vector3 | undefined;
+  } = {
+    active: false,
+    elapsed: 0,
+    center: undefined,
+    start: undefined,
+  };
+  // La primera llegada tras el gusano (✅ Anthony, 2026-11-06): tumbado lejos de la nave, se incorpora y escribe
+  // su primera nota; hasta entonces no se controla nada. Solo esa vez: luego se aparece frente a La Boca.
+  let awakening: { elapsed: number; noted: boolean } | undefined =
+    arrivedBy === 'blanco' && !inPrologue && currentWorld.id === FIRST_ARRIVAL.world
+      ? { elapsed: 0, noted: false }
+      : undefined;
   // Leyendo, muriendo o cerrado ya el viaje (la vuelta a casa), no se hace nada.
   const free = (): boolean =>
+    !cinematic.active &&
+    awakening === undefined &&
     session.acceptsInput &&
     !ui.blocking &&
     !discovery.isOpen &&
@@ -809,27 +839,39 @@ function start(): void {
       : undefined;
   // El gusano junto al fragmento de la Luna: se abre, y al terminar llega el fundido a blanco de la Cámara.
   const wormholeView = inPrologue ? createWormholeView() : undefined;
+  // Mientras arrastra la nave, la imagen se separa en colores y crece un destello.
+  const warpDistortion = inPrologue ? createWarpDistortion(renderer.domElement) : undefined;
   let crossingAsked = false;
   function openWormhole(): void {
-    const fragment = sources
-      .get(WORMHOLE.world)
-      ?.interactables.find((i) => i.id === WORMHOLE.source);
     const moon = systemScene.groupOf(WORMHOLE.world);
-    if (!wormholeView || !fragment || !moon) {
+    // Desde aquí no se controla nada (ni levantarse, ni pilotar, ni el cuaderno): solo se mira.
+    cinematic.active = true;
+    cinematic.elapsed = 0;
+    ui.setLocked(true);
+    if (!wormholeView || !moon) {
       wormhole = 'gusano'; // sin la escena, directamente al fundido
       return;
     }
-    // Sobre el fragmento y un poco más allá, visto desde ti; cuelga de la Luna (su centro es su origen).
+    // Delante de la nave y por encima, según hacia dónde miras; cuelga de la Luna (su centro es su origen).
     moon.updateWorldMatrix(true, false);
     const eye = moon.worldToLocal(camera.position.clone());
-    wormholeView.start(moon, wormholeCenter(fragment.position, new Vector3(), eye));
+    const ahead = moon.worldToLocal(
+      camera.position.clone().add(camera.getWorldDirection(new Vector3())),
+    );
+    cinematic.center = cinematicCenter(eye, ahead.sub(eye), new Vector3());
+    // La nave sale de donde está (si estás en la Luna); si no, de tu vista.
+    cinematic.start = flight?.frame === WORMHOLE.world ? flight.position.clone() : eye;
+    wormholeView.start(moon, cinematic.center);
   }
   let wormhole: DeathCause | undefined;
   const physics = createFixedStep(
     { stepSeconds: PHYSICS_STEP, maxStepsPerFrame: MAX_PHYSICS_STEPS_PER_FRAME },
     (dt) => {
       const moving = overlay.playing && free();
-      if (flight?.piloting) {
+      if (cinematic.active && flight?.piloting) {
+        // La nave sigue el recorrido de la cinemática (en cada fotograma): aquí no vuela ni choca.
+        flight.hold();
+      } else if (flight?.piloting) {
         if (moving) shipDeath ??= flight.step(session.director.clock.t, input.flightKeys(), dt);
         else flight.hold();
       } else {
@@ -839,6 +881,19 @@ function start(): void {
     },
   );
   status.textContent = '';
+  if (awakening) {
+    const mark = currentWorld.world.markers.spawns.get(FIRST_ARRIVAL.spawn);
+    if (mark) {
+      player.switchWorld(
+        spawnOnGround(mark, currentWorld.collision, currentWorld.well),
+        envOf(currentWorld.id),
+        currentWorld.well,
+      );
+      passage.reset(player.state.position);
+    }
+    flight?.parkAtCrash();
+    ui.setLocked(true);
+  }
   arrival?.clear();
 
   let awoke = false;
@@ -857,7 +912,16 @@ function start(): void {
       const timeRuns =
         overlay.playing && !ui.blocking && !discovery.isOpen && !(shipMap?.isOpen ?? false);
       // El primer despertar de la partida: el cartel del mundo (o ponerle nombre).
-      if (overlay.playing && !awoke) {
+      if (awakening) {
+        if (overlay.playing) awakening.elapsed += dt;
+        if (!awakening.noted && awakeningPose(awakening.elapsed).done) {
+          // De pie, saca el cuaderno y escribe lo que cree que le ha pasado.
+          awakening.noted = true;
+          ui.setLocked(false);
+          ui.readSource(FIRST_ARRIVAL.note);
+        } else if (awakening.noted && !ui.blocking) awakening = undefined;
+      }
+      if (overlay.playing && !awoke && !awakening) {
         awoke = true;
         arrive(currentWorld.id);
       }
@@ -867,8 +931,8 @@ function start(): void {
       }
       const opened = prologue?.update(
         {
-          world: currentWorld.id,
-          onFoot: !(flight?.piloting ?? false),
+          world: flight?.piloting ? flight.frame : currentWorld.id,
+          seated: flight?.piloting ?? false,
           running: timeRuns && session.acceptsInput,
           knowsFragment: reading.known.has(WORMHOLE.fact),
         },
@@ -877,6 +941,22 @@ function start(): void {
       if (opened) openWormhole();
       if (wormholeView?.active) {
         wormholeView.update(timeRuns ? dt : 0, camera.position);
+        warpDistortion?.update(wormholeView.progress);
+        // La nave despega sola y el gusano la arrastra entera hasta su centro.
+        if (cinematic.active && cinematic.start && cinematic.center && flight?.piloting) {
+          if (timeRuns) cinematic.elapsed += dt;
+          flight.placeAt(
+            WORMHOLE.world,
+            cinematicShipPosition(
+              cinematic.start,
+              cinematic.center,
+              new Vector3(),
+              cinematic.elapsed,
+              wormholeView.progress,
+            ),
+            cinematic.center,
+          );
+        }
         if (wormholeView.progress >= 1 && !crossingAsked) {
           crossingAsked = true;
           wormhole = 'gusano';
@@ -977,6 +1057,15 @@ function start(): void {
         player.interpolatedBody(alpha, body);
         if (outside) chasePose(body, feet, camera.position, camera.quaternion, around);
         else cameraPose(body, player.pitch, feet, camera.position, camera.quaternion);
+        if (awakening && !outside) {
+          // Tumbado: la vista baja hacia el suelo y mira al cielo; poco a poco se incorpora.
+          const pose = awakeningPose(awakening.elapsed);
+          camera.position.addScaledVector(
+            feet.clone().sub(currentWorld.well.center).normalize(),
+            -pose.drop,
+          );
+          camera.rotateX(pose.pitch);
+        }
       }
       explorer.update({
         feet,
@@ -988,7 +1077,7 @@ function start(): void {
         landings: player.state.landings,
         landingSpeed: player.state.lastLandingSpeed,
         dt,
-        visible: !piloting,
+        visible: !piloting && !(awakening && !awakening.noted),
         firstPerson: !outside,
         reading: reading.current !== null,
       });

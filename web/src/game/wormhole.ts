@@ -7,17 +7,17 @@ import { Vector3 } from 'three';
 
 export const WORMHOLE_SEQUENCE = {
   /** Lo que dura, en segundos, desde que se abre hasta que llega el fundido a blanco. */
-  seconds: 3.5,
-  /** Radio del anillo al abrirse del todo (m). */
-  ringRadius: 2.6,
+  seconds: 6.5,
+  /** Radio del anillo al abrirse del todo (m): cabe la nave entera (9 m de ancho). */
+  ringRadius: 16,
   /** Cuánto por encima del fragmento se abre su centro (m): a la altura de los ojos. */
   rise: 1.6,
   /** Cuánto más allá del fragmento, visto desde quien lo abre (m): que lo enmarque y no lo envuelva. */
   behind: 3,
   /** Hasta qué radio (m) "pesa" para la lente al final: de ahí sale cuánto dobla las estrellas. */
-  lensRadius: 9,
+  lensRadius: 40,
   /** Cuánto se ensancha la vista al final (fracción del campo de visión). */
-  stretch: 0.3,
+  stretch: 0.4,
 } as const;
 
 function clamp01(value: number): number {

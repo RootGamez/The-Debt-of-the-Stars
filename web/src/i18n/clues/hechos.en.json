@@ -1,4 +1,7 @@
 {
+  "llegada.gusano": {
+    "frase": "A wormhole tore me out of my first flight and brought me to a system that isn't mine."
+  },
   "bucle.llegada": {
     "frase": "I always wake up in front of the Mouth; a crack of light closes behind me."
   },
@@ -18,7 +21,9 @@
   "deuda.relojes_se_separan": {
     "frase": "The clocks of two worlds drift apart little by little: they have to be compared."
   },
-  "deuda.cancion": { "frase": "A lullaby: \"never cross the same Gate twice in the same day.\"" },
+  "deuda.cancion": {
+    "frase": "A lullaby: \"never cross the same Gate twice in the same day.\""
+  },
   "deuda.puertas_se_buscan": {
     "frase": "The Gates seek each other: the Mouth answers a distant call."
   },
@@ -35,16 +40,22 @@
   "deuda.filtraciones": {
     "frase": "Micro wormholes \"bite\" the space around the Gates and leave curved edges."
   },
-  "lectura.horas": { "frase": "I can read how the Absent wrote their hours." },
+  "lectura.horas": {
+    "frase": "I can read how the Absent wrote their hours."
+  },
   "partida.vida_normal": {
     "frase": "The Absent lived calmly: irrigation shifts, tables set, and the Gates used like someone catching a train."
   },
-  "partida.evacuacion": { "frase": "There was an evacuation notice: forty minutes, Gates 2 to 6." },
+  "partida.evacuacion": {
+    "frase": "There was an evacuation notice: forty minutes, Gates 2 to 6."
+  },
   "partida.cascada": {
     "frase": "The debt spikes soared during the evacuation: fleeing sped up the collapse.",
     "rumor": "What happened to those who crossed the Gates?"
   },
-  "silencio.consejo_existe": { "frase": "A Transit Council authorized the use of the Gates." },
+  "silencio.consejo_existe": {
+    "frase": "A Transit Council authorized the use of the Gates."
+  },
   "silencio.investigadora": {
     "frase": "Someone was waiting for a researcher who never came back."
   },
@@ -81,7 +92,9 @@
     "frase": "The Council signed the order to stay silent.",
     "rumor": "Who ordered the silence?"
   },
-  "silencio.uno_se_quedo": { "frase": "Someone stayed behind in the laboratory." },
+  "silencio.uno_se_quedo": {
+    "frase": "Someone stayed behind in the laboratory."
+  },
   "lab.existe_lugar_lento": {
     "frase": "There was a secret destination where time barely advanced."
   },
@@ -93,9 +106,15 @@
     "frase": "To find the slow place you must correct the displacement of its image.",
     "rumor": "How much must what you see be corrected?"
   },
-  "nudo.existe": { "frase": "There is a dark, immensely heavy point, the Knot, that bends light." },
-  "nudo.origen": { "frase": "The first Gate closed badly: the Knot was born from it." },
-  "contrapeso.trasladado": { "frase": "The Counterweight was taken to a final testing site." },
+  "nudo.existe": {
+    "frase": "There is a dark, immensely heavy point, the Knot, that bends light."
+  },
+  "nudo.origen": {
+    "frase": "The first Gate closed badly: the Knot was born from it."
+  },
+  "contrapeso.trasladado": {
+    "frase": "The Counterweight was taken to a final testing site."
+  },
   "contrapeso.reloj": {
     "frase": "The Counterweight's internal clock matters: it must not be moved without adjusting it."
   },
@@ -115,14 +134,24 @@
     "frase": "The calculation to correct the Counterweight's clock according to the route it takes.",
     "rumor": "How is the Counterweight's clock corrected?"
   },
-  "contrapeso.lugar": { "frase": "The Counterweight is installed in the Engine Room of the Scar." },
-  "contrapeso.ventana_pulso": { "frase": "The machine's core only opens during the pulse." },
-  "contrapeso.terminado": { "frase": "The Counterweight is finished, but untested." },
+  "contrapeso.lugar": {
+    "frase": "The Counterweight is installed in the Engine Room of the Scar."
+  },
+  "contrapeso.ventana_pulso": {
+    "frase": "The machine's core only opens during the pulse."
+  },
+  "contrapeso.terminado": {
+    "frase": "The Counterweight is finished, but untested."
+  },
   "bocas.relojes_distintos": {
     "frase": "Each mouth of a Gate carries its own time; that is why things arrive from different eras."
   },
-  "casa.prueba_llama": { "frase": "A new mouth is calling from a young system." },
-  "casa.prueba_plazo": { "frase": "The Institute's great test is in a few days." },
+  "casa.prueba_llama": {
+    "frase": "A new mouth is calling from a young system."
+  },
+  "casa.prueba_plazo": {
+    "frase": "The Institute's great test is in a few days."
+  },
   "casa.pruebas_menores": {
     "frase": "At home they are building a small Gate and running \"minor tests\"."
   },
@@ -135,8 +164,12 @@
   "casa.directora_dirige": {
     "frase": "The Director leads the Institute's great test."
   },
-  "casa.fragmentos_curvos": { "frase": "The fragments at home have smooth, curved edges." },
-  "casa.bordes_son_mordidas": { "frase": "Those curved edges are bites from micro wormholes." },
+  "casa.fragmentos_curvos": {
+    "frase": "The fragments at home have smooth, curved edges."
+  },
+  "casa.bordes_son_mordidas": {
+    "frase": "Those curved edges are bites from micro wormholes."
+  },
   "casa.simbolo_partido": {
     "frase": "A fragment at home carries half a symbol of unknown meaning."
   },
@@ -149,7 +182,9 @@
   "casa.fragmento_antiguo": {
     "frase": "The Moon's fragment is older than the earlier ones, but it arrived later."
   },
-  "casa.en_la_red": { "frase": "The home system already appears in the network of the Gates." },
+  "casa.en_la_red": {
+    "frase": "The home system already appears in the network of the Gates."
+  },
   "puertas.otros_viajeros": {
     "frase": "Others arrived here before me, through mouths from different eras. The last row of the wall is blank."
   },

@@ -1,5 +1,20 @@
 [
   {
+    "id": "umbral.llegada",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "titulo": "Mi primera nota",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Parece que un agujero de gusano me arrastró… con nave y todo.",
+        "Este sistema no es el mío. La estrella es vieja y la luz, ámbar.",
+        "Por lo que leí en el Instituto, creo que estoy en el sistema de origen de los Ausentes."
+      ],
+      "hechos": ["llegada.gusano"]
+    }
+  },
+  {
     "id": "umbral.boca",
     "mundo": "umbral",
     "tipo": "observacion",

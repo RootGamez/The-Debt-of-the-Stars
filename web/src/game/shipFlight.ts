@@ -127,10 +127,14 @@ export interface ShipFlight {
   standAtLadder(onFootWorld: string): boolean;
   /** Depuración (`?debug`): la nave, pilotada, aparece quieta a esa altura sobre un mundo. */
   warpTo(world: string, altitude: number): boolean;
+  /** La primera llegada a Umbral: la nave posada donde cayó tras el gusano (marca `PARK_Caida`). */
+  parkAtCrash(): boolean;
   /** Depuración (`?debug`): la nave, pilotada, aparece quieta en `position` (marco de `world`) mirando a `toward`. */
   placeAt(world: string, position: Vector3, toward: Vector3): boolean;
 }
 
+/** Dónde se posó la nave al caer del gusano (solo la primera llegada); no es donde espera cada ciclo. */
+export const CRASH_PARK = 'PARK_Caida';
 /** Segundos que se muestran los controles tras despegar. */
 const CONTROLS_HINT_SECONDS = 12;
 /** Por debajo de esta altura (m) se sugiere cómo posarse. */
@@ -205,12 +209,18 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
 
   // Dónde espera la nave al empezar cada ciclo.
   const home = runtimeOf(runtimes, homeWorld);
-  const park = home.world.markers.parks.values().next().value;
+  const park = [...home.world.markers.parks].find(([name]) => name !== CRASH_PARK)?.[1];
   if (!park) throw new Error(`${homeWorld} no tiene marca PARK_ para la nave`);
-  const parked = spawnOnGround(park, home.collision, home.well.center);
-  const parkedUp = parked.feet.clone().sub(home.well.center).normalize();
-  const parkPosition = parked.feet.clone().addScaledVector(parkedUp, model.hull.clearance);
-  const parkOrientation = parked.body.clone();
+  /** La nave posada sobre la marca `mark` (de pie sobre el suelo, a su altura de patas). */
+  function parkingOn(mark: Object3D): { position: Vector3; orientation: Quaternion } {
+    const parked = spawnOnGround(mark, home.collision, home.well.center);
+    const parkedUp = parked.feet.clone().sub(home.well.center).normalize();
+    return {
+      position: parked.feet.clone().addScaledVector(parkedUp, model.hull.clearance),
+      orientation: parked.body.clone(),
+    };
+  }
+  const { position: parkPosition, orientation: parkOrientation } = parkingOn(park);
 
   const spheres: Sphere[] = [...runtimes.values()]
     .filter((r) => spec.bodyOf(r.id))
@@ -270,6 +280,16 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
   function parkAtHome(): void {
     ship.park(homeWorld, parkPosition, parkOrientation);
     attach();
+  }
+
+  /** La primera llegada: la nave posada donde cayó (PARK_Caida), hasta el ciclo siguiente. */
+  function parkAtCrash(): boolean {
+    const mark = home.world.markers.parks.get(CRASH_PARK);
+    if (!mark || boarding.isPiloting) return false;
+    const crash = parkingOn(mark);
+    ship.park(homeWorld, crash.position, crash.orientation);
+    attach();
+    return true;
   }
 
   /** Lleva la nave a otro marco conservando su movimiento real (posición, velocidad y giro). */
@@ -627,6 +647,7 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
       placeAtLadder(onFootWorld);
       return true;
     },
+    parkAtCrash,
     warpTo(world, altitude) {
       if (!boarding.isPiloting || !spec.bodyOf(world)) return false;
       const runtime = runtimeOf(runtimes, world);

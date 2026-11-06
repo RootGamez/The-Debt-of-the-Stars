@@ -22,8 +22,11 @@ describe('buildWorld (worlds modelled in code, Phase 11)', () => {
       clockRate: 1,
       ambient: { color: 0x7a6a8c, intensity: 0.35 },
     });
-    expect([...(world?.markers.spawns.keys() ?? [])]).toEqual(['SPAWN_LaBoca']);
-    expect([...(world?.markers.parks.keys() ?? [])]).toEqual(['PARK_Nave']);
+    expect([...(world?.markers.spawns.keys() ?? [])].sort()).toEqual([
+      'SPAWN_Despertar',
+      'SPAWN_LaBoca',
+    ]);
+    expect([...(world?.markers.parks.keys() ?? [])].sort()).toEqual(['PARK_Caida', 'PARK_Nave']);
     expect(world?.markers.interactions.map((i) => i.clueId).sort()).toEqual([
       'umbral.aula',
       'umbral.boca',
@@ -32,6 +35,7 @@ describe('buildWorld (worlds modelled in code, Phase 11)', () => {
       'umbral.cuaderno',
       'umbral.envios',
       'umbral.hoja_entrada',
+      'umbral.llegada',
       'umbral.placa',
     ]);
     expect(world?.markers.triggers.map((t) => t.event)).toEqual(['boca_destello']);

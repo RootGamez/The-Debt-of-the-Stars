@@ -279,6 +279,15 @@ function sites(
 
 /** Dónde espera la nave (blender/marcas/umbral.json): suelo llano y despejado. */
 const SHIP_PARK = { lat: 1, lon: 27 } as const;
+/**
+ * La primera llegada (✅ Anthony, 2026-11-06): el claro al sur de La Boca donde se despierta tumbado tras el gusano
+ * y, a unos 40 m, donde se posó el Albatros II al caer. Solo se usan esa vez; en los ciclos siguientes se aparece
+ * frente a La Boca con la nave en `SHIP_PARK`.
+ */
+/** Distancia al centro para orientar marcas hacia un punto lejano de la superficie (m). */
+const UMBRAL_RADIUS_FOR_HEADING = 90;
+const WAKE_SPOT = { lat: -8, lon: 5 } as const;
+const CRASH_PARK = { lat: -22, lon: -18 } as const;
 
 function houseSpots(plaza: Site): { lat: number; lon: number }[] {
   return Array.from({ length: 6 }, (_, k) => {
@@ -1271,6 +1280,19 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
   relief.addPad(s.classroom.lat, s.classroom.lon, 5.6);
   relief.addPad(s.plaza.lat, s.plaza.lon, 13, 6);
   relief.addPad(SHIP_PARK.lat, SHIP_PARK.lon, 4, 3);
+  relief.addPad(WAKE_SPOT.lat, WAKE_SPOT.lon, 3, 3);
+  relief.addPad(CRASH_PARK.lat, CRASH_PARK.lon, 5, 3);
+  // Se despierta mirando hacia la nave caída.
+  const crashPoint = direction(CRASH_PARK.lat, CRASH_PARK.lon).multiplyScalar(
+    UMBRAL_RADIUS_FOR_HEADING,
+  );
+  const wake = builder.place({
+    ...WAKE_SPOT,
+    heading: headingTowards(WAKE_SPOT.lat, WAKE_SPOT.lon, crashPoint),
+  });
+  builder.mark('SPAWN_Despertar', wake, [0, 0, 1]);
+  // La primera nota del cuaderno, que se puede releer donde se despertó.
+  builder.mark('INT_llegada', wake, [0, 0.6, 0.4], { clue_id: 'umbral.llegada', kind: 'texto' });
   const route: readonly (readonly [keyof typeof s, keyof typeof s])[] = [
     ['mouth', 'dock'],
     ['mouth', 'lookout'],
@@ -1486,6 +1508,14 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
       'PARK_Nave',
       parkUp.clone().multiplyScalar(relief.groundRadius(parkUp)),
       uprightRotation(parkUp),
+    ),
+  );
+  const crashUp = direction(CRASH_PARK.lat, CRASH_PARK.lon);
+  frame.add(
+    marker(
+      'PARK_Caida',
+      crashUp.clone().multiplyScalar(relief.groundRadius(crashUp)),
+      uprightRotation(crashUp),
     ),
   );
 

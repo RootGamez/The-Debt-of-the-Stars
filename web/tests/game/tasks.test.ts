@@ -23,7 +23,7 @@ const START: TaskState = {
 };
 
 describe('the tasks of the prologue', () => {
-  it('go in the order of the story: move, neighbor, teacher, ship, island, director, Moon', () => {
+  it('go in the order of the story: move, neighbor, teacher, ship, island, director, Moon, back to the ship', () => {
     expect(TASK_IDS).toEqual([
       'andar',
       'vecina',
@@ -36,6 +36,7 @@ describe('the tasks of the prologue', () => {
       'directora',
       'luna',
       'fragmento',
+      'volver',
     ]);
   });
 
@@ -64,6 +65,8 @@ describe('the tasks of the prologue', () => {
     s = { ...s, piloting: false, onMoon: true };
     expect(tracker.update(s)).toBe('fragmento');
     s = { ...s, facts: new Set([...s.facts, MOON_FRAGMENT_FACT]) };
+    expect(tracker.update(s)).toBe('volver');
+    s = { ...s, onMoon: false, piloting: true };
     expect(tracker.update(s)).toBeUndefined();
     expect(tracker.doneIds).toEqual(TASK_IDS);
   });
@@ -93,7 +96,7 @@ describe('the tasks of the prologue', () => {
     const tracker = new TaskTracker();
     tracker.update({ ...START, walked: 5 });
     const items = tracker.items(false);
-    expect(items.map((i) => i.done)).toEqual([true, ...Array<boolean>(10).fill(false)]);
+    expect(items.map((i) => i.done)).toEqual([true, ...Array<boolean>(11).fill(false)]);
     expect(items.filter((i) => i.current).map((i) => i.id)).toEqual(['vecina']);
     expect(items[1]?.hint).toBe(taskHint('vecina', false));
   });

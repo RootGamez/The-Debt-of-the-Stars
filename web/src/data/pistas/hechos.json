@@ -7,6 +7,13 @@
     "enlaces": ["bucle.camara"]
   },
   {
+    "id": "llegada.gusano",
+    "hilos": ["H7"],
+    "frase": "Un agujero de gusano me arrancó de mi primer vuelo y me trajo a un sistema que no es el mío.",
+    "menciona": [],
+    "enlaces": ["bucle.llegada"]
+  },
+  {
     "id": "bucle.orden_camara",
     "hilos": ["H1"],
     "frase": "El Consejo ordenó construir un aparato que sostuviera el último cuarto de hora.",

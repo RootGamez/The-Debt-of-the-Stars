@@ -376,6 +376,11 @@ export const EN: Readonly<Record<string, string>> = {
   'Sube con la nave: el tablero ya apunta a la Luna. Cerca, frena y baja despacio; con la nave quieta en el suelo, toca Levantarse':
     'Take off: the dashboard already points to the Moon. When close, brake and descend slowly; with the ship at rest on the ground, tap Get up',
   'Examina el fragmento de la Luna': 'Examine the fragment on the Moon',
+  'Vuelve al Albatros II': 'Go back to the Albatross II',
+  'Vuelve a la nave: junto a la escotilla, F para subir; sentado en el asiento, F':
+    'Go back to the ship: by the hatch, F to board; in the seat, F',
+  'Vuelve a la nave: junto a la escotilla toca Subir y, en el asiento, Pilotar':
+    'Go back to the ship: by the hatch tap Board and, in the seat, Pilot',
   Fragmento: 'Fragment',
   Tareas: 'Tasks',
   'Todo hecho': 'All done',

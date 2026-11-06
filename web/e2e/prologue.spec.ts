@@ -50,23 +50,26 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   await page.keyboard.press('KeyE');
   await expect(page.locator('.reader')).toBeVisible();
   await closeReader(page);
-  // Un momento después se abre el gusano delante del fragmento (hito 9E).
+  // A pie no pasa nada: el gusano espera a que vuelvas a sentarte en el Albatros II (✅ Anthony, 2026-11-06).
+  await page.waitForTimeout(2000);
+  expect((await page.evaluate(() => window.__juego?.wormhole?.()))?.active).toBe(false);
+  // La nave sigue en el hangar: a bordo (frente al asiento), F para sentarse y la nave sobre la Luna.
+  expect(await page.evaluate(() => window.__juego?.warpTo?.('hogar') ?? false)).toBe(true);
+  expect(await page.evaluate(() => window.__juego?.toShip?.() ?? false)).toBe(true);
+  await page.keyboard.press('KeyF');
+  await expect.poll(async () => (await snapshot(page))?.ship?.piloting).toBe(true);
+  expect(await page.evaluate(() => window.__juego?.shipTo?.('luna', 20) ?? false)).toBe(true);
   await expect
     .poll(async () => (await page.evaluate(() => window.__juego?.wormhole?.()))?.active, {
       timeout: 10_000,
     })
     .toBe(true);
-  // Con el Registro abierto el tiempo se para, y el gusano también.
-  const wormhole = () => page.evaluate(() => window.__juego?.wormhole?.().progress ?? -1);
+  // Durante la cinemática no se puede hacer nada: ni abrir el cuaderno ni levantarse.
   await page.keyboard.press('Tab');
-  await expect(page.locator('.registry')).toBeVisible();
-  const opened = await wormhole();
-  await page.waitForTimeout(800);
-  expect(await wormhole()).toBe(opened);
-  expect(opened).toBeLessThan(1);
-  await page.keyboard.press('KeyR');
+  await page.keyboard.press('KeyF');
+  await page.waitForTimeout(300);
   await expect(page.locator('.registry')).toBeHidden();
-  await play(page); // cerrar el Registro deja la pausa: un clic y sigue
+  expect((await snapshot(page))?.ship?.piloting).toBe(true);
 
   // Tras el fundido a blanco la página se carga de nuevo, ya en el sistema ajeno (sin `?mundo=`): el blanco
   // sigue mientras llega el mundo y luego se aclara.
@@ -78,9 +81,15 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   );
   expect(await value(page, 'world')).toBe('umbral');
   expect(await loopValue(page, 'loops')).toBe(0);
-  // El primer despertar frente a La Boca: al empezar a jugar se le pone nombre (Intro lo deja en «Umbral») y
+  // La primera llegada (✅ Anthony, 2026-11-06): despierta tumbado lejos de la nave, que espera posada donde cayó;
+  // al levantarse escribe su primera nota. Después se le pone nombre al mundo (Intro lo deja en «Umbral») y
   // aparece su reloj.
   await play(page);
+  expect((await snapshot(page))?.ship?.landed).toBe(true);
+  const note = page.locator('.reader');
+  await expect(note).toBeVisible({ timeout: 15_000 });
+  await closeReader(page);
+  expect((await snapshot(page))?.registry.facts).toContain('llegada.gusano');
   const naming = page.getByRole('dialog', { name: 'Un mundo nuevo' });
   await expect(naming).toBeVisible({ timeout: 15_000 });
   await naming.getByRole('textbox').press('Enter');

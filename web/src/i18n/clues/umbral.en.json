@@ -1,4 +1,12 @@
 {
+  "umbral.llegada": {
+    "titulo": "My first note",
+    "superficial": [
+      "It seems a wormhole pulled me through… ship and all.",
+      "This system isn't mine. The star is old and the light is amber.",
+      "From what I read at the Institute, I think I'm in the home system of the Absent."
+    ]
+  },
   "umbral.boca": {
     "titulo": "The Mouth",
     "superficial": [

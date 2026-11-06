@@ -104,6 +104,10 @@ export interface ReadingUi {
   setWorld(sources: WorldSources): void;
   /** Oculta y desactiva las interacciones mientras se pilota. */
   setEnabled(enabled: boolean): void;
+  /** Bloquea leer y abrir el cuaderno (teclas, botón y aviso) durante una cinemática. */
+  setLocked(locked: boolean): void;
+  /** Abre la lectura de una fuente sin tenerla delante (la primera nota del cuaderno al despertar). */
+  readSource(id: string): void;
   /** Hay una lectura o el Registro abiertos: el ciclo y el movimiento deben esperar. */
   readonly blocking: boolean;
   /** Una grabación está sonando (para el murmullo), o null. */
@@ -174,6 +178,8 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   const forward = new Vector3();
   let target: Interactable | undefined;
   let enabled = true;
+  /** Una cinemática en marcha: nada de leer ni abrir el cuaderno, aunque esté habilitado. */
+  let locked = false;
 
   const book = createBookButton(touch, () => {
     if (overlay.playing && !reading.frozen && !registryPanel.isOpen) openRegistry();
@@ -351,6 +357,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   }
 
   function onKey(event: KeyboardEvent): void {
+    if (locked) return; // una cinemática: ni leer ni abrir el cuaderno
     const action = keyAction(
       {
         playing: overlay.playing,
@@ -407,8 +414,10 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       if (!overlay.playing && reading.frozen) closeReading(); // al pausar se cierra la lectura
       playRecording(dt);
       readingPanel.update(dt);
-      book.setVisible(overlay.playing && enabled && !reading.frozen && !registryPanel.isOpen);
-      if (!enabled) {
+      book.setVisible(
+        overlay.playing && enabled && !locked && !reading.frozen && !registryPanel.isOpen,
+      );
+      if (!enabled || locked) {
         prompt.hide();
         current.markers.hide();
         target = undefined;
@@ -433,6 +442,14 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       current = sources;
       target = undefined;
       prompt.hide();
+    },
+    readSource(id) {
+      if (!reading.frozen && !registryPanel.isOpen) openReading(id);
+    },
+    setLocked(value) {
+      locked = value;
+      if (locked && registryPanel.isOpen) closeRegistry();
+      if (locked && reading.frozen) closeReading();
     },
     setEnabled(value) {
       enabled = value;

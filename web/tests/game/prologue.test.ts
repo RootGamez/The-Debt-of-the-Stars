@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { createPrologueGate, WORMHOLE, type PrologueFrame } from '../../src/game/prologue';
 
-const BY_THE_FRAGMENT: PrologueFrame = {
+const SEATED_ON_THE_MOON: PrologueFrame = {
   world: WORMHOLE.world,
-  onFoot: true,
+  seated: true,
   running: true,
   knowsFragment: true,
 };
@@ -15,33 +15,33 @@ function wait(gate: ReturnType<typeof createPrologueGate>, frame: PrologueFrame,
 }
 
 describe('the wormhole at the end of the prologue', () => {
-  it('opens once, a moment after examining the fragment on the Moon', () => {
+  it('opens once, a moment after sitting back in the ship having examined the fragment', () => {
     const gate = createPrologueGate();
 
-    expect(wait(gate, BY_THE_FRAGMENT, WORMHOLE.after - 0.5)).toBe(0);
-    expect(wait(gate, BY_THE_FRAGMENT, 5)).toBe(1);
+    expect(wait(gate, SEATED_ON_THE_MOON, WORMHOLE.after - 0.25)).toBe(0);
+    expect(wait(gate, SEATED_ON_THE_MOON, 5)).toBe(1);
   });
 
-  it('does not open just for walking on the Moon', () => {
+  it('does not open just for flying around the Moon', () => {
     const gate = createPrologueGate();
 
-    expect(wait(gate, { ...BY_THE_FRAGMENT, knowsFragment: false }, 30)).toBe(0);
+    expect(wait(gate, { ...SEATED_ON_THE_MOON, knowsFragment: false }, 30)).toBe(0);
   });
 
-  it('does not open at home, from the ship nor while the game is paused or reading', () => {
+  it('does not open on foot, at home nor while the game is paused or reading', () => {
     const gate = createPrologueGate();
 
-    expect(wait(gate, { ...BY_THE_FRAGMENT, world: 'hogar' }, 10)).toBe(0);
-    expect(wait(gate, { ...BY_THE_FRAGMENT, onFoot: false }, 10)).toBe(0);
-    expect(wait(gate, { ...BY_THE_FRAGMENT, running: false }, 10)).toBe(0);
+    expect(wait(gate, { ...SEATED_ON_THE_MOON, seated: false }, 10)).toBe(0);
+    expect(wait(gate, { ...SEATED_ON_THE_MOON, world: 'hogar' }, 10)).toBe(0);
+    expect(wait(gate, { ...SEATED_ON_THE_MOON, running: false }, 10)).toBe(0);
   });
 
-  it('starts counting again after leaving the Moon', () => {
+  it('starts counting again after standing up', () => {
     const gate = createPrologueGate();
 
-    wait(gate, BY_THE_FRAGMENT, WORMHOLE.after - 0.5);
-    wait(gate, { ...BY_THE_FRAGMENT, onFoot: false }, 1);
+    wait(gate, SEATED_ON_THE_MOON, WORMHOLE.after - 0.25);
+    wait(gate, { ...SEATED_ON_THE_MOON, seated: false }, 1);
 
-    expect(wait(gate, BY_THE_FRAGMENT, WORMHOLE.after - 0.5)).toBe(0);
+    expect(wait(gate, SEATED_ON_THE_MOON, WORMHOLE.after - 0.25)).toBe(0);
   });
 });
