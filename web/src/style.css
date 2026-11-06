@@ -170,6 +170,49 @@ body {
   pointer-events: auto;
 }
 
+.touch-hud,
+.touch-screen {
+  position: absolute;
+  top: 16px;
+  min-width: 44px;
+  height: 44px;
+  border: 2px solid rgb(var(--ink-rgb) / 50%);
+  border-radius: 22px;
+  background: rgb(var(--night-rgb) / 35%);
+  color: var(--text);
+  font: inherit;
+  font-size: 18px;
+  pointer-events: auto;
+}
+
+.touch-hud {
+  top: 72px;
+  right: 16px;
+}
+
+.touch-screen {
+  top: 128px;
+  right: 16px;
+}
+
+.touch-hud.touch-hud-off {
+  opacity: 0.55;
+}
+
+.touch-screen[hidden] {
+  display: none;
+}
+
+/* La interfaz oculta (botón del ojo): se ve solo el mundo, con los controles táctiles. */
+.interfaz-oculta .clock-hud,
+.interfaz-oculta .tareas,
+.interfaz-oculta .tareas-mostrar,
+.interfaz-oculta .ship-hud,
+.interfaz-oculta .hud-book,
+.interfaz-oculta .place {
+  display: none !important;
+}
+
 .touch-ship-controls {
   position: absolute;
   right: 24px;

@@ -96,15 +96,18 @@
     "frase": "Someone stayed behind in the laboratory."
   },
   "lab.existe_lugar_lento": {
-    "frase": "There was a secret destination where time barely advanced."
+    "frase": "There was a secret destination where time barely advanced.",
+    "pista": "Whoever shipped cargo, or waited for letters, would have noticed a clock falling behind."
   },
   "lab.imagen_desplazada": {
     "frase": "Near the Knot the stars appear where they are not: what you see is not where it seems.",
-    "rumor": "Where is that place, if what you see is not where it seems?"
+    "rumor": "Where is that place, if what you see is not where it seems?",
+    "pista": "Someone who watched the sky for a living would have written it down; or a light that only comes in for a while."
   },
   "lab.correccion": {
     "frase": "To find the slow place you must correct the displacement of its image.",
-    "rumor": "How much must what you see be corrected?"
+    "rumor": "How much must what you see be corrected?",
+    "pista": "Someone who worked there left it said, in a voice you must learn to hear; or a console that follows the routes."
   },
   "nudo.existe": {
     "frase": "There is a dark, immensely heavy point, the Knot, that bends light."
@@ -116,41 +119,52 @@
     "frase": "The Counterweight was taken to a final testing site."
   },
   "contrapeso.reloj": {
-    "frase": "The Counterweight's internal clock matters: it must not be moved without adjusting it."
+    "frase": "The Counterweight's internal clock matters: it must not be moved without adjusting it.",
+    "pista": "Beside where it rested, someone left a warning."
   },
   "contrapeso.que_es": {
-    "frase": "The Counterweight is a replacement engine that \"pays\" the debt."
+    "frase": "The Counterweight is a replacement engine that \"pays\" the debt.",
+    "pista": "Where it was made, someone wrote down how it was installed."
   },
   "contrapeso.sustituye_motor": {
-    "frase": "It is installed in place of the engine of the machine at the Scar."
+    "frase": "It is installed in place of the engine of the machine at the Scar.",
+    "pista": "A manual would say; or a factory that still rehearses it on its own."
   },
   "contrapeso.metodo_sincronia": {
-    "frase": "A travelling clock drifts out of step; the twins' diaries teach how to calculate by how much."
+    "frase": "A travelling clock drifts out of step; the twins' diaries teach how to calculate by how much.",
+    "pista": "Two people who counted the same days in different places."
   },
   "contrapeso.medir_desfase": {
-    "frase": "A drift can be measured by comparing calibrated clocks in different places."
+    "frase": "A drift can be measured by comparing calibrated clocks in different places.",
+    "pista": "A clock that doesn't keep its place's time can be set by comparing it with another."
   },
   "contrapeso.cuenta_sincronia": {
     "frase": "The calculation to correct the Counterweight's clock according to the route it takes.",
-    "rumor": "How is the Counterweight's clock corrected?"
+    "rumor": "How is the Counterweight's clock corrected?",
+    "pista": "The pages missing from the manual must be somewhere."
   },
   "contrapeso.lugar": {
-    "frase": "The Counterweight is installed in the Engine Room of the Scar."
+    "frase": "The Counterweight is installed in the Engine Room of the Scar.",
+    "pista": "Where the machine that opens the Gates stands."
   },
   "contrapeso.ventana_pulso": {
-    "frase": "The machine's core only opens during the pulse."
+    "frase": "The machine's core only opens during the pulse.",
+    "pista": "The machine isn't always open: someone noted when it beats."
   },
   "contrapeso.terminado": {
     "frase": "The Counterweight is finished, but untested."
   },
   "bocas.relojes_distintos": {
-    "frase": "Each mouth of a Gate carries its own time; that is why things arrive from different eras."
+    "frase": "Each mouth of a Gate carries its own time; that is why things arrive from different eras.",
+    "pista": "Letters that answer too early, or a list of worlds with their hours."
   },
   "casa.prueba_llama": {
-    "frase": "A new mouth is calling from a young system."
+    "frase": "A new mouth is calling from a young system.",
+    "pista": "The machine keeps count of who calls the network."
   },
   "casa.prueba_plazo": {
-    "frase": "The Institute's great test is in a few days."
+    "frase": "The Institute's great test is in a few days.",
+    "pista": "At home they said it out loud, and it was on a blackboard."
   },
   "casa.pruebas_menores": {
     "frase": "At home they are building a small Gate and running \"minor tests\"."
@@ -217,5 +231,11 @@
   },
   "partida.precipitada": {
     "frase": "They left recently and in a hurry: devices on standby, tools on the table, work half done."
+  },
+  "archivo.hora_ranura": {
+    "frase": "At four o'clock, the Ember's light comes in through the Archive's slot."
+  },
+  "casa.planos_completan": {
+    "frase": "These plans are exactly what the Institute's Gate is missing: with them, its test would work."
   }
 }

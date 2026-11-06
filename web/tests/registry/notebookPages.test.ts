@@ -155,4 +155,19 @@ describe('the notebook of the prologue', () => {
     const page = pages.find((p) => p.kind === 'learned');
     expect(page).toMatchObject({ kind: 'learned', total: 0 });
   });
+
+  it('gives one deduction page to every conclusion already started, right after "what I know"', () => {
+    const pages = pagesFor(new Set(['lab.existe_lugar_lento']));
+    const kinds = pages.map((page) => page.kind);
+    const deductions = pages.flatMap((page) =>
+      page.kind === 'deduction' ? [page.deduction.id] : [],
+    );
+
+    expect(deductions).toEqual(['K1', 'K3']);
+    expect(kinds.indexOf('deduction')).toBe(kinds.indexOf('known') + 1);
+  });
+
+  it('has no deduction pages when nothing is known', () => {
+    expect(pagesFor(new Set()).some((page) => page.kind === 'deduction')).toBe(false);
+  });
 });

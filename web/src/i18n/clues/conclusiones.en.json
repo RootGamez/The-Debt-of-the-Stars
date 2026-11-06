@@ -1,11 +1,56 @@
 {
-  "K1": { "titulo": "A slow place exists" },
-  "K2": { "titulo": "What you see in the sky is displaced" },
-  "KC": { "titulo": "How much what you see must be corrected" },
-  "K3": { "titulo": "I know where the Laboratory really is" },
-  "K4": { "titulo": "What the Counterweight is and what it replaces" },
-  "K5": { "titulo": "The Counterweight's clock must be synchronized" },
-  "K6": { "titulo": "Where and when it is installed" },
-  "K7": { "titulo": "The mouths of a Gate have different clocks" },
-  "K8": { "titulo": "When the great test is" }
+  "K1": {
+    "titulo": "A slow place exists",
+    "sabe": "There was a secret place where time barely passed.",
+    "accion": "Look in the sky for something that doesn't move like a star.",
+    "pregunta": "Was there somewhere time ran differently?"
+  },
+  "K2": {
+    "titulo": "What you see in the sky is displaced",
+    "sabe": "Near the Knot, light bends: what I see in the sky isn't where it seems.",
+    "accion": "Look at the image knowing that it lies.",
+    "pregunta": "Why could nobody find that place?"
+  },
+  "KC": {
+    "titulo": "How much what you see must be corrected",
+    "sabe": "The image of the place appears turned about eighteen degrees toward the Ember.",
+    "accion": "From the image, turn your eyes eighteen degrees away from the Ember.",
+    "pregunta": "How much must what you see be corrected?"
+  },
+  "K3": {
+    "titulo": "I know where the Laboratory really is",
+    "sabe": "The Laboratory is inside the Knot, eighteen degrees past its image, on the side away from the Ember.",
+    "accion": "Fly there with the graduated sight (G).",
+    "pregunta": "Where is the Laboratory really?"
+  },
+  "K4": {
+    "titulo": "What the Counterweight is and what it replaces",
+    "sabe": "The Counterweight is a replacement engine: it goes where the machine's engine was and pays the debt.",
+    "accion": "Find it and carry it to the machine.",
+    "pregunta": "What is the Counterweight?"
+  },
+  "K5": {
+    "titulo": "The Counterweight's clock must be synchronized",
+    "sabe": "Its clock must show the same as the machine's, and every journey throws it off.",
+    "accion": "At the cradle, match the two clocks with the two wheels.",
+    "pregunta": "Why does its clock matter?"
+  },
+  "K6": {
+    "titulo": "Where and when it is installed",
+    "sabe": "It is installed in the Engine Room on Scar, and it only fits during the nine o’clock pulse.",
+    "accion": "Arrive before nine, pull the old engine out with the lever and wait for the pulse.",
+    "pregunta": "Where and when is it installed?"
+  },
+  "K7": {
+    "titulo": "The mouths of a Gate have different clocks",
+    "sabe": "Each mouth of a Gate lives its own time: what you see on the other side is not the day you arrive.",
+    "accion": "Before crossing, count the drift of each mouth.",
+    "pregunta": "Why do things arrive from different times?"
+  },
+  "K8": {
+    "titulo": "When the great test is",
+    "sabe": "The Institute’s great test is on day forty since I took off.",
+    "accion": "Get home before day forty.",
+    "pregunta": "When will the great test be?"
+  }
 }

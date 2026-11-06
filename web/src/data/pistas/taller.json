@@ -5,7 +5,10 @@
     "tipo": "observacion",
     "titulo": "La Nave de Montaje",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.economia"] }
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["silencio.economia"]
+    }
   },
   {
     "id": "taller.cuna",
@@ -13,7 +16,10 @@
     "tipo": "objeto",
     "titulo": "La Cuna vacía",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.trasladado"] }
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["contrapeso.trasladado"]
+    }
   },
   {
     "id": "taller.nota_cuna",
@@ -21,7 +27,10 @@
     "tipo": "texto",
     "titulo": "La nota pegada en la Cuna",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.reloj"] }
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["contrapeso.reloj"]
+    }
   },
   {
     "id": "taller.manual",
@@ -41,7 +50,10 @@
     "lector": "gemelos",
     "titulo": "Los diarios de los gemelos",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": []
+    },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
       "texto": ["[texto pendiente]"],
@@ -55,7 +67,10 @@
     "lector": "cabina",
     "titulo": "La Cabina de Control",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.medir_desfase"] },
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["contrapeso.medir_desfase"]
+    },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
       "texto": ["[texto pendiente]"],
@@ -71,12 +86,7 @@
     "borrador": true,
     "superficial": {
       "texto": ["[texto pendiente]"],
-      "hechos": [
-        "contrapeso.que_es",
-        "contrapeso.sustituye_motor",
-        "contrapeso.lugar",
-        "contrapeso.ventana_pulso"
-      ]
+      "hechos": ["contrapeso.que_es", "contrapeso.sustituye_motor", "contrapeso.ventana_pulso"]
     }
   },
   {
@@ -85,7 +95,10 @@
     "tipo": "texto",
     "titulo": "Los Dormitorios",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.dos_investigadores"] }
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["silencio.dos_investigadores"]
+    }
   },
   {
     "id": "taller.pista",
@@ -94,7 +107,10 @@
     "lector": "pista",
     "titulo": "El reloj de la Pista de Pruebas",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.medir_desfase"] }
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["contrapeso.medir_desfase"]
+    }
   },
   {
     "id": "taller.paginas",
@@ -102,6 +118,9 @@
     "tipo": "texto",
     "titulo": "Las páginas de sincronización",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.cuenta_sincronia"] }
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["contrapeso.cuenta_sincronia"]
+    }
   }
 ]

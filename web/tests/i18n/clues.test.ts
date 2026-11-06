@@ -80,6 +80,9 @@ describe('the English clues', () => {
       'titulo',
       'superficial',
       'profunda',
+      'pista',
+      'sabe',
+      'accion',
     ];
     const graph = (list: readonly unknown[]) =>
       list.map((e) => {
@@ -99,5 +102,17 @@ describe('the English clues', () => {
     setLanguage('en');
     expect(() => loadClues()).not.toThrow();
     setLanguage('es');
+  });
+
+  it('translate the deduction lines of every conclusion and the lead of every fact', () => {
+    const unchanged = (before: readonly unknown[], after: readonly unknown[], field: string) =>
+      before
+        .map((entry, i) => [entry, after[i]] as [Record<string, unknown>, Record<string, unknown>])
+        .filter(([a]) => a[field] !== undefined)
+        .filter(([a, b]) => a[field] === b[field])
+        .map(([a]) => a.id);
+    expect(unchanged(hechos, english.hechos, 'pista')).toEqual([]);
+    for (const field of ['sabe', 'accion', 'pregunta'])
+      expect(unchanged(conclusiones, english.conclusiones, field), field).toEqual([]);
   });
 });

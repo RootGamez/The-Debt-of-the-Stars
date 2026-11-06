@@ -5,7 +5,10 @@
     "tipo": "texto",
     "titulo": "El informe oficial",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.version_oficial"] }
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["silencio.version_oficial"]
+    }
   },
   {
     "id": "archivo.indice",
@@ -13,7 +16,10 @@
     "tipo": "texto",
     "titulo": "El Índice",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.censura"] }
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["silencio.censura"]
+    }
   },
   {
     "id": "archivo.sala_relojes",
@@ -21,7 +27,10 @@
     "tipo": "observacion",
     "titulo": "La Sala de Relojes",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["contrapeso.medir_desfase"] },
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["contrapeso.medir_desfase"]
+    },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
       "texto": ["[texto pendiente]"],
@@ -35,7 +44,10 @@
     "lector": "cartas",
     "titulo": "Las cartas que contestan antes",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": []
+    },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
       "texto": ["[texto pendiente]"],
@@ -48,7 +60,10 @@
     "tipo": "texto",
     "titulo": "El escritorio del archivista",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["archivo.hora_ranura"]
+    },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
       "texto": ["[texto pendiente]"],
@@ -62,7 +77,10 @@
     "cuando": "ranura_luz",
     "titulo": "La tablilla de la ranura de luz",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": [] },
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": []
+    },
     "profunda": {
       "requiere": ["lab.existe_lugar_lento"],
       "texto": ["[texto pendiente]"],
@@ -75,7 +93,10 @@
     "tipo": "texto",
     "titulo": "El Fondo del Cañón",
     "borrador": true,
-    "superficial": { "texto": ["[texto pendiente]"], "hechos": ["silencio.acta"] },
+    "superficial": {
+      "texto": ["[texto pendiente]"],
+      "hechos": ["silencio.acta"]
+    },
     "profunda": {
       "requiere": ["silencio.censura"],
       "texto": ["[texto pendiente]"],

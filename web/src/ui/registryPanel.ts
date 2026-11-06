@@ -9,6 +9,7 @@ import {
   type NotebookEntry,
   type NotebookPage,
 } from '../registry/notebookPages';
+import type { DeductionView } from '../registry/registryView';
 import type { WorldPage } from '../worlds/worldLog';
 import { worldDrawing } from './worldDrawings';
 import { t } from '../i18n';
@@ -113,6 +114,45 @@ function worldMeta(world: WorldPage): string {
   return parts.join(' · ');
 }
 
+/**
+ * Una página de deducción (plan de historia y puzzles, §5.1): el título de la conclusión; si está completa, lo que
+ * ahora sé y qué puedo hacer; y sus trozos, los sabidos con ✓ y los que faltan como pregunta con su orientación.
+ */
+function deductionContent(deduction: DeductionView): HTMLElement[] {
+  const title = node('h3', 'registry-known-title', deduction.title);
+  if (deduction.unlocked) title.classList.add('registry-deduction-done');
+  const parts: HTMLElement[] = [title];
+  if (deduction.unlocked && deduction.knowLine !== undefined) {
+    parts.push(node('p', 'registry-deduction-know', deduction.knowLine));
+  }
+  if (deduction.unlocked && deduction.action !== undefined) {
+    const action = node('p', 'registry-deduction-action');
+    action.append(
+      node('span', 'registry-deduction-label', `${t('Qué puedo hacer ahora')}: `),
+      document.createTextNode(deduction.action),
+    );
+    parts.push(action);
+  }
+  parts.push(
+    node(
+      'p',
+      'registry-count',
+      deduction.unlocked ? t('Por qué lo sé') : t('Lo que tengo y lo que me falta'),
+    ),
+  );
+  const list = node('ul', 'registry-facts');
+  for (const piece of deduction.pieces) {
+    const item = node('li', piece.met ? 'registry-piece' : 'registry-piece registry-piece-missing');
+    item.append(node('span', 'registry-line', `${piece.met ? '✓' : '?'} ${piece.line}`));
+    if (!piece.met && piece.lead !== undefined) {
+      item.append(node('p', 'registry-lead', piece.lead));
+    }
+    list.append(item);
+  }
+  parts.push(list);
+  return parts;
+}
+
 /** El contenido de una página. */
 function pageContent(page: NotebookPage): HTMLElement[] {
   switch (page.kind) {
@@ -146,6 +186,8 @@ function pageContent(page: NotebookPage): HTMLElement[] {
       parts.push(list);
       return parts;
     }
+    case 'deduction':
+      return deductionContent(page.deduction);
     case 'tasks': {
       const done = page.items.filter((item) => item.done).length;
       const list = node('ul', 'registry-facts registry-tasks');

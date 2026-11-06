@@ -1,4 +1,5 @@
 import { t } from '../i18n';
+import type { CounterweightPlace } from './counterweight';
 // Las tareas del prólogo (Fase 9, rehecho): una cadena corta de cosas por hacer en casa que enseña a moverse, a
 // hablar, a leer y a pilotar y que cuenta una pequeña trama antes de ir a la Luna: la Maestra pide una pieza, hay
 // que ir a buscarla a la isla del primer Albatros y llevársela a la Directora, que entonces da la misión. Cada tarea
@@ -23,7 +24,12 @@ export type TaskId =
   | 'explorar'
   | 'ubicarse'
   | 'nave_umbral'
-  | 'planetas';
+  | 'planetas'
+  | 'cw_coger'
+  | 'cw_llevar'
+  | 'cw_motor'
+  | 'cw_ruedas'
+  | 'cw_pulso';
 
 /** Los juegos de tareas: el del prólogo en casa y el del bucle. */
 export type TaskSetId = 'prologo' | 'bucle';
@@ -51,6 +57,19 @@ export interface TaskState {
   /** Los mundos ya visitados (los que tienen nombre en la bitácora) y los que hay que visitar (solo el bucle). */
   visited?: ReadonlySet<string>;
   explorable?: readonly string[];
+  /** El mundo donde estás (a pie o el marco de la nave). */
+  world?: string;
+  /** Las conclusiones que ya se entienden (K1…K8). */
+  conclusions?: ReadonlySet<string>;
+  /** El Contrapeso en este ciclo (la misión «Detener el colapso»). */
+  counterweight?: CounterweightTaskView;
+}
+
+/** Lo que las tareas miran del Contrapeso: dónde está, si el motor viejo ya salió y si los relojes coinciden. */
+export interface CounterweightTaskView {
+  place: CounterweightPlace;
+  motorOut: boolean;
+  matched: boolean;
 }
 
 interface TaskDef {
@@ -67,6 +86,13 @@ interface TaskDef {
   done(state: TaskState): boolean;
   /** Cuánto lleva hecho (se pinta tras el título: "2/5"). */
   progress?(state: TaskState): { done: number; total: number };
+  /** En vivo: se tacha y se destacha con el estado de cada momento y no se guarda (lo del ciclo). */
+  live?: boolean;
+  /** No sale en la lista hasta que esto se cumpla. */
+  shownWhen?(state: TaskState): boolean;
+  /** Las conclusiones que hacen falta para entender el paso; sin ellas sale `unknownTitle` y no señala nada. */
+  needs?: readonly string[];
+  unknownTitle?: string;
 }
 
 /** Hecho que da la Directora al encargar la misión, y el que da la pieza de la isla. */
@@ -319,10 +345,113 @@ const LOOP_DEFS: readonly TaskDef[] = [
   },
 ];
 
+// Plan de historia y puzzles físicos, §5.2 (✅ D5, Anthony 2026-11-06): con algo del Contrapeso entendido, sus
+// pasos salen como una misión que se tacha sola en el ciclo. Lo que aún no se entiende sale como pregunta y no
+// señala nada; el Banco del Laboratorio nunca se señala (encontrarlo es la deducción).
+const STOP_COLLAPSE = t('Detener el colapso');
+const UNKNOWN_HINT_TEXT = t(
+  'Aún no lo entiendo: en el cuaderno, las páginas de deducción dicen qué me falta',
+);
+const COUNTERWEIGHT_CONCLUSIONS = ['K4', 'K5', 'K6'];
+const cw = (s: TaskState): CounterweightTaskView =>
+  s.counterweight ?? { place: 'bench', motorOut: false, matched: false };
+const atInstall = (place: CounterweightPlace): boolean =>
+  place === 'cradle' || place === 'installed';
+
+const COUNTERWEIGHT_STEPS: readonly TaskDef[] = [
+  {
+    id: 'cw_coger',
+    title: t('Coge el Contrapeso del Banco del Laboratorio'),
+    unknownTitle: t('¿Dónde está el Contrapeso?'),
+    needs: ['K3', 'K4'],
+    label: t('Contrapeso'),
+    hint: {
+      keys: t('Está en su Banco, en el Laboratorio: E para cogerlo. En brazos no se corre'),
+      touch: t('Está en su Banco, en el Laboratorio: toca Coger. En brazos no se corre'),
+    },
+    target: { kind: 'none' },
+    done: (s) => cw(s).place !== 'bench',
+  },
+  {
+    id: 'cw_llevar',
+    title: t('Llévalo a la Sala del Motor de Cicatriz'),
+    unknownTitle: t('¿Dónde se instala el Contrapeso?'),
+    needs: ['K6'],
+    label: t('Cicatriz'),
+    hint: {
+      keys: t('Súbelo a la nave y vuela a Cicatriz; la Sala del Motor rodea el centro del planeta'),
+      touch: t(
+        'Súbelo a la nave y vuela a Cicatriz; la Sala del Motor rodea el centro del planeta',
+      ),
+    },
+    target: { kind: 'world', world: 'cicatriz' },
+    done: (s) => {
+      const { place } = cw(s);
+      return atInstall(place) || (place === 'carried' && s.world === 'cicatriz');
+    },
+  },
+  {
+    id: 'cw_motor',
+    title: t('Saca el motor viejo con la palanca antes de las 9:00'),
+    unknownTitle: t('¿Qué hay que quitar para ponerlo?'),
+    needs: ['K4', 'K6'],
+    label: t('Palanca'),
+    hint: {
+      keys: t(
+        'La palanca está en la consola, delante del núcleo: E para tirar. Después del pulso ya no sale',
+      ),
+      touch: t(
+        'La palanca está en la consola, delante del núcleo: toca Tirar. Después del pulso ya no sale',
+      ),
+    },
+    target: { kind: 'source', id: 'cicatriz.palanca' },
+    done: (s) => cw(s).motorOut,
+  },
+  {
+    id: 'cw_ruedas',
+    title: t('En la cuna, iguala su reloj con el de la máquina'),
+    unknownTitle: t('¿Qué pasa con su reloj?'),
+    needs: ['K5'],
+    label: t('Cuna'),
+    hint: {
+      keys: t(
+        'Ponlo en la cuna con E y gira las dos ruedas hasta que los dos relojes marquen lo mismo',
+      ),
+      touch: t('Ponlo en la cuna y gira las dos ruedas hasta que los dos relojes marquen lo mismo'),
+    },
+    target: { kind: 'source', id: 'cicatriz.cuna' },
+    done: (s) => {
+      const { place, matched } = cw(s);
+      return place === 'installed' || (place === 'cradle' && matched);
+    },
+  },
+  {
+    id: 'cw_pulso',
+    title: t('Espera al pulso de las 9:00'),
+    unknownTitle: t('¿Cuándo encaja?'),
+    needs: ['K6'],
+    label: t('Pulso'),
+    hint: {
+      keys: t('Con los relojes iguales, el pulso de las 9:00 lo sube de la cuna al núcleo'),
+      touch: t('Con los relojes iguales, el pulso de las 9:00 lo sube de la cuna al núcleo'),
+    },
+    target: { kind: 'none' },
+    done: (s) => cw(s).place === 'installed',
+  },
+];
+
+const COUNTERWEIGHT_DEFS: readonly TaskDef[] = COUNTERWEIGHT_STEPS.map((def) => ({
+  ...def,
+  mission: STOP_COLLAPSE,
+  live: true,
+  shownWhen: (s: TaskState) =>
+    COUNTERWEIGHT_CONCLUSIONS.some((id) => s.conclusions?.has(id) === true),
+}));
+
 const SETS: Readonly<Record<TaskSetId, { defs: readonly TaskDef[]; chain: boolean }>> = {
   // En el prólogo hacer algo de más adelante da por hecho lo anterior; en el bucle cada paso cuenta por sí solo.
   prologo: { defs: PROLOGUE_DEFS, chain: true },
-  bucle: { defs: LOOP_DEFS, chain: false },
+  bucle: { defs: [...LOOP_DEFS, ...COUNTERWEIGHT_DEFS], chain: false },
 };
 
 /** Las tareas de cada juego, en orden. */
@@ -335,11 +464,11 @@ export const TASK_IDS: readonly TaskId[] = taskIds('prologo');
 
 /** Para validar lo guardado: las tareas del bucle. */
 export function isLoopTask(id: unknown): id is TaskId {
-  return typeof id === 'string' && LOOP_DEFS.some((d) => d.id === id);
+  return typeof id === 'string' && LOOP_DEFS.some((d) => d.id === id && !d.live);
 }
 
 function defOf(id: TaskId): TaskDef {
-  const def = [...PROLOGUE_DEFS, ...LOOP_DEFS].find((d) => d.id === id);
+  const def = [...PROLOGUE_DEFS, ...LOOP_DEFS, ...COUNTERWEIGHT_DEFS].find((d) => d.id === id);
   if (!def) throw new Error(`Tarea desconocida: ${id}`);
   return def;
 }
@@ -384,7 +513,7 @@ export class TaskTracker {
   ) {
     this.defs = SETS[set].defs;
     this.chain = SETS[set].chain;
-    for (const id of already) if (this.defs.some((d) => d.id === id)) this.done.add(id);
+    for (const id of already) if (this.defs.some((d) => d.id === id && !d.live)) this.done.add(id);
   }
 
   /** Apunta lo hecho con este estado y devuelve la tarea que toca ahora (o ninguna si ya están todas). */
@@ -393,45 +522,73 @@ export class TaskTracker {
     if (this.chain) {
       let last = -1;
       this.defs.forEach((def, index) => {
-        if (this.done.has(def.id) || def.done(state)) last = index;
+        if (this.isDoneNow(def) || def.done(state)) last = index;
       });
       for (let index = 0; index <= last; index++) {
         const def = this.defs[index];
         if (def) this.done.add(def.id);
       }
     } else {
-      for (const def of this.defs) if (def.done(state)) this.done.add(def.id);
+      for (const def of this.defs) if (!def.live && def.done(state)) this.done.add(def.id);
     }
     return this.currentDef()?.id;
   }
 
+  /** Hecha ya: lo apuntado o, si es en vivo, lo que dice el estado de este momento. */
+  private isDoneNow(def: TaskDef): boolean {
+    if (def.live) return this.state !== undefined && def.done(this.state);
+    return this.done.has(def.id);
+  }
+
+  /** Las tareas en vivo solo cuentan cuando se muestran (su condición de aparecer). */
+  private isShown(def: TaskDef): boolean {
+    if (def.after !== undefined && !this.done.has(def.after)) return false;
+    return def.shownWhen === undefined || (this.state !== undefined && def.shownWhen(this.state));
+  }
+
   private currentDef(): TaskDef | undefined {
-    return this.defs.find((def) => !this.done.has(def.id));
+    return this.defs.find((def) => this.isShown(def) && !this.isDoneNow(def));
   }
 
   isDone(id: TaskId): boolean {
-    return this.done.has(id);
+    const def = this.defs.find((d) => d.id === id);
+    return def !== undefined && this.isDoneNow(def);
   }
 
+  /** Solo las apuntadas (las tareas en vivo no se guardan). */
   get doneIds(): readonly TaskId[] {
-    return this.defs.filter((d) => this.done.has(d.id)).map((d) => d.id);
+    return this.defs.filter((d) => !d.live && this.done.has(d.id)).map((d) => d.id);
+  }
+
+  /** A dónde apunta la tarea: a ninguna parte mientras el jugador aún no entiende el paso. */
+  target(id: TaskId): TaskTarget {
+    const def = this.defs.find((d) => d.id === id);
+    if (def && !this.understands(def)) return { kind: 'none' };
+    return taskTarget(id);
+  }
+
+  private understands(def: TaskDef): boolean {
+    const known = this.state?.conclusions;
+    return def.needs === undefined || def.needs.every((id) => known?.has(id) === true);
   }
 
   /** La lista para pintarla (sin las que aún no se han abierto). */
   items(touch: boolean): TaskItem[] {
     const current = this.currentDef()?.id;
     return this.defs
-      .filter((def) => def.after === undefined || this.done.has(def.after))
+      .filter((def) => this.isShown(def))
       .map((def) => {
         const progress = this.state && def.progress?.(this.state);
+        const unknown = !this.understands(def) && def.unknownTitle !== undefined;
+        const baseTitle = unknown && def.unknownTitle !== undefined ? def.unknownTitle : def.title;
         const item: TaskItem = {
           id: def.id,
           title: progress
-            ? `${def.title} (${String(progress.done)}/${String(progress.total)})`
-            : def.title,
-          done: this.done.has(def.id),
+            ? `${baseTitle} (${String(progress.done)}/${String(progress.total)})`
+            : baseTitle,
+          done: this.isDoneNow(def),
           current: def.id === current,
-          hint: touch ? def.hint.touch : def.hint.keys,
+          hint: unknown ? UNKNOWN_HINT_TEXT : touch ? def.hint.touch : def.hint.keys,
         };
         return def.mission === undefined ? item : { ...item, mission: def.mission };
       });

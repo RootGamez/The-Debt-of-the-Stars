@@ -6,6 +6,7 @@ import type { InputController } from '../core/inputController';
 import { MOUSE_LOOK_SENSITIVITY, TOUCH_LOOK_SENSITIVITY } from '../data/movement';
 import { EMPTY_FLIGHT_KEYS, type FlightKeys } from '../ship/shipInput';
 import { t } from '../i18n';
+import { canFullscreen, toggleFullscreen } from './fullscreen';
 
 const STICK_RADIUS = 56; // px
 const DEAD_ZONE = 0.15;
@@ -55,6 +56,8 @@ export function createTouchControls(
   const knob = div('touch-knob', base);
   const jump = button('touch-jump', t('Saltar'), layer);
   const pause = button('touch-pause', t('Pausa'), layer);
+  const hud = button('touch-hud', '👁', layer);
+  const screen = button('touch-screen', '⛶', layer);
   const shipPanel = div('touch-ship-controls', layer);
   const board = button('touch-ship-action', t('Nave'), shipPanel);
   const target = button('touch-ship-action', t('Objetivo'), shipPanel);
@@ -66,6 +69,11 @@ export function createTouchControls(
   down.classList.add('touch-ship-flight');
   match.classList.add('touch-ship-flight');
   pause.setAttribute('aria-label', t('Pausar el juego'));
+  hud.setAttribute('aria-label', t('Ocultar o mostrar la interfaz'));
+  hud.title = t('Ocultar o mostrar la interfaz');
+  screen.setAttribute('aria-label', t('Pantalla completa'));
+  screen.title = t('Pantalla completa');
+  screen.hidden = !canFullscreen(document);
   shipPanel.setAttribute('aria-label', t('Controles de la nave'));
   base.hidden = true;
 
@@ -236,6 +244,22 @@ export function createTouchControls(
     }
   }
   pause.addEventListener('click', onPause, { signal });
+  // Como la H del teclado: quita la lista de tareas, los relojes y demás papeles para ver (o grabar) solo el mundo.
+  hud.addEventListener(
+    'click',
+    () => {
+      const hidden = document.body.classList.toggle('interfaz-oculta');
+      hud.classList.toggle('touch-hud-off', hidden);
+    },
+    { signal },
+  );
+  screen.addEventListener(
+    'click',
+    () => {
+      void toggleFullscreen(document);
+    },
+    { signal },
+  );
 
   let shownPiloting: boolean | undefined;
   /** Solo toca el DOM cuando cambia el modo (se llama cada fotograma). */

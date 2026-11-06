@@ -193,4 +193,35 @@ describe('parseClues with something that is not a clue file', () => {
     expect(() => parse(value)).toThrow(WorldDataError);
     expect(() => parse(value)).toThrow(/pistas/);
   });
+
+  it('reads what a conclusion means and what to do with it, and the lead of a fact (deduction pages)', () => {
+    const d = raw();
+    Object.assign(at(d.conclusiones, 0), {
+      sabe: 'Había un sitio lento.',
+      accion: 'Buscarlo en el cielo.',
+      pregunta: '¿Hubo un sitio lento?',
+    });
+    Object.assign(at(d.hechos, 1), { pista: 'Quien enviaba cosas lo notaría.' });
+
+    const clues = parse(d);
+
+    expect(clues.conclusions[0]).toMatchObject({
+      knowLine: 'Había un sitio lento.',
+      action: 'Buscarlo en el cielo.',
+      question: '¿Hubo un sitio lento?',
+    });
+    expect(clues.conclusions[1]?.knowLine).toBeUndefined();
+    expect(clues.facts.get('lab.existe_lugar_lento')?.lead).toBe('Quien enviaba cosas lo notaría.');
+    expect(clues.facts.get('deuda.palabra')?.lead).toBeUndefined();
+  });
+
+  it('rejects an empty lead or an empty deduction line', () => {
+    const lead = raw();
+    Object.assign(at(lead.hechos, 0), { pista: ' ' });
+    const action = raw();
+    Object.assign(at(action.conclusiones, 0), { accion: '' });
+
+    expect(() => parse(lead)).toThrow(WorldDataError);
+    expect(() => parse(action)).toThrow(WorldDataError);
+  });
 });

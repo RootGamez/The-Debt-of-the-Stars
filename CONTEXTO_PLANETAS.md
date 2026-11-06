@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — La deuda de las estrellas
 
-**Versión:** v0.17
-**Última actualización:** 2026-11-04 · Fase 11H (Cicatriz hueca, con anillo y micro agujero)
+**Versión:** v0.18
+**Última actualización:** 2026-11-06 · Plan de historia y puzzles físicos
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -394,4 +394,5 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-11-03 · Fase 11G (🟡).** Hogar por código: continente de día con el Instituto, la aldea, la ciudad, el campo, el embarcadero y el Motor (la Directora pasa a esperar allí); islas de noche con secretos para los curiosos; mar y cielo como el Archivo; los Ool por código, de color y luz según la edad (✅).
 - **2026-11-04 · Fase 11H.** Anthony pide rehacer Cicatriz hueca, con el micro agujero negro en el núcleo, anillo y mucho más detalle (✅ la idea, la máquina alrededor del centro, la gravedad doble, el anillo con fragmentos pisables y hechos nuevos en el grafo). Se hace por código (`web/src/worlds/procedural/cicatriz*.ts`); los lugares y textos nuevos son 🟡.
 - **2026-11-06 · Fase 12.** Anthony pide para Umbral un aire más denso con nubes, que se note el día y la noche según el lado y la cara de noche helada (✅). Colores, alturas y dónde empieza el hielo, 🟡.
+- **2026-11-06 · Historia y puzzles físicos (✅ el plan).** Anthony aprueba rehacer el Archivo por dentro en salas con carácter y un secreto, la Sala Cerrada (la petición rechazada), y estructuras nuevas para los puzzles físicos: el canal de las campanas del Anfiteatro y la hoja de carga de los silos (Umbral), el Planetario, los péndulos, la Cisterna y el prisma (Archivo), la silueta de la Cuna y la Balanza (Taller), y la placa del motor y la placa que canta (Cicatriz). Las salas y medidas son 🟡 (`docs/plan-historia-y-puzzles-fisicos.md` §7).
 - **2026-11-06 · Hitos D y E de la llegada (🟡).** Tres edificios cerrados en Umbral con estilo del Observatorio y cobre oxidado; murales, proyección y panel a medio tallar con el aspecto de los Ausentes (✅ D2).

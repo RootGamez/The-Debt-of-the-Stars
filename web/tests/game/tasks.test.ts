@@ -196,6 +196,82 @@ describe('the tasks of the loop (first steps in the unknown, then every planet)'
 
   it('keeps the prologue as it was', () => {
     expect(taskIds('prologo')).toEqual(TASK_IDS);
-    expect(taskIds('bucle')).toEqual(['explorar', 'ubicarse', 'nave_umbral', 'planetas']);
+    expect(taskIds('bucle')).toEqual([
+      'explorar',
+      'ubicarse',
+      'nave_umbral',
+      'planetas',
+      'cw_coger',
+      'cw_llevar',
+      'cw_motor',
+      'cw_ruedas',
+      'cw_pulso',
+    ]);
+  });
+});
+
+describe('the plan of the Counterweight (a mission that ticks itself off within the cycle)', () => {
+  const DONE_BEFORE = ['explorar', 'ubicarse', 'nave_umbral', 'planetas'] as const;
+  const ALL = new Set(['K3', 'K4', 'K5', 'K6']);
+  const BENCH = { place: 'bench', motorOut: false, matched: false } as const;
+  const LOOP: TaskState = { ...START, visited: new Set(['umbral']), explorable: ['umbral'] };
+  const ids = (tracker: TaskTracker) => tracker.items(false).map((i) => i.id);
+
+  it('does not show up until something of the Counterweight is understood', () => {
+    const tracker = new TaskTracker('bucle', DONE_BEFORE);
+    tracker.update({ ...LOOP, conclusions: new Set(['K3']), counterweight: BENCH });
+    expect(ids(tracker).some((id) => id.startsWith('cw_'))).toBe(false);
+
+    tracker.update({ ...LOOP, conclusions: new Set(['K4']), counterweight: BENCH });
+    expect(ids(tracker).filter((id) => id.startsWith('cw_'))).toEqual([
+      'cw_coger',
+      'cw_llevar',
+      'cw_motor',
+      'cw_ruedas',
+      'cw_pulso',
+    ]);
+    expect(tracker.items(false).find((i) => i.id === 'cw_coger')?.mission).toBe(
+      'Detener el colapso',
+    );
+  });
+
+  it('asks instead of telling while a step is not understood, and then points nowhere', () => {
+    const tracker = new TaskTracker('bucle', DONE_BEFORE);
+    tracker.update({ ...LOOP, conclusions: new Set(['K4']), counterweight: BENCH });
+    const carry = tracker.items(false).find((i) => i.id === 'cw_llevar');
+
+    expect(carry?.title).toBe('¿Dónde se instala el Contrapeso?');
+    expect(tracker.target('cw_llevar')).toEqual({ kind: 'none' });
+
+    tracker.update({ ...LOOP, conclusions: ALL, counterweight: BENCH });
+    expect(tracker.items(false).find((i) => i.id === 'cw_llevar')?.title).toBe(
+      'Llévalo a la Sala del Motor de Cicatriz',
+    );
+    expect(tracker.target('cw_llevar')).toEqual({ kind: 'world', world: 'cicatriz' });
+  });
+
+  it('never points at the Laboratory: finding it is the deduction', () => {
+    expect(taskTarget('cw_coger')).toEqual({ kind: 'none' });
+  });
+
+  it('ticks each step from the state of this cycle, and unticks it when the cycle starts over', () => {
+    const tracker = new TaskTracker('bucle', DONE_BEFORE);
+    const at = (counterweight: NonNullable<TaskState['counterweight']>, world = 'laboratorio') =>
+      tracker.update({ ...LOOP, conclusions: ALL, counterweight, world });
+
+    expect(at(BENCH)).toBe('cw_coger');
+    expect(at({ place: 'carried', motorOut: false, matched: false })).toBe('cw_llevar');
+    expect(at({ place: 'carried', motorOut: false, matched: false }, 'cicatriz')).toBe('cw_motor');
+    expect(at({ place: 'carried', motorOut: true, matched: false }, 'cicatriz')).toBe('cw_ruedas');
+    expect(at({ place: 'cradle', motorOut: true, matched: true }, 'cicatriz')).toBe('cw_pulso');
+    expect(at({ place: 'installed', motorOut: true, matched: true }, 'cicatriz')).toBeUndefined();
+
+    expect(at(BENCH)).toBe('cw_coger');
+    expect(tracker.doneIds).toEqual(DONE_BEFORE);
+  });
+
+  it('is not saved: the Counterweight goes back to its Bench every cycle', () => {
+    expect(isLoopTask('cw_coger')).toBe(false);
+    expect(new TaskTracker('bucle', ['cw_coger']).doneIds).toEqual([]);
   });
 });

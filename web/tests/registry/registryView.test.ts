@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildRegistryView } from '../../src/registry/registryView';
-import { parse } from '../helpers/clueFixture';
+import { at, parse, raw } from '../helpers/clueFixture';
 
 const clues = parse();
 const known = (...ids: string[]): ReadonlySet<string> => new Set(ids);
@@ -52,5 +52,52 @@ describe('buildRegistryView', () => {
 
     expect(view.threads[1]?.known).toBe(1);
     expect(view.threads[1]?.total).toBe(2);
+  });
+
+  it('has no deduction while nothing of a conclusion is known', () => {
+    expect(buildRegistryView(clues, known()).deductions).toEqual([]);
+  });
+
+  it('opens a deduction as soon as one of its pieces is known, with the missing ones as questions', () => {
+    const d = raw();
+    Object.assign(at(d.hechos, 2), { pista: 'Alguien que mira el cielo lo anotaría.' });
+    const view = buildRegistryView(parse(d), known('lab.existe_lugar_lento'));
+
+    expect(view.deductions.map((x) => x.id)).toEqual(['K1', 'K3']);
+    const k3 = view.deductions[1];
+    expect(k3?.unlocked).toBe(false);
+    expect(k3?.pieces).toEqual([
+      { met: true, line: 'Existe un sitio lento' },
+      {
+        met: false,
+        line: '¿Dónde está ese sitio, si nadie lo ve?',
+        lead: 'Alguien que mira el cielo lo anotaría.',
+      },
+    ]);
+  });
+
+  it('says what is now known and what to do once a deduction is complete', () => {
+    const d = raw();
+    Object.assign(at(d.conclusiones, 0), { sabe: 'Había un sitio lento.', accion: 'Buscarlo.' });
+    const view = buildRegistryView(parse(d), known('lab.existe_lugar_lento'));
+
+    expect(view.deductions[0]).toEqual({
+      id: 'K1',
+      title: 'Existe un sitio lento',
+      unlocked: true,
+      knowLine: 'Había un sitio lento.',
+      action: 'Buscarlo.',
+      pieces: [{ met: true, line: 'Hubo un destino donde el tiempo casi no avanzaba.' }],
+    });
+  });
+
+  it('counts a group of alternatives as met with any of them, showing the one that is known', () => {
+    const view = buildRegistryView(clues, known('lab.existe_lugar_lento', 'deuda.palabra'));
+
+    expect(view.deductions[1]?.unlocked).toBe(true);
+    expect(view.deductions[1]?.pieces[1]).toEqual({
+      met: true,
+      line: 'La placa habla de una cuenta.',
+    });
   });
 });

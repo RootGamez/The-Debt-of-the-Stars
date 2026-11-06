@@ -56,6 +56,14 @@
         "Quien los lleve de vuelta podrá construir otro. O podrá no hacerlo."
       ],
       "hechos": ["contrapeso.planos"]
+    },
+    "profunda": {
+      "requiere": ["casa.pruebas_menores", "contrapeso.que_es"],
+      "texto": [
+        "Ahora sabes lo que tienes en las manos. En el taller del Instituto hay un anillo de latón que se abre once segundos y no sabe quedarse quieto.",
+        "Esto es justo lo que le falta."
+      ],
+      "hechos": ["casa.planos_completan"]
     }
   },
   {

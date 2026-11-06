@@ -1,7 +1,7 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.13
-**Última actualización:** 2026-11-05 · Prólogo con tareas (la pieza de la isla)
+**Versión:** v0.14
+**Última actualización:** 2026-11-06 · Plan de historia y puzzles físicos (decisiones)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
 > Este documento dice **qué se puede aprender, dónde y en qué orden**. Es el puente entre la historia y el
@@ -318,7 +318,7 @@ textos de ambiente sin peso en el grafo.
 | 1 | ¿Qué masa dobla la luz y frena el tiempo del Laboratorio? | **El Nudo**: la garganta de la primera Puerta, semilla del agujero negro (sección 3) | ✅ Anthony |
 | 2 | ¿Cuándo se puede instalar el Contrapeso? (pregunta 7 de la historia) | Solo durante el **pulso de las 9:00**, cuando el núcleo se abre; antes hay que sacar el motor viejo | ✅ Anthony (durante el pulso) · 🟡 sacar el motor viejo |
 | 3 | ¿Dónde está la Cámara? (H1) | En el Laboratorio, con las notas de quien la construyó | ✅ Anthony |
-| 4 | ¿Quién firma la orden de silencio? (pregunta 18) | "El Consejo de Tránsito" (los que gestionaban las Puertas) | 🟡 · ❓ quién en concreto |
+| 4 | ¿Quién firma la orden de silencio? (pregunta 18) | "El Consejo de Tránsito, en pleno": siete signos, uno tachado (quien votó en contra) | ✅ Anthony (2026-11-06) · ❓ quién votó en contra |
 | 5 | ¿Las grabaciones suenan al ritmo del reloj donde se grabaron? | Sí, es la mecánica de lectura de `cicatriz.grabacion_esceptico` (ya propuesta en la historia §6) | ✅ Anthony (plan de la Fase 7, 2026-10-28) |
 | 6 | ¿Existe el Observatorio? | Sí, como extra opcional; el grafo no depende de él | ✅ Anthony |
 | 7 | El hueco con el símbolo de casa en `cicatriz.lista_mundos` | La red ya incluye el sistema del protagonista | 🟡 |
@@ -361,4 +361,6 @@ textos de ambiente sin peso en el grafo.
 - **2026-11-03 · Fase 11G (🟡).** Hogar rehecho: doce fuentes nuevas de ambiente (once notas y la charla de la astrónoma), sin hechos. La Directora espera ahora en el Motor (cambia su primera línea). Total: 67 fuentes y 61 hechos.
 - **2026-11-05 · Prólogo con tareas (🟡).** Nueva fuente `hogar.fragmento_isla` (isla del primer Albatros) con el hecho `casa.fragmento_isla` (H7): la Maestra manda a buscar una pieza pequeña y la Directora solo da la misión (`casa.mision_luna`, ahora su lectura profunda) cuando se la llevas. `casa.directora_dirige` pasa a ser su lectura superficial y su frase pierde «a quien tendré que convencer». En el cuaderno del prólogo no aparecen las preguntas sobre los Ausentes: solo las tareas y lo aprendido. Total: 61 fuentes del grafo.
 - **2026-11-04 · Fase 11H (🟡).** Cicatriz pasa a ser hueca, con micro agujero en el centro y anillo (✅ la idea, Anthony). Cinco fuentes nuevas con texto borrador: `cicatriz.cripta`, `cicatriz.friso`, `cicatriz.nucleo`, `cicatriz.partidas` y `cicatriz.anillo`, y cinco hechos nuevos (`nudo.sellado`, `deuda.mundo_vaciado`, `deuda.garganta_maquina`, `partida.ultimas_salidas`, `deuda.anillo_de_mordidas`), todos 🟡 para que Anthony los decida. Total: 72 fuentes y 66 hechos.
+- **2026-11-06 · Plan de historia y puzzles físicos (✅ decisiones).** Anthony aprueba `docs/plan-historia-y-puzzles-fisicos.md`: siete **puzzles físicos** basados en experimentos reales (las campanas de Galileo en Umbral; el Planetario, los péndulos de Huygens, la Cisterna de Arquímedes y el prisma en el Archivo; la palanca en el Taller; la placa de Chladni en Cicatriz), cada uno con su pista en otro mundo; de un puzzle resuelto **solo persiste el conocimiento** (su dibujo en el cuaderno); la hora de las **6:30 sale del Planetario** del Archivo (el telescopio deja de decirla); una **página de deducción** por conclusión con dibujo y «qué puedo hacer ahora»; la Puerta del Nudo brilla un poco a menos de 300 m; Claude escribe en borrador las tarjetas de final; firmas con signos y la orden firmada por el Consejo en pleno (decisión 4). Las fuentes y los hechos nuevos se añaden a este documento al construirlos (hito T10 del plan).
 - **2026-11-06 · Llegada e hito E (🟡).** Umbral gana cuatro fuentes: `umbral.llegada` (la primera nota), `umbral.mural`, `umbral.consola_mando` y `umbral.mesa_tallista`, y tres hechos encadenados: `llegada.gusano` → `umbral.hogar_ausentes` → `partida.precipitada` → `partida.evacuacion`. Total: 65 fuentes. Textos en borrador.
+- **2026-11-06 · T1 del plan de historia (🟡).** Los hechos llevan `pista` (una frase vaga de a dónde mirar) y las conclusiones `sabe`, `accion` y `pregunta`; el cuaderno muestra una página de deducción por conclusión empezada. Hechos nuevos: `archivo.hora_ranura` (el escritorio del Archivo dice que a las 4:00 la luz entra por la ranura) y `casa.planos_completan` (lectura profunda de los planos de las Puertas). El telescopio del Observatorio ya no da las 6:30 y `contrapeso.lugar` sale de la secuencia del Taller (se aprende en Cicatriz). Con K4, K5 o K6 la lista de tareas muestra la misión «Detener el colapso» (cinco pasos en vivo, no se guardan).

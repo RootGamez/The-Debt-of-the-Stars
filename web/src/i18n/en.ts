@@ -174,6 +174,9 @@ export const EN: Readonly<Record<string, string>> = {
   'Si lo encuentras: aquí está todo lo que he aprendido.':
     'If you find this: here is everything I have learned.',
   'Lo que sé': 'What I know',
+  'Qué puedo hacer ahora': 'What I can do now',
+  'Por qué lo sé': 'Why I know it',
+  'Lo que tengo y lo que me falta': 'What I have and what I am missing',
   'Todavía no sé nada con certeza.': 'I do not know anything for certain yet.',
   'Todavía no sé nada sobre esto.': 'I do not know anything about this yet.',
   'Bitácora de mundos': 'Log of worlds',
@@ -395,6 +398,44 @@ export const EN: Readonly<Record<string, string>> = {
     '↑ take off · Ship to get up · Objective: tasks',
   'Ocultar tareas': 'Hide tasks',
   'Mostrar tareas': 'Show tasks',
+  'Ocultar o mostrar la interfaz': 'Hide or show the interface',
+  'Pantalla completa': 'Full screen',
+  'Detener el colapso': 'Stop the collapse',
+  'Aún no lo entiendo: en el cuaderno, las páginas de deducción dicen qué me falta':
+    'I do not understand it yet: the deduction pages in the notebook say what I am missing',
+  'Coge el Contrapeso del Banco del Laboratorio':
+    'Take the Counterweight from the Bench in the Laboratory',
+  '¿Dónde está el Contrapeso?': 'Where is the Counterweight?',
+  Contrapeso: 'Counterweight',
+  'Está en su Banco, en el Laboratorio: E para cogerlo. En brazos no se corre':
+    'It is on its Bench in the Laboratory: E to pick it up. You cannot run while carrying it',
+  'Está en su Banco, en el Laboratorio: toca Coger. En brazos no se corre':
+    'It is on its Bench in the Laboratory: tap Pick up. You cannot run while carrying it',
+  'Llévalo a la Sala del Motor de Cicatriz': 'Take it to the Engine Room in Scar',
+  '¿Dónde se instala el Contrapeso?': 'Where does the Counterweight go?',
+  'Súbelo a la nave y vuela a Cicatriz; la Sala del Motor rodea el centro del planeta':
+    'Put it on the ship and fly to Scar; the Engine Room surrounds the center of the planet',
+  'Saca el motor viejo con la palanca antes de las 9:00':
+    'Pull out the old engine with the lever before 9:00',
+  '¿Qué hay que quitar para ponerlo?': 'What has to be removed to fit it?',
+  Palanca: 'Lever',
+  'La palanca está en la consola, delante del núcleo: E para tirar. Después del pulso ya no sale':
+    'The lever is on the console in front of the core: E to pull. After the pulse the engine will not come out',
+  'La palanca está en la consola, delante del núcleo: toca Tirar. Después del pulso ya no sale':
+    'The lever is on the console in front of the core: tap Pull. After the pulse the engine will not come out',
+  'En la cuna, iguala su reloj con el de la máquina':
+    'In the cradle, match its clock to the one on the machine',
+  '¿Qué pasa con su reloj?': 'What about its clock?',
+  Cuna: 'Cradle',
+  'Ponlo en la cuna con E y gira las dos ruedas hasta que los dos relojes marquen lo mismo':
+    'Set it in the cradle with E and turn the two wheels until both clocks read the same',
+  'Ponlo en la cuna y gira las dos ruedas hasta que los dos relojes marquen lo mismo':
+    'Set it in the cradle and turn the two wheels until both clocks read the same',
+  'Espera al pulso de las 9:00': 'Wait for the 9:00 pulse',
+  '¿Cuándo encaja?': 'When does it fit?',
+  Pulso: 'Pulse',
+  'Con los relojes iguales, el pulso de las 9:00 lo sube de la cuna al núcleo':
+    'With the clocks matched, the 9:00 pulse lifts it from the cradle into the core',
   // Las tareas del bucle (plan de la llegada, hito B).
   'Primeros pasos en lo desconocido': 'First steps into the unknown',
   'Explora cada planeta del sistema': 'Explore every planet in the system',

@@ -210,7 +210,8 @@
     "hilos": ["H5"],
     "frase": "Hubo un destino secreto donde el tiempo casi no avanzaba.",
     "menciona": ["lab.imagen_desplazada"],
-    "enlaces": ["silencio.dos_investigadores", "contrapeso.trasladado"]
+    "enlaces": ["silencio.dos_investigadores", "contrapeso.trasladado"],
+    "pista": "Quien enviaba cargas, o quien esperaba cartas, habría notado un reloj que se quedaba atrás."
   },
   {
     "id": "lab.imagen_desplazada",
@@ -218,13 +219,21 @@
     "frase": "Cerca del Nudo las estrellas se ven donde no están: lo que se ve no está donde parece.",
     "rumor": "¿Dónde está ese sitio, si lo que se ve no está donde parece?",
     "menciona": ["lab.correccion"],
-    "enlaces": ["nudo.existe"]
+    "enlaces": ["nudo.existe"],
+    "pista": "Alguien que miraba el cielo de oficio lo habría anotado; o una luz que solo entra un rato."
   },
   {
     "id": "lab.correccion",
     "hilos": ["H5"],
     "frase": "Para hallar el sitio lento hay que corregir el desplazamiento de su imagen.",
     "rumor": "¿Cuánto hay que corregir lo que se ve?",
+    "enlaces": ["lab.imagen_desplazada"],
+    "pista": "Quien trabajó allí lo dejó dicho, con una voz que hay que saber escuchar; o una consola que sigue las rutas."
+  },
+  {
+    "id": "archivo.hora_ranura",
+    "hilos": ["H5"],
+    "frase": "A las cuatro, la luz de la Brasa entra por la ranura del Archivo.",
     "enlaces": ["lab.imagen_desplazada"]
   },
   {
@@ -250,50 +259,58 @@
     "id": "contrapeso.reloj",
     "hilos": ["H6"],
     "frase": "El reloj interno del Contrapeso importa: no debe moverse sin ajustarlo.",
-    "enlaces": ["contrapeso.medir_desfase", "contrapeso.metodo_sincronia"]
+    "enlaces": ["contrapeso.medir_desfase", "contrapeso.metodo_sincronia"],
+    "pista": "Junto a donde reposaba, alguien dejó una advertencia."
   },
   {
     "id": "contrapeso.que_es",
     "hilos": ["H6"],
     "frase": "El Contrapeso es un motor de reemplazo que «paga» la deuda.",
-    "enlaces": ["contrapeso.sustituye_motor", "deuda.es_de_tiempo"]
+    "enlaces": ["contrapeso.sustituye_motor", "deuda.es_de_tiempo"],
+    "pista": "Donde se fabricaba, alguien escribió cómo se instalaba."
   },
   {
     "id": "contrapeso.sustituye_motor",
     "hilos": ["H6"],
     "frase": "Se instala en lugar del motor de la máquina de Cicatriz.",
-    "enlaces": ["contrapeso.que_es", "contrapeso.lugar"]
+    "enlaces": ["contrapeso.que_es", "contrapeso.lugar"],
+    "pista": "Un manual lo diría; o una fábrica que todavía lo ensaya sola."
   },
   {
     "id": "contrapeso.metodo_sincronia",
     "hilos": ["H2", "H6"],
     "frase": "Un reloj que viaja se desfasa; los diarios de los gemelos enseñan a calcular cuánto.",
-    "enlaces": ["contrapeso.reloj", "contrapeso.cuenta_sincronia"]
+    "enlaces": ["contrapeso.reloj", "contrapeso.cuenta_sincronia"],
+    "pista": "Dos personas que contaron los mismos días en sitios distintos."
   },
   {
     "id": "contrapeso.medir_desfase",
     "hilos": ["H6"],
     "frase": "Se puede medir un desfase comparando relojes calibrados en sitios distintos.",
-    "enlaces": ["contrapeso.reloj", "deuda.relojes_se_separan"]
+    "enlaces": ["contrapeso.reloj", "deuda.relojes_se_separan"],
+    "pista": "Un reloj que no marca la hora de su sitio se puede poner en hora comparándolo con otro."
   },
   {
     "id": "contrapeso.cuenta_sincronia",
     "hilos": ["H6"],
     "frase": "La cuenta para corregir el reloj del Contrapeso según la ruta que siga.",
     "rumor": "¿Cómo se corrige el reloj del Contrapeso?",
-    "enlaces": ["contrapeso.metodo_sincronia"]
+    "enlaces": ["contrapeso.metodo_sincronia"],
+    "pista": "Las páginas que le faltan al manual tienen que estar en algún sitio."
   },
   {
     "id": "contrapeso.lugar",
     "hilos": ["H6"],
     "frase": "El Contrapeso se instala en la Sala del Motor de Cicatriz.",
-    "enlaces": ["contrapeso.ventana_pulso", "contrapeso.sustituye_motor"]
+    "enlaces": ["contrapeso.ventana_pulso", "contrapeso.sustituye_motor"],
+    "pista": "Donde está la máquina que abre las Puertas."
   },
   {
     "id": "contrapeso.ventana_pulso",
     "hilos": ["H6"],
     "frase": "El núcleo de la máquina solo se abre durante el pulso.",
-    "enlaces": ["contrapeso.lugar"]
+    "enlaces": ["contrapeso.lugar"],
+    "pista": "La máquina no siempre está abierta: alguien anotó cuándo late."
   },
   {
     "id": "contrapeso.terminado",
@@ -305,19 +322,22 @@
     "id": "bocas.relojes_distintos",
     "hilos": ["H7"],
     "frase": "Cada boca de una Puerta lleva su propio tiempo; por eso las cosas llegan de épocas distintas.",
-    "enlaces": ["deuda.relojes_se_separan", "casa.fragmento_antiguo"]
+    "enlaces": ["deuda.relojes_se_separan", "casa.fragmento_antiguo"],
+    "pista": "Cartas que contestan antes de tiempo, o una lista de mundos con sus horas."
   },
   {
     "id": "casa.prueba_llama",
     "hilos": ["H7"],
     "frase": "Una boca nueva llama desde un sistema joven.",
-    "enlaces": ["deuda.puertas_se_buscan", "casa.prueba_plazo"]
+    "enlaces": ["deuda.puertas_se_buscan", "casa.prueba_plazo"],
+    "pista": "La máquina lleva la cuenta de quién llama a la red."
   },
   {
     "id": "casa.prueba_plazo",
     "hilos": ["H7"],
     "frase": "La prueba mayor del Instituto es dentro de pocos días.",
-    "enlaces": ["casa.prueba_llama", "casa.pruebas_menores"]
+    "enlaces": ["casa.prueba_llama", "casa.pruebas_menores"],
+    "pista": "En casa lo decían en voz alta, y estaba en una pizarra."
   },
   {
     "id": "casa.pruebas_menores",
@@ -408,6 +428,12 @@
     "hilos": ["H6"],
     "frase": "En el Banco del Archivo quedan los planos del Contrapeso: con ellos se podría construir otro.",
     "enlaces": ["contrapeso.sustituye_motor"]
+  },
+  {
+    "id": "casa.planos_completan",
+    "hilos": ["H7"],
+    "frase": "Estos planos son justo lo que le falta a la Puerta del Instituto: con ellos, su prueba funcionaría.",
+    "enlaces": ["contrapeso.planos", "casa.pruebas_menores"]
   },
   {
     "id": "nudo.sellado",

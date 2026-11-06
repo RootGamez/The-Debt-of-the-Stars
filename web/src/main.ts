@@ -853,6 +853,13 @@ function start(): void {
           shipPlace: () => flight.shipPlace,
           visited: () => new Set(Object.keys(worldNames)),
           explorable: spec?.bodies.filter((body) => !body.hidden).map((body) => body.world),
+          conclusions: () => reading.conclusions(),
+          counterweight: () => {
+            const play = counterweight?.play;
+            return play
+              ? { place: play.place, motorOut: play.motorOut, matched: play.wheels.read().matched }
+              : undefined;
+          },
           onDone: (done) => {
             if (!inPrologue) markTasksDone(browserStore(), loadSave(browserStore()), done);
           },

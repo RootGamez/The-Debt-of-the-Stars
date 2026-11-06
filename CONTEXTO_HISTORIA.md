@@ -1,8 +1,8 @@
 # CONTEXTO DE HISTORIA — La deuda de las estrellas
 
 **Título:** La deuda de las estrellas (The Debt of the Stars) ✅ decidido por Anthony
-**Versión:** v1.12 (el aspecto de los Ausentes)
-**Última actualización:** 2026-10-30 · HUD
+**Versión:** v1.13 (firmas, orden de silencio y la Sala Cerrada)
+**Última actualización:** 2026-11-06 · Historia y puzzles físicos
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)
 
 > Documento vivo. Es la fuente de verdad de la historia del juego: léelo entero antes de continuar el trabajo en cualquier sesión (con Claude o sin él) y actualízalo al final.
@@ -323,7 +323,7 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 15. ❓ **El Límite y los hitos:** cuánta deuda soporta una Puerta, cuánta llevan las pruebas pequeñas del Instituto y cuánta tendría la prueba mayor (sirve para diseñar el reloj y la tensión del final A).
 16. ❓ **Cuántas Puertas** había en la red de los Ausentes y cuántas tiene el Instituto (define cuánto se contagian).
 17. ✅ **Cómo se esconde el laboratorio:** resuelto, por lente gravitacional (la imagen visible es un desplazamiento de su posición real).
-18. ✅ **Quién ocultó el problema:** resuelto, el Consejo. ❓ Falta definir sus motivos exactos y sus miembros (¿quién firma la orden de silencio?).
+18. ✅ **Quién ocultó el problema:** resuelto, el Consejo. ✅ **La orden de silencio** la firma «el Consejo de Tránsito, en pleno»: siete signos, uno tachado, el de quien votó en contra (Anthony, 2026-11-06). ❓ Falta quién votó en contra y sus motivos exactos.
 19. ✅ **El laboratorio es un sitio aparte:** resuelto, quinto lugar fuera de los cuatro mundos.
 
 ---
@@ -357,4 +357,5 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-30 · Fase 10 (hito 10D, 🟡).** El epílogo se puede jugar: con el Contrapeso instalado se baja con la nave al horizonte estable (tira de la nave, la marea se nota, el reloj de Umbral se acelera) y al cruzarlo, fundido a negro, se despierta en el Archivo de las Puertas. Se proponen los números del puzzle de las bocas de casa (§9) y que los planos se puedan dejar. La boca y los planos ya deciden el final (A, B o "llega tarde"); las escenas de cada final son el hito siguiente.
 - **2026-10-30 · Fase 10 (hito 10E, 🟡).** Los finales se pueden jugar: la vuelta a casa por la boca elegida (el Hogar de antes con A y B; el de siempre si se llega tarde), la Directora que cierra el viaje con la tarjeta del final, la Luna sin fragmento en el final A y los finales vistos en el guardado. Los textos de las tarjetas y las escenas son de Anthony.
 - **2026-10-30 · HUD (Cuaderno vivo).** Implementado el rediseño del HUD con las decisiones de Anthony (§8 «Interfaz»): textos que se escriben y se pasan frase a frase, charlas con retrato, el Registro como libro y la bitácora de mundos (nombrar cada mundo al llegar y pegar su dibujo). Viendo el juego, Anthony pide el papel crema de la propuesta A con solo la tinta brillando.
+- **2026-11-06 · Historia y puzzles físicos.** Anthony aprueba el plan `docs/plan-historia-y-puzzles-fisicos.md`: los Ausentes **no firman con nombre** sino con signos de rombos y triángulos; la orden de silencio la firma el Consejo en pleno, con un signo tachado (pregunta 18); y el secreto de la **Sala Cerrada** del Archivo es **la petición rechazada**: la investigadora y el escéptico pidieron no evacuar por las Puertas y esperar al Contrapeso, y el Consejo la archivó. Los textos se escriben con `docs/biblia-textos.md`.
 - **2026-11-06 · La llegada.** Anthony decide el aspecto de los Ausentes (pregunta 10, ✅) y que la primera llegada a Umbral sea por el gusano de la Luna, despertando junto a la nave caída; Umbral es el hogar de los Ausentes y se fueron hace poco y con prisa.

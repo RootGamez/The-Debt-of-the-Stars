@@ -4,7 +4,7 @@
 // páginas van de dos en dos (cada hoja tiene anverso y reverso). Pura: el panel solo pinta lo que sale de aquí.
 import type { TaskItem } from '../game/tasks';
 import type { WorldPage } from '../worlds/worldLog';
-import type { RegistryView, ThreadView } from './registryView';
+import type { DeductionView, RegistryView, ThreadView } from './registryView';
 
 /** Lo más que cabe en una página: entradas, o su peso (un hecho con «ver también» ocupa más). */
 export const PAGE_CAPACITY = 6;
@@ -28,6 +28,8 @@ export type NotebookPage =
   | { kind: 'cover' }
   | { kind: 'flyleaf' }
   | { kind: 'known'; conclusions: readonly string[]; totalFacts: number }
+  /** Una conclusión empezada: lo que sé, lo que falta (con su orientación) y, completa, qué puedo hacer. */
+  | { kind: 'deduction'; deduction: DeductionView }
   | {
       kind: 'thread';
       threadId: string;
@@ -143,6 +145,7 @@ export function notebookPages(
       conclusions: view.conclusions.map((c) => c.title),
       totalFacts: view.totalFacts,
     },
+    ...view.deductions.map((deduction): NotebookPage => ({ kind: 'deduction', deduction })),
     ...view.threads.flatMap((thread) => threadPages(thread, fresh)),
   ];
   const indexAt = pages.length;

@@ -10,7 +10,14 @@ import { createGuideView } from '../ui/guideView';
 import { createTaskPanel } from '../ui/taskPanel';
 import { createWaypointView } from '../ui/taskWaypoint';
 import { placeWaypoint } from './waypoint';
-import { TaskHints, taskHint, taskLabel, taskTarget, type TaskId, type TaskTracker } from './tasks';
+import {
+  TaskHints,
+  taskHint,
+  taskLabel,
+  type CounterweightTaskView,
+  type TaskId,
+  type TaskTracker,
+} from './tasks';
 
 /** Más cerca que esto de lo que señala, el indicador se quita (ya lo tienes delante: manda el aviso de E). */
 const ARRIVED_DISTANCE = 3;
@@ -52,6 +59,10 @@ export interface TaskRigOptions {
   /** Los mundos ya visitados y los que hay que visitar (tareas del bucle). */
   visited?: () => ReadonlySet<string>;
   explorable?: readonly string[];
+  /** Las conclusiones que ya se entienden (la misión del Contrapeso las necesita). */
+  conclusions?: () => ReadonlySet<string>;
+  /** El Contrapeso de este ciclo (si el juego lo tiene). */
+  counterweight?: () => CounterweightTaskView | undefined;
   /** Avisa cuando cambia lo hecho (para guardarlo). */
   onDone?: (done: readonly TaskId[]) => void;
 }
@@ -141,7 +152,7 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
 
   /** Pone en `point` el sitio de la tarea (en el espacio del mundo que se ve); `radius` se descuenta de la distancia. */
   function whereIs(id: TaskId): { radius: number } | undefined {
-    const target = taskTarget(id);
+    const target = tracker.target(id);
     if (target.kind === 'none') return undefined;
     if (target.kind === 'world') {
       const group = systemScene.groupOf(target.world);
@@ -163,7 +174,7 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
       return;
     }
     const meters = Math.max(0, point.distanceTo(camera.position) - where.radius);
-    const kind = taskTarget(id).kind;
+    const kind = tracker.target(id).kind;
     const arrived =
       (kind === 'source' && meters < ARRIVED_DISTANCE) ||
       (kind === 'ship' && meters < SHIP_ARRIVED_DISTANCE);
@@ -199,6 +210,9 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
         onMoon: !frame.piloting && frame.world === options.moonWorld,
         visited: options.visited?.(),
         explorable: options.explorable,
+        world: frame.world,
+        conclusions: options.conclusions?.(),
+        counterweight: options.counterweight?.(),
       });
       if (tracker.doneIds.length !== doneCount) {
         doneCount = tracker.doneIds.length;
@@ -211,7 +225,7 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
         frame.visible && !panel.hidden,
       );
       if (frame.piloting) {
-        const target = current ? taskTarget(current) : undefined;
+        const target = current ? tracker.target(current) : undefined;
         options.setShipTarget(target?.kind === 'world' ? target.world : undefined);
       }
       showWaypoint(current, frame.visible);

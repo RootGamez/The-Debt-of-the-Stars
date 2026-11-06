@@ -773,6 +773,38 @@ body {
   color: var(--amber);
   text-shadow: var(--halo-amber);
 }
+/* Páginas de deducción (plan de historia y puzzles, §5.1). */
+.registry-deduction-done {
+  color: var(--amber);
+  text-shadow: var(--halo-amber);
+}
+.registry-deduction-know {
+  margin: 0.2em 0 0.4em;
+  text-shadow: var(--halo);
+}
+.registry-deduction-action {
+  margin: 0 0 0.5em;
+  padding-left: 0.6em;
+  border-left: 2px solid var(--amber);
+  text-shadow: var(--halo);
+}
+.registry-deduction-label {
+  color: var(--amber);
+}
+.registry-piece {
+  list-style: none;
+  text-shadow: var(--halo);
+}
+.registry-piece-missing {
+  color: var(--pencil);
+  text-shadow: none;
+}
+.registry-lead {
+  margin: 0.1em 0 0.3em 1em;
+  font-size: 0.8em;
+  font-style: italic;
+  color: var(--pencil);
+}
 .registry-empty {
   color: var(--pencil);
 }

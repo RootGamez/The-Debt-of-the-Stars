@@ -118,4 +118,41 @@ describe('the real clue data', () => {
     expect(recordings.length).toBeGreaterThan(0);
     for (const recording of recordings) expect(recording.recordedRate).toBeGreaterThan(0);
   });
+
+  it('explains every conclusion: what I now know, what to do and the question while it is missing', () => {
+    for (const conclusion of clues.conclusions) {
+      expect(conclusion.knowLine, conclusion.id).toBeTruthy();
+      expect(conclusion.action, conclusion.id).toBeTruthy();
+      expect(conclusion.question, conclusion.id).toBeTruthy();
+    }
+  });
+
+  it('gives a vague lead to every fact a conclusion needs (never the place itself)', () => {
+    const needed = clues.conclusions
+      .flatMap((c) => c.requires.flat())
+      .filter((id) => clues.facts.has(id));
+    for (const id of needed) expect(clues.facts.get(id)?.lead, id).toBeTruthy();
+  });
+
+  it('does not give away the hour of the alignment at the Observatory telescope', () => {
+    const telescope = clues.sourceById.get('observatorio.telescopio');
+    expect(telescope?.surface.text.join(' ')).not.toMatch(/6:30|seis y media/);
+  });
+
+  it('leaves the place of the installation to Scar: the factory sequence only shows how', () => {
+    const sequence = clues.sourceById.get('taller.secuencia');
+    expect(sequence?.surface.facts).not.toContain('contrapeso.lugar');
+    expect(sequence?.surface.facts).toContain('contrapeso.ventana_pulso');
+  });
+
+  it('tells, on the plans, that they are what the Institute is missing (an informed last choice)', () => {
+    const plans = clues.sourceById.get('puertas.planos');
+    expect(plans?.deep?.requires).toEqual(['casa.pruebas_menores', 'contrapeso.que_es']);
+    expect(plans?.deep?.facts).toEqual(['casa.planos_completan']);
+  });
+
+  it('lets the archivist tell when the light comes through the slot', () => {
+    const desk = clues.sourceById.get('archivo.escritorio');
+    expect(desk?.surface.facts).toContain('archivo.hora_ranura');
+  });
 });

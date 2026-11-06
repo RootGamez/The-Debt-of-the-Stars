@@ -54,6 +54,11 @@ export interface Fact {
   links: string[];
   /** Pregunta que se muestra mientras el hecho es solo un rumor. */
   rumor: string | undefined;
+  /**
+   * Orientación vaga para quien busca este hecho (`pista`): qué tipo de sitio o de persona lo sabría, nunca cuál.
+   * La enseña la página de deducción de la conclusión que lo necesita mientras falta.
+   */
+  lead: string | undefined;
 }
 
 /** Una lectura de una fuente; la profunda exige haber aprendido antes `requires`. */
@@ -98,6 +103,10 @@ export interface Conclusion {
   title: string;
   thread: string;
   requires: Requirement[];
+  /** La página de deducción: lo que ahora sé (`sabe`), qué puedo hacer (`accion`) y la pregunta mientras falta. */
+  knowLine: string | undefined;
+  action: string | undefined;
+  question: string | undefined;
 }
 
 export interface Clues {
@@ -134,6 +143,10 @@ function text(value: unknown, where: string): string {
   if (typeof value !== 'string' || value.trim().length === 0)
     fail(`${where} debe ser un texto no vacío`);
   return value;
+}
+
+function optionalText(value: unknown, where: string): string | undefined {
+  return value === undefined ? undefined : text(value, where);
 }
 
 function ids(value: unknown, where: string): string[] {
@@ -184,7 +197,8 @@ function parseFacts(raw: unknown, threadIds: ReadonlySet<string>): Map<string, F
       line: text(r.frase, `${id}.frase`),
       mentions: ids(r.menciona, `${id}.menciona`),
       links: ids(r.enlaces, `${id}.enlaces`),
-      rumor: r.rumor === undefined ? undefined : text(r.rumor, `${id}.rumor`),
+      rumor: optionalText(r.rumor, `${id}.rumor`),
+      lead: optionalText(r.pista, `${id}.pista`),
     });
   }
   return facts;
@@ -227,7 +241,15 @@ function parseConclusions(
       parseRequirement(g, `${id}.requiere`),
     );
     if (requires.length === 0) fail(`${id} necesita al menos un requisito`);
-    return { id, title: text(r.titulo, `${id}.titulo`), thread, requires };
+    return {
+      id,
+      title: text(r.titulo, `${id}.titulo`),
+      thread,
+      requires,
+      knowLine: optionalText(r.sabe, `${id}.sabe`),
+      action: optionalText(r.accion, `${id}.accion`),
+      question: optionalText(r.pregunta, `${id}.pregunta`),
+    };
   });
   for (const c of parsed) {
     for (const target of c.requires.flat()) {

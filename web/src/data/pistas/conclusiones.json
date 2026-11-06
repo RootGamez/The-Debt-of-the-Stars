@@ -3,31 +3,46 @@
     "id": "K1",
     "titulo": "Existe un sitio lento",
     "hilo": "H5",
-    "requiere": ["lab.existe_lugar_lento"]
+    "requiere": ["lab.existe_lugar_lento"],
+    "sabe": "Había un sitio secreto donde el tiempo casi no pasaba.",
+    "accion": "Buscar en el cielo algo que no se mueva como una estrella.",
+    "pregunta": "¿Hubo algún sitio donde el tiempo corriera distinto?"
   },
   {
     "id": "K2",
     "titulo": "Lo que se ve en el cielo está desplazado",
     "hilo": "H5",
-    "requiere": ["lab.imagen_desplazada"]
+    "requiere": ["lab.imagen_desplazada"],
+    "sabe": "Cerca del Nudo la luz se tuerce: lo que veo en el cielo no está donde parece.",
+    "accion": "Mirar la imagen sabiendo que miente.",
+    "pregunta": "¿Por qué nadie encontraba ese sitio?"
   },
   {
     "id": "KC",
     "titulo": "Cuánto hay que corregir lo que se ve",
     "hilo": "H5",
-    "requiere": ["lab.correccion"]
+    "requiere": ["lab.correccion"],
+    "sabe": "La imagen del sitio se ve unos dieciocho grados girada hacia la Brasa.",
+    "accion": "Desde la imagen, apartar la vista dieciocho grados de la Brasa.",
+    "pregunta": "¿Cuánto hay que corregir lo que se ve?"
   },
   {
     "id": "K3",
     "titulo": "Sé dónde está de verdad el Laboratorio",
     "hilo": "H5",
-    "requiere": ["K1", "K2", "KC"]
+    "requiere": ["K1", "K2", "KC"],
+    "sabe": "El Laboratorio está dentro del Nudo, dieciocho grados más allá de su imagen, del lado contrario a la Brasa.",
+    "accion": "Volar hacia allí pilotando con la mira graduada (G).",
+    "pregunta": "¿Dónde está de verdad el Laboratorio?"
   },
   {
     "id": "K4",
     "titulo": "Qué es el Contrapeso y qué sustituye",
     "hilo": "H6",
-    "requiere": ["contrapeso.que_es", "contrapeso.sustituye_motor"]
+    "requiere": ["contrapeso.que_es", "contrapeso.sustituye_motor"],
+    "sabe": "El Contrapeso es un motor de reemplazo: va en lugar del motor de la máquina y paga la deuda.",
+    "accion": "Encontrarlo y llevarlo hasta la máquina.",
+    "pregunta": "¿Qué es el Contrapeso?"
   },
   {
     "id": "K5",
@@ -36,24 +51,36 @@
     "requiere": [
       ["contrapeso.reloj", "contrapeso.medir_desfase"],
       ["contrapeso.metodo_sincronia", "contrapeso.cuenta_sincronia"]
-    ]
+    ],
+    "sabe": "Su reloj tiene que marcar lo mismo que el de la máquina, y cada viaje lo desajusta.",
+    "accion": "En la cuna, igualar los dos relojes con las dos ruedas.",
+    "pregunta": "¿Por qué importa su reloj?"
   },
   {
     "id": "K6",
     "titulo": "Dónde y cuándo se instala",
     "hilo": "H6",
-    "requiere": ["contrapeso.lugar", "contrapeso.ventana_pulso"]
+    "requiere": ["contrapeso.lugar", "contrapeso.ventana_pulso"],
+    "sabe": "Se instala en la Sala del Motor de Cicatriz, y solo encaja durante el pulso de las nueve.",
+    "accion": "Llegar antes de las nueve, sacar el motor viejo con la palanca y esperar al pulso.",
+    "pregunta": "¿Dónde y cuándo se instala?"
   },
   {
     "id": "K7",
     "titulo": "Las bocas de una Puerta tienen relojes distintos",
     "hilo": "H7",
-    "requiere": ["bocas.relojes_distintos"]
+    "requiere": ["bocas.relojes_distintos"],
+    "sabe": "Cada boca de una Puerta vive su propio tiempo: lo que se ve al otro lado no es el día al que se llega.",
+    "accion": "Antes de cruzar, contar el desfase de cada boca.",
+    "pregunta": "¿Por qué llegan cosas de épocas distintas?"
   },
   {
     "id": "K8",
     "titulo": "Cuándo es la prueba mayor",
     "hilo": "H7",
-    "requiere": [["casa.prueba_llama", "casa.prueba_plazo"]]
+    "requiere": [["casa.prueba_llama", "casa.prueba_plazo"]],
+    "sabe": "La prueba mayor del Instituto es el día cuarenta desde que despegué.",
+    "accion": "Volver a casa antes del día cuarenta.",
+    "pregunta": "¿Cuándo será la prueba mayor?"
   }
 ]
