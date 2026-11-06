@@ -64,6 +64,8 @@ import {
   silos,
   watchtower,
 } from './umbralLandmarks';
+import { closedHall } from './umbralHalls';
+import { HALLS, hallPad, type HallId } from './umbralHallsShape';
 import { sunInWorld } from './sun';
 import { windDust } from './wind';
 
@@ -1281,6 +1283,11 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
   relief.addPad(s.plaza.lat, s.plaza.lon, 13, 6);
   relief.addPad(SHIP_PARK.lat, SHIP_PARK.lon, 4, 3);
   relief.addPad(WAKE_SPOT.lat, WAKE_SPOT.lon, 3, 3);
+  // Los edificios cerrados (plan de la llegada, hito D): su explanada y un camino desde lo que miran.
+  for (const hall of Object.values(HALLS)) {
+    relief.addPad(hall.lat, hall.lon, hallPad(hall), 4);
+    relief.addPath(direction(hall.lat, hall.lon), direction(hall.facing.lat, hall.facing.lon));
+  }
   relief.addPad(CRASH_PARK.lat, CRASH_PARK.lon, 5, 3);
   // Se despierta mirando hacia la nave caída.
   const crashPoint = direction(CRASH_PARK.lat, CRASH_PARK.lon).multiplyScalar(
@@ -1334,6 +1341,11 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
   fallenRing(builder);
   iceStation(builder);
   silos(builder);
+  for (const id of Object.keys(HALLS) as HallId[]) {
+    const { lat, lon, facing } = HALLS[id];
+    const toward = direction(facing.lat, facing.lon).multiplyScalar(UMBRAL_RADIUS_FOR_HEADING);
+    closedHall(builder, id, headingTowards(lat, lon, toward));
+  }
   builder.mesas();
   builder.cairns();
 

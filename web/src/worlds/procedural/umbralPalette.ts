@@ -25,6 +25,11 @@ export const PALETTE = {
   tuft: '#B89650',
   tuftDry: '#9C7E48',
   light: '#FFC070',
+  /** Remates de los edificios cerrados (plan de la llegada, hito D): cobre y su óxido verde. */
+  copper: '#A8653A',
+  verdigris: '#5E9A86',
+  /** Pilotos de los aparatos en espera. */
+  standby: '#FFB45A',
 } as const;
 /** Estratos de las mesas de roca, de abajo arriba. */
 export const STRATA = ['#C9A57A', '#B48A62', '#D6BA8E', '#A47A56', '#C2966C', '#9A7458'] as const;
