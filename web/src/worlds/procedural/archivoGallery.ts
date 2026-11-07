@@ -36,6 +36,8 @@ import {
   type Triple,
 } from './kit';
 import { seededRandom } from './noise';
+import { RoomsBuilder } from './archivoRooms';
+import { inCorridor, nearBulkhead, roomAt } from './archivoRoomsShape';
 
 const DEG = Math.PI / 180;
 
@@ -234,6 +236,7 @@ export class GalleryBuilder {
     this.arches();
     this.shelves();
     this.lamps();
+    this.rooms();
     this.places();
     this.lock();
     for (const [index, lon] of TOWER_LONS.entries()) this.tower(index + 1, lon);
@@ -258,9 +261,13 @@ export class GalleryBuilder {
       if (lon + 4 > LOCK_HOLE.from - 1 && lon < LOCK_HOLE.to + 1) continue;
       if (Math.abs(lonDelta(lon + 2, FONDO.lon)) < FONDO.flat + FONDO.ramp + 2) continue;
       const f = this.at(0, lon + 2, 90);
-      this.pieces.add(P.ivory, box(), f.at([0, 0, 0.01], undefined, [1.2, 4.4, 0.03]), 'stone', {
-        solid: false,
-      });
+      this.pieces.add(
+        roomAt(lon + 2).path,
+        box(),
+        f.at([0, 0, 0.01], undefined, [1.2, 4.4, 0.03]),
+        'stone',
+        { solid: false, vary: 0.02 },
+      );
     }
   }
 
@@ -293,6 +300,8 @@ export class GalleryBuilder {
     for (let lon = -180; lon < 180; lon += step) {
       const fondo = Math.abs(lonDelta(lon, FONDO.lon));
       if (fondo < FONDO.flat + FONDO.ramp + 1) continue;
+      // Ni contra un mamparo ni en el pasillo de los cajones (que tiene sus propias paredes).
+      if (inCorridor(lon) || nearBulkhead(lon, 1.6)) continue;
       const half = floorHalfLat(floorRadius(lon));
       for (const sideLat of [half - 0.75, -(half - 0.75)]) {
         if (this.nearestSource(sideLat, lon) < 4.5) continue;
@@ -342,10 +351,36 @@ export class GalleryBuilder {
       side = -side;
       if (Math.abs(lonDelta(lon, FONDO.lon)) < FONDO.flat + FONDO.ramp + 2) continue;
       if (this.nearestSource(3.2 * side, lon) < 3.5) continue;
-      this.lamp(this.at(3.2 * side, lon), P.light);
+      if (nearBulkhead(lon, 1.2)) continue;
+      const room = roomAt(lon);
+      if (room.id === 'cajones') {
+        this.ceilingLamp(lon, side, room.light, room.glow);
+        continue;
+      }
+      this.lamp(this.at(3.2 * side, lon), room.light, GLOW * room.glow);
     }
     this.lamp(this.at(2.2, FONDO.lon - 2.2), P.lightCold, 1.4);
     this.lamp(this.at(-2.2, FONDO.lon + 2.2), P.lightCold, 1.4);
+  }
+
+  /** Una luz en lo alto de la pared de cajones (el pasillo es demasiado estrecho para farolas). */
+  private ceilingLamp(lon: number, side: number, color: string, glow: number): void {
+    this.pieces.add(color, ball(0.13, 1), this.at(side * 2.5, lon).at([0, 0, 3.3]), 'light', {
+      glow: GLOW * glow,
+      vary: 0,
+      solid: false,
+    });
+  }
+
+  /** Las salas (plan de historia y puzzles físicos, §7.2): mamparos y lo que da carácter a cada una. */
+  private rooms(): void {
+    new RoomsBuilder({
+      pieces: this.pieces,
+      palette: P,
+      at: (lat, lon, heading = 0) => this.at(lat, lon, heading),
+      section: tubeSection,
+      random: this.random,
+    }).build();
   }
 
   private lamp(f: Frame, color: string, glow = GLOW): void {
