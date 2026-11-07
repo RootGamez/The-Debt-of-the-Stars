@@ -12,6 +12,8 @@ import { loadChronology } from './core/chronology';
 import { createSoundtrack } from './audio/soundtrack';
 import { machineTime } from './game/counterweight';
 import { createArchivoRig } from './game/archivoRig';
+import { DEPTHS } from './game/depthsPlay';
+import { createDepthsRig } from './game/depthsRig';
 import { createBellsRig } from './game/bellsRig';
 import { createCounterweightRig } from './game/counterweightRig';
 import { composeActions } from './reading/composeActions';
@@ -314,6 +316,7 @@ function start(): void {
   const portal = taller?.world.scene.getObjectByName(TELEPORTER.portal);
   const gateOpen = (gate: Gate): boolean =>
     gate.lock === undefined ||
+    (gate.lock === DEPTHS.lock && depths?.play.hatchOpen === true) ||
     (track !== undefined && teleporterOpen(gate.lock, session.activeEventIds, track));
   const birthplace =
     counterweight?.core ??
@@ -456,6 +459,7 @@ function start(): void {
       counterweight?.play.reset();
       bells?.play.reset();
       archivoPuzzles?.play.reset();
+      depths?.play.reset();
       track?.reset();
       arrive(startWorld);
     },
@@ -481,6 +485,8 @@ function start(): void {
   const soundtrack = createSoundtrack();
   // El Planetario y el prisma del Archivo (T6): esferas, rieles y soporte.
   const archivoPuzzles = createArchivoRig({ scene, runtimes });
+  // La cisterna del Fondo y los péndulos de la Sala Cerrada (T7).
+  const depths = createDepthsRig({ scene, runtimes });
   // Las campanas del Anfiteatro de Umbral (P1): coger, poner en el canal y oír a la bola pasar.
   const bells = createBellsRig({
     scene,
@@ -599,6 +605,7 @@ function start(): void {
       counterweight?.play.actions,
       bells?.play.actions,
       archivoPuzzles?.play.actions,
+      depths?.play.actions,
       epilogue?.play.actions,
       homecoming?.play.actions,
     ]),
@@ -606,6 +613,7 @@ function start(): void {
       ...counterweight?.readers,
       ...bells?.readers,
       ...archivoPuzzles?.readers,
+      ...depths?.readers,
       ...epilogue?.readers,
       ...(track && { pista: (status, _solved, solve) => trackClockBody(track, status, solve) }),
       ocular: (status, solved, solve) => ocularBody(ocularSource, status, solved, solve),
@@ -792,6 +800,10 @@ function start(): void {
     window.__juego.absorption = () => absorption?.snapshot() ?? null;
     window.__juego.counterweight = () => counterweight?.play.snapshot() ?? null;
     window.__juego.bells = () => bells?.play.snapshot() ?? null;
+    window.__juego.depths = () => depths?.play.snapshot() ?? null;
+    window.__juego.depthsPendulum = (pendulum) => {
+      depths?.forcePendulum(pendulum);
+    };
     window.__juego.archivo = () => archivoPuzzles?.play.snapshot() ?? null;
     window.__juego.archivoRail = (rail) => {
       archivoPuzzles?.forceRail(rail);
@@ -1202,6 +1214,7 @@ function start(): void {
         timeRuns ? dt : 0,
       );
       bells?.update(camera, t, timeRuns ? dt : 0);
+      depths?.update(camera, t);
       archivoPuzzles?.update(
         camera,
         timeRuns ? dt : 0,

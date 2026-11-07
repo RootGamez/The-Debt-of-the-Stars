@@ -14,8 +14,12 @@ import {
   MeshStandardMaterial,
   Object3D,
   SphereGeometry,
+  Quaternion,
   Vector3,
 } from 'three';
+
+/** Los anillos PASO_ miran por su Y local (como en el Taller). */
+const Y_UP = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { isMesh } from '../markers';
 import {
@@ -397,7 +401,8 @@ export function buildArchivo({ detail = ARCHIVO_DETAIL }: ArchivoOptions = {}): 
   frame.add(ray);
 
   for (const { name, frame: f, at, props } of builder.markers) {
-    frame.add(marker(name, f.point(at), f.rotation(), props));
+    const rotation = name.startsWith('PASO_') ? f.rotation().multiply(Y_UP) : f.rotation();
+    frame.add(marker(name, f.point(at), rotation, props));
   }
 
   const root = new Object3D();

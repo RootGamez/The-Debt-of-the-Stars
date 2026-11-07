@@ -4,6 +4,7 @@
 import { Vector3, type WebGLRenderer } from 'three';
 import type { Player } from '../core/player';
 import type { ArchivoSnapshot } from '../game/archivoPlay';
+import type { DepthsSnapshot } from '../game/depthsPlay';
 import type { BellsSnapshot } from '../game/bellsPlay';
 import type { CounterweightSnapshot } from '../game/counterweightPlay';
 import type { Ending } from '../game/epilogue';
@@ -137,6 +138,8 @@ declare global {
       counterweight?(): CounterweightSnapshot | null;
       bells?(): BellsSnapshot | null;
       archivo?(): ArchivoSnapshot | null;
+      depths?(): DepthsSnapshot | null;
+      depthsPendulum?(pendulum: number | undefined): void;
       archivoRail?(rail: number | undefined): void;
       bellsMark?(mark: number | undefined): void;
       /** El horizonte estable: su radio (m; 0 si no lo hay) y lo cerca que está quien mira (0–1). */

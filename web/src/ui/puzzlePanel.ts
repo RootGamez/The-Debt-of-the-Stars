@@ -218,6 +218,8 @@ export function createPuzzlePanel(
         return { body: element('p', 'puzzle-hint', t('La tapa no cede.')) };
       case 'planetario':
         return { body: element('p', 'puzzle-hint', t('La manivela no gira.')) };
+      case 'pendulos':
+        return { body: element('p', 'puzzle-hint', t('El cerrojo no cede.')) };
     }
   }
 

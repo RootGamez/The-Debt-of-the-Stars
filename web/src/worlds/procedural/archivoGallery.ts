@@ -38,6 +38,8 @@ import {
 import { seededRandom } from './noise';
 import { RoomsBuilder } from './archivoRooms';
 import { buildArchivoPuzzles } from './archivoPuzzles';
+import { buildArchivoDepths } from './archivoDepths';
+import { CELL_AT, CELL_CLEAR } from './archivoDepthsShape';
 import { inCorridor, nearBulkhead, roomAt } from './archivoRoomsShape';
 
 const DEG = Math.PI / 180;
@@ -354,6 +356,7 @@ export class GalleryBuilder {
       if (Math.abs(lonDelta(lon, FONDO.lon)) < FONDO.flat + FONDO.ramp + 2) continue;
       if (this.nearestSource(3.2 * side, lon) < 3.5) continue;
       if (nearBulkhead(lon, 1.2)) continue;
+      if (Math.abs(lonDelta(lon, CELL_AT.lon)) < CELL_CLEAR) continue;
       const room = roomAt(lon);
       if (room.id === 'cajones') {
         this.ceilingLamp(lon, side, room.light, room.glow);
@@ -376,12 +379,14 @@ export class GalleryBuilder {
 
   /** El Planetario, las esferas y el prisma (T6). */
   private puzzles(): void {
-    buildArchivoPuzzles({
+    const context = {
       pieces: this.pieces,
       palette: P,
       markers: this.markers,
-      at: (lat, lon, heading = 0) => this.at(lat, lon, heading),
-    });
+      at: (lat: number, lon: number, heading = 0) => this.at(lat, lon, heading),
+    };
+    buildArchivoPuzzles(context);
+    buildArchivoDepths(context);
   }
 
   /** Las salas (plan de historia y puzzles físicos, §7.2): mamparos y lo que da carácter a cada una. */

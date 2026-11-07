@@ -510,5 +510,49 @@
     "rumor": "¿Por qué sobra un riel en el Planetario?",
     "enlaces": ["nudo.existe"],
     "dibujo": "planetario"
+  },
+  {
+    "id": "archivo.cisterna_lastre",
+    "hilos": ["H5"],
+    "frase": "La cisterna del Archivo se lastra con siete partes de piedra, hasta la tercera marca: la madera flota.",
+    "rumor": "¿Cómo se alcanza la barcaza de la cisterna del Archivo?",
+    "dibujo": "cisterna"
+  },
+  {
+    "id": "deuda.limite",
+    "hilos": ["H2"],
+    "frase": "El Límite bajaba con cada Puerta nueva: la red entera tenía fecha.",
+    "rumor": "¿Había una fecha para toda la red de Puertas?",
+    "enlaces": ["deuda.es_de_tiempo"]
+  },
+  {
+    "id": "partida.aviso_ignorado",
+    "hilos": ["H3", "H4"],
+    "frase": "Pidieron que nadie huyera por las Puertas; el Consejo archivó la petición.",
+    "rumor": "¿Alguien advirtió de que huir era la trampa?",
+    "enlaces": ["partida.cascada"]
+  },
+  {
+    "id": "deuda.resonancia",
+    "hilos": ["H2"],
+    "frase": "Las Puertas se contagian como péndulos de una misma viga: si van juntas, la deuda de una pasa a todas.",
+    "rumor": "¿Por qué se contagiaba la deuda de una Puerta a otra?",
+    "enlaces": ["deuda.es_de_tiempo"],
+    "dibujo": "pendulos"
+  },
+  {
+    "id": "contrapeso.desafina",
+    "hilos": ["H6"],
+    "frase": "El Contrapeso desafina su Puerta de las demás: por eso «paga» la deuda.",
+    "rumor": "¿Por qué el Contrapeso paga la deuda?",
+    "enlaces": ["contrapeso.que_es"]
+  },
+  {
+    "id": "contrapeso.escalera",
+    "hilos": ["H6"],
+    "frase": "El Contrapeso tiene cinco brazos de largos distintos, en escalera: uno, tres, dos, cinco, cuatro.",
+    "rumor": "¿Qué figura forman los brazos del Contrapeso?",
+    "enlaces": ["contrapeso.desafina"],
+    "dibujo": "escalera"
   }
 ]

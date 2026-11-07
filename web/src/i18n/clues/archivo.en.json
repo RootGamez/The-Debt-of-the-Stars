@@ -114,5 +114,69 @@
     "superficial": [
       "A steel post with a golden ring on top, beside the tablet of the light slot. Something was meant to go here."
     ]
+  },
+  "archivo.cisterna": {
+    "titulo": "The cistern of the Canyon Floor",
+    "superficial": [
+      "A waist-high stone basin, with a pumice barge floating on the water. On the barge, record drawers locked shut.",
+      "On the wall of the basin there are three gold marks, one above another. Above the last, the mouth of an overflow."
+    ]
+  },
+  "archivo.bloques_1": {
+    "titulo": "Small blocks",
+    "superficial": ["A pile of small gray stone blocks, each of a single part."]
+  },
+  "archivo.bloques_2": {
+    "titulo": "Medium blocks",
+    "superficial": [
+      "A pile of medium gray stone blocks, each of two parts, marked with two stripes."
+    ]
+  },
+  "archivo.bloques_3": {
+    "titulo": "Large blocks",
+    "superficial": [
+      "A pile of large gray stone blocks, each of three parts, marked with three stripes."
+    ]
+  },
+  "archivo.tablones": {
+    "titulo": "The planks",
+    "superficial": [
+      "Some planks of pale, dry wood. You can tell by the water stains they left: they float."
+    ]
+  },
+  "archivo.pendulos": {
+    "titulo": "The pendulums of the beam",
+    "superficial": [
+      "Five copper pendulums hang from one beam. Each rod has five notches for its length, and the weight slides along it."
+    ]
+  },
+  "archivo.viga": {
+    "titulo": "The copper beam",
+    "superficial": [
+      "A copper beam from wall to wall with five pendulums hanging from it. While they swing together, the beam trembles and the latch of the hatch will not give.",
+      "Changing the weight of one does not part them. Changing the length does."
+    ]
+  },
+  "archivo.informe_original": {
+    "titulo": "The researcher's report, the original",
+    "superficial": [
+      "Three standing sheets of glass, each with a version of the same report. In each version there is a gap where something was erased.",
+      "Laid one after another, the gaps fill in: “The debt is one of time.” “The Limit drops with every new Gate.” “Estimated date: within this year.”"
+    ]
+  },
+  "archivo.peticion": {
+    "titulo": "The rejected petition",
+    "superficial": [
+      "A sheet nailed to the wall, signed with two signs: a diamond with a dot and a downward triangle. The researcher and the skeptic.",
+      "“Do not evacuate through the Gates. Every departure adds to the count. Stay and wait for the Counterweight.”",
+      "Above it, a red seal of seven diamonds in a row: “File it away.”"
+    ]
+  },
+  "archivo.modelo_red": {
+    "titulo": "The model of the network",
+    "superficial": [
+      "A small beam with dozens of tiny pendulums, one for each Gate. Almost all hang together.",
+      "At one end one hangs apart, with a sign that is not of the Absent: two rings with a line down the middle. It is the sign of home."
+    ]
   }
 }

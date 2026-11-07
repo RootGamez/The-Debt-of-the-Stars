@@ -22,6 +22,7 @@ import {
 import { ARCHIVO_SOURCES } from '../../../src/worlds/procedural/archivoGallery';
 import { direction, frameAt, type Triple } from '../../../src/worlds/procedural/kit';
 import { createWorldRuntime, environmentOf } from '../../../src/worlds/worldRuntime';
+import { gateArrival } from '../../../src/worlds/gates';
 
 const world = buildWorld('archivo');
 if (!world) throw new Error('El Archivo debería construirse por código');
@@ -57,6 +58,14 @@ describe('the Archivo built in code', () => {
       ...Array.from({ length: 6 }, () => 'archivo.planetario'),
       'archivo.prisma',
       'archivo.soporte',
+      // La cisterna del Fondo, sus cuatro montones y la Sala Cerrada (T7).
+      'archivo.cisterna',
+      ...['bloques_1', 'bloques_2', 'bloques_3', 'tablones'].map((id) => `archivo.${id}`),
+      ...Array.from({ length: 5 }, () => 'archivo.pendulos'),
+      'archivo.viga',
+      'archivo.informe_original',
+      'archivo.peticion',
+      'archivo.modelo_red',
     ];
     expect(world.markers.interactions.map((i) => i.clueId).sort()).toEqual(
       [...ARCHIVO_SOURCES.map((s) => `archivo.${s.id}`), ...physical].sort(),
@@ -76,8 +85,24 @@ describe('the Archivo built in code', () => {
       const ring = Math.hypot(Math.hypot(p.x, p.z) - TUBE_MAJOR, p.y);
       expect(ring).toBeLessThan(TUBE_MINOR);
       expect(p.length()).toBeGreaterThan(62);
-      expect(p.length()).toBeLessThan(FLOOR_RADIUS + 3);
+      // La viga de la Sala Cerrada cuelga a 3 m del suelo.
+      expect(p.length()).toBeLessThan(FLOOR_RADIUS + 3.5);
     }
+  });
+
+  it('has the hatch of the Sealed Room: a locked ring that leads inside the sealed cell', () => {
+    const hatch = runtime.gates.find((g) => g.name === 'PASO_Trampilla');
+    const back = runtime.gates.find((g) => g.name === 'PASO_Camara');
+    const beam = runtime.world.markers.interactions.find((i) => i.clueId === 'archivo.viga');
+
+    expect(hatch).toMatchObject({ target: 'PASO_Camara', lock: 'sala_cerrada' });
+    expect(back).toMatchObject({ target: 'PASO_Trampilla' });
+    expect(back?.lock).toBeUndefined();
+    expect(back && beam).toBeTruthy();
+    if (!back || !beam) return;
+    // Se aparece dentro de la cámara (a menos de lo que mide), no al otro lado de su pared.
+    const arrival = gateArrival(back).feet;
+    expect(arrival.distanceTo(beam.object.getWorldPosition(new Vector3()))).toBeLessThan(3.6);
   });
 
   it('wakes you up dry, on the islet of the Borde', () => {

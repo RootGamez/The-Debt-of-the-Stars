@@ -26,6 +26,14 @@
         "En la placa del pedestal: «Trasladado para las pruebas finales.» Y debajo, en la casilla de destino, solo un trazo largo, sin nombre."
       ],
       "hechos": ["contrapeso.trasladado"]
+    },
+    "profunda": {
+      "requiere": ["contrapeso.que_es"],
+      "texto": [
+        "Con lo que sé del Contrapeso, el hueco de la cuna se lee de otra manera: tiene tallada su silueta, con cinco brazos de largos distintos puestos en escalera: uno, tres, dos, cinco, cuatro.",
+        "Debajo, a mano: «Así no canta con las demás.»"
+      ],
+      "hechos": ["contrapeso.escalera"]
     }
   },
   {

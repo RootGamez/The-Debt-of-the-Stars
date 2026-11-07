@@ -251,5 +251,146 @@
       ],
       "hechos": []
     }
+  },
+  {
+    "id": "archivo.cisterna",
+    "mundo": "archivo",
+    "tipo": "observacion",
+    "ambiente": true,
+    "titulo": "La cisterna del Fondo",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una pila de piedra a la altura de la cintura, con una barcaza de piedra pómez flotando en el agua. Sobre la barcaza, cajones de registros cerrados con llave.",
+        "En la pared de la pila hay tres marcas de oro, una sobre otra. Por encima de la última, la boca de un aliviadero."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.bloques_1",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "Bloques pequeños",
+    "borrador": true,
+    "superficial": {
+      "texto": ["Un montón de bloques pequeños de piedra gris, cada uno de una sola parte."],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.bloques_2",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "Bloques medianos",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Un montón de bloques medianos de piedra gris, cada uno de dos partes, marcado con dos rayas."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.bloques_3",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "Bloques grandes",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Un montón de bloques grandes de piedra gris, cada uno de tres partes, marcado con tres rayas."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.tablones",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "Los tablones",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Unos tablones de madera clara y seca. Se ve por las manchas de agua que dejaron: flotan."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.pendulos",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "Los péndulos de la viga",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Cinco péndulos de cobre cuelgan de una misma viga. Cada vara tiene cinco muescas para el largo, y por ella corre el peso."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.viga",
+    "mundo": "archivo",
+    "tipo": "observacion",
+    "lector": "pendulos",
+    "titulo": "La viga de cobre",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una viga de cobre de pared a pared, de la que cuelgan cinco péndulos. Mientras se mecen a la vez, la viga tiembla y el cerrojo de la trampilla no cede.",
+        "Cambiar el peso de uno no los separa. Cambiar el largo, sí."
+      ],
+      "hechos": ["deuda.resonancia", "contrapeso.desafina"]
+    }
+  },
+  {
+    "id": "archivo.informe_original",
+    "mundo": "archivo",
+    "tipo": "texto",
+    "titulo": "El informe de la investigadora, el original",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Tres láminas de vidrio de pie, cada una con una versión del mismo informe. En cada versión hay un hueco donde se borró algo.",
+        "Puestas una tras otra, los huecos se completan: «La deuda es de tiempo.» «El Límite baja con cada Puerta nueva.» «Fecha estimada: dentro de este año.»"
+      ],
+      "hechos": ["deuda.es_de_tiempo", "deuda.limite"]
+    }
+  },
+  {
+    "id": "archivo.peticion",
+    "mundo": "archivo",
+    "tipo": "texto",
+    "titulo": "La petición rechazada",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una hoja clavada en la pared, firmada con dos signos: un rombo con un punto y un triángulo hacia abajo. La investigadora y el escéptico.",
+        "«No evacuéis por las Puertas. Cada salida suma a la cuenta. Quedaos y esperad al Contrapeso.»",
+        "Encima, un sello rojo de siete rombos en fila: «Archívese»."
+      ],
+      "hechos": ["partida.aviso_ignorado"]
+    }
+  },
+  {
+    "id": "archivo.modelo_red",
+    "mundo": "archivo",
+    "tipo": "observacion",
+    "titulo": "El modelo de la red",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una viga pequeña con decenas de péndulos diminutos, uno por Puerta. Casi todos cuelgan juntos.",
+        "En una punta hay uno colgado aparte, con un signo que no es de los Ausentes: dos anillos con una raya en medio. Es el de casa."
+      ],
+      "hechos": ["casa.en_la_red"]
+    }
   }
 ]

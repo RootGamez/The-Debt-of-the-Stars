@@ -453,4 +453,11 @@ export function silos(b: LandmarkBuilder): void {
   });
   b.lamp(f, 6.4, -1.6);
   b.lamp(f, -6.4, 1.6);
+  // La hoja de carga de la cisterna del Archivo (P4), en un poste al pie de los silos.
+  v.add(P.rockDark, box(), f.at([-1.5, -2.7, 0.6], undefined, [0.12, 0.12, 1.2]));
+  v.add(P.paper, box(), f.at([-1.5, -2.78, 1.1], undefined, [0.6, 0.02, 0.45]), 'stone', {
+    solid: false,
+    vary: 0,
+  });
+  b.mark('INT_hoja_carga', f, [-1.5, -2.7, 1.25], { clue_id: 'umbral.hoja_carga', kind: 'texto' });
 }

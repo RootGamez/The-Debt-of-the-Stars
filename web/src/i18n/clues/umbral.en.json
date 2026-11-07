@@ -149,5 +149,12 @@
       "A sandstone lectern with its lid closed and a slit of light beneath it.",
       "From the mechanism below comes, now and then, a small tap, like someone waiting for their turn."
     ]
+  },
+  "umbral.hoja_carga": {
+    "titulo": "The loading sheet of the silos",
+    "superficial": [
+      "A loading sheet nailed to a post, at the foot of the silos on the Dock.",
+      "“For the cistern of the Archive: ballast up to the third mark, seven parts of stone. Wood is no use: it floats.”"
+    ]
   }
 }

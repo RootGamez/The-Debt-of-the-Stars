@@ -451,6 +451,83 @@ const BUILDERS: Readonly<Record<string, () => Sketch>> = {
     };
   },
 
+  /** `contrapeso.escalera`: los cinco brazos del Contrapeso en escalera (1, 3, 2, 5, 4). */
+  escalera() {
+    const pen = new Pen(127);
+    const lengths = [1, 3, 2, 5, 4];
+    pen.line([20, 108], [180, 108]);
+    lengths.forEach((length, index) => {
+      const x = 36 + index * 32;
+      pen.line([x, 108], [x, 108 - length * 17], index === 1, false);
+      pen.circle(x, 108 - length * 17, 4, true);
+      pen.label(x, 122, String(length), 'middle', true);
+    });
+    pen.label(100, 14, t('así no canta con las demás'));
+    return {
+      alt: t(
+        'Dibujo: cinco brazos de largos distintos en escalera, de izquierda a derecha de largo uno, tres, dos, cinco y cuatro',
+      ),
+      shapes: pen.shapes,
+    };
+  },
+
+  /** `archivo.cisterna_lastre`: la cisterna con sus tres marcas, un bloque de cada tamaño y la madera tachada. */
+  cisterna() {
+    const pen = new Pen(131);
+    pen.line([30, 40], [30, 108]);
+    pen.line([100, 40], [100, 108]);
+    pen.line([30, 108], [100, 108]);
+    for (const [index, level] of [3, 5, 7].entries()) {
+      const y = 108 - level * 9;
+      pen.line([30, y], [42, y], true);
+      pen.label(20, y + 3, String(index + 1), 'middle', true);
+    }
+    pen.line([34, 108 - 63], [96, 108 - 63], false, true);
+    pen.arc(65, 32, 10, 180, 360);
+    pen.label(65, 22, t('barcaza'));
+    for (const [index, parts] of [1, 2, 3].entries()) {
+      const x = 126 + index * 22;
+      const size = 6 + parts * 4;
+      pen.line([x, 108], [x + size, 108]);
+      pen.line([x, 108 - size], [x + size, 108 - size]);
+      pen.line([x, 108], [x, 108 - size]);
+      pen.line([x + size, 108], [x + size, 108 - size]);
+      pen.label(x + size / 2, 122, String(parts), 'middle', true);
+    }
+    pen.line([128, 70], [176, 70]);
+    pen.line([132, 66], [172, 74], true);
+    pen.label(152, 60, t('madera: flota'));
+    return {
+      alt: t(
+        'Dibujo: una cisterna con tres marcas de oro y una barcaza arriba; al lado, bloques de una, dos y tres partes y un tablón de madera tachado',
+      ),
+      shapes: pen.shapes,
+    };
+  },
+
+  /** `deuda.resonancia`: la viga con los péndulos juntos y, debajo, separados. */
+  pendulos() {
+    const pen = new Pen(137);
+    pen.line([20, 24], [180, 24]);
+    pen.line([20, 82], [180, 82]);
+    for (let k = 0; k < 5; k++) {
+      const x = 40 + k * 30;
+      pen.line([x, 24], [x + 12, 50]);
+      pen.circle(x + 12, 52, 3.4, true);
+      const lengths = [18, 42, 30, 54, 42];
+      pen.line([x, 82], [x, 82 + (lengths[k] ?? 30)]);
+      pen.circle(x, 84 + (lengths[k] ?? 30), 3.4);
+    }
+    pen.label(100, 14, t('juntos: se contagian'), 'middle', true);
+    pen.label(100, 124, t('separados: cada uno a su paso'));
+    return {
+      alt: t(
+        'Dibujo: dos vigas con cinco péndulos; los de arriba cuelgan igual y se mecen juntos, los de abajo tienen largos distintos y cada uno va a su paso',
+      ),
+      shapes: pen.shapes,
+    };
+  },
+
   /** `bocas.relojes_distintos`: tres bocas de Puerta, cada una con su hora. */
   bocas() {
     const pen = new Pen(79);

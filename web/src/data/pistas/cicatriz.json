@@ -16,9 +16,10 @@
       "requiere": ["contrapeso.que_es"],
       "texto": [
         "Ahora entiendo el mecanismo: el núcleo late, y solo durante el pulso se abre. Un motor entra cuando el otro sale, en el mismo latido.",
-        "Entre latido y latido, el núcleo está cerrado, y quien intente abrirlo a destiempo solo gasta fuerza."
+        "Entre latido y latido, el núcleo está cerrado, y quien intente abrirlo a destiempo solo gasta fuerza.",
+        "En las esferas armilares que rodean el núcleo, los mismos cinco brazos puestos en escalera: uno, tres, dos, cinco, cuatro."
       ],
-      "hechos": ["contrapeso.ventana_pulso"]
+      "hechos": ["contrapeso.ventana_pulso", "contrapeso.escalera"]
     }
   },
   {

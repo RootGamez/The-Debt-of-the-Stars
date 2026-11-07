@@ -456,6 +456,25 @@ export const EN: Readonly<Record<string, string>> = {
     'The crank will not turn: something is out of place.',
   'Las esferas están alineadas.': 'The spheres are lined up.',
   'La manivela no gira.': 'The crank will not turn.',
+  'así no canta con las demás': 'it does not sing with the others like this',
+  'Dibujo: cinco brazos de largos distintos en escalera, de izquierda a derecha de largo uno, tres, dos, cinco y cuatro':
+    'Drawing: five arms of different lengths in a staircase, from left to right of length one, three, two, five and four',
+  barcaza: 'barge',
+  'madera: flota': 'wood: floats',
+  'Dibujo: una cisterna con tres marcas de oro y una barcaza arriba; al lado, bloques de una, dos y tres partes y un tablón de madera tachado':
+    'Drawing: a cistern with three gold marks and a barge on top; beside it, blocks of one, two and three parts and a crossed-out wooden plank',
+  'juntos: se contagian': 'together: they catch from one another',
+  'separados: cada uno a su paso': 'apart: each at its own pace',
+  'Dibujo: dos vigas con cinco péndulos; los de arriba cuelgan igual y se mecen juntos, los de abajo tienen largos distintos y cada uno va a su paso':
+    'Drawing: two beams with five pendulums; the upper ones hang alike and swing together, the lower ones have different lengths and each goes at its own pace',
+  'Los cinco péndulos van cada uno a su paso. La viga se calma y el cerrojo cae.':
+    'The five pendulums each go at their own pace. The beam calms and the latch falls.',
+  'Los cinco péndulos se mecen a la vez y la viga tiembla. El cerrojo no cede.':
+    'The five pendulums swing together and the beam trembles. The latch will not give.',
+  'Los péndulos ya no van juntos, pero la viga sigue temblando: aún no es la figura.':
+    'The pendulums no longer go together, but the beam keeps trembling: it is not the figure yet.',
+  'La trampilla de la Sala Cerrada está abierta.': 'The hatch of the Sealed Room is open.',
+  'El cerrojo no cede.': 'The latch will not give.',
   'donde está': 'where it is',
   'donde parece': 'where it seems',
   'Dibujo: una estrella se ve dieciocho grados más allá de donde está, junto a un punto oscuro que dobla la luz':

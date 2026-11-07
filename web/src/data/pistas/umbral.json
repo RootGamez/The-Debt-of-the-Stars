@@ -301,5 +301,19 @@
       ],
       "hechos": ["mundos.compas", "mundos.cancion"]
     }
+  },
+  {
+    "id": "umbral.hoja_carga",
+    "mundo": "umbral",
+    "tipo": "texto",
+    "titulo": "La hoja de carga de los silos",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una hoja de carga clavada en un poste, al pie de los silos del Muelle.",
+        "«Para la cisterna del Archivo: lastre hasta la tercera marca, siete partes de piedra. La madera no sirve: flota.»"
+      ],
+      "hechos": ["archivo.cisterna_lastre"]
+    }
   }
 ]

@@ -257,5 +257,29 @@
   "lab.riel_vacio": {
     "frase": "In the Orrery there is a rail with no world, between Threshold and the Observatory.",
     "rumor": "Why is there a spare rail in the Orrery?"
+  },
+  "archivo.cisterna_lastre": {
+    "frase": "The Archive cistern is ballasted with seven parts of stone, up to the third mark: wood floats.",
+    "rumor": "How do you reach the barge of the Archive cistern?"
+  },
+  "deuda.limite": {
+    "frase": "The Limit dropped with every new Gate: the whole network had a date.",
+    "rumor": "Was there a date for the whole network of Gates?"
+  },
+  "partida.aviso_ignorado": {
+    "frase": "They asked that nobody flee through the Gates; the Council filed the petition away.",
+    "rumor": "Did anyone warn that fleeing was the trap?"
+  },
+  "deuda.resonancia": {
+    "frase": "The Gates catch from one another like pendulums on one beam: if they go together, the debt of one passes to all.",
+    "rumor": "Why did the debt of one Gate spread to another?"
+  },
+  "contrapeso.desafina": {
+    "frase": "The Counterweight puts its Gate out of tune with the others: that is why it “pays” the debt.",
+    "rumor": "Why does the Counterweight pay the debt?"
+  },
+  "contrapeso.escalera": {
+    "frase": "The Counterweight has five arms of different lengths, in a staircase: one, three, two, five, four.",
+    "rumor": "What figure do the arms of the Counterweight make?"
   }
 }

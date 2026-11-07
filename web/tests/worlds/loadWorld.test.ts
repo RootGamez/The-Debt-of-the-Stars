@@ -42,6 +42,7 @@ describe('buildWorld (worlds modelled in code, Phase 11)', () => {
       'umbral.cuaderno',
       'umbral.cuenta_ninos',
       'umbral.envios',
+      'umbral.hoja_carga',
       'umbral.hoja_entrada',
       'umbral.llegada',
       'umbral.mesa_tallista',

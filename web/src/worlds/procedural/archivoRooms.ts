@@ -5,6 +5,8 @@ import type { Matrix4 } from 'three';
 import { box, cylinder, pieceMatrix, type Frame, type PieceSet, type Triple } from './kit';
 import type { ARCHIVO_PALETTE } from './archivoGallery';
 import { floorHalfLat, floorRadius, TUBE_MAJOR, TUBE_MINOR } from './archivoShape';
+import { CELL_AT, CELL_CLEAR } from './archivoDepthsShape';
+import { lonDelta } from './archivoShape';
 import {
   BULKHEAD_LONS,
   BULKHEAD_THICK,
@@ -338,6 +340,8 @@ export class RoomsBuilder {
     for (let lon = 112; lon < 245; lon += 2.2) {
       const real = ((lon + 180) % 360) - 180;
       if (!inCorridor(real) || nearBulkhead(real, 1.2)) continue;
+      // La Sala Cerrada ocupa ese tramo del pasillo.
+      if (Math.abs(lonDelta(real, CELL_AT.lon)) < CELL_CLEAR) continue;
       for (const side of [1, -1]) {
         const f = at(side * (CORRIDOR_HALF + 0.35), real, side > 0 ? 180 : 0);
         v.add(P.pearlShade, box(), f.at([0, 0, 1.5], undefined, [2.25, 0.7, 3.0]));
