@@ -39,7 +39,9 @@ describe('the real clue data', () => {
     expect(
       ambient.every(
         (s) =>
-          ['hogar', 'observatorio', 'laboratorio', 'puertas', 'umbral'].includes(s.world) &&
+          ['hogar', 'observatorio', 'laboratorio', 'puertas', 'umbral', 'archivo'].includes(
+            s.world,
+          ) &&
           s.surface.facts.length === 0 &&
           !s.deep,
       ),
@@ -48,7 +50,7 @@ describe('the real clue data', () => {
     expect(ambient.map((s) => s.id)).toContain('observatorio.registrador');
   });
 
-  it('contains the 7 threads, the 9 conclusions and the 67 sources of CONTEXTO_PISTAS.md', () => {
+  it('contains the 7 threads, the 9 conclusions and the 68 sources of CONTEXTO_PISTAS.md', () => {
     expect(clues.threads.map((t) => t.id)).toEqual(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7']);
     expect(clues.conclusions.map((c) => c.id)).toEqual([
       'K1',
@@ -61,7 +63,7 @@ describe('the real clue data', () => {
       'K7',
       'K8',
     ]);
-    expect(graph).toHaveLength(67);
+    expect(graph).toHaveLength(68);
   });
 
   it('spreads the sources over the places of the document', () => {
@@ -72,7 +74,7 @@ describe('the real clue data', () => {
       hogar: 7,
       luna: 1,
       umbral: 15,
-      archivo: 7,
+      archivo: 8,
       taller: 10,
       cicatriz: 14,
       observatorio: 3,

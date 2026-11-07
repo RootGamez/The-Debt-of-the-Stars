@@ -441,6 +441,21 @@ export const EN: Readonly<Record<string, string>> = {
   'un verso que nadie canta': 'a verse nobody sings',
   'Dibujo: una fila de mundos desde la Brasa: Taller, Cicatriz, Archivo, Umbral, un hueco punteado y el Observatorio':
     'Drawing: a row of worlds from the Ember: Workshop, Scar, Archive, Threshold, a dotted gap and the Observatory',
+  'un riel sin mundo': 'a rail with no world',
+  'Dibujo: el Planetario desde arriba, seis rieles concéntricos con una esfera en cada uno menos el quinto, todas en línea hacia la derecha a las 6:30':
+    'Drawing: the Orrery from above, six concentric rails with a sphere on each but the fifth, all in a line to the right at 6:30',
+  'La manivela se ha parado: las esferas quedan en una misma línea. Son las 6:30.':
+    'The crank has stopped: the spheres fall in one line. It is 6:30.',
+  'Las esferas empiezan a girar, cada una a su paso. La manivela aún no se ha parado.':
+    'The spheres begin to turn, each at its own pace. The crank has not stopped yet.',
+  'Seis rieles y una manivela que no gira. Faltan las esferas.':
+    'Six rails and a crank that will not turn. The spheres are missing.',
+  'La manivela no gira. Hay {placed} de {total} esferas en sus rieles.':
+    'The crank will not turn. There are {placed} of {total} spheres on their rails.',
+  'La manivela no gira: algo no está en su sitio.':
+    'The crank will not turn: something is out of place.',
+  'Las esferas están alineadas.': 'The spheres are lined up.',
+  'La manivela no gira.': 'The crank will not turn.',
   'donde está': 'where it is',
   'donde parece': 'where it seems',
   'Dibujo: una estrella se ve dieciocho grados más allá de donde está, junto a un punto oscuro que dobla la luz':

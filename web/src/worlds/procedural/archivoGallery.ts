@@ -37,6 +37,7 @@ import {
 } from './kit';
 import { seededRandom } from './noise';
 import { RoomsBuilder } from './archivoRooms';
+import { buildArchivoPuzzles } from './archivoPuzzles';
 import { inCorridor, nearBulkhead, roomAt } from './archivoRoomsShape';
 
 const DEG = Math.PI / 180;
@@ -237,6 +238,7 @@ export class GalleryBuilder {
     this.shelves();
     this.lamps();
     this.rooms();
+    this.puzzles();
     this.places();
     this.lock();
     for (const [index, lon] of TOWER_LONS.entries()) this.tower(index + 1, lon);
@@ -369,6 +371,16 @@ export class GalleryBuilder {
       glow: GLOW * glow,
       vary: 0,
       solid: false,
+    });
+  }
+
+  /** El Planetario, las esferas y el prisma (T6). */
+  private puzzles(): void {
+    buildArchivoPuzzles({
+      pieces: this.pieces,
+      palette: P,
+      markers: this.markers,
+      at: (lat, lon, heading = 0) => this.at(lat, lon, heading),
     });
   }
 

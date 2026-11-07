@@ -427,6 +427,30 @@ const BUILDERS: Readonly<Record<string, () => Sketch>> = {
     };
   },
 
+  /** `observatorio.alineacion` y `lab.riel_vacio`: el Planetario desde arriba, con su riel vacío y la línea de las 6:30. */
+  planetario() {
+    const pen = new Pen(113);
+    const cx = 100;
+    const cy = 66;
+    pen.dot(cx, cy, 3, true);
+    for (let rail = 1; rail <= 6; rail++) {
+      const radius = 9 + rail * 8;
+      pen.circle(cx, cy, radius, false, rail === 5);
+    }
+    // Una esfera en cada riel, en línea hacia la derecha (la alineación), menos en el quinto.
+    for (const rail of [1, 2, 3, 4, 6]) pen.dot(cx + 9 + rail * 8, cy, 2.6, true);
+    pen.line([cx, cy], [cx + 62, cy], true, true);
+    pen.circle(cx + 49, cy, 3.4, false, true);
+    pen.label(cx + 58, cy + 16, '6:30', 'middle', true);
+    pen.label(cx - 62, 18, t('un riel sin mundo'));
+    return {
+      alt: t(
+        'Dibujo: el Planetario desde arriba, seis rieles concéntricos con una esfera en cada uno menos el quinto, todas en línea hacia la derecha a las 6:30',
+      ),
+      shapes: pen.shapes,
+    };
+  },
+
   /** `bocas.relojes_distintos`: tres bocas de Puerta, cada una con su hora. */
   bocas() {
     const pen = new Pen(79);

@@ -11,6 +11,7 @@ import { Quaternion, Timer, Vector3, type PerspectiveCamera, type WebGLRenderer 
 import { loadChronology } from './core/chronology';
 import { createSoundtrack } from './audio/soundtrack';
 import { machineTime } from './game/counterweight';
+import { createArchivoRig } from './game/archivoRig';
 import { createBellsRig } from './game/bellsRig';
 import { createCounterweightRig } from './game/counterweightRig';
 import { composeActions } from './reading/composeActions';
@@ -454,6 +455,7 @@ function start(): void {
       waterPlay.reset();
       counterweight?.play.reset();
       bells?.play.reset();
+      archivoPuzzles?.play.reset();
       track?.reset();
       arrive(startWorld);
     },
@@ -477,6 +479,8 @@ function start(): void {
   });
   // El sonido se sintetiza (sin archivos) y arranca con el primer gesto del jugador.
   const soundtrack = createSoundtrack();
+  // El Planetario y el prisma del Archivo (T6): esferas, rieles y soporte.
+  const archivoPuzzles = createArchivoRig({ scene, runtimes });
   // Las campanas del Anfiteatro de Umbral (P1): coger, poner en el canal y oír a la bola pasar.
   const bells = createBellsRig({
     scene,
@@ -594,12 +598,14 @@ function start(): void {
     actions: composeActions([
       counterweight?.play.actions,
       bells?.play.actions,
+      archivoPuzzles?.play.actions,
       epilogue?.play.actions,
       homecoming?.play.actions,
     ]),
     readers: {
       ...counterweight?.readers,
       ...bells?.readers,
+      ...archivoPuzzles?.readers,
       ...epilogue?.readers,
       ...(track && { pista: (status, _solved, solve) => trackClockBody(track, status, solve) }),
       ocular: (status, solved, solve) => ocularBody(ocularSource, status, solved, solve),
@@ -786,6 +792,10 @@ function start(): void {
     window.__juego.absorption = () => absorption?.snapshot() ?? null;
     window.__juego.counterweight = () => counterweight?.play.snapshot() ?? null;
     window.__juego.bells = () => bells?.play.snapshot() ?? null;
+    window.__juego.archivo = () => archivoPuzzles?.play.snapshot() ?? null;
+    window.__juego.archivoRail = (rail) => {
+      archivoPuzzles?.forceRail(rail);
+    };
     window.__juego.bellsMark = (mark) => {
       bells?.forceMark(mark);
     };
@@ -1192,6 +1202,11 @@ function start(): void {
         timeRuns ? dt : 0,
       );
       bells?.update(camera, t, timeRuns ? dt : 0);
+      archivoPuzzles?.update(
+        camera,
+        timeRuns ? dt : 0,
+        session.activeEventIds.includes('ranura_luz'),
+      );
       if (counterweight?.play.place === 'installed' && !stable) session.director.stabilize();
       epilogue?.update();
       homecoming?.update(dt);

@@ -249,5 +249,13 @@
   "mundos.cancion": {
     "frase": "A song names the worlds from the Ember: Workshop runs, Scar burns, Archive weighs, Threshold waits… Observatory watches.",
     "rumor": "What does the lectern of the bells sing?"
+  },
+  "observatorio.alineacion": {
+    "frase": "At 6:30 the Observatory, the Ember and the world-less rail fall in line.",
+    "rumor": "When do the worlds of the Orrery line up?"
+  },
+  "lab.riel_vacio": {
+    "frase": "In the Orrery there is a rail with no world, between Threshold and the Observatory.",
+    "rumor": "Why is there a spare rail in the Orrery?"
   }
 }

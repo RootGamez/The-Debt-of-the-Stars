@@ -49,8 +49,17 @@ describe('the Archivo built in code', () => {
   });
 
   it('keeps every source of the clue graph, the light-slot ray and the arrival', () => {
+    // Las siete de siempre, más las de los puzzles físicos (T6): cinco esferas, seis marcas del Planetario, el prisma y su soporte.
+    const physical = [
+      ...['taller', 'cicatriz', 'archivo', 'umbral', 'observatorio'].map(
+        (w) => `archivo.esfera_${w}`,
+      ),
+      ...Array.from({ length: 6 }, () => 'archivo.planetario'),
+      'archivo.prisma',
+      'archivo.soporte',
+    ];
     expect(world.markers.interactions.map((i) => i.clueId).sort()).toEqual(
-      ARCHIVO_SOURCES.map((s) => `archivo.${s.id}`).sort(),
+      [...ARCHIVO_SOURCES.map((s) => `archivo.${s.id}`), ...physical].sort(),
     );
     expect(world.markers.eventProps.map((p) => p.event)).toEqual(['ranura_luz']);
     expect([...world.markers.spawns.keys()]).toEqual(['SPAWN_Borde']);

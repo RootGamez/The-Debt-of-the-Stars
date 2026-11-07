@@ -141,5 +141,115 @@
       ],
       "hechos": ["bucle.orden_camara"]
     }
+  },
+  {
+    "id": "archivo.esfera_taller",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "La esfera de la rueda dentada",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una esfera pequeña de bronce, con una rueda dentada tallada alrededor.",
+        "Pesa poco y tintinea: dentro hay algo que gira."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.esfera_cicatriz",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "La esfera mordida",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una esfera color brasa a la que le falta un trozo: un corte limpio y redondo, como los del suelo de un mundo."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.esfera_archivo",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "La esfera de la gota",
+    "borrador": true,
+    "superficial": {
+      "texto": ["Una esfera color agua, con una punta arriba: una gota a punto de caer."],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.esfera_umbral",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "La esfera del anillo",
+    "borrador": true,
+    "superficial": {
+      "texto": ["Una esfera de arena clara, rodeada por un anillo fino: el anillo de una Puerta."],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.esfera_observatorio",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "La esfera de la cúpula",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una media esfera de perla sobre una base plana: una cúpula, como las que miran el cielo."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.planetario",
+    "mundo": "archivo",
+    "tipo": "observacion",
+    "lector": "planetario",
+    "titulo": "El Planetario",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una mesa redonda con seis rieles de oro, uno dentro de otro, y una manivela. En el centro, un sol pequeño.",
+        "En cada riel hay una ranura para una esfera. Cinco son de oro. La quinta es negra, y está vacía."
+      ],
+      "hechos": ["observatorio.alineacion", "lab.riel_vacio"]
+    }
+  },
+  {
+    "id": "archivo.prisma",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "El prisma",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Un prisma de cristal tirado en el suelo, con una muesca en la base. Parece haberse caído de su soporte."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "archivo.soporte",
+    "mundo": "archivo",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "El soporte del prisma",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Un pie de acero con un aro de oro encima, junto a la tablilla de la ranura. Algo debía ir aquí."
+      ],
+      "hechos": []
+    }
   }
 ]

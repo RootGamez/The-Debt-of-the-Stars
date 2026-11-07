@@ -42,6 +42,11 @@ export function takeFromRack(state: CarryState): CarryState {
   return next === undefined ? state : moved(state, next, HANDS);
 }
 
+/** Coge un objeto concreto de su estante (con las manos libres). */
+export function takeObject(state: CarryState, id: string): CarryState {
+  return heldBy(state) === undefined && state.where[id] === RACK ? moved(state, id, HANDS) : state;
+}
+
 /** Encaja lo que se lleva en un sitio libre que lo acepte. */
 export function placeHeld(
   state: CarryState,

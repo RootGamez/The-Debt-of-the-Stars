@@ -6,6 +6,7 @@ import {
   placeHeld,
   resetCarry,
   takeFromRack,
+  takeObject,
   takeFromSlot,
   placedAt,
 } from '../../src/game/carry';
@@ -70,5 +71,15 @@ describe('carrying and fitting objects', () => {
     );
 
     expect(resetCarry(state)).toEqual(createCarry(things));
+  });
+
+  it('takes one chosen object from its rack, and only with free hands', () => {
+    const state = createCarry(things);
+    const chosen = takeObject(state, 'b');
+
+    expect(heldBy(chosen)).toBe('b');
+    expect(takeObject(chosen, 'c')).toBe(chosen);
+    expect(takeObject(state, 'z')).toBe(state);
+    expect(takeObject(placeHeld(chosen, 's1'), 'b')).toEqual(placeHeld(chosen, 's1'));
   });
 });

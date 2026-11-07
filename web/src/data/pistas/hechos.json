@@ -494,5 +494,21 @@
     "frase": "Una canción nombra los mundos desde la Brasa: Taller corre, Cicatriz arde, Archivo pesa, Umbral espera… Observatorio vela.",
     "rumor": "¿Qué canta el atril de las campanas?",
     "dibujo": "cancion"
+  },
+  {
+    "id": "observatorio.alineacion",
+    "hilos": ["H5"],
+    "frase": "A las 6:30 el Observatorio, la Brasa y el riel sin mundo quedan en línea.",
+    "rumor": "¿Cuándo se alinean los mundos del Planetario?",
+    "enlaces": ["lab.riel_vacio"],
+    "dibujo": "planetario"
+  },
+  {
+    "id": "lab.riel_vacio",
+    "hilos": ["H5"],
+    "frase": "En el Planetario hay un riel sin mundo entre Umbral y el Observatorio.",
+    "rumor": "¿Por qué sobra un riel en el Planetario?",
+    "enlaces": ["nudo.existe"],
+    "dibujo": "planetario"
   }
 ]

@@ -3,6 +3,7 @@
 // Sin `?debug` y con el panel oculto no calcula nada.
 import { Vector3, type WebGLRenderer } from 'three';
 import type { Player } from '../core/player';
+import type { ArchivoSnapshot } from '../game/archivoPlay';
 import type { BellsSnapshot } from '../game/bellsPlay';
 import type { CounterweightSnapshot } from '../game/counterweightPlay';
 import type { Ending } from '../game/epilogue';
@@ -135,6 +136,8 @@ declare global {
        */
       counterweight?(): CounterweightSnapshot | null;
       bells?(): BellsSnapshot | null;
+      archivo?(): ArchivoSnapshot | null;
+      archivoRail?(rail: number | undefined): void;
       bellsMark?(mark: number | undefined): void;
       /** El horizonte estable: su radio (m; 0 si no lo hay) y lo cerca que está quien mira (0–1). */
       horizon?(): { radius: number; closeness: number };

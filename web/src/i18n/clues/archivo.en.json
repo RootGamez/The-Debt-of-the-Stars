@@ -70,5 +70,49 @@
       "Among the minutes there is an order of another kind, with nobody’s name on it: “Let an apparatus be built that holds the last quarter hour of the Mouth.”",
       "Nobody writes down what for. The next entry is a bill of materials."
     ]
+  },
+  "archivo.esfera_taller": {
+    "titulo": "The sphere of the cogwheel",
+    "superficial": [
+      "A small bronze sphere with a cogwheel carved around it.",
+      "It weighs little and tinkles: something turns inside."
+    ]
+  },
+  "archivo.esfera_cicatriz": {
+    "titulo": "The bitten sphere",
+    "superficial": [
+      "An ember-colored sphere with a piece missing: a clean, round cut, like those in the ground of a world."
+    ]
+  },
+  "archivo.esfera_archivo": {
+    "titulo": "The sphere of the drop",
+    "superficial": ["A water-colored sphere with a point on top: a drop about to fall."]
+  },
+  "archivo.esfera_umbral": {
+    "titulo": "The sphere of the ring",
+    "superficial": ["A pale sand sphere surrounded by a thin ring: the ring of a Gate."]
+  },
+  "archivo.esfera_observatorio": {
+    "titulo": "The sphere of the dome",
+    "superficial": ["A pearl half-sphere on a flat base: a dome, like those that watch the sky."]
+  },
+  "archivo.planetario": {
+    "titulo": "The Orrery",
+    "superficial": [
+      "A round table with six golden rails, one inside another, and a crank. At the center, a small sun.",
+      "Each rail has a socket for a sphere. Five are gold. The fifth is black, and empty."
+    ]
+  },
+  "archivo.prisma": {
+    "titulo": "The prism",
+    "superficial": [
+      "A glass prism lying on the floor, with a notch in its base. It seems to have fallen from its stand."
+    ]
+  },
+  "archivo.soporte": {
+    "titulo": "The prism stand",
+    "superficial": [
+      "A steel post with a golden ring on top, beside the tablet of the light slot. Something was meant to go here."
+    ]
   }
 }

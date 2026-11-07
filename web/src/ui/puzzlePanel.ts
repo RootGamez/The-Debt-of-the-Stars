@@ -216,6 +216,8 @@ export function createPuzzlePanel(
         return { body: element('p', 'puzzle-hint', t('El ocular está a oscuras.')) };
       case 'campanas':
         return { body: element('p', 'puzzle-hint', t('La tapa no cede.')) };
+      case 'planetario':
+        return { body: element('p', 'puzzle-hint', t('La manivela no gira.')) };
     }
   }
 
