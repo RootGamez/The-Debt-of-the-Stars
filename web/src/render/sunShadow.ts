@@ -219,6 +219,7 @@ const GLSL_COMMON = /* glsl */ `
     vec2 uv = c.xy / c.w * 0.5 + 0.5;
     if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return 1.0;
     float mine = dot(wp - uSunShadowPos, uSunShadowForward) / uSunNearFar;
+    if (mine > 1.0) return 1.0; // más allá del plano far del mapa: nada que comparar
     float lit = 0.0;
     for (int x = -1; x <= 1; x++) {
       for (int y = -1; y <= 1; y++) {
@@ -324,10 +325,14 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
       const previousOverride = scene.overrideMaterial;
       const previousBackground = scene.background;
       scene.background = null;
-      drawCascade(renderer, scene, near, clearColor);
-      if (useFar) drawCascade(renderer, scene, far, clearColor);
-      scene.overrideMaterial = previousOverride;
-      scene.background = previousBackground;
+      try {
+        drawCascade(renderer, scene, near, clearColor);
+        if (useFar) drawCascade(renderer, scene, far, clearColor);
+      } finally {
+        scene.overrideMaterial = previousOverride;
+        scene.background = previousBackground;
+        renderer.setRenderTarget(null);
+      }
     },
 
     register(root) {
@@ -339,6 +344,10 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
     receive(mat) {
       if (patched.has(mat)) return;
       patched.add(mat);
+      // Three usa el texto de `onBeforeCompile` como clave del programa: sin esto, todos los materiales parcheados
+      // compartirían programa aunque su parche propio fuera distinto.
+      const previousKey = mat.customProgramCacheKey.bind(mat);
+      mat.customProgramCacheKey = () => `${previousKey()}|sunshadow`;
       const previous = mat.onBeforeCompile.bind(mat);
       mat.onBeforeCompile = (shader, renderer) => {
         previous(shader, renderer);
