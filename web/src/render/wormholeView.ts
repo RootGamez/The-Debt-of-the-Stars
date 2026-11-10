@@ -1,36 +1,11 @@
-// La apertura del gusano junto al fragmento de la Luna (Fase 9E, 🟡): un anillo de luz que se abre sobre el
-// fragmento, siempre de cara a quien mira, con un velo de luz dentro. Cuelga de la Luna, así que sigue en su sitio
-// aunque cambie el marco de la escena. Da a la lente del cielo un "peso" que crece (las estrellas se doblan
-// alrededor) y cuánto se estira la vista. Los tiempos y tamaños, en game/wormhole.ts.
-import {
-  AdditiveBlending,
-  BufferAttribute,
-  CircleGeometry,
-  Group,
-  Mesh,
-  MeshBasicMaterial,
-  TorusGeometry,
-  Vector3,
-  type Object3D,
-} from 'three';
+// La apertura del gusano junto al fragmento de la Luna (Fase 9E, 🟡): una esfera de agujero de gusano (la misma de
+// todos los portales del juego: render/wormholeSphere.ts) que se abre sobre el fragmento y crece hasta cubrir la
+// nave. Cuelga de la Luna, así que sigue en su sitio aunque cambie el marco de la escena. Da a la lente del cielo un
+// "peso" que crece (las estrellas se doblan alrededor) y cuánto se estira la vista. Los tiempos y tamaños, en
+// game/wormhole.ts.
+import { Vector3, type Object3D } from 'three';
 import { lensRadius, ringRadius, viewStretch, wormholeProgress } from '../game/wormhole';
-
-const RING_COLOR = 0xfff0d0;
-const VEIL_COLOR = 0xffe2b0;
-/** Brillo del velo en el borde (en el centro, 1): luz al fondo del túnel. */
-const VEIL_RIM = 0.25;
-/** Opacidad del velo abierto del todo: casi blanco justo antes del fundido. */
-const VEIL_OPACITY = 0.7;
-
-/** Un disco que brilla más en el centro que en el borde (CircleGeometry pone el centro primero). */
-function glowDisc(radius: number, segments: number): CircleGeometry {
-  const geometry = new CircleGeometry(radius, segments);
-  const count = geometry.getAttribute('position').count;
-  const colors = new Float32Array(count * 3).fill(VEIL_RIM);
-  colors.fill(1, 0, 3);
-  geometry.setAttribute('color', new BufferAttribute(colors, 3));
-  return geometry;
-}
+import { createWormholeSphere } from './wormholeSphere';
 
 export interface WormholeView {
   /** Abre el gusano colgado de `parent` (el mundo), en `center` (en su marco). */
@@ -49,27 +24,11 @@ export interface WormholeView {
 }
 
 export function createWormholeView(): WormholeView {
-  const root = new Group();
+  const sphere = createWormholeSphere(0xffe2b0);
+  const root = sphere.root;
   root.name = 'Gusano';
   root.visible = false;
-  const ringMaterial = new MeshBasicMaterial({
-    color: RING_COLOR,
-    transparent: true,
-    blending: AdditiveBlending,
-    depthWrite: false,
-  });
-  const ring = new Mesh(new TorusGeometry(1, 0.06, 10, 64), ringMaterial);
-  const inner = new Mesh(new TorusGeometry(0.82, 0.02, 6, 64), ringMaterial);
-  const veilMaterial = new MeshBasicMaterial({
-    color: VEIL_COLOR,
-    transparent: true,
-    opacity: 0,
-    vertexColors: true,
-    blending: AdditiveBlending,
-    depthWrite: false,
-  });
-  const veil = new Mesh(glowDisc(0.95, 48), veilMaterial);
-  root.add(ring, inner, veil);
+  sphere.open.value = 0;
   const lensOut = { position: new Vector3(), radius: 0 };
   let elapsed = 0;
   let active = false;
@@ -84,14 +43,13 @@ export function createWormholeView(): WormholeView {
       root.visible = true;
       parent.add(root);
     },
-    update(dt, eye) {
+    update(dt) {
       if (!active) return;
       elapsed += dt;
+      sphere.time.value += dt;
       progress = wormholeProgress(elapsed);
       root.scale.setScalar(Math.max(1e-3, ringRadius(progress)));
-      root.lookAt(eye); // siempre de cara (lookAt sabe del marco del padre)
-      ringMaterial.opacity = Math.min(1, progress * 4);
-      veilMaterial.opacity = VEIL_OPACITY * progress * progress;
+      sphere.open.value = Math.min(1, progress * 4);
     },
     get active() {
       return active;
@@ -109,12 +67,7 @@ export function createWormholeView(): WormholeView {
       return lensOut.radius > 0 ? lensOut : undefined;
     },
     dispose() {
-      root.removeFromParent();
-      ring.geometry.dispose();
-      inner.geometry.dispose();
-      veil.geometry.dispose();
-      ringMaterial.dispose();
-      veilMaterial.dispose();
+      sphere.dispose();
     },
   };
 }

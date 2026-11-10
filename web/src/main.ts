@@ -73,6 +73,7 @@ import { createWarpDistortion } from './ui/warpDistortion';
 import { gateSplit, gateStretch } from './game/gateWormhole';
 import { createGateWormholes, type GateWormholeSample } from './render/gateWormholeView';
 import { createWormholeView } from './render/wormholeView';
+import { renderWithWormholes } from './render/wormholeSphere';
 import { Player } from './core/player';
 import { absorptionWindow, quietChronology, triggersAsEvents } from './core/timeline';
 import { createAbsorptionView } from './render/absorptionView';
@@ -1037,7 +1038,7 @@ function start(): void {
   runFrameLoop(
     renderer,
     () => {
-      renderer.render(scene, camera);
+      renderWithWormholes(renderer, scene, camera);
     },
     (dt) => {
       const look = input.consumeLook();
