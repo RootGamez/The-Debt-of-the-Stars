@@ -1071,7 +1071,9 @@ function start(): void {
     () => {
       // Dentro del Nudo la estrella no ilumina (su luz está apagada): sin sombra.
       sunShadow?.setEnabled(sun.visible);
-      sunShadow?.update(renderer, scene, sun.position, camera.getWorldPosition(cameraWorld));
+      sunShadow?.update(renderer, scene, sun.position, camera.getWorldPosition(cameraWorld), {
+        starRadius: spec?.star.radius ?? 0,
+      });
       renderWithWormholes(renderer, scene, camera);
     },
     (dt) => {
