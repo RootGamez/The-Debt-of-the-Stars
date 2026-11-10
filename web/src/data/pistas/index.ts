@@ -6,6 +6,7 @@ import { parseClues, type Clues } from '../../registry/clues';
 import conclusiones from './conclusiones.json';
 import hechos from './hechos.json';
 import hilos from './hilos.json';
+import anclajes from './anclajes.json';
 import archivo from './archivo.json';
 import cicatriz from './cicatriz.json';
 import hogar from './hogar.json';
@@ -35,6 +36,7 @@ const SOURCE_FILES: readonly (readonly unknown[])[] = [
   observatorio,
   laboratorio,
   puertas,
+  anclajes,
 ];
 
 export function chronologyEventIds(): string[] {

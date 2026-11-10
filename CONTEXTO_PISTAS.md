@@ -1,7 +1,7 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.14
-**Última actualización:** 2026-11-06 · Plan de historia y puzzles físicos (decisiones)
+**Versión:** v0.15
+**Última actualización:** 2026-11-10 · Lecturas del Cerco
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
 > Este documento dice **qué se puede aprender, dónde y en qué orden**. Es el puente entre la historia y el
@@ -343,6 +343,10 @@ textos de ambiente sin peso en el grafo.
 - **Grabaciones (Fase 7):** cada fuente de tipo grabación lleva `reloj`, el ritmo con que se grabó (0,20 la del escéptico). Se oye con una rueda de velocidad: se entiende cuando velocidad × reloj ≈ 1 (±15 %); si no, las palabras salen arrastradas (lenta) o tragadas (rápida). La lectura superficial es lo que se oye al pulsarla; la profunda es lo que dice, frase a frase. **Lo profundo se anota al oírla entera a la velocidad buena**, sepa lo que sepa el jugador: entenderla es la llave. El `requiere` de los datos sigue diciendo qué ayuda a encontrar esa velocidad (lo usan las reglas del grafo). Mientras no haya voces de verdad suena un murmullo sintetizado.
 - **Charlas (Fase 9, 🟡):** tipo de fuente `charla` para la gente de casa ("E · hablar"). La Directora es una charla del grafo (da la misión y su lectura profunda); la Maestra, el técnico, la mecánica y los vecinos de la aldea tienen charlas de ambiente sin hechos, que no cuentan entre las fuentes ni para las reglas del grafo.
 - **Lectores de puzle (Fase 7):** `umbral.cuaderno` (completar la última hora del Archivo) y `archivo.cartas` (ordenar las cartas por cuándo se escribieron en días de Umbral) llevan `lector`. Lo que dan se anota **al resolverlos**, no al abrirlos. Desde la Fase 10 también `taller.gemelos`, `taller.cabina`, `lab.pizarra`, `cicatriz.cuna` (sus dos ruedas igualan el reloj del Contrapeso con el de la máquina) y `puertas.bocas` (elegir la boca de casa: lo que da se anota al cruzar por la buena). Desde la Fase 11F, `taller.pista` (sus dos ruedas ponen en hora el reloj de la Pista; con él en hora el anillo lleva a la Sala del Centro durante las 7:00).
+
+### Lecturas del Cerco (🟡, 2026-11-10)
+
+Cinco fuentes **de ambiente** (`"ambiente": true`, sin hechos ni lectura profunda; no cuentan para el grafo) en los dos anclajes de la estructura que rodea la Brasa (`data/pistas/anclajes.json`, inglés en `i18n/clues/anclajes.en.json`): `cerco.placa_obra`, `cerco.mando` y `cerco.receptor` (Anclaje Norte) y `cerco.diario_obra` y `cerco.acta` (Anclaje Sur). Cuentan la apuesta del Consejo por la energía de la estrella (H4, el silencio, visto desde otro lado) y enlazan con la petición rechazada de la Sala Cerrada. Si Anthony las quiere en el Registro, pasarían a un hilo H8 con hechos propios (decisión abierta).
 
 ## 12. Bitácora
 

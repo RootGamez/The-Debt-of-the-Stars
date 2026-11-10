@@ -1,0 +1,43 @@
+{
+  "cerco.placa_obra": {
+    "titulo": "The building-site plaque",
+    "superficial": [
+      "A slate plaque, polished by the hand of whoever passed it every day. At the top, in large letters: \"ENCLOSURE OF CAPTURE. First ring\".",
+      "Below it, the motto of the works: \"What the star gives, the star will pay for\".",
+      "Lower down, the delivery date, carved and empty. And the signature of the Transit Council, in full: seven signs, the last one struck out."
+    ]
+  },
+  "cerco.mando": {
+    "titulo": "The command blackboard",
+    "superficial": [
+      "A blackboard with two columns, half rubbed out. On the left: \"Estimated completion of the Enclosure: forty years\". On the right: \"Estimated time until the network collapses: nine\".",
+      "Someone has circled the nine twice in chalk. Beside it, in another hand: \"What if we calculated wrong?\".",
+      "No one has written below it. The chalk is still on the ledge, worn down to a fingertip."
+    ]
+  },
+  "cerco.receptor": {
+    "titulo": "The receiver",
+    "superficial": [
+      "A huge dish looks up at the Ember from its mast. One edge still wears the building tarpaulin: it never received its light in full.",
+      "A copper counter tallies the energy captured. It reads almost zero.",
+      "The cables run down to a knot of connections marked with the sign of the network of Gates. The energy was not meant for a house or a factory: it was going to feed the Gates."
+    ]
+  },
+  "cerco.diario_obra": {
+    "titulo": "The foreman's diary",
+    "superficial": [
+      "A building-site notebook, its corners black from handling. The last pages have hardly any figures.",
+      "\"Day 3,211. The Council orders the cranes stopped. The notice says the deadline can't be met, as if we had only found out today\".",
+      "\"Day 3,212. They send all of us to the Gates. I leave the key in. If anyone finishes this, may they finish it better than we did\"."
+    ]
+  },
+  "cerco.acta": {
+    "titulo": "The minutes of the choice",
+    "superficial": [
+      "Minutes of the Transit Council, in full, with a single item: the choice. Two petitions lie on the table.",
+      "The first, from the researcher: the resources to finish her device, and not to evacuate through the Gates meanwhile. The second, the Enclosure's, which promises energy \"enough to cover any debt\".",
+      "The second is approved. Six signs, and a seventh struck out.",
+      "In the margin, in pencil, unsigned: \"Debt is not paid with energy. It is paid with time\"."
+    ]
+  }
+}

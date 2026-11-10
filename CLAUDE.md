@@ -4,11 +4,13 @@ Juego 3D low poly que corre gratis en el navegador (Three.js + TypeScript + Vite
 y desde la Fase 11 están todos hechos por código (Blender en pausa; ya no hay `.glb` ni `.blend`).
 
 ## Antes de trabajar
+
 1. Carga la skill `juego-bucle-tiempo` (y `tiny-planets-blender` si se modela).
 2. Lee enteros `CONTEXTO_HISTORIA.md`, `CONTEXTO_PLANETAS.md` y `CONTEXTO_PISTAS.md`: son la fuente de verdad del juego.
 3. Lee el plan maestro `docs/PLAN_DESARROLLO.md` y el plan de la fase en curso.
 
 ## Reglas
+
 - Leyenda de los documentos: ✅ decidido por Anthony · 🟡 propuesta · ❓ abierto. Nunca conviertas 🟡/❓ en ✅ sin que Anthony lo decida.
 - Historia original: inspirada en el espíritu de Outer Wilds e Interstellar, nunca en su contenido.
 - `docs/` está ignorada por git: guarda el plan maestro y todos los planes (`docs/plan-fase-N-<nombre>.md`, `docs/plan-<tema>.md`).
@@ -18,6 +20,7 @@ y desde la Fase 11 están todos hechos por código (Blender en pausa; ya no hay 
 - Tests primero para la lógica pura (relojes, bucle, gravedad, Registro, lectura de marcas).
 
 ## Estructura
+
 ```
 CONTEXTO_*.md         historia, planetas y grafo de pistas: fuente de verdad (versionada)
 docs/                 planes (local, ignorada)
@@ -27,23 +30,25 @@ web/                  proyecto Vite + TypeScript + Three.js
 ```
 
 ## Comandos (desde `web/`)
-| Comando | Qué hace |
-|---|---|
-| `npm run dev` | Servidor de desarrollo |
-| `npm run build` | Comprueba tipos y genera `dist/` |
-| `npm test` | Tests (Vitest) |
-| `npm run coverage` | Tests con cobertura |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | TypeScript sin emitir |
-| `npm run format` | Prettier |
-| `npm run check` | Todo lo anterior (tipos, lint, formato, cobertura, build) |
-| `npm run e2e` | Pruebas de extremo a extremo con Playwright (Chromium) |
+
+| Comando             | Qué hace                                                  |
+| ------------------- | --------------------------------------------------------- |
+| `npm run dev`       | Servidor de desarrollo                                    |
+| `npm run build`     | Comprueba tipos y genera `dist/`                          |
+| `npm test`          | Tests (Vitest)                                            |
+| `npm run coverage`  | Tests con cobertura                                       |
+| `npm run lint`      | ESLint                                                    |
+| `npm run typecheck` | TypeScript sin emitir                                     |
+| `npm run format`    | Prettier                                                  |
+| `npm run check`     | Todo lo anterior (tipos, lint, formato, cobertura, build) |
+| `npm run e2e`       | Pruebas de extremo a extremo con Playwright (Chromium)    |
 
 En el navegador: `?mundo=<id>` carga otro mundo base y `?debug` muestra el panel F3 y expone
 `window.__juego.snapshot()` (lo usan las pruebas de Playwright). Solo con `?debug`: `&ciclo=<s>`
 acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` saltan ∓1/15 del ciclo.
 
 ## Leer y el Registro (Fase 4)
+
 - Las pistas están en `web/src/data/pistas/` (un archivo por mundo + `hilos.json`, `hechos.json`, `conclusiones.json`); se validan al cargar y las 7 reglas de `CONTEXTO_PISTAS.md` se comprueban en `npm test`.
 - Todos los textos son **borradores provisionales** (`"borrador": true`, de Claude, a la espera de Anthony); ya no queda ningún «[texto pendiente]» (lo comprueba `tests/registry/realClues.test.ts`). Las tarjetas de final están en `web/src/data/finales.json` y su inglés en `i18n/en.ts`.
 - Una fuente = marca `INT_` del mundo (en su constructor de `worlds/procedural/`) con `clue_id` y `kind` (texto, grabacion, objeto, observacion) que coincide con el `id` de la fuente; los eventos son marcas `TRIG_` con `event`.
@@ -52,6 +57,7 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - Al añadir un mundo con fuentes: añade su id a `BUILT_WORLDS` en `web/tests/registry/umbralMarkers.test.ts` (regla 5).
 
 ## El sistema y la nave (Fase 5)
+
 - Los mundos orbitan en rieles (`web/src/data/sistema.json`); todo se dibuja relativo al mundo donde estás (`render/systemScene.ts`).
 - La nave (el Albatros II) es por código desde la Fase 11 (plan: `docs/plan-fase-11-nave.md`); ya no usa `nave.glb`. Modelo en `web/src/ship/model/` (`albatros.ts`, medidas en `albatrosShape.ts`): un disco de 9 m con una sala por dentro, la escotilla en el suelo y la escalerilla a popa. Espera posada en `PARK_Nave` (Umbral) al empezar cada ciclo.
 - Física de 6 ejes con toberas reales (`ship/thrusters.ts`, 24 toberas, cada una con su llama; `ship/shipPhysics.ts`). Choca como esferas (`ALBATROS_HULL`, `ship/shipContact.ts`). Se anda por dentro con `physics/movingCollider.ts`. La escotilla se abre posada y se cierra al volar (`ship/hatch.ts`). Lo que se mueve en la sala (llamas, reloj de pared, planetario) está en `game/shipCabin.ts`.
@@ -61,28 +67,33 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - E2E: no dejar el juego abierto en el panel de vista previa mientras corre `npm run e2e`.
 
 ## El ciclo (Fase 3)
+
 - Modo B (✅ Anthony): el tiempo real es el del jugador; en mundos lentos el reloj de Umbral corre más rápido (`src/data/loop.ts`, `TIME_MODE`).
 - La cronología (eventos, absorción, curvas de reloj) está en `web/src/data/cronologia.json`: se ajusta ahí, sin tocar código.
 - El guardado (`bucle-tiempo:partida` en localStorage) solo guarda ciclos y hechos; se valida al leerlo.
 
 ## Marcas de los mundos
+
 - 1 unidad = 1 metro, y se diseña en el marco de Blender (Z arriba; la raíz se gira −90° en X). Marcas: `COL_`, `INT_<id>`, `SPAWN_<nombre>`, `TRIG_<nombre>`, `PARK_`, `PASO_` (anillo de una Puerta plegada, con `destino`); objetos `EVT_` (solo durante un evento) y `ANIM_` (giran sobre su Y local); las propiedades van en `userData`.
 - Mundos huecos (el Nudo, mundo `laboratorio`): `inner_radius` en la raíz; dentro la gravedad empuja hacia fuera.
 - Blender está en pausa y ya no hay `.blend` (se pueden recuperar de git). `blender/scripts/` y `blender/marcas/` se quedan como referencia del diseño original, que los constructores citan.
 
 ## Relatividad jugable (Fase 7)
+
 - Grabaciones: las fuentes `grabacion` llevan `reloj` (ritmo con que se grabaron) y se entienden con la rueda de velocidad (velocidad × reloj ≈ 1). La M silencia el juego.
 - El Laboratorio está dentro del Nudo (cuerpo oculto en `sistema.json`); se entra por la Puerta plegada. Con `?debug`: `__juego.warpTo('laboratorio')` y `__juego.place()`.
 - La lente (`system/lens.ts`): la imagen del Nudo se ve girada 18° hacia la Brasa; nítida solo desde el Observatorio en la alineación. **G** muestra la mira graduada. Con `?debug`: `__juego.lens()`.
 - Mareas (`physics/tides.ts`): el Borde de Cicatriz, la semilla del Nudo y su cáscara; la tensión acumulada mata (`marea`). Con `?debug`: `__juego.tide()`.
 
 ## Publicación (Cloudflare)
+
 - Está en https://bucle-de-tiempo.anthonygamez2858.workers.dev (cuenta de Anthony, Workers con assets estáticos, sin script: `web/wrangler.jsonc`).
 - `npm run deploy` (en `web/`) construye y sube `dist/`; `npm run deploy:dry` solo comprueba. Hace falta haber entrado con `npx wrangler login`.
 - Los mundos se construyen en el navegador: `dist/` solo lleva el código y las fuentes de letra (no hay modelos que subir).
 - `web/public/_headers` pone la caché (`/assets/*` inmutable) y `web/public/.assetsignore` deja fuera los `.map`.
 
 ## Mundos por código (Fase 11)
+
 - Blender está en pausa: todos los mundos son TypeScript en `web/src/worlds/procedural/` (plan: `docs/plan-fase-11-modelado-por-codigo.md`).
 - `kit.ts` (primitivas, marcos lat/lon, piezas con colisión, terreno, dispersión, luz de cielo y bruma), `noise.ts`, `wind.ts` (polvo).
 - Un mundo por código cumple el contrato que tenían los `.glb` (raíz con datos, `COL_`, `INT_`, `SPAWN_`, `PARK_`, `TRIG_`, `EVT_`); se registra en `procedural/index.ts` y `loadWorld` lo construye (sin descargar nada; un id sin constructor es un error).
@@ -102,26 +113,35 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - Para mirar un mundo de cerca sin jugar, una página temporal en `web/` que llame a `buildUmbral()` sirve (no la dejes en el repo).
 
 ## Puzzles físicos (plan: `docs/plan-historia-y-puzzles-fisicos.md`)
+
 - `game/carry.ts` es coger, llevar y encajar (puro: manos, estante, encajes; todo vuelve al estante con cada ciclo). Las acciones de varias fuentes se juntan con `reading/composeActions.ts`.
 - P1, las campanas del Anfiteatro de Umbral: `puzzles/bells.ts` (el compás), `game/bellsPlay.ts` y `bellsRig.ts`, `render/bellsView.ts`, estructura en `worlds/procedural/umbralBells*.ts`. Las marcas `INT_canal_N` comparten `clue_id` (se alcanza desde cualquier punto del canal). Con `?debug`: `__juego.bells()` y `__juego.bellsMark(n)` (fija la marca más cercana para probar sin andar al milímetro).
 - P2 y P5 en el Archivo: `puzzles/orrery.ts`, `game/archivoPlay.ts` + `archivoRig.ts`, `render/archivoPuzzlesView.ts` y estructura en `worlds/procedural/archivoPuzzles*.ts` (las marcas `INT_planetario_N` comparten `clue_id`, una por riel, con `riel` en `userData`). Con `?debug`: `__juego.archivo()` y `__juego.archivoRail(n)`.
 - P3 y P4 en el Archivo: `puzzles/cistern.ts`, `puzzles/pendulums.ts`, `game/depthsPlay.ts` + `depthsRig.ts`, `render/archivoDepthsView.ts` y estructura en `worlds/procedural/archivoDepths*.ts`. La Sala Cerrada es una cámara sellada del pasillo de los cajones con un anillo plegado (`PASO_Trampilla`↔`PASO_Camara`, cerradura `sala_cerrada` que abre `main.ts` con `depths.play.hatchOpen`). Con `?debug`: `__juego.depths()` y `__juego.depthsPendulum(n)`.
 - P6 y P7: `puzzles/balance.ts`, `puzzles/chladni.ts`, `game/benchPlay.ts` + `benchRig.ts`, `render/benchView.ts` y estructura en `worlds/procedural/bench*.ts` (la Balanza en la isla de la Cuna del Taller, la placa en la Fundición y su placa del motor junto a la palanca de Cicatriz; marcas con `muesca` y `agujero` en `userData`). Con `?debug`: `__juego.bench()`, `__juego.benchNotch(n)` y `__juego.benchHole(n)`. El brillo de la Puerta del Nudo está en `render/lensView.ts` (`doorGlow` en `system/lens.ts`).
-- **Todo portal del juego es una esfera de agujero de gusano** (`render/wormholeSphere.ts`, pedido de Anthony: como el de *Interstellar*, no un anillo con velo): una bola de lente que dobla el entorno en el borde (anillo de Einstein incluido) y deja ver otro lugar por el centro. Para doblar el entorno el render pasa por `renderWithWormholes` (pinta antes la escena sin las esferas en una textura; un solo pase si no hay ninguna a la vista). La usan las Puertas plegadas, la boca del cielo y el gusano de la Luna: cualquier portal nuevo debe usar `createWormholeSphere`.
+- **Todo portal del juego es una esfera de agujero de gusano** (`render/wormholeSphere.ts`, pedido de Anthony: como el de _Interstellar_, no un anillo con velo): una bola de lente que dobla el entorno en el borde (anillo de Einstein incluido) y deja ver otro lugar por el centro. Para doblar el entorno el render pasa por `renderWithWormholes` (pinta antes la escena sin las esferas en una textura; un solo pase si no hay ninguna a la vista). La usan las Puertas plegadas, la boca del cielo y el gusano de la Luna: cualquier portal nuevo debe usar `createWormholeSphere`.
 - Las Puertas plegadas (`PASO_`) llevan un gusano estable (`render/gateWormholeView.ts`; cerca de ellas la vista se deforma: `game/gateWormhole.ts`). En el Archivo de las Puertas, elegir una boca de casa en el atril abre una boca en el cielo (`game/skyMouth.ts`, `render/skyMouthView.ts`) a la que solo se llega con la nave (el Archivo de las Puertas tiene nave); cruzarla lleva a `?mundo=hogar&final=…`, donde se aparece en el espacio, sentado en la nave (`ShipFlight.startPiloting`). Con `?debug`: `__juego.toGate(nombre)`, `gates()`, `skyMouth()`, `flyIntoMouth()` y `landHome()`.
 - Los croquis del cuaderno (`dibujo` en los hechos) están en `ui/notebookSketches.ts` (trazos puros, con texto alternativo en los dos idiomas).
 
+## Soles, el Cerco y la luz (plan: `docs/plan-soles-y-luz-dinamica.md`)
+
+- Las estrellas son esferas modeladas (`render/starModel.ts`, superficie pura en `starSurface.ts`). Cada sistema declara su `estrella` en `data/sistema*.json`: `tipo` (`solar` en casa, `enana_roja` en el sistema ajeno, `lejana` en las Puertas), colores, `intensidad`, `caida` (cómo cae la luz con la distancia; 0,5 en el sistema ajeno), `manchas`, `giro`. Se validan en `system/systemData.ts`. `system/starLight.ts` da la intensidad de la luz para que a la distancia de referencia (el mundo de la nave) valga lo que dice el archivo.
+- **El Cerco** (`estructura` en `sistema.json`): dos anillos meridianos que giran en sentidos opuestos y pasan siempre por los dos polos (`system/cercoShape.ts`, `render/cercoRings.ts`). Los polos son los **anclajes** `anclaje_norte` y `anclaje_sur`, mundos por código fijos fuera del plano de las órbitas (`posicion` en lugar de `orbita` en `BodySpec`; `worlds/procedural/anclaje*.ts`). Un cuerpo con `posicion` se salta los mapas de órbitas. Las cinco lecturas son de ambiente (`data/pistas/anclajes.json`).
+- **Sombras de la estrella** (`render/sunShadow.ts`): la luz sigue siendo la `PointLight` de three (fases correctas); se le suma oclusión con dos mapas de distancias dibujados desde la estrella hacia el jugador (cascada cercana de 90 m y lejana de 160 m, con penumbra que crece con la distancia al cuerpo que tapa) y un parche en `lights_fragment_begin` que multiplica la luz 0 (la estrella, que debe ser la primera luz de la escena). Proyecta lo que lleva `castShadow` (el cristal no); `castShadowsFrom` añade el explorador y la nave. Los materiales de los mundos reciben la sombra con `receive()` (idempotente, se encadena con `applySkyLight`); donde el sol llegaría y algo lo tapa, el relleno de cielo baja a un 40 %. Dentro del Nudo la sombra se apaga con la luz de la estrella.
+- `?sombra=<512|1024|2048|4096>` elige el mapa y `?sombra=no` la apaga; `?calidad=baja` también la apaga. Con `?debug`: `__juego.aimAt('estrella')` apunta la cámara a la estrella.
+
 ## El explorador (el jugador, por código)
+
 - Ool joven con traje acolchado remendado y casco de burbuja (lámina de Anthony): `web/src/character/`. `gait.ts` es la lógica pura del andar (fase por distancia, quieto/andar/correr/aire/nadar), `explorerBody.ts` y `explorerGear.ts` las piezas, `explorerModel.ts` el muñeco articulado (un `Group` por articulación, marco de diseño Z arriba y frente +Y).
 - ✅ Mide como un Ool adulto: `EYE_HEIGHT` 1,08 y `PLAYER_HEIGHT` 1,45 (`data/movement.ts`).
 - `render/explorerView.ts` lo cuelga de la escena: en primera persona oculta cabeza y casco y retrasa el cuerpo (`FIRST_PERSON_BACK`/`_DOWN`) para verse al mirar abajo; pilotando no se dibuja. `ui/helmetRim.ts` pone el borde del casco.
 - Con `?debug`: **F6** cámara exterior, **F7** la gira; `__juego.outside(true, Math.PI)` (de frente), `__juego.pitch(-1.2)` y `__juego.explorer()`.
 
 ## Idiomas y accesibilidad
+
 - Español (por defecto) e inglés. El texto en español del código es la clave: `t('Volver')` (`web/src/i18n/`); la traducción está en `i18n/en.ts` y `tests/i18n/dictionary.test.ts` falla si un `t('...')` no tiene entrada. Huecos: `t('Ciclos: {n}', { n })`; plurales: `plural(n, 'día', 'días')`.
 - El idioma se decide al cargar (guardado en `bucle-tiempo:idioma`, si no el del navegador) y cambiarlo recarga la página. No llames a `t()` con textos de datos que no estén en el diccionario.
 - Las pistas se traducen superponiendo `web/src/i18n/clues/<mundo>.en.json` (por `id`) sobre `data/pistas/*.json` (`i18n/localizeClues.ts`). Al añadir una pista o cambiar un texto, actualiza su `.en.json`; el test `tests/i18n/clues.test.ts` lo exige.
 - Los nombres de los mundos en inglés: Home, Moon, Threshold (Umbral), Archive, Workshop, Scar, Observatory, Hidden Laboratory; la Boca = Mouth, Puerta = Gate, Ausentes = the Absent.
 - Accesibilidad (Configuración, en la pausa): escala de la interfaz (100–200 %) y de las letras (100–200 %), guardadas en `bucle-tiempo:accesibilidad`. Todo el CSS sigue en px: `web/scripts/postcss-ui-scale.ts` los envuelve en `calc(Npx * var(--ui-scale))` (y las letras, además, por `--text-scale`). No uses medidas en px fuera del CSS (canvas/inline) sin multiplicarlas.
 - Menú principal (`web/src/menu/`): al entrar se ve un desfile de mundos (Hogar, Umbral, Archivo, Taller; planos y fundidos en `shots.ts`, cámara en `showcase.ts`) con Jugar o Continuar / Empezar de cero, idioma y tamaños. El juego carga por debajo y Jugar se activa al estar listo. No sale con `?debug`, `?mundo`, `?final` ni al cruzar el gusano. Para añadir un mundo al desfile, que se construya por código y añade planos a `SHOTS`.
-

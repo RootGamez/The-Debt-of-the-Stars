@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — La deuda de las estrellas
 
-**Versión:** v0.18
-**Última actualización:** 2026-11-06 · Plan de historia y puzzles físicos
+**Versión:** v0.19
+**Última actualización:** 2026-11-10 · Soles modelados, el Cerco y la luz real
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -12,7 +12,7 @@
 
 ## 1. El sistema ajeno de un vistazo
 
-**La estrella (🟡):** *la Brasa* (nombre ❓), una enana naranja vieja de luz cálida y débil. Da al sistema un crepúsculo permanente, ideal para el tono melancólico.
+**La estrella (✅ Anthony, 2026-11-10: enana roja):** *la Brasa* (nombre ❓), una **enana roja** de luz cálida y débil, con manchas grandes, protuberancias y llamaradas. Da al sistema un crepúsculo permanente, ideal para el tono melancólico. (Antes era una enana naranja vieja.) El sistema de casa tiene una estrella como nuestro Sol: blanco cálido, con pocas manchas. Las estrellas son esferas modeladas, igual que los planetas (`render/starModel.ts`).
 
 **Órbitas, de dentro hacia fuera (🟡):**
 
@@ -37,6 +37,15 @@
 | **Cicatriz** | 80 m | 1.2 | 0.60 y bajando | Cerca de la maquinaria | Todo junto: marea, desfase, lente | 13:30 a 13:45 |
 | **Observatorio** | 30 m | 0.2 | 1.15 | Lejos de la masa | Luz finita y lente gravitacional | 14:45 a 15:00 (el último) |
 | **Laboratorio Oculto** | 25 m | 0.3 | 0.20 | Muy cerca de la masa | Dilatación extrema | No llega a absorberse (❓) |
+
+### El Cerco y sus anclajes (✅ la idea, Anthony 2026-11-10; 🟡 el detalle)
+
+Alrededor de la Brasa, dentro de la órbita del Taller, los Ausentes empezaron a levantar una estructura para **sacar energía de su estrella**: dos anillos (radios de 260 y 280 m) que **giran en sentidos opuestos** alrededor del eje de los polos y **solo se unen en dos puntos**, los polos, donde hay dos estaciones lo bastante grandes para desembarcar: **Anclaje Norte** y **Anclaje Sur** (esferas de 40 m; nombres ❓). El Consejo, en lugar de buscar una solución al problema de las Puertas, apostó por esta obra; al darse cuenta de que el tiempo no alcanzaba (cuarenta años de obra contra nueve de margen), la dejó **a medias** y no pudo concretar el plan. Los anillos, terminados un 70 % y un 45 %, tienen tramos de captadores, de armazón, de andamio con grúa y huecos con dovelas a la deriva.
+
+- 🟡 **Para qué quería la energía:** el Consejo creía en el modelo del «préstamo de energía» (el que se descartó como mecanismo real): pagar la deuda a base de energía. La investigadora sabía que la deuda es **de tiempo**. Es el porqué de la petición rechazada de la Sala Cerrada del Archivo.
+- 🟡 **Cada anclaje:** casquete exterior (lejos de la estrella, a oscuras: pista de atraque, casa y placa) y casquete interior (cara al sol: el receptor en el Norte, el almacén de captadores con tragaluz en el Sur), unidos por una Puerta plegada (`PASO_Eje` ↔ `PASO_Sol`). Un tambor alrededor del ecuador (el cojinete donde giran los brazos de los anillos) no se pisa. El tiempo va algo más lento que en Umbral (0,92).
+- 🟡 **Lecturas** (cinco, de ambiente, sin hechos; borradores): la placa de la obra, la pizarra del mando y el receptor en el Norte; el diario del capataz y el acta de la elección en el Sur.
+- Opcionales: no entran en las reglas del grafo (como el Observatorio).
 
 > Los relojes sirven para diseñar el HUD de doble reloj y los puzzles de fechas que no cuadran. Los valores reales no tienen por qué ser físicamente exactos: tienen que *verse* y *entenderse*.
 
@@ -398,3 +407,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-11-06 · Hitos D y E de la llegada (🟡).** Tres edificios cerrados en Umbral con estilo del Observatorio y cobre oxidado; murales, proyección y panel a medio tallar con el aspecto de los Ausentes (✅ D2).
 - **2026-11-06 · T5 del plan de historia (🟡).** El tubo de la Galería del Archivo se corta con ocho mamparos de piedra (cada uno con su puerta de oro al ras del suelo) en ocho salas: el Vestíbulo de la Esclusa (78°–92°), la Sala de la Ranura (92°–110°), el Pasillo de los Cajones (110° a −115°, estrecho, con paredes de cajones), el Fondo del Cañón, la Sala de Relojes, la Gran Nave, el Índice y la Sala del Archivista. Cada una con su luz, su suelo y su mobiliario (`web/src/worlds/procedural/archivoRooms.ts`). Las fuentes siguen donde estaban. Falta la Sala Cerrada, que llega con P3.
 - **2026-11-10 · Estructuras de los puzzles físicos (T4 a T8, 🟡).** Umbral: el canal inclinado de las campanas, su estante y el atril en el Anfiteatro; la cuenta de la bola en el Aula; la hoja de carga en los silos. Archivo: el Planetario (seis rieles) y cinco pedestales de esferas en la Gran Nave; el prisma y su soporte en la Sala de la Ranura; la cisterna y sus cuatro montones en el Fondo del Cañón; la Sala Cerrada (cámara sellada del pasillo de los cajones, con la viga de los péndulos y tres fuentes) y el anillo de su trampilla junto al Índice. Taller: la Balanza del Contrapeso y tres pesas en la isla de la Cuna. Cicatriz: la placa que canta en la Fundición y la placa del motor viejo junto a la palanca. Nudo: brillo tenue de su Puerta a menos de 300 m. Detalle en `docs/plan-historia-y-puzzles-fisicos.md`.
+- **2026-11-10 · Soles y luz real (🟡, plan `docs/plan-soles-y-luz-dinamica.md`).** Anthony pide estrellas modeladas (un Sol en casa y una enana roja en el sistema ajeno), una estructura inconclusa del Consejo alrededor de la enana roja (dos anillos que giran en sentidos opuestos, unidos en dos puntos con estaciones donde desembarcar y leer) y luz dinámica real. Se hace el Cerco con sus dos anclajes, las sombras de la estrella (ventanas, edificios, eclipses y la sombra de los anillos) y la caída de la luz con la distancia.

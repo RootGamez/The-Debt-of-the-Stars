@@ -16,6 +16,8 @@ const BUILT_WORLDS = [
   'hogar',
   'luna',
   'puertas',
+  'anclaje_norte',
+  'anclaje_sur',
 ];
 
 const load = loadBuiltWorld;

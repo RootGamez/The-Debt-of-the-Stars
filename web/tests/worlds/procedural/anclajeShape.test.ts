@@ -37,16 +37,13 @@ describe('the two hubs', () => {
     for (const [, site] of sites) {
       expect(Math.abs(site.lat)).toBeGreaterThan(DRUM_LAT + 8);
     }
-    for (let i = 0; i < sites.length; i++) {
-      for (let j = i + 1; j < sites.length; j++) {
-        const a = siteDirection(sites[i]![1]);
-        const b = siteDirection(sites[j]![1]);
-        expect(
-          angleBetween(a, b) * ANCLAJE_RADIUS,
-          `${sites[i]![0]} y ${sites[j]![0]}`,
-        ).toBeGreaterThan(9);
+    sites.forEach(([nameA, a], i) => {
+      for (const [nameB, b] of sites.slice(i + 1)) {
+        const apart = angleBetween(siteDirection(a), siteDirection(b)) * ANCLAJE_RADIUS;
+
+        expect(apart, `${nameA} y ${nameB}`).toBeGreaterThan(9);
       }
-    }
+    });
   });
 
   it.each(IDS)(

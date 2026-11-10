@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import anclajes from '../../src/data/pistas/anclajes.json';
 import archivo from '../../src/data/pistas/archivo.json';
 import cicatriz from '../../src/data/pistas/cicatriz.json';
 import conclusiones from '../../src/data/pistas/conclusiones.json';
@@ -25,6 +26,7 @@ const fuentes = [
   ...observatorio,
   ...laboratorio,
   ...puertas,
+  ...anclajes,
 ];
 const raw: RawClues = { hilos, hechos, conclusiones, fuentes };
 const english = localizeClues(raw, 'en');

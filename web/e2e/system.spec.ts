@@ -3,8 +3,17 @@
 import { expect, test, type Page } from '@playwright/test';
 import { loopValue, ready, snapshot, startPlaying } from './helpers';
 
-/** Los cinco mundos y el Nudo (oculto, con el Laboratorio dentro). */
-const WORLDS = ['taller', 'cicatriz', 'archivo', 'umbral', 'laboratorio', 'observatorio'];
+/** Los cinco mundos, el Nudo (oculto, con el Laboratorio dentro) y los dos anclajes del Cerco (fijos en los polos). */
+const WORLDS = [
+  'taller',
+  'cicatriz',
+  'archivo',
+  'umbral',
+  'laboratorio',
+  'observatorio',
+  'anclaje_norte',
+  'anclaje_sur',
+];
 
 async function bodies(page: Page): Promise<Record<string, [number, number, number]>> {
   return (await snapshot(page))?.system.bodies ?? {};

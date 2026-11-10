@@ -1,8 +1,8 @@
 # CONTEXTO DE HISTORIA — La deuda de las estrellas
 
 **Título:** La deuda de las estrellas (The Debt of the Stars) ✅ decidido por Anthony
-**Versión:** v1.13 (firmas, orden de silencio y la Sala Cerrada)
-**Última actualización:** 2026-11-06 · Historia y puzzles físicos
+**Versión:** v1.14 (el Cerco del Consejo)
+**Última actualización:** 2026-11-10 · Soles y luz real
 **Documentos relacionados:** `CONTEXTO_PLANETAS.md` (diseño detallado de cada mundo) · `CONTEXTO_PISTAS.md` (grafo de pistas: qué se aprende, dónde y en qué orden)
 
 > Documento vivo. Es la fuente de verdad de la historia del juego: léelo entero antes de continuar el trabajo en cualquier sesión (con Claude o sin él) y actualízalo al final.
@@ -359,3 +359,4 @@ Cada mundo aporta dos cosas: una pieza de **dónde** (la ruta al laboratorio) y 
 - **2026-10-30 · HUD (Cuaderno vivo).** Implementado el rediseño del HUD con las decisiones de Anthony (§8 «Interfaz»): textos que se escriben y se pasan frase a frase, charlas con retrato, el Registro como libro y la bitácora de mundos (nombrar cada mundo al llegar y pegar su dibujo). Viendo el juego, Anthony pide el papel crema de la propuesta A con solo la tinta brillando.
 - **2026-11-06 · Historia y puzzles físicos.** Anthony aprueba el plan `docs/plan-historia-y-puzzles-fisicos.md`: los Ausentes **no firman con nombre** sino con signos de rombos y triángulos; la orden de silencio la firma el Consejo en pleno, con un signo tachado (pregunta 18); y el secreto de la **Sala Cerrada** del Archivo es **la petición rechazada**: la investigadora y el escéptico pidieron no evacuar por las Puertas y esperar al Contrapeso, y el Consejo la archivó. Los textos se escriben con `docs/biblia-textos.md`.
 - **2026-11-06 · La llegada.** Anthony decide el aspecto de los Ausentes (pregunta 10, ✅) y que la primera llegada a Umbral sea por el gusano de la Luna, despertando junto a la nave caída; Umbral es el hogar de los Ausentes y se fueron hace poco y con prisa.
+- **2026-11-10 · El Cerco.** Anthony decide (✅) que el Consejo, en lugar de buscar una solución al fenómeno, intentó **sacar energía de la estrella** y empezó a rodearla con una estructura (el Cerco: dos anillos que giran en sentidos opuestos, unidos en dos puntos con estaciones donde desembarcar). Al ver que el tiempo no alcanzaba, la dejó a medias y no pudo concretar el plan. 🟡 Claude propone que el Consejo creía en el modelo del «préstamo de energía» (el candidato A de §4, descartado como mecanismo real) y que por eso archivó la petición de la investigadora y el escéptico; las pruebas se leen en los dos anclajes (`CONTEXTO_PLANETAS.md`).

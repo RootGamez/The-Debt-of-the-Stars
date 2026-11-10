@@ -64,7 +64,7 @@ const P = {
   cool: '#9fd8ff',
 } as const;
 
-const AMBIENT = { strength: 0.95, color: '#8a7aa0' } as const;
+const AMBIENT = { strength: 1.5, color: '#9a88b0' } as const;
 
 const SURFACE: Surface = { radius: ANCLAJE_RADIUS, groundRadius: anclajeGround };
 
@@ -75,7 +75,7 @@ function createMaterials(
   const sky = {
     day: new Color('#b8a8c8').multiplyScalar(0.9),
     ground: new Color('#6a5a58'),
-    night: new Color(0.1, 0.1, 0.16),
+    night: new Color(0.3, 0.27, 0.36),
   };
   const make = (
     options: ConstructorParameters<typeof MeshStandardMaterial>[0],
@@ -201,6 +201,15 @@ function outerCap(id: HubId, set: PieceSet, marks: Marks): void {
   const plaque = siteFrame(sites.plaque, 0.1, 3);
   set.add(P.slate, box(), plaque.at([0, 0, 0.7], undefined, [2.4, 0.5, 1.4]), 'stone');
   set.add(P.copper, box(), plaque.at([0, -0.27, 1.0], undefined, [1.9, 0.06, 0.8]), 'metal');
+  if (id === 'norte') {
+    marks.add('INT_placa_obra', plaque, [0, -1.2, 1.1], {
+      clue_id: 'cerco.placa_obra',
+      kind: 'texto',
+    });
+    marks.add('INT_mando', house, [0, 0.2, 1.2], { clue_id: 'cerco.mando', kind: 'texto' });
+  } else {
+    marks.add('INT_acta', house, [0, 0.2, 1.2], { clue_id: 'cerco.acta', kind: 'texto' });
+  }
   const door = siteFrame(sites.gateOuter, 0.1, 5);
   gate(set, door);
   marks.add('PASO_Eje', door, [0, 0, 2.0], { destino: 'PASO_Sol' });
@@ -222,6 +231,10 @@ function innerCap(id: HubId, set: PieceSet, marks: Marks): void {
     set.add(P.lamp, torus(4.6, 0.1, 28, 4), centre.at([0, 0, 6.3], [0, 0, 0]), 'light', {
       glow: 1.2,
     });
+    marks.add('INT_receptor', centre, [0, -3.4, 1.2], {
+      clue_id: 'cerco.receptor',
+      kind: 'observacion',
+    });
   } else {
     // El almacén de captadores, con un tragaluz por el que entra la estrella.
     hall(set, centre, [12, 8, 4.2], P.sandDark, 2.4);
@@ -233,6 +246,10 @@ function innerCap(id: HubId, set: PieceSet, marks: Marks): void {
         'metal',
       );
     }
+    marks.add('INT_diario_obra', centre, [0, -1.2, 1.2], {
+      clue_id: 'cerco.diario_obra',
+      kind: 'texto',
+    });
   }
   const door = siteFrame(sites.gateInner, 0.1, 5);
   gate(set, door);

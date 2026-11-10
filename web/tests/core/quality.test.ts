@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { qualityFromQuery, sunShadowSizeFromQuery } from '../../src/core/quality';
+import {
+  isSoftwareRenderer,
+  qualityFromQuery,
+  sunShadowSizeFromQuery,
+} from '../../src/core/quality';
 
 describe('the graphics quality', () => {
   it('is high by default', () => {
@@ -34,5 +38,26 @@ describe('the size of the sun shadow map', () => {
     expect(sunShadowSizeFromQuery('?sombra=no', 'alta')).toBe(0);
     expect(sunShadowSizeFromQuery('?sombra=777', 'alta')).toBe(2048);
     expect(sunShadowSizeFromQuery('?sombra=1024', 'baja')).toBe(1024);
+  });
+});
+
+describe('software renderers', () => {
+  it('are recognised by the name WebGL reports', () => {
+    expect(
+      isSoftwareRenderer(
+        'ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero)), SwiftShader driver)',
+      ),
+    ).toBe(true);
+    expect(isSoftwareRenderer('llvmpipe (LLVM 15.0.7, 256 bits)')).toBe(true);
+    expect(
+      isSoftwareRenderer('ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Direct3D11 vs_5_0 ps_5_0)'),
+    ).toBe(false);
+    expect(isSoftwareRenderer('')).toBe(false);
+  });
+
+  it('get no sun shadow unless the address asks for one', () => {
+    expect(sunShadowSizeFromQuery('', 'alta', true)).toBe(0);
+    expect(sunShadowSizeFromQuery('?sombra=1024', 'alta', true)).toBe(1024);
+    expect(sunShadowSizeFromQuery('', 'alta', false)).toBe(2048);
   });
 });

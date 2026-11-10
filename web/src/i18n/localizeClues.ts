@@ -1,6 +1,7 @@
 // Los textos de las pistas viven en `src/data/pistas/*.json` en español. Para otro idioma se superponen los de
 // `src/i18n/clues/*.en.json`, que repiten el `id` de cada pieza con sus textos traducidos: el grafo (ids, hilos,
 // requisitos) es el mismo en todos los idiomas, y lo que falte se ve en español.
+import anclajes from './clues/anclajes.en.json';
 import archivo from './clues/archivo.en.json';
 import cicatriz from './clues/cicatriz.en.json';
 import conclusiones from './clues/conclusiones.en.json';
@@ -41,6 +42,7 @@ const SOURCES: Overlay<SourceText> = {
   ...observatorio,
   ...laboratorio,
   ...puertas,
+  ...anclajes,
 };
 
 const OVERLAYS: Record<

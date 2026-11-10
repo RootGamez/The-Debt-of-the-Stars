@@ -57,7 +57,7 @@ import { ATMOSPHERES } from './data/atmospheres';
 import { createBlackHoleView } from './render/blackHoleView';
 import { growthFor } from './system/blackHole';
 import { BLACK_HOLE } from './data/blackHole';
-import { qualityFromQuery, sunShadowSizeFromQuery } from './core/quality';
+import { isSoftwareRenderer, qualityFromQuery, sunShadowSizeFromQuery } from './core/quality';
 import { createSightScale } from './ui/sightScale';
 import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
@@ -1046,7 +1046,14 @@ function start(): void {
 
   // La sombra de la estrella (plan de soles y luz, S3): los materiales de los mundos reciben la sombra, y lo que ya lleva
   // `castShadow` la proyecta. Con `?calidad=baja` no hay sombra (y los materiales ni se tocan).
-  const shadowSize = sunShadowSizeFromQuery(window.location.search, quality);
+  const gl = renderer.getContext();
+  const rendererInfo = gl.getExtension('WEBGL_debug_renderer_info');
+  const gpuName = rendererInfo ? String(gl.getParameter(rendererInfo.UNMASKED_RENDERER_WEBGL)) : '';
+  const shadowSize = sunShadowSizeFromQuery(
+    window.location.search,
+    quality,
+    isSoftwareRenderer(gpuName),
+  );
   const sunShadow = shadowSize > 0 ? createSunShadow(shadowSize) : undefined;
   const cameraWorld = new Vector3();
   if (sunShadow) {

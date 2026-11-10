@@ -1,0 +1,83 @@
+[
+  {
+    "id": "cerco.placa_obra",
+    "mundo": "anclaje_norte",
+    "tipo": "texto",
+    "titulo": "La placa de la obra",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Una placa de pizarra, pulida por la mano de quien pasaba cada día. Arriba, en grande: «CERCO DE CAPTACIÓN. Primer anillo».",
+        "Debajo, la consigna de la obra: «Lo que la estrella da, la estrella lo pagará».",
+        "Más abajo, la fecha de entrega, tallada y vacía. Y la firma del Consejo de Tránsito, en pleno: siete signos, el último tachado."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "cerco.mando",
+    "mundo": "anclaje_norte",
+    "tipo": "texto",
+    "titulo": "La pizarra del mando",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Una pizarra con dos columnas, a medio borrar. A la izquierda: «Terminación estimada del Cerco: cuarenta años». A la derecha: «Tiempo estimado hasta el colapso de la red: nueve».",
+        "Alguien ha rodeado el nueve con tiza dos veces. Al lado, con otra letra: «¿Y si calculamos mal?».",
+        "Nadie ha escrito debajo. La tiza sigue en la repisa, gastada hasta el dedo."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "cerco.receptor",
+    "mundo": "anclaje_norte",
+    "tipo": "observacion",
+    "titulo": "El receptor",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un plato enorme mira a la Brasa desde su mástil. Aún lleva puesta la lona de obra en un borde: nunca llegó a recibir su luz entera.",
+        "Un contador de cobre cuenta la energía captada. Marca casi cero.",
+        "Los cables bajan hasta un nudo de conexiones marcado con el signo de la red de Puertas. La energía no era para una casa ni para una fábrica: iba a alimentar las Puertas."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "cerco.diario_obra",
+    "mundo": "anclaje_sur",
+    "tipo": "texto",
+    "titulo": "El diario del capataz",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un cuaderno de obra, con las esquinas negras de tanto manejarlo. Las últimas hojas casi no tienen números.",
+        "«Día 3.211. El Consejo manda parar las grúas. El aviso dice que el plazo no alcanza, como si lo hubiéramos descubierto hoy».",
+        "«Día 3.212. Nos mandan a las Puertas, a todos. Dejo la llave puesta. Si alguien termina esto, que lo termine mejor que nosotros»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "cerco.acta",
+    "mundo": "anclaje_sur",
+    "tipo": "texto",
+    "titulo": "El acta de la elección",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un acta del Consejo de Tránsito, en pleno, con un solo punto: la elección. Sobre la mesa, dos peticiones.",
+        "La primera, de la investigadora: los recursos para terminar su artilugio y no evacuar por las Puertas mientras tanto. La segunda, la del Cerco, que promete energía «suficiente para cubrir cualquier deuda».",
+        "Se aprueba la segunda. Seis signos, y un séptimo tachado.",
+        "Al margen, a lápiz, sin firma: «La deuda no se paga con energía. Se paga con tiempo»."
+      ],
+      "hechos": []
+    }
+  }
+]

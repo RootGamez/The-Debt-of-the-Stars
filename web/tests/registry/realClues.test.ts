@@ -32,10 +32,12 @@ describe('the real clue data', () => {
     ]);
   });
 
-  it('keeps the notes for the curious (home, Observatorio) out of the graph (Phase 11G)', () => {
+  it('keeps the notes for the curious (home, Observatorio, the anchorages of the Cerco) out of the graph (Phase 11G)', () => {
     const ambient = clues.sources.filter((s) => s.ambient);
 
     expect(ambient.length).toBeGreaterThanOrEqual(10);
+    // Las cinco lecturas del Cerco (plan de soles): dos en un anclaje y tres en el otro, todas de ambiente.
+    expect(ambient.filter((s) => s.world.startsWith('anclaje_'))).toHaveLength(5);
     expect(
       ambient.every(
         (s) =>
@@ -47,6 +49,8 @@ describe('the real clue data', () => {
             'umbral',
             'archivo',
             'taller',
+            'anclaje_norte',
+            'anclaje_sur',
           ].includes(s.world) &&
           s.surface.facts.length === 0 &&
           !s.deep,
