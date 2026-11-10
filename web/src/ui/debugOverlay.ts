@@ -108,7 +108,8 @@ declare global {
       } | null;
       /** Los Ool: cuánto se ha girado cada uno hacia ti (rad) y tus filamentos (si brillan, cuántas veces latieron). */
       ool?(): { turns: Record<string, number>; filaments: { glowing: boolean; beats: number } };
-      /** Tú: si se te ve, primera persona, velocidad, fase del paso, mezclas y triángulos; y la cámara exterior. */
+      /** Tú: si se te ve, primera persona, velocidad, fase del paso, mezclas, triángulos, la luz del cuerpo (intensidad y
+       * si está encendida) y la cámara exterior. */
       explorer?(): {
         visible: boolean;
         firstPerson: boolean;
@@ -118,6 +119,8 @@ declare global {
         air: number;
         swim: number;
         triangles: number;
+        light: number;
+        lightOn: boolean;
         outside: boolean;
       };
       /** La cámara exterior de depuración (como F6), girada `angle` rad a su alrededor (π = de frente). */

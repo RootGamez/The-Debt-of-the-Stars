@@ -1,7 +1,17 @@
 // El explorador en la escena: sigue al jugador (pies y orientación), anda según lo que hace su cuerpo y, en
 // primera persona, esconde la cabeza y el casco y se retrasa un poco para que al mirar abajo se vean el pecho, el
-// cinturón y las botas. Pilotando la nave no se dibuja. Sus filamentos brillan más mientras lee.
-import { Quaternion, Vector3, type Object3D } from 'three';
+// cinturón y las botas. Pilotando la nave no se dibuja. Sus filamentos brillan más mientras lee, y con la luz del
+// cuerpo encendida todo él luce azul celeste y alumbra a su alrededor (una PointLight colgada de la escena, no del
+// muñeco: así nunca se esconde y el número de luces no cambia, que obligaría a recompilar todos los materiales).
+import { Color, PointLight, Quaternion, Vector3, type Object3D } from 'three';
+import {
+  BODY_LIGHT,
+  bodyLightIntensity,
+  createBodyLight,
+  stepBodyLight,
+  toggleBodyLight,
+  type BodyLightState,
+} from '../character/bodyLight';
 import { buildExplorer } from '../character/explorerModel';
 import { createGait, gaitPose, stepGait } from '../character/gait';
 import { forwardOf, upOf } from '../physics/surfaceFrame';
@@ -16,6 +26,8 @@ export const FIRST_PERSON_DOWN = 0;
 const READING_GLOW = 2.4;
 const GLOW_RATE = 4;
 const PLANT_RATE = 10;
+/** Cuánto más brillan los puntos del cuerpo con la luz encendida. */
+const BODY_LIGHT_GLOW = 3;
 
 export interface ExplorerFrame {
   feet: Vector3;
@@ -32,6 +44,8 @@ export interface ExplorerFrame {
   visible: boolean;
   firstPerson: boolean;
   reading: boolean;
+  /** Si la luz del cuerpo está encendida. */
+  lightOn: boolean;
 }
 
 export interface ExplorerView {
@@ -46,6 +60,8 @@ export interface ExplorerView {
     air: number;
     swim: number;
     triangles: number;
+    /** Intensidad de la luz del cuerpo ahora (0 apagada). */
+    light: number;
   };
   dispose(): void;
 }
@@ -60,6 +76,12 @@ export function createExplorerView(parent: Object3D): ExplorerView {
   parent.add(rig.root);
   const gait = createGait();
   const baseGlow = rig.materials.glow.emissiveIntensity;
+  const baseGlowColor = rig.materials.glow.emissive.clone();
+  const lightColor = new Color(BODY_LIGHT.color);
+  const light = new PointLight(BODY_LIGHT.color, 0, BODY_LIGHT.range, BODY_LIGHT.decay);
+  light.name = 'EXPLORADOR_luz';
+  parent.add(light);
+  let bodyLight: BodyLightState = createBodyLight();
   let glow = 1;
   let plant = 1;
   let speed = 0;
@@ -69,8 +91,13 @@ export function createExplorerView(parent: Object3D): ExplorerView {
   return {
     update(frame) {
       rig.root.visible = frame.visible;
+      bodyLight = stepBodyLight(
+        bodyLight.on === frame.lightOn ? bodyLight : toggleBodyLight(bodyLight),
+        frame.dt,
+      );
       if (!frame.visible) {
         hasForward = false;
+        light.intensity = 0;
         return;
       }
       upOf(frame.body, up);
@@ -106,7 +133,12 @@ export function createExplorerView(parent: Object3D): ExplorerView {
       }
       rig.root.quaternion.copy(frame.body);
       glow += ((frame.reading ? READING_GLOW : 1) - glow) * Math.min(1, GLOW_RATE * frame.dt);
-      rig.materials.glow.emissiveIntensity = baseGlow * glow;
+      const lit = bodyLight.level;
+      rig.materials.glow.emissiveIntensity = baseGlow * glow * (1 + (BODY_LIGHT_GLOW - 1) * lit);
+      rig.materials.glow.emissive.copy(baseGlowColor).lerp(lightColor, lit);
+      // La luz sale del pecho (también en primera persona, donde el cuerpo va un poco detrás de los ojos).
+      light.position.copy(rig.root.position).addScaledVector(up, BODY_LIGHT.height);
+      light.intensity = bodyLightIntensity(bodyLight);
     },
     snapshot() {
       return {
@@ -118,10 +150,12 @@ export function createExplorerView(parent: Object3D): ExplorerView {
         air: gait.air,
         swim: gait.swim,
         triangles: rig.triangles,
+        light: light.intensity,
       };
     },
     dispose() {
       rig.root.removeFromParent();
+      light.removeFromParent();
       rig.dispose();
     },
   };

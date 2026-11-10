@@ -3,9 +3,14 @@
 // parche en los materiales que multiplica SOLO la luz 0 (la estrella) por la visibilidad. Es la misma técnica que
 // `applySkyLight`. Los cuerpos que proyectan sombra son los que ya llevan `castShadow` (el cristal no).
 //
-// Dos cascadas desde la estrella hacia el jugador: la cercana (90 m, detalle fino: edificios, ventanas) y la lejana
-// (160 m, solo lo que queda entre la estrella y la zona cercana: otros mundos, los anillos del Cerco), con penumbra
-// que crece con la distancia al cuerpo que tapa, como un eclipse de verdad.
+// Tres cascadas desde la estrella hacia el jugador: la de al lado (24 m, texeles de 2-3 cm: lo que se ve de cerca),
+// la cercana (90 m: edificios, ventanas) y la lejana (160 m, solo lo que queda entre la estrella y la zona cercana:
+// otros mundos, los anillos del Cerco), con penumbra que crece con la distancia al cuerpo que tapa, como un eclipse.
+//
+// Para que de cerca no se vea rota: el desplazamiento por la normal y el sesgo de profundidad crecen con el tamaño
+// del texel y con lo rasante que llega la luz (sin franjas en el suelo ni en las paredes), la normal es la de la cara
+// de verdad (derivadas de la posición: el mundo es facetado), el filtro es bilineal (bordes suaves, sin escalera) y
+// las cámaras de sombra se encajan a texeles enteros (los bordes no tiemblan al andar).
 import {
   Color,
   Matrix4,
@@ -17,7 +22,6 @@ import {
   ShaderChunk,
   ShaderMaterial,
   UnsignedByteType,
-  Vector2,
   Vector3,
   WebGLRenderTarget,
   type Material,
@@ -25,14 +29,14 @@ import {
   type Scene,
   type WebGLRenderer,
 } from 'three';
-import { sunShadowFocus } from './sunShadowFocus';
+import { stableShadowAim, sunShadowFocus } from './sunShadowFocus';
 
 /** Capa de los cuerpos que proyectan sombra de la estrella. */
 export const SUN_SHADOW_LAYER = 5;
 
 const DEFAULT_SIZE = 2048;
-const NORMAL_BIAS = 0.12;
-const DEPTH_BIAS = 0.15;
+/** Cascada de al lado: radio de la zona (m). Sus proyectores llegan tan lejos como los de la cercana. */
+const CLOSE_RADIUS = 24;
 /** Cascada cercana: radio de la zona y hasta dónde llegan sus proyectores (m). */
 const NEAR_RADIUS = 90;
 const NEAR_REACH = 200;
@@ -133,6 +137,9 @@ interface Cascade {
   far: { value: number };
   matrix: { value: Matrix4 };
   on: { value: number };
+  /** Un texel en coordenadas de textura (1 / tamaño). */
+  texel: { value: number };
+  /** Cuánto mide un texel a la distancia del foco (m). */
   texelMeters: { value: number };
 }
 
@@ -154,29 +161,53 @@ function createCascade(size: number): Cascade {
     far,
     matrix: { value: new Matrix4() },
     on: { value: 0 },
+    texel: { value: 1 / size },
     texelMeters: { value: 1 },
   };
 }
 
-/** Apunta la cámara de la cascada desde la estrella al foco y deja listos sus uniformes. */
-function aim(
-  cascade: Cascade,
-  star: Vector3,
-  focus: Vector3,
-  limits: { near: number; far: number; fov: number },
-): void {
+const lookTarget = new Vector3();
+
+interface AimLimits {
+  near: number;
+  far: number;
+  fov: number;
+  /** Distancia de la estrella al foco: da cuánto mide un texel allí. */
+  distance: number;
+}
+
+/** Apunta la cámara de la cascada desde la estrella en `direction` (unitario) y deja listos sus uniformes. */
+function aim(cascade: Cascade, star: Vector3, direction: Vector3, limits: AimLimits): void {
   const { camera } = cascade;
   camera.fov = limits.fov;
   camera.near = limits.near;
   camera.far = limits.far;
   camera.position.copy(star);
   camera.up.set(0, 1, 0);
-  if (Math.abs(focus.y - star.y) / (star.distanceTo(focus) || 1) > 0.99) camera.up.set(1, 0, 0);
-  camera.lookAt(focus);
+  if (Math.abs(direction.y) > 0.99) camera.up.set(1, 0, 0);
+  camera.lookAt(lookTarget.copy(star).add(direction));
   camera.updateProjectionMatrix();
   camera.updateMatrixWorld(true);
   cascade.far.value = limits.far;
   cascade.matrix.value.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+  const span = 2 * Math.tan((limits.fov * Math.PI) / 360) * limits.distance;
+  cascade.texelMeters.value = span / cascade.target.width;
+}
+
+/** Una cascada nítida, encajada a texeles enteros para que sus bordes no tiemblen al moverse. */
+function aimStable(
+  cascade: Cascade,
+  star: Vector3,
+  focus: Vector3,
+  fit: { near: number; far: number; fovDegrees: number; distance: number },
+): void {
+  const stable = stableShadowAim(star, focus, fit.fovDegrees, cascade.target.width);
+  aim(cascade, star, stable.direction, {
+    near: fit.near,
+    far: fit.far,
+    fov: stable.fovDegrees,
+    distance: fit.distance,
+  });
 }
 
 function drawCascade(renderer: WebGLRenderer, scene: Scene, cascade: Cascade, clear: Color): void {
@@ -193,18 +224,24 @@ function drawCascade(renderer: WebGLRenderer, scene: Scene, cascade: Cascade, cl
 }
 
 const GLSL_COMMON = /* glsl */ `
+  uniform sampler2D uSunCloseMap;
   uniform sampler2D uSunNearMap;
   uniform sampler2D uSunFarMap;
+  uniform mat4 uSunCloseMatrix;
   uniform mat4 uSunNearMatrix;
   uniform mat4 uSunFarMatrix;
   uniform vec3 uSunShadowPos;
-  uniform vec3 uSunShadowForward;
+  uniform float uSunCloseFar;
   uniform float uSunNearFar;
   uniform float uSunFarFar;
+  uniform float uSunCloseOn;
   uniform float uSunNearOn;
   uniform float uSunFarOn;
-  uniform vec2 uSunNearTexel;
-  uniform vec2 uSunFarTexel;
+  uniform float uSunCloseTexel;
+  uniform float uSunNearTexel;
+  uniform float uSunFarTexel;
+  uniform float uSunCloseTexelMeters;
+  uniform float uSunNearTexelMeters;
   uniform float uSunFarTexelMeters;
   uniform float uSunStarAngle;
   varying vec3 vSunWorld;
@@ -212,22 +249,37 @@ const GLSL_COMMON = /* glsl */ `
   ${PACK}
   float sunSeen = 1.0;
 
-  // Cascada cercana: contraste fino, 3x3.
-  float sunNearLit(vec3 wp) {
-    vec4 c = uSunNearMatrix * vec4(wp, 1.0);
-    if (c.w <= 0.0) return 1.0;
-    vec2 uv = c.xy / c.w * 0.5 + 0.5;
-    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return 1.0;
-    float mine = dot(wp - uSunShadowPos, uSunShadowForward) / uSunNearFar;
-    if (mine > 1.0) return 1.0; // más allá del plano far del mapa: nada que comparar
-    float lit = 0.0;
-    for (int x = -1; x <= 1; x++) {
-      for (int y = -1; y <= 1; y++) {
-        float seen = unpackDist(texture2D(uSunNearMap, uv + vec2(float(x), float(y)) * uSunNearTexel));
-        lit += (mine - ${DEPTH_BIAS.toFixed(3)} / uSunNearFar > seen) ? 0.0 : 1.0;
+  // PCF bilineal de 3x3 (16 lecturas): cada comparación pesa según dónde cae el punto dentro de su texel, así el
+  // borde de la sombra es una rampa suave y no una escalera de texeles.
+  float sunPcf(sampler2D map, vec2 uv, float texel, float mine) {
+    vec2 st = uv / texel - 0.5;
+    vec2 base = floor(st);
+    vec2 f = st - base;
+    vec2 center = (base + 0.5) * texel;
+    float sum = 0.0;
+    for (int j = -1; j <= 2; j++) {
+      float wy = j == -1 ? 1.0 - f.y : (j == 2 ? f.y : 1.0);
+      for (int i = -1; i <= 2; i++) {
+        float wx = i == -1 ? 1.0 - f.x : (i == 2 ? f.x : 1.0);
+        float seen = unpackDist(texture2D(map, center + vec2(float(i), float(j)) * texel));
+        sum += wx * wy * step(mine, seen);
       }
     }
-    return lit / 9.0;
+    return sum / 9.0;
+  }
+
+  // Una cascada nítida (la de al lado o la cercana). 'edge' dice cuánto se aleja el punto del borde del mapa (en
+  // fracción del mapa; < 0 fuera). La distancia guardada es la del eje de la cámara: la w del recorte.
+  float sunCascade(sampler2D map, mat4 matrix, float far, float texel, vec3 wp, float bias, out float edge) {
+    edge = -1.0;
+    vec4 c = matrix * vec4(wp, 1.0);
+    if (c.w <= 0.0) return 1.0;
+    vec2 uv = c.xy / c.w * 0.5 + 0.5;
+    edge = min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y));
+    if (edge <= 0.0) return 1.0;
+    float mine = (c.w - bias) / far;
+    if (mine > 1.0) return 1.0; // más allá del plano far del mapa: nada que comparar
+    return sunPcf(map, uv, texel, mine);
   }
 
   // Cascada lejana: cuerpos grandes entre la estrella y el punto. La penumbra crece con la distancia al cuerpo
@@ -237,7 +289,7 @@ const GLSL_COMMON = /* glsl */ `
     if (c.w <= 0.0) return 1.0;
     vec2 uv = c.xy / c.w * 0.5 + 0.5;
     if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return 1.0;
-    float mine = dot(wp - uSunShadowPos, uSunShadowForward) / uSunFarFar;
+    float mine = c.w / uSunFarFar;
     float bias = 0.8 / uSunFarFar;
     float blocked = 0.0;
     float depthSum = 0.0;
@@ -262,39 +314,70 @@ const GLSL_COMMON = /* glsl */ `
 
   float sunVisibility() {
     if (uSunNearOn < 0.5) return 1.0;
-    vec3 n = normalize(vSunNormal);
-    float lit = sunNearLit(vSunWorld + n * ${NORMAL_BIAS.toFixed(3)});
+    // La normal de la cara de verdad (el mundo es facetado; la del vértice puede ir suavizada), del lado de la
+    // normal de la malla.
+    vec3 g = cross(dFdx(vSunWorld), dFdy(vSunWorld));
+    vec3 n = dot(g, g) > 1e-14 ? normalize(g) : normalize(vSunNormal);
+    if (dot(n, vSunNormal) < 0.0) n = -n;
+    float ndl = dot(n, normalize(uSunShadowPos - vSunWorld));
+    // 0 de cara al sol, 1 rasante, 2 de espaldas: cuánto se separa el punto de su cara antes de mirar el mapa.
+    float slope = clamp(1.0 - ndl, 0.0, 2.0);
+    // Sesgo de profundidad: algo más de medio texel de cara, más cuanto más rasante (tangente, con tope).
+    float tangent = ndl > 0.25 ? sqrt(1.0 - ndl * ndl) / ndl : 4.0;
+    float edge;
+    float closeLit = 1.0;
+    float closeWeight = 0.0;
+    if (uSunCloseOn > 0.5) {
+      float t = uSunCloseTexelMeters;
+      closeLit = sunCascade(uSunCloseMap, uSunCloseMatrix, uSunCloseFar, uSunCloseTexel,
+        vSunWorld + n * t * (1.0 + slope), t * (0.6 + 0.6 * tangent), edge);
+      closeWeight = smoothstep(0.0, 0.12, edge);
+    }
+    float lit = closeLit;
+    if (closeWeight < 1.0) {
+      float t = uSunNearTexelMeters;
+      float nearLit = sunCascade(uSunNearMap, uSunNearMatrix, uSunNearFar, uSunNearTexel,
+        vSunWorld + n * t * (1.0 + slope), t * (0.6 + 0.6 * tangent), edge);
+      lit = mix(nearLit, closeLit, closeWeight);
+    }
     if (uSunFarOn > 0.5) lit = min(lit, sunFarLit(vSunWorld + n * 0.6));
     return lit;
   }`;
 
 export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
   const patched = new WeakSet<Material>();
+  const close = createCascade(size);
   const near = createCascade(size);
   const far = createCascade(Math.max(256, size / FAR_SIZE_DIVISOR));
+  const cascades = [close, near, far];
   const shared = {
+    uSunCloseMap: { value: close.target.texture },
     uSunNearMap: { value: near.target.texture },
     uSunFarMap: { value: far.target.texture },
+    uSunCloseMatrix: close.matrix,
     uSunNearMatrix: near.matrix,
     uSunFarMatrix: far.matrix,
     uSunShadowPos: { value: new Vector3() },
-    uSunShadowForward: { value: new Vector3(0, 0, -1) },
+    uSunCloseFar: close.far,
     uSunNearFar: near.far,
     uSunFarFar: far.far,
+    uSunCloseOn: close.on,
     uSunNearOn: near.on,
     uSunFarOn: far.on,
-    uSunNearTexel: { value: new Vector2(1 / size, 1 / size) },
-    uSunFarTexel: { value: new Vector2(1 / far.target.width, 1 / far.target.width) },
+    uSunCloseTexel: close.texel,
+    uSunNearTexel: near.texel,
+    uSunFarTexel: far.texel,
+    uSunCloseTexelMeters: close.texelMeters,
+    uSunNearTexelMeters: near.texelMeters,
     uSunFarTexelMeters: far.texelMeters,
     uSunStarAngle: { value: 0.05 },
   };
-  const forward = new Vector3();
+  const toFocus = new Vector3();
   const clearColor = new Color();
   let enabled = true;
 
   function switchOff(): void {
-    near.on.value = 0;
-    far.on.value = 0;
+    for (const cascade of cascades) cascade.on.value = 0;
   }
 
   return {
@@ -303,14 +386,16 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
         switchOff();
         return;
       }
-      forward.subVectors(focus, star);
-      const distance = forward.length();
-      forward.normalize();
+      const distance = star.distanceTo(focus);
       shared.uSunShadowPos.value.copy(star);
-      shared.uSunShadowForward.value.copy(forward);
       const nearFit = sunShadowFocus(star, focus, { radius: NEAR_RADIUS, reach: NEAR_REACH });
-      aim(near, star, focus, { near: nearFit.near, far: nearFit.far, fov: nearFit.fovDegrees });
+      aimStable(near, star, focus, nearFit);
       near.on.value = 1;
+      // La de al lado: mismos proyectores (hasta NEAR_REACH hacia la estrella), zona mucho más pequeña.
+      const closeFit = sunShadowFocus(star, focus, { radius: CLOSE_RADIUS, reach: NEAR_REACH });
+      const useClose = distance > NEAR_RADIUS;
+      close.on.value = useClose ? 1 : 0;
+      if (useClose) aimStable(close, star, focus, closeFit);
       // Cuánto se ve la estrella desde aquí (radio angular, rad): lo que ensancha la penumbra de los eclipses.
       shared.uSunStarAngle.value = distance > 0 ? (options.starRadius ?? 0) / distance : 0;
 
@@ -318,7 +403,13 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
       far.on.value = useFar ? 1 : 0;
       if (useFar) {
         const farFit = sunShadowFocus(star, focus, { radius: FAR_RADIUS, reach: distance });
-        aim(far, star, focus, { near: 1, far: nearFit.near - 4, fov: farFit.fovDegrees });
+        toFocus.subVectors(focus, star).normalize();
+        aim(far, star, toFocus, {
+          near: 1,
+          far: nearFit.near - 4,
+          fov: farFit.fovDegrees,
+          distance,
+        });
         far.texelMeters.value = (2 * FAR_RADIUS) / far.target.width;
       }
 
@@ -327,6 +418,7 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
       scene.background = null;
       try {
         drawCascade(renderer, scene, near, clearColor);
+        if (useClose) drawCascade(renderer, scene, close, clearColor);
         if (useFar) drawCascade(renderer, scene, far, clearColor);
       } finally {
         scene.overrideMaterial = previousOverride;
@@ -395,7 +487,7 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
     },
 
     dispose() {
-      for (const cascade of [near, far]) {
+      for (const cascade of cascades) {
         cascade.target.dispose();
         cascade.material.dispose();
       }

@@ -1,7 +1,15 @@
 // El explorador en la escena: sigue los pies y la orientación del jugador, anda cuando se mueve, se esconde
 // pilotando, en primera persona oculta la cabeza y se retrasa, y sus filamentos brillan al leer.
 import { describe, expect, it } from 'vitest';
-import { Box3, Group, MeshStandardMaterial, Quaternion, Vector3, type Mesh } from 'three';
+import {
+  Box3,
+  Group,
+  MeshStandardMaterial,
+  PointLight,
+  Quaternion,
+  Vector3,
+  type Mesh,
+} from 'three';
 import {
   createExplorerView,
   FIRST_PERSON_BACK,
@@ -25,6 +33,7 @@ function frame(overrides: Partial<ExplorerFrame> = {}): ExplorerFrame {
     visible: true,
     firstPerson: false,
     reading: false,
+    lightOn: false,
     ...overrides,
   };
 }
@@ -111,5 +120,23 @@ describe('the debug camera outside', () => {
     const position = new Vector3();
     chasePose(new Quaternion(), new Vector3(), position, new Quaternion(), Math.PI);
     expect(position.z).toBeLessThan(-1.5);
+  });
+
+  it('lights its surroundings sky blue from the chest when the body light is on, and not while piloting', () => {
+    const scene = new Group();
+    const view = createExplorerView(scene);
+    const light = scene.getObjectByName('EXPLORADOR_luz') as PointLight;
+    const before = glowOf(scene);
+    for (let i = 0; i < 120; i++) view.update(frame({ lightOn: true }));
+    expect(light.intensity).toBeGreaterThan(0);
+    expect(view.snapshot().light).toBe(light.intensity);
+    expect(light.color.b).toBeGreaterThan(light.color.r);
+    expect(light.position.y).toBeGreaterThan(10.5);
+    expect(glowOf(scene)).toBeGreaterThan(before);
+    view.update(frame({ lightOn: true, visible: false }));
+    expect(light.intensity).toBe(0);
+    expect(light.visible).toBe(true);
+    for (let i = 0; i < 120; i++) view.update(frame({ lightOn: false }));
+    expect(light.intensity).toBeLessThan(0.1);
   });
 });

@@ -108,6 +108,7 @@ import { createReadingUi, type ReadingUi } from './reading/readingUi';
 import { createWorldSources, type WorldSources } from './reading/worldSources';
 import { cameraPose, chasePose } from './render/firstPersonCamera';
 import { createExplorerView } from './render/explorerView';
+import { createBodyLightSwitch } from './game/bodyLightSwitch';
 import { createHelmetRim } from './ui/helmetRim';
 import { createStarfield, dimStars } from './render/sky';
 import { finalApproach, finalLight } from './system/absorption';
@@ -574,6 +575,8 @@ function start(): void {
       },
     },
   );
+  // La luz del explorador: la L enciende los puntos de su cuerpo, que alumbran de azul celeste en todas direcciones.
+  const bodyLight = createBodyLightSwitch(() => overlay.playing);
   // De vuelta en casa: la Directora cierra el viaje con la tarjeta del final.
   const homecoming = homecomingEnding
     ? createHomecomingRig({
@@ -840,7 +843,7 @@ function start(): void {
     window.__juego.blackHole = () => blackHole.snapshot();
     window.__juego.sky = () => ({ density: atmosphere.density });
     window.__juego.ool = () => ({ turns: ool.snapshot(), filaments: filaments.snapshot() });
-    window.__juego.explorer = () => ({ ...explorer.snapshot(), outside });
+    window.__juego.explorer = () => ({ ...explorer.snapshot(), outside, lightOn: bodyLight.on });
     window.__juego.pitch = (angle) => {
       player.look(0, angle - player.pitch);
       return player.pitch;
@@ -1287,6 +1290,7 @@ function start(): void {
         visible: !piloting && !(awakening && !awakening.noted),
         firstPerson: !outside,
         reading: reading.current !== null,
+        lightOn: bodyLight.on,
       });
       helmetRim.update(!piloting && !outside && overlay.playing);
       camera.position.add(session.shake);

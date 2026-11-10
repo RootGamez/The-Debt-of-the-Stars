@@ -31,7 +31,7 @@ export function isTouchDevice(): boolean {
 
 const desktopHelp = (): string =>
   t(
-    'WASD moverse · ratón mirar · Espacio saltar · Shift correr · F nave · G mira · M sonido · Esc pausa · F3 datos',
+    'WASD moverse · ratón mirar · Espacio saltar · Shift correr · F nave · G mira · L luz · M sonido · Esc pausa · F3 datos',
   );
 
 /** Lo que se lee en el botón de cada escala: 1,25 → «125 %». */

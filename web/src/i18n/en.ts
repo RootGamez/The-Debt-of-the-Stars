@@ -104,8 +104,8 @@ export const EN: Readonly<Record<string, string>> = {
   Normal: 'Normal',
   Rápida: 'Fast',
   'Al instante': 'Instant',
-  'WASD moverse · ratón mirar · Espacio saltar · Shift correr · F nave · G mira · M sonido · Esc pausa · F3 datos':
-    'WASD move · mouse look · Space jump · Shift run · F ship · G sight · M sound · Esc pause · F3 stats',
+  'WASD moverse · ratón mirar · Espacio saltar · Shift correr · F nave · G mira · L luz · M sonido · Esc pausa · F3 datos':
+    'WASD move · mouse look · Space jump · Shift run · F ship · G sight · L light · M sound · Esc pause · F3 stats',
   'Reloj doble: tu tiempo y el de Umbral': "Double clock: your time and Umbral's",
   'tú {time}': 'you {time}',
   'Abrir el Registro': 'Open the Registry',

@@ -46,3 +46,41 @@ export function sunShadowFocus(
     distance,
   };
 }
+
+/** Paso de los ángulos de las cámaras de sombra (fracción): el ángulo solo cambia a saltos de un 4 %. */
+const FOV_STEP = 1.04;
+/** Por debajo de este coseno de elevación no se estrecha más el paso de acimut (cerca del polo de la cámara). */
+const MIN_COS_ELEVATION = 0.05;
+
+export interface StableAim {
+  /** Hacia dónde mira la cámara de sombra (unitario), encajado a texeles enteros. */
+  direction: Vector3;
+  /** Ángulo vertical total (grados), a saltos de un 4 % y nunca más estrecho que el pedido. */
+  fovDegrees: number;
+}
+
+/**
+ * Apunta la cámara de sombra sin que el mapa tiemble al andar: si se apuntara siempre justo al jugador, cada paso
+ * movería los texeles un poco y los bordes de las sombras parpadearían. Así la dirección solo cambia a saltos de
+ * un texel entero (en elevación y acimut, con `up` = +Y en la cámara) y el ángulo a saltos de un 4 %, con lo que
+ * lo que no se mueve cae siempre en el mismo texel.
+ */
+export function stableShadowAim(
+  star: Vector3,
+  focus: Vector3,
+  fovDegrees: number,
+  mapSize: number,
+): StableAim {
+  const exponent = Math.ceil(Math.log(Math.max(fovDegrees, 1e-6)) / Math.log(FOV_STEP) - 1e-9);
+  const fov = Math.min(MAX_FOV, FOV_STEP ** exponent);
+  const direction = new Vector3().subVectors(focus, star);
+  if (direction.lengthSq() === 0) return { direction: direction.set(0, 0, -1), fovDegrees: fov };
+  direction.normalize();
+  const texel = ((fov / 180) * Math.PI) / mapSize;
+  const elevation = Math.round(Math.asin(Math.max(-1, Math.min(1, direction.y))) / texel) * texel;
+  const azimuthStep = texel / Math.max(MIN_COS_ELEVATION, Math.cos(elevation));
+  const azimuth = Math.round(Math.atan2(direction.z, direction.x) / azimuthStep) * azimuthStep;
+  const flat = Math.cos(elevation);
+  direction.set(flat * Math.cos(azimuth), Math.sin(elevation), flat * Math.sin(azimuth));
+  return { direction, fovDegrees: fov };
+}
