@@ -3,27 +3,12 @@
 // cielo gira, el suelo no), y la Brasa, los demás mundos y las estrellas se mueven a su alrededor.
 // Así la física, las colisiones y la lectura siguen trabajando en el marco de un solo mundo.
 // Un mundo fuera de todo sistema (Hogar, Luna) se queda en el origen, sin Brasa ni movimiento.
-import {
-  AdditiveBlending,
-  BackSide,
-  Group,
-  Mesh,
-  MeshBasicMaterial,
-  Quaternion,
-  SphereGeometry,
-  Vector3,
-  type Light,
-  type Object3D,
-  type Scene,
-} from 'three';
+import { Group, Quaternion, Vector3, type Light, type Object3D, type Scene } from 'three';
 import { SYSTEM_FRAME, toLocalPosition, toSystemPosition } from '../system/frames';
 import { bodyPose, createPose, type BodyPose } from '../system/orbits';
 import type { BodySpec, SystemSpec } from '../system/systemData';
-import { isMesh } from '../worlds/markers';
+import { createStarView, type StarView } from './starModel';
 
-const BRASA_COLOR = 0xffc890;
-const HALO_COLOR = 0xff8a3a;
-const HALO_SCALE = 1.35;
 const ORIGIN = new Vector3();
 
 export interface SystemSceneOptions {
@@ -72,8 +57,13 @@ export function createSystemScene(options: SystemSceneOptions): SystemScene {
     pivots.set(id, { group, spec: system?.bodyOf(id), pose: createPose() });
   }
 
-  const star = system ? createStar(system.star.radius) : undefined;
-  if (star) scene.add(star);
+  // La estrella de este sistema: su cuerpo modelado y la luz que da (color e intensidad de su tipo).
+  const star: StarView | undefined = system ? createStarView(system.star) : undefined;
+  if (star) scene.add(star.object);
+  if (system) {
+    sun.color.setHex(system.star.lightColor);
+    sun.intensity = system.star.intensity;
+  }
 
   let reference: string | undefined;
   const referencePose = createPose();
@@ -119,7 +109,8 @@ export function createSystemScene(options: SystemSceneOptions): SystemScene {
         pivot.group.quaternion.multiplyQuaternions(inverse, pivot.pose.orientation);
       }
       toLocalPosition(referencePose, ORIGIN, starPosition);
-      star?.position.copy(starPosition);
+      star?.object.position.copy(starPosition);
+      star?.update(t);
       sun.position.copy(starPosition);
       sky.quaternion.copy(inverse);
     },
@@ -138,40 +129,11 @@ export function createSystemScene(options: SystemSceneOptions): SystemScene {
     dispose() {
       for (const { group } of pivots.values()) scene.remove(group);
       if (star) {
-        scene.remove(star);
-        star.traverse((object) => {
-          if (!isMesh(object)) return;
-          object.geometry.dispose();
-          const materials = Array.isArray(object.material) ? object.material : [object.material];
-          materials.forEach((material) => {
-            material.dispose();
-          });
-        });
+        scene.remove(star.object);
+        star.dispose();
       }
     },
   };
   scenery.setReference(options.start);
   return scenery;
-}
-
-/** La Brasa: una esfera brillante con un halo suave (provisional hasta el arte de la Fase 6). */
-function createStar(radius: number): Mesh {
-  const star = new Mesh(
-    new SphereGeometry(radius, 32, 16),
-    new MeshBasicMaterial({ color: BRASA_COLOR }),
-  );
-  star.name = 'La Brasa';
-  const halo = new Mesh(
-    new SphereGeometry(radius * HALO_SCALE, 32, 16),
-    new MeshBasicMaterial({
-      color: HALO_COLOR,
-      transparent: true,
-      opacity: 0.35,
-      blending: AdditiveBlending,
-      depthWrite: false,
-      side: BackSide,
-    }),
-  );
-  star.add(halo);
-  return star;
 }

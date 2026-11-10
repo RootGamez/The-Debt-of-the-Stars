@@ -3,9 +3,24 @@
 // así que se validan al cargar como la cronología, con mensajes en español.
 import { WorldDataError } from '../worlds/markers';
 
+/** Cómo es la estrella: define su aspecto (render/starModel.ts) y su luz. */
+export type StarKind = 'solar' | 'enana_roja' | 'lejana';
+
 export interface StarSpec {
-  /** Radio de la Brasa (m). Entrar en ella mata. */
+  /** Radio de la estrella (m). Entrar en ella mata. */
   radius: number;
+  kind: StarKind;
+  /** Color de la superficie (el cuerpo que se ve) y de la luz que da (0xRRGGBB). */
+  surfaceColor: number;
+  lightColor: number;
+  /** Intensidad de la luz de la estrella a la distancia de referencia. */
+  intensity: number;
+  /** Cuánto cae la luz con la distancia (0 = nada, 1 = como 1/d). Ver `render/sunFalloff.ts`. */
+  falloff: number;
+  /** Cuánta superficie cubren las manchas (0 a 1). */
+  spots: number;
+  /** Segundos por vuelta sobre su eje (0 = no gira). */
+  spin: number;
 }
 
 export interface BodySpec {
@@ -58,6 +73,73 @@ function parseSpin(world: string, raw: unknown): 'locked' | number {
   return spin;
 }
 
+const STAR_KINDS: readonly StarKind[] = ['solar', 'enana_roja', 'lejana'];
+
+/** Lo que trae cada tipo de estrella si el archivo no lo cambia. */
+const STAR_PRESETS: Record<StarKind, Omit<StarSpec, 'radius' | 'kind'>> = {
+  solar: {
+    surfaceColor: 0xfff1c8,
+    lightColor: 0xfff4e4,
+    intensity: 2.4,
+    falloff: 0,
+    spots: 0.15,
+    spin: 600,
+  },
+  enana_roja: {
+    surfaceColor: 0xff4a1e,
+    lightColor: 0xff9a5c,
+    intensity: 2.6,
+    falloff: 0,
+    spots: 0.45,
+    spin: 180,
+  },
+  lejana: {
+    surfaceColor: 0xffe0b0,
+    lightColor: 0xffd8a8,
+    intensity: 1.6,
+    falloff: 0,
+    spots: 0.1,
+    spin: 900,
+  },
+};
+
+function optionalColor(value: unknown, what: string, fallback: number): number {
+  if (value === undefined) return fallback;
+  if (typeof value !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(value))
+    fail(`${what} debe ser un color "#rrggbb"`);
+  return Number.parseInt(value.slice(1), 16);
+}
+
+function optionalRange(value: unknown, what: string, fallback: number, max: number): number {
+  if (value === undefined) return fallback;
+  const number = finiteNumber(value, what);
+  if (number < 0 || number > max) fail(`${what} debe estar entre 0 y ${String(max)}`);
+  return number;
+}
+
+function parseStar(raw: Record<string, unknown>): StarSpec {
+  const radius = finiteNumber(raw.radio, 'estrella.radio');
+  if (radius <= 0) fail('estrella.radio debe ser mayor que 0');
+  const kind = raw.tipo ?? 'solar';
+  if (typeof kind !== 'string' || !(STAR_KINDS as readonly string[]).includes(kind))
+    fail(`estrella.tipo debe ser uno de: ${STAR_KINDS.join(', ')}`);
+  const preset = STAR_PRESETS[kind as StarKind];
+  return {
+    radius,
+    kind: kind as StarKind,
+    surfaceColor: optionalColor(
+      raw.colorSuperficie,
+      'estrella.colorSuperficie',
+      preset.surfaceColor,
+    ),
+    lightColor: optionalColor(raw.colorLuz, 'estrella.colorLuz', preset.lightColor),
+    intensity: optionalRange(raw.intensidad, 'estrella.intensidad', preset.intensity, 100),
+    falloff: optionalRange(raw.caida, 'estrella.caida', preset.falloff, 2),
+    spots: optionalRange(raw.manchas, 'estrella.manchas', preset.spots, 1),
+    spin: optionalRange(raw.giro, 'estrella.giro', preset.spin, 1_000_000),
+  };
+}
+
 function parseBody(raw: unknown, starRadius: number, knownWorlds: readonly string[]): BodySpec {
   if (!isRecord(raw) || typeof raw.mundo !== 'string')
     fail('cada cuerpo necesita un "mundo" de texto');
@@ -84,8 +166,8 @@ function parseBody(raw: unknown, starRadius: number, knownWorlds: readonly strin
 export function parseSystem(raw: unknown, knownWorlds: readonly string[]): SystemSpec {
   if (!isRecord(raw)) fail('el archivo no es un objeto');
   if (!isRecord(raw.estrella)) fail('falta "estrella"');
-  const radius = finiteNumber(raw.estrella.radio, 'estrella.radio');
-  if (radius <= 0) fail('estrella.radio debe ser mayor que 0');
+  const star = parseStar(raw.estrella);
+  const radius = star.radius;
   if (!Array.isArray(raw.cuerpos)) fail('"cuerpos" debe ser una lista');
   const bodies = raw.cuerpos.map((body: unknown) => parseBody(body, radius, knownWorlds));
   const byWorld = new Map<string, BodySpec>();
@@ -96,7 +178,7 @@ export function parseSystem(raw: unknown, knownWorlds: readonly string[]): Syste
   if (raw.bucle !== undefined && typeof raw.bucle !== 'boolean')
     fail('"bucle" debe ser true o false');
   return {
-    star: { radius },
+    star,
     bodies,
     bodyOf: (world) => byWorld.get(world),
     ship: parseShip(raw.nave, byWorld),

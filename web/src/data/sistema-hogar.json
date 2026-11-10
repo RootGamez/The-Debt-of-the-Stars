@@ -2,7 +2,7 @@
   "_fuente": "CONTEXTO_PLANETAS.md §9 y plan de la Fase 9 (🟡). El sistema de casa del prólogo: Hogar y su Luna, quietos (periodo 0): en el prólogo no corre el ciclo (\"bucle\": false). La Luna queda a unos 650 m de la superficie de Hogar, un trayecto corto y seguro para el primer vuelo. La nave, el Albatros II, espera en el hangar del Instituto. faseRotacion pone la estrella baja al este del Instituto: un amanecer que no termina mientras dura el prólogo.",
   "bucle": false,
   "nave": "hogar",
-  "estrella": { "radio": 120 },
+  "estrella": { "radio": 120, "tipo": "solar" },
   "cuerpos": [
     {
       "mundo": "hogar",

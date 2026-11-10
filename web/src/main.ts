@@ -894,7 +894,9 @@ function start(): void {
       const where =
         target === 'agujero'
           ? blackHole.lens()?.position.clone()
-          : systemScene.groupOf(target)?.getWorldPosition(new Vector3());
+          : target === 'estrella'
+            ? sun.position.clone()
+            : systemScene.groupOf(target)?.getWorldPosition(new Vector3());
       if (!where || flight?.piloting) return false;
       aimToward(player, camera, where);
       return true;

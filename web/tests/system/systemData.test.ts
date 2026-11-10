@@ -68,6 +68,53 @@ describe('parseSystem', () => {
     expect(system.bodies[1]?.hidden).toBe(false);
   });
 
+  it('gives the star the look of its kind, and lets the file override each part', () => {
+    const plain = parseSystem(valid, WORLD_IDS).star;
+    const red = parseSystem(
+      { ...valid, estrella: { radio: 100, tipo: 'enana_roja' } },
+      WORLD_IDS,
+    ).star;
+    const custom = parseSystem(
+      {
+        ...valid,
+        estrella: {
+          radio: 100,
+          tipo: 'enana_roja',
+          colorLuz: '#112233',
+          intensidad: 3,
+          caida: 1,
+          manchas: 0.2,
+          giro: 90,
+        },
+      },
+      WORLD_IDS,
+    ).star;
+
+    expect(plain.kind).toBe('solar');
+    expect(red.kind).toBe('enana_roja');
+    expect(red.surfaceColor).not.toBe(plain.surfaceColor);
+    expect(red.falloff).toBe(0);
+    expect(custom).toMatchObject({
+      lightColor: 0x112233,
+      intensity: 3,
+      falloff: 1,
+      spots: 0.2,
+      spin: 90,
+    });
+    expect(custom.surfaceColor).toBe(red.surfaceColor);
+  });
+
+  it.each([
+    ['an unknown star kind', { radio: 100, tipo: 'pulsar' }],
+    ['a colour that is not #rrggbb', { radio: 100, colorLuz: 'rojo' }],
+    ['a negative intensity', { radio: 100, intensidad: -1 }],
+    ['a falloff above 2', { radio: 100, caida: 3 }],
+    ['spots outside 0 to 1', { radio: 100, manchas: 2 }],
+    ['a negative star spin', { radio: 100, giro: -5 }],
+  ])('rejects %s in the star with a Spanish message', (_name, star) => {
+    expect(() => parseSystem({ ...valid, estrella: star }, WORLD_IDS)).toThrow(/^sistema: /);
+  });
+
   it('looks bodies up by world', () => {
     const system = parseSystem(valid, WORLD_IDS);
 
