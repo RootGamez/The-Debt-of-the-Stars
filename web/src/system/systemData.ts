@@ -66,6 +66,8 @@ export interface StructureSpec {
 
 export interface SystemSpec {
   star: StarSpec;
+  /** Distancia a la estrella (m) a la que la luz vale `star.intensity`: la del mundo donde espera la nave. */
+  referenceDistance: number;
   /** La estructura que rodea la estrella, si la hay. */
   structure: StructureSpec | undefined;
   bodies: readonly BodySpec[];
@@ -265,12 +267,19 @@ export function parseSystem(raw: unknown, knownWorlds: readonly string[]): Syste
     fail('"bucle" debe ser true o false');
   return {
     star,
+    referenceDistance: referenceDistance(bodies, raw.nave),
     structure: parseStructure(raw.estructura, radius),
     bodies,
     bodyOf: (world) => byWorld.get(world),
     ship: parseShip(raw.nave, byWorld),
     looping: raw.bucle !== false,
   };
+}
+
+function referenceDistance(bodies: readonly BodySpec[], ship: unknown): number {
+  const home =
+    bodies.find((body) => body.world === ship) ?? bodies.find((body) => !body.fixedPosition);
+  return home?.orbitRadius ?? 1;
 }
 
 function parseShip(raw: unknown, bodies: ReadonlyMap<string, BodySpec>): string | undefined {

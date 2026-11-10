@@ -7,7 +7,16 @@ import '@fontsource/alegreya/latin-400-italic.css';
 import '@fontsource/alegreya/latin-700.css';
 import './style.css';
 import './ui/theme.css';
-import { Quaternion, Timer, Vector3, type PerspectiveCamera, type WebGLRenderer } from 'three';
+import {
+  InstancedMesh,
+  Mesh,
+  MeshStandardMaterial,
+  Quaternion,
+  Timer,
+  Vector3,
+  type PerspectiveCamera,
+  type WebGLRenderer,
+} from 'three';
 import { loadChronology } from './core/chronology';
 import { createSoundtrack } from './audio/soundtrack';
 import { machineTime } from './game/counterweight';
@@ -48,7 +57,7 @@ import { ATMOSPHERES } from './data/atmospheres';
 import { createBlackHoleView } from './render/blackHoleView';
 import { growthFor } from './system/blackHole';
 import { BLACK_HOLE } from './data/blackHole';
-import { qualityFromQuery } from './core/quality';
+import { qualityFromQuery, sunShadowSizeFromQuery } from './core/quality';
 import { createSightScale } from './ui/sightScale';
 import { createFixedStep } from './core/fixedStep';
 import { IDLE_INTENT } from './core/inputController';
@@ -73,6 +82,7 @@ import { createWarpDistortion } from './ui/warpDistortion';
 import { gateSplit, gateStretch } from './game/gateWormhole';
 import { createGateWormholes, type GateWormholeSample } from './render/gateWormholeView';
 import { createWormholeView } from './render/wormholeView';
+import { castShadowsFrom, createSunShadow } from './render/sunShadow';
 import { renderWithWormholes } from './render/wormholeSphere';
 import { Player } from './core/player';
 import { absorptionWindow, quietChronology, triggersAsEvents } from './core/timeline';
@@ -294,7 +304,9 @@ function start(): void {
   const ool = createOolView(characters, reducedMotion);
   const filaments = createFilaments();
   // Tú: el explorador (un Ool con su traje), que anda con el jugador; al mirar abajo se ve su cuerpo.
+  const childrenBeforeExplorer = scene.children.length;
   const explorer = createExplorerView(scene);
+  const explorerRoots = scene.children.slice(childrenBeforeExplorer);
   const helmetRim = createHelmetRim();
   // Con `?debug`, F6 pone la cámara fuera, detrás del explorador, para verlo andar; F7 la gira a su alrededor.
   let outside = false;
@@ -1032,6 +1044,23 @@ function start(): void {
   }
   arrival?.clear();
 
+  // La sombra de la estrella (plan de soles y luz, S3): los materiales de los mundos reciben la sombra, y lo que ya lleva
+  // `castShadow` la proyecta. Con `?calidad=baja` no hay sombra (y los materiales ni se tocan).
+  const shadowSize = sunShadowSizeFromQuery(window.location.search, quality);
+  const sunShadow = shadowSize > 0 ? createSunShadow(shadowSize) : undefined;
+  const cameraWorld = new Vector3();
+  if (sunShadow) {
+    scene.traverse((object) => {
+      if (!(object instanceof Mesh) && !(object instanceof InstancedMesh)) return;
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      for (const material of materials)
+        if (material instanceof MeshStandardMaterial) sunShadow.receive(material);
+    });
+    // Lo que no tenía `castShadow` (tú, la nave) también proyecta sombra.
+    for (const root of [...explorerRoots, shipModel?.object]) if (root) castShadowsFrom(root);
+    sunShadow.register(scene);
+  }
+
   let awoke = false;
   const feet = new Vector3();
   const airCenter = new Vector3();
@@ -1040,6 +1069,9 @@ function start(): void {
   runFrameLoop(
     renderer,
     () => {
+      // Dentro del Nudo la estrella no ilumina (su luz está apagada): sin sombra.
+      sunShadow?.setEnabled(sun.visible);
+      sunShadow?.update(renderer, scene, sun.position, camera.getWorldPosition(cameraWorld));
       renderWithWormholes(renderer, scene, camera);
     },
     (dt) => {

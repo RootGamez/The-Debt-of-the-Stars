@@ -3,9 +3,18 @@
 // cielo gira, el suelo no), y la Brasa, los demás mundos y las estrellas se mueven a su alrededor.
 // Así la física, las colisiones y la lectura siguen trabajando en el marco de un solo mundo.
 // Un mundo fuera de todo sistema (Hogar, Luna) se queda en el origen, sin Brasa ni movimiento.
-import { Group, Quaternion, Vector3, type Light, type Object3D, type Scene } from 'three';
+import {
+  Group,
+  PointLight,
+  Quaternion,
+  Vector3,
+  type Light,
+  type Object3D,
+  type Scene,
+} from 'three';
 import { SYSTEM_FRAME, toLocalPosition, toSystemPosition } from '../system/frames';
 import { bodyPose, createPose, type BodyPose } from '../system/orbits';
+import { sourceIntensity } from '../system/starLight';
 import type { BodySpec, SystemSpec } from '../system/systemData';
 import { createCercoView, type CercoView } from './cercoRings';
 import { createStarView, type StarView } from './starModel';
@@ -68,7 +77,9 @@ export function createSystemScene(options: SystemSceneOptions): SystemScene {
   if (cerco) scene.add(cerco.object);
   if (system) {
     sun.color.setHex(system.star.lightColor);
-    sun.intensity = system.star.intensity;
+    // La luz cae con la distancia según la estrella; a la distancia de referencia vale lo que dice el archivo.
+    if (sun instanceof PointLight) sun.decay = system.star.falloff;
+    sun.intensity = sourceIntensity(system.star, system.referenceDistance);
   }
 
   let reference: string | undefined;

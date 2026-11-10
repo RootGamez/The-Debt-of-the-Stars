@@ -203,6 +203,11 @@ describe('parseSystem', () => {
     );
   });
 
+  it('measures the light from the world where the ship waits (or the first body without a ship)', () => {
+    expect(parseSystem({ ...valid, nave: 'umbral' }, WORLD_IDS).referenceDistance).toBe(1900);
+    expect(parseSystem(valid, WORLD_IDS).referenceDistance).toBe(500);
+  });
+
   it('looks bodies up by world', () => {
     const system = parseSystem(valid, WORLD_IDS);
 

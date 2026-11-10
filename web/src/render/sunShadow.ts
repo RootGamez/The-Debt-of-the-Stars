@@ -3,7 +3,10 @@
 // parche en los materiales que multiplica SOLO la luz 0 (la estrella) por la visibilidad. Es la misma técnica que
 // `applySkyLight`. Los cuerpos que proyectan sombra son los que ya llevan `castShadow` (el cristal no).
 import {
+  Color,
   Matrix4,
+  Mesh,
+  MeshStandardMaterial,
   NearestFilter,
   PerspectiveCamera,
   RGBAFormat,
@@ -42,7 +45,8 @@ const SHADOWED_LIGHTS_BEGIN = (() => {
     POINT_LIGHT_INFO,
     `${POINT_LIGHT_INFO}
     #if UNROLLED_LOOP_INDEX == 0
-      directLight.color *= sunVisibility();
+      sunSeen = sunVisibility();
+      directLight.color *= sunSeen;
     #endif`,
   );
 })();
@@ -75,6 +79,15 @@ function createDistanceMaterial(uFar: { value: number }): ShaderMaterial {
   });
 }
 
+/** Hace que proyecten sombra las mallas opacas y con luz de `root` (el explorador, la nave): lo que no la llevaba. */
+export function castShadowsFrom(root: Object3D): void {
+  root.traverse((object) => {
+    if (!(object instanceof Mesh)) return;
+    const material: unknown = Array.isArray(object.material) ? object.material[0] : object.material;
+    if (material instanceof MeshStandardMaterial && !material.transparent) object.castShadow = true;
+  });
+}
+
 export interface SunShadow {
   /** Dibuja el mapa. `star` y `focus` en coordenadas del mundo de la escena. */
   update(
@@ -93,7 +106,11 @@ export interface SunShadow {
   dispose(): void;
 }
 
+/** Mínimo del relleno de cielo en un sitio donde el sol llegaría pero algo lo tapa (techos, paredes). */
+const SHADED_FILL = 0.4;
+
 export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
+  const patched = new WeakSet<Material>();
   const target = new WebGLRenderTarget(size, size, {
     format: RGBAFormat,
     type: UnsignedByteType,
@@ -115,6 +132,7 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
     uSunShadowTexel: { value: new Vector2(1 / size, 1 / size) },
   };
   const forward = new Vector3();
+  const clearColor = new Color();
   let enabled = true;
 
   return {
@@ -145,6 +163,8 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
       const previousTarget = renderer.getRenderTarget();
       const previousOverride = scene.overrideMaterial;
       const previousBackground = scene.background;
+      const previousClear = renderer.getClearColor(clearColor).getHex();
+      const previousAlpha = renderer.getClearAlpha();
       scene.overrideMaterial = material;
       scene.background = null;
       renderer.setRenderTarget(target);
@@ -152,6 +172,7 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
       renderer.clear();
       renderer.render(scene, camera);
       renderer.setRenderTarget(previousTarget);
+      renderer.setClearColor(previousClear, previousAlpha);
       scene.overrideMaterial = previousOverride;
       scene.background = previousBackground;
     },
@@ -163,6 +184,8 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
     },
 
     receive(mat) {
+      if (patched.has(mat)) return;
+      patched.add(mat);
       const previous = mat.onBeforeCompile.bind(mat);
       mat.onBeforeCompile = (shader, renderer) => {
         previous(shader, renderer);
@@ -202,6 +225,7 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
             varying vec3 vSunWorld;
             varying vec3 vSunNormal;
             ${PACK}
+            float sunSeen = 1.0;
             float sunVisibility() {
               if (uSunShadowOn < 0.5) return 1.0;
               vec3 wp = vSunWorld + normalize(vSunNormal) * ${NORMAL_BIAS.toFixed(3)};
@@ -221,6 +245,15 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
             }`,
           )
           .replace('#include <lights_fragment_begin>', SHADOWED_LIGHTS_BEGIN);
+        // Un interior no recibe el cielo entero: donde el sol llegaría (cara de día del mundo) pero algo lo tapa, el
+        // relleno de cielo y ambiente baja. Solo con la luz de cielo del mundo (`vSkyDay`).
+        if (shader.fragmentShader.includes('varying float vSkyDay')) {
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <aomap_fragment>',
+            `#include <aomap_fragment>
+            reflectedLight.indirectDiffuse *= mix(1.0, ${SHADED_FILL.toFixed(2)}, (1.0 - sunSeen) * vSkyDay * uSunShadowOn);`,
+          );
+        }
       };
       mat.needsUpdate = true;
     },

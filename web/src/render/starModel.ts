@@ -78,7 +78,7 @@ void main() {
 
 /** Una cara por color: el geometry queda sin índice para que cada triángulo tenga el suyo. */
 function surfaceGeometry(spec: StarSpec, seed: number): BufferGeometry {
-  const geometry = new IcosahedronGeometry(spec.radius, SURFACE_DETAIL).toNonIndexed();
+  const geometry = new IcosahedronGeometry(spec.radius, SURFACE_DETAIL);
   const noise = starSurfaceNoise(seed);
   const base = new Color(spec.surfaceColor);
   const position = geometry.getAttribute('position');
