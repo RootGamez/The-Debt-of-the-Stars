@@ -87,7 +87,7 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 
 ## Publicación (Cloudflare)
 
-- Está en https://bucle-de-tiempo.anthonygamez2858.workers.dev (cuenta de Anthony, Workers con assets estáticos, sin script: `web/wrangler.jsonc`).
+- Está en https://the-debt-of-the-stars.anthonygamez2858.workers.dev (cuenta de Anthony, Workers con assets estáticos, sin script: `web/wrangler.jsonc`).
 - `npm run deploy` (en `web/`) construye y sube `dist/`; `npm run deploy:dry` solo comprueba. Hace falta haber entrado con `npx wrangler login`.
 - Los mundos se construyen en el navegador: `dist/` solo lleva el código y las fuentes de letra (no hay modelos que subir).
 - `web/public/_headers` pone la caché (`/assets/*` inmutable) y `web/public/.assetsignore` deja fuera los `.map`.
