@@ -13,6 +13,7 @@ import {
   Float32BufferAttribute,
   IcosahedronGeometry,
   InstancedMesh,
+  SphereGeometry,
   Matrix4,
   Mesh,
   Object3D,
@@ -90,6 +91,30 @@ export const cone = (bottom: number, top = 0, sides = 8): BufferGeometry =>
 
 export const ball = (radius: number, detail = 1): BufferGeometry =>
   primitive(`ball${radius}-${detail}`, () => new IcosahedronGeometry(radius, detail));
+
+/**
+ * Media esfera de radio 1 (solo z ≥ 0), para techos y cúpulas: una esfera entera dejaría su mitad de abajo colgando
+ * bajo el borde. Es una cúpula de anillos cuyo último anillo cae justo en el ecuador (z = 0, radio 1), así que ajusta
+ * con el borde de la pared sin huecos. Lleva también la cara de dentro, para verse desde la sala de una rotonda.
+ */
+export const domeShell = (detail = 1): BufferGeometry =>
+  primitive(`dome-${detail}`, () => {
+    const half = new SphereGeometry(1, 10 + 4 * detail, 3 + detail, 0, Math.PI * 2, 0, Math.PI / 2)
+      .rotateX(Math.PI / 2)
+      .toNonIndexed();
+    const source = half.getAttribute('position');
+    const positions: number[] = [];
+    for (let f = 0; f < source.count; f += 3) {
+      const face: number[] = [];
+      for (let k = 0; k < 3; k++) {
+        face.push(source.getX(f + k), source.getY(f + k), source.getZ(f + k));
+      }
+      positions.push(...face);
+      // Cara de dentro: el mismo triángulo con el giro invertido.
+      positions.push(...face.slice(0, 3), ...face.slice(6, 9), ...face.slice(3, 6));
+    }
+    return geometryFrom(positions);
+  });
 
 /** Toro de pie en el plano XZ (eje Y), como el de Blender. */
 export const torus = (radius: number, tube: number, sides = 24, section = 6): BufferGeometry =>

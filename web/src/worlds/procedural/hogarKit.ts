@@ -7,6 +7,7 @@ import {
   box,
   cone,
   cylinder,
+  domeShell,
   frameAt,
   PieceSet,
   torus,
@@ -332,7 +333,7 @@ export class HogarBuilder {
     const rise = radius * 0.7;
     this.pieces.add(
       P.moss,
-      ball(1, 1),
+      domeShell(1),
       frame.at(at, undefined, [radius * 1.08, radius * 1.08, rise]),
       'stone',
       { solid: false },

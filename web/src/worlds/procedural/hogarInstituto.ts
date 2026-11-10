@@ -9,6 +9,7 @@ import {
   box,
   cone,
   cylinder,
+  domeShell,
   rampMatrix,
   torus,
   torusArc,
@@ -31,6 +32,8 @@ const ROTUNDA_RADIUS = 6.5;
 const ROTUNDA_HEIGHT = 4.2;
 /** La puerta de la rotonda, mirando a la plaza (sur): su anchura en grados de pared. */
 const ROTUNDA_DOOR = 26;
+/** El arco de esa puerta: la pared se rellena a su medida. */
+const ROTUNDA_ARCH: DoorArch = { halfWidth: 1.5, height: 3 };
 const TOWER_RADIUS = 4;
 const TOWER_BASE = 3.2;
 const RAMP_RADIUS = 4.65;
@@ -51,14 +54,20 @@ function roundWall(
   colors: readonly string[],
   gap: number,
   gapWidth: number,
+  arch?: DoorArch,
 ): void {
   const panels = Math.round((2 * Math.PI * radius) / 1.3);
   const width = (2 * Math.PI * radius) / panels + 0.04;
+  const panelAngle = 360 / panels;
+  const skipped: number[] = [];
   for (let k = 0; k < panels; k++) {
-    const a = (k + 0.5) * (360 / panels);
+    const a = (k + 0.5) * panelAngle;
     const off = Math.abs(((a - gap + 540) % 360) - 180);
-    if (off < gapWidth / 2) continue;
     const r = a * DEG;
+    if (off < gapWidth / 2) {
+      skipped.push(((a - gap + 540) % 360) - 180);
+      continue;
+    }
     const p: Triple = [
       center[0] + Math.sin(r) * radius,
       center[1] + Math.cos(r) * radius,
@@ -87,6 +96,79 @@ function roundWall(
       { solid: false },
     );
   }
+  if (skipped.length > 0) {
+    const span: [number, number] = [
+      Math.min(...skipped) - panelAngle / 2,
+      Math.max(...skipped) + panelAngle / 2,
+    ];
+    fillDoorGap(b, f, { center, radius, height, colors, gap, panelAngle }, span, arch);
+  }
+}
+
+/** Un arco de puerta: media anchura y altura (m). Sin él, el hueco es recto y la pared sigue encima a esa altura. */
+interface DoorArch {
+  halfWidth: number;
+  height: number;
+}
+
+interface WallShape {
+  center: Triple;
+  radius: number;
+  height: number;
+  colors: readonly string[];
+  gap: number;
+  panelAngle: number;
+}
+
+/** Anchura de cada tira de pared que rellena el hueco de la puerta (m). */
+const GAP_SLICE = 0.2;
+/** Altura del dintel recto de una puerta sin arco (m). */
+const STRAIGHT_DOOR_HEIGHT = 2.6;
+
+/**
+ * Rellena el hueco de la puerta con tiras de pared: encima del arco (o de la altura de paso) hasta el techo y, a los
+ * lados del arco, hasta el suelo. Solo choca lo que llega al suelo; por el arco se pasa.
+ */
+function fillDoorGap(
+  b: HogarBuilder,
+  f: Frame,
+  wall: WallShape,
+  [from, to]: readonly [number, number],
+  arch?: DoorArch,
+): void {
+  const { center, radius, height, colors, gap, panelAngle } = wall;
+  const count = Math.max(1, Math.ceil(((to - from) * DEG * radius) / GAP_SLICE));
+  const step = (to - from) / count;
+  const width = step * DEG * radius + 0.02;
+  for (let i = 0; i < count; i++) {
+    const rel = from + (i + 0.5) * step;
+    const angle = (((gap + rel) % 360) + 360) % 360;
+    const across = radius * Math.sin(rel * DEG);
+    const inside = arch !== undefined && Math.abs(across) < arch.halfWidth;
+    const bottom = arch
+      ? inside
+        ? arch.height * Math.sqrt(1 - (across / arch.halfWidth) ** 2)
+        : 0
+      : STRAIGHT_DOOR_HEIGHT;
+    const length = height - bottom;
+    if (length <= 0.02) continue;
+    const r = angle * DEG;
+    b.pieces.add(
+      colors[Math.floor(angle / panelAngle) % colors.length] ?? P.cream,
+      box(),
+      f.at(
+        [
+          center[0] + Math.sin(r) * radius,
+          center[1] + Math.cos(r) * radius,
+          center[2] + bottom + length / 2,
+        ],
+        [0, 0, -r],
+        [width, 0.25, length],
+      ),
+      'stone',
+      { solid: arch !== undefined && !inside },
+    );
+  }
 }
 
 function dome(
@@ -97,7 +179,7 @@ function dome(
   rise: number,
   color: string,
 ): void {
-  b.pieces.add(color, ball(1, 2), f.at(at, undefined, [radius, radius, rise]), 'stone', {
+  b.pieces.add(color, domeShell(2), f.at(at, undefined, [radius, radius, rise]), 'stone', {
     solid: false,
   });
   for (let k = 0; k < 4; k++) {
@@ -154,7 +236,17 @@ function plaza(b: HogarBuilder, f: Frame): void {
 function rotunda(b: HogarBuilder, f: Frame): void {
   const [cx, cy] = INSTITUTO_LAYOUT.rotunda;
   const c: Triple = [cx, cy, 0];
-  roundWall(b, f, c, ROTUNDA_RADIUS, ROTUNDA_HEIGHT, [P.cream, P.sandstone], 180, ROTUNDA_DOOR);
+  roundWall(
+    b,
+    f,
+    c,
+    ROTUNDA_RADIUS,
+    ROTUNDA_HEIGHT,
+    [P.cream, P.sandstone],
+    180,
+    ROTUNDA_DOOR,
+    ROTUNDA_ARCH,
+  );
   dome(b, f, [cx, cy, ROTUNDA_HEIGHT], ROTUNDA_RADIUS + 0.15, 3.2, P.cream);
   b.pieces.add(
     P.glow,
@@ -178,7 +270,7 @@ function rotunda(b: HogarBuilder, f: Frame): void {
     f.at(
       [cx + Math.sin(door) * ROTUNDA_RADIUS, cy + Math.cos(door) * ROTUNDA_RADIUS, 0],
       [0, 0, -door],
-      [1.5, 1, 3],
+      [ROTUNDA_ARCH.halfWidth, 1, ROTUNDA_ARCH.height],
     ),
     'stone',
     { solid: false },
