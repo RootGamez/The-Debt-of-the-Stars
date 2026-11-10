@@ -97,6 +97,8 @@ function arrival(b: PuertasBuilder): void {
   b.view(P.obsidian, torus(1.6, 0.18, 24, 4), f.at([0, -2.8, 0.02], [Math.PI / 2, 0, 0]));
   b.lamp(P.thread, torus(1.25, 0.03, 32, 3), f.at([0, -2.8, 0.05], [Math.PI / 2, 0, 0]), 1.3);
   b.mark('SPAWN_Puertas', f, [0, -0.5, 1.0]);
+  // La nave espera a la espalda del anillo caído (T11: a las bocas de casa solo se llega volando).
+  b.mark('PARK_Nave', f, [0, 14, 0]);
   b.mark('INT_cielo', f, [0, 0.8, 1.6], { clue_id: 'puertas.cielo', kind: 'observacion' });
 }
 

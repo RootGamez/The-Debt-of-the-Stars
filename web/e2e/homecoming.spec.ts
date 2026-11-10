@@ -40,6 +40,13 @@ async function arriveHome(page: Page, ending: string, endings: string[] = []): P
   await startPlaying(page, query);
 }
 
+/** Tras cruzar la boca se aparece en el espacio, sentado en la nave (T11); para andar hay que posarse. */
+async function landAtHome(page: Page): Promise<void> {
+  expect((await snapshot(page))?.ship?.piloting).toBe(true);
+  expect(await page.evaluate(() => window.__juego?.landHome?.())).toBe(true);
+  await expect.poll(async () => (await snapshot(page))?.ship?.piloting).toBe(false);
+}
+
 async function talkToTheDirector(page: Page): Promise<void> {
   await standAt(page, 'instituto.directora');
   await expect(page.locator('.prompt')).toHaveText('E · hablar');
@@ -57,6 +64,7 @@ test('ending A: the earlier home, the view turns to the Moon and the card offers
 }) => {
   test.setTimeout(90_000);
   await arriveHome(page, 'A');
+  await landAtHome(page);
   const home = await homecoming(page);
   expect(home).toMatchObject({ ending: 'A', phase: 'playing' });
   expect(home?.without).toContain('luna_Fragmento');
@@ -70,7 +78,7 @@ test('ending A: the earlier home, the view turns to the Moon and the card offers
   await talkToTheDirector(page);
   await expect.poll(async () => (await homecoming(page))?.phase).toBe('turning');
   await expect.poll(async () => (await homecoming(page))?.phase, { timeout: 10_000 }).toBe('card');
-  const card = page.getByRole('dialog', { name: 'Final A' });
+  const card = page.getByRole('dialog', { name: 'Antes de la prueba' });
   await expect(card).toBeVisible();
   await expect(card).toContainText('Texto provisional');
   await expect(card.getByRole('button', { name: 'Volver a jugar' })).toBeFocused();
@@ -85,10 +93,11 @@ test('ending A: the earlier home, the view turns to the Moon and the card offers
 test('ending B is saved together with the endings already seen', async ({ page }) => {
   test.setTimeout(90_000);
   await arriveHome(page, 'B', ['A']);
+  await landAtHome(page);
 
   await talkToTheDirector(page);
 
-  const card = page.getByRole('dialog', { name: 'Final B' });
+  const card = page.getByRole('dialog', { name: 'La cuenta empieza hoy' });
   await expect(card).toBeVisible();
   expect(await savedEndings(page)).toEqual(['A', 'B']);
   // Ya no hay vuelta al juego: ni pausa ni Registro.
@@ -109,6 +118,7 @@ test('arriving late is the home as always, and the card leads back to the Archiv
 }) => {
   test.setTimeout(90_000);
   await arriveHome(page, 'tarde');
+  await landAtHome(page);
   expect(await homecoming(page)).toMatchObject({ ending: 'tarde', without: [] });
 
   await talkToTheDirector(page);

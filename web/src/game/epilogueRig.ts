@@ -9,11 +9,11 @@ import { EPILOGUE_WORLD } from '../worlds/worldSelection';
 import {
   OFFSETS_CONCLUSION,
   TEST_DAY_CONCLUSION,
+  arrivalDay,
   createEpiloguePlay,
-  endingFor,
   mouthById,
-  type Ending,
   type EpiloguePlay,
+  type MouthId,
 } from './epilogue';
 
 /** Los planos enrollados sobre el Banco (pieza suelta del modelo). */
@@ -23,8 +23,8 @@ export interface EpilogueRigOptions {
   runtimes: ReadonlyMap<string, WorldRuntime>;
   /** Si una conclusión ya está en el Registro. */
   knows: (conclusion: string) => boolean;
-  /** Se cruza una boca: el final que sale de ella y de los planos. */
-  onCross: (ending: Ending) => void;
+  /** Se elige una boca de casa: se abre en el cielo (T11). */
+  onChoose: (id: MouthId) => void;
 }
 
 export interface EpilogueRig {
@@ -36,13 +36,12 @@ export interface EpilogueRig {
 }
 
 export function createEpilogueRig(options: EpilogueRigOptions): EpilogueRig | undefined {
-  const { runtimes, knows, onCross } = options;
+  const { runtimes, knows, onChoose } = options;
   const archive = runtimes.get(EPILOGUE_WORLD);
   if (!archive) return undefined;
   const plans = archive.world.scene.getObjectByName(PLANS_OBJECT);
   if (!plans) throw new WorldDataError(`${archive.id}: falta ${PLANS_OBJECT} en el Banco`);
   const play = createEpiloguePlay();
-  let crossed = false;
   return {
     play,
     readers: {
@@ -56,10 +55,7 @@ export function createEpilogueRig(options: EpilogueRigOptions): EpilogueRig | un
             carryingPlans: () => play.carryingPlans,
             cross: (id) => {
               const mouth = mouthById(id);
-              const ending = mouth ? endingFor(mouth, play.carryingPlans) : undefined;
-              if (crossed || !ending) return;
-              crossed = true;
-              onCross(ending);
+              if (mouth && arrivalDay(mouth) !== undefined) onChoose(id);
             },
           },
           status,

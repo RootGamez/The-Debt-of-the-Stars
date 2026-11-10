@@ -103,10 +103,19 @@ test('the Archive is out of time: no loop, the plans are taken and left, and the
   await expect(page.locator('.puzzle-mouths')).toContainText('280 días después de lo que se ve');
   await page.getByRole('button', { name: 'Elegir: El Instituto, más joven' }).click();
   await expect(page.locator('.puzzle-choices')).toContainText('Llevas los planos del Contrapeso.');
-  await page.getByRole('button', { name: 'Cruzar' }).click();
+  await page.getByRole('button', { name: 'Abrir', exact: true }).click();
 
-  await expect.poll(async () => (await snapshot(page))?.loop.cause).toBe('boca');
+  // Elegir una boca la abre en el cielo (T11): a pie no se cruza; se llega a ella con la nave.
+  await expect
+    .poll(async () => page.evaluate(() => window.__juego?.skyMouth?.()))
+    .toEqual({
+      chosen: 'instituto',
+      open: true,
+    });
+  expect((await snapshot(page))?.loop.cause).toBeNull();
   expect((await snapshot(page))?.registry.facts).toContain('bocas.vuelta_antes');
+  expect(await page.evaluate(() => window.__juego?.flyIntoMouth?.())).toBe(true);
+  await expect.poll(async () => (await snapshot(page))?.loop.cause).toBe('boca');
   await page.waitForURL(/mundo=hogar&final=B/, { timeout: 30_000 });
 });
 
@@ -124,13 +133,20 @@ test('without K7 the mouths only show what is seen, and the one that looks close
   await expect(page.locator('.puzzle-mouths')).toContainText('Cerrada.');
   await page.getByRole('button', { name: 'Elegir: Hogar al anochecer' }).click();
   await expect(
-    page.getByRole('group', { name: /Cruzar hacia «Hogar al anochecer»/ }),
+    page.getByRole('group', { name: /Abrir la boca hacia «Hogar al anochecer»/ }),
   ).toBeVisible();
   await page.getByRole('button', { name: 'Todavía no' }).click();
-  await expect(page.getByRole('button', { name: 'Cruzar' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Abrir', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Elegir: Hogar al anochecer' })).toBeFocused();
   await page.getByRole('button', { name: 'Elegir: La Sala de Fragmentos, llena' }).click();
-  await page.getByRole('button', { name: 'Cruzar' }).click();
+  await page.getByRole('button', { name: 'Abrir', exact: true }).click();
+  await expect
+    .poll(async () => page.evaluate(() => window.__juego?.skyMouth?.()))
+    .toEqual({
+      chosen: 'fragmentos',
+      open: true,
+    });
+  expect(await page.evaluate(() => window.__juego?.flyIntoMouth?.())).toBe(true);
 
   await page.waitForURL(/mundo=hogar&final=tarde/, { timeout: 30_000 });
 });

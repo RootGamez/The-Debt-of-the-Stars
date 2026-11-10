@@ -39,12 +39,15 @@ export function mouthsBody(
 
   function ask(id: MouthId, view: string, pick: HTMLButtonElement): void {
     status.textContent = '';
-    const go = button(t('Cruzar'), 'puzzle-choice');
+    const go = button(t('Abrir'), 'puzzle-choice');
     const wait = button(t('Todavía no'), 'puzzle-choice');
     const question = element(
       'p',
       'puzzle-hint',
-      t('¿Cruzar hacia «{view}»? No hay vuelta atrás.', { view }),
+      t(
+        '¿Abrir la boca hacia «{view}»? Se abrirá en el cielo y solo se llega a ella con la nave.',
+        { view },
+      ),
     );
     question.id = 'puzzle-mouth-question';
     const lines = [question];

@@ -12,6 +12,9 @@ import { loadChronology } from './core/chronology';
 import { createSoundtrack } from './audio/soundtrack';
 import { machineTime } from './game/counterweight';
 import { createArchivoRig } from './game/archivoRig';
+import { SKY_MOUTH, crossesMouth, createSkyMouth, skyMouthCenter } from './game/skyMouth';
+import { endingFor, mouthById } from './game/epilogue';
+import { createSkyMouthView } from './render/skyMouthView';
 import { createBenchRig } from './game/benchRig';
 import { DEPTHS } from './game/depthsPlay';
 import { createDepthsRig } from './game/depthsRig';
@@ -137,6 +140,8 @@ const FIRST_ARRIVAL = {
 const NEAR_PLANE = 0.05;
 /** Lo que «pesa» para la lente del cielo una Puerta plegada pegada a ella (m): las estrellas se doblan a su alrededor. */
 const GATE_LENS_RADIUS = 14;
+/** A qué altura sobre Hogar se aparece, en la nave, tras cruzar una boca de casa (m). */
+const HOME_ARRIVAL_ALTITUDE = 300;
 /** Desde aquí, durante este evento, la imagen del Nudo se ve con claridad (cronologia.json). */
 const OBSERVATORY = 'observatorio';
 const ALIGNMENT_EVENT = 'alineacion';
@@ -478,14 +483,21 @@ function start(): void {
   reading.restoreOpened(session.savedOpened, (opened) => {
     session.saveOpened(opened);
   });
-  // En el Archivo de las Puertas: los planos del Contrapeso y las bocas de casa (cruzar una decide el final).
+  // En el Archivo de las Puertas: los planos del Contrapeso y las bocas de casa. Elegir una abre un agujero de gusano
+  // en el cielo (T11); cruzarlo con la nave decide el final.
+  const skyMouth = createSkyMouth();
+  const puertas = runtimes.get(SKY_MOUTH.world);
+  const skyView = puertas ? createSkyMouthView(puertas.world.scene) : undefined;
+  const skyWorld = new Vector3();
   const epilogue = createEpilogueRig({
     runtimes,
     knows: (conclusion) => reading.conclusions().has(conclusion),
-    onCross: (chosen) => {
-      ending = chosen;
+    onChoose: (id) => {
+      if (!puertas || !skyView) return;
+      skyMouth.open(id);
+      skyView.open(skyMouthCenter(puertas.spawn.feet, puertas.world.info.radius));
       game.ui?.closeReading();
-      mouthCross = 'boca';
+      game.ui?.notify(t('Se abre una boca en el cielo. Solo se llega a ella con la nave.'));
     },
   });
   // El sonido se sintetiza (sin archivos) y arranca con el primer gesto del jugador.
@@ -766,6 +778,25 @@ function start(): void {
       passage.reset(player.state.position);
       return placed;
     };
+    window.__juego.skyMouth = () => ({
+      chosen: skyMouth.chosen ?? null,
+      open: skyView?.isOpen ?? false,
+    });
+    window.__juego.flyIntoMouth = () => {
+      if (!skyView?.isOpen || !flight) return false;
+      return flight.startPiloting(
+        SKY_MOUTH.world,
+        skyView.center.clone().addScaledVector(skyView.center.clone().normalize(), 6),
+        skyView.center,
+        session.director.clock.t,
+      );
+    };
+    window.__juego.landHome = () => {
+      if (!flight?.piloting) return false;
+      flight.reset();
+      enterWorld(startWorld);
+      return true;
+    };
     window.__juego.toGate = (name, distance = 5) => {
       const gate = currentWorld.gates.find((g) => g.name === name);
       if (!gate || flight?.piloting) return false;
@@ -1025,6 +1056,13 @@ function start(): void {
       }
       if (overlay.playing && !awoke && !awakening) {
         awoke = true;
+        // Tras cruzar una boca de casa se aparece en el espacio, sentado en la nave, sobre Hogar (T11).
+        const homeWorld = homecomingEnding ? runtimes.get(startWorld) : undefined;
+        if (homeWorld && flight) {
+          const up = homeWorld.spawn.feet.clone().normalize();
+          const arrival = up.multiplyScalar(homeWorld.world.info.radius + HOME_ARRIVAL_ALTITUDE);
+          flight.startPiloting(startWorld, arrival, homeWorld.spawn.feet, session.director.clock.t);
+        }
         arrive(currentWorld.id);
       }
       if (timeRuns && free()) {
@@ -1147,11 +1185,28 @@ function start(): void {
       if (horizon.crossed(here.frame, here.position) && session.acceptsInput) {
         horizonCross = 'horizonte';
       }
+      // La nave entra en la boca del cielo: el final sale de la boca elegida y de los planos.
+      if (
+        skyView?.isOpen &&
+        flight?.piloting &&
+        crossesMouth(camera.position, skyView.worldCenter(skyWorld)) &&
+        session.acceptsInput
+      ) {
+        const id = skyMouth.cross();
+        const mouth = id ? mouthById(id) : undefined;
+        const chosen = mouth ? endingFor(mouth, epilogue?.play.carryingPlans ?? false) : undefined;
+        if (chosen) {
+          ending = chosen;
+          mouthCross = 'boca';
+        }
+      }
       // Al abrirse el gusano la vista se estira (después de la marea, que fija la de cada fotograma).
       gateSample = gateWormholes.update(camera.position, performance.now() / 1000);
-      gateWarp.update(gateSplit(gateSample.proximity));
-      if (gateSample.proximity > 0 && !reducedMotion) {
-        camera.fov *= 1 + gateStretch(gateSample.proximity);
+      const skyNear = skyView?.update(camera.position, performance.now() / 1000) ?? 0;
+      const near = Math.max(gateSample.proximity, skyNear);
+      gateWarp.update(gateSplit(near));
+      if (near > 0 && !reducedMotion) {
+        camera.fov *= 1 + gateStretch(near);
         camera.updateProjectionMatrix();
       }
       if (wormholeView && wormholeView.stretch > 0 && !reducedMotion) {

@@ -141,6 +141,9 @@ declare global {
       archivo?(): ArchivoSnapshot | null;
       depths?(): DepthsSnapshot | null;
       bench?(): BenchSnapshot | null;
+      skyMouth?(): { chosen: string | null; open: boolean };
+      flyIntoMouth?(): boolean;
+      landHome?(): boolean;
       toGate?(name: string, distance?: number): boolean;
       gates?(): string[];
       benchNotch?(notch: number | undefined): void;

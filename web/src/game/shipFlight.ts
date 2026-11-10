@@ -129,6 +129,8 @@ export interface ShipFlight {
   standAtLadder(onFootWorld: string): boolean;
   /** Depuración (`?debug`): la nave, pilotada, aparece quieta a esa altura sobre un mundo. */
   warpTo(world: string, altitude: number): boolean;
+  /** Empieza la partida ya sentado en la nave, en el espacio (la llegada tras cruzar un agujero de gusano estable). */
+  startPiloting(world: string, position: Vector3, toward: Vector3, t: number): boolean;
   /** La primera llegada a Umbral: la nave posada donde cayó tras el gusano (marca `PARK_Caida`). */
   parkAtCrash(): boolean;
   /** Depuración (`?debug`): la nave, pilotada, aparece quieta en `position` (marco de `world`) mirando a `toward`. */
@@ -667,19 +669,30 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
     },
     placeAt(world, position, toward) {
       if (!boarding.isPiloting || !spec.bodyOf(world)) return false;
-      up.copy(position).normalize();
-      const forward = toward.clone().sub(position);
-      forward.addScaledVector(up, -forward.dot(up));
-      if (forward.lengthSq() < 1e-6) {
-        // Hacia el centro del mundo (el núcleo de Cicatriz hueca): el morro apunta abajo y el techo, a un lado.
-        forward.copy(toward).sub(position);
-        up.copy(Math.abs(forward.y) < 0.9 * forward.length() ? Y_AXIS : X_AXIS);
-        up.addScaledVector(forward, -up.dot(forward) / forward.lengthSq()).normalize();
-      }
-      place(world, position, lookAlong(up, forward));
+      place(world, position, orientToward(position, toward));
+      return true;
+    },
+    startPiloting(world, position, toward, t) {
+      if (boarding.isPiloting || !spec.bodyOf(world)) return false;
+      place(world, position, orientToward(position, toward));
+      board(t);
       return true;
     },
   };
+
+  /** Cómo queda la nave en `position` mirando hacia `toward` con el techo hacia fuera del mundo. */
+  function orientToward(position: Vector3, toward: Vector3): Quaternion {
+    up.copy(position).normalize();
+    const forward = toward.clone().sub(position);
+    forward.addScaledVector(up, -forward.dot(up));
+    if (forward.lengthSq() < 1e-6) {
+      // Hacia el centro del mundo (el núcleo de Cicatriz hueca): el morro apunta abajo y el techo, a un lado.
+      forward.copy(toward).sub(position);
+      up.copy(Math.abs(forward.y) < 0.9 * forward.length() ? Y_AXIS : X_AXIS);
+      up.addScaledVector(forward, -up.dot(forward) / forward.lengthSq()).normalize();
+    }
+    return lookAlong(up, forward);
+  }
 
   /** Deja la nave quieta en un sitio (depuración). */
   function place(world: string, position: Vector3, orientation: Quaternion): void {

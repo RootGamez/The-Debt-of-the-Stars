@@ -52,10 +52,52 @@ void main() {
 
 interface GateEntry {
   gate: Gate;
-  root: Group;
-  time: { value: number };
-  material: ShaderMaterial;
+  mesh: WormholeMesh;
   center: Vector3;
+}
+
+export interface WormholeMesh {
+  /** El velo en espiral y su aro de luz, en el plano XY mirando a +Z, con el hueco a `OPENING` m de radio. */
+  root: Group;
+  /** Segundos reales para la espiral. */
+  time: { value: number };
+  dispose(): void;
+}
+
+/** El velo de un agujero de gusano estable: lo comparten los anillos de las Puertas y la boca del cielo. */
+export function createWormholeMesh(): WormholeMesh {
+  const time = { value: 0 };
+  const material = new ShaderMaterial({
+    vertexShader: VERTEX,
+    fragmentShader: FRAGMENT,
+    uniforms: { uTime: time, uGlow: { value: 1 } },
+    transparent: true,
+    depthWrite: false,
+    blending: AdditiveBlending,
+    side: 2,
+  });
+  const ringMaterial = new MeshBasicMaterial({
+    color: 0xfff0d0,
+    transparent: true,
+    opacity: 0.85,
+    blending: AdditiveBlending,
+    depthWrite: false,
+  });
+  const root = new Group();
+  const veil = new Mesh(new CircleGeometry(OPENING, 48), material);
+  const halo = new Mesh(new TorusGeometry(OPENING + 0.04, 0.035, 8, 56), ringMaterial);
+  root.add(veil, halo);
+  return {
+    root,
+    time,
+    dispose() {
+      root.removeFromParent();
+      veil.geometry.dispose();
+      halo.geometry.dispose();
+      material.dispose();
+      ringMaterial.dispose();
+    },
+  };
 }
 
 export interface GateWormholeSample {
@@ -79,38 +121,18 @@ export function createGateWormholes(
   isOpen: (gate: Gate) => boolean,
 ): GateWormholeView {
   const entries: GateEntry[] = [];
-  const ringMaterial = new MeshBasicMaterial({
-    color: 0xfff0d0,
-    transparent: true,
-    opacity: 0.85,
-    blending: AdditiveBlending,
-    depthWrite: false,
-  });
   const forward = new Vector3(0, 0, 1);
   const rotation = new Quaternion();
   for (const runtime of runtimes) {
     for (const gate of runtime.gates) {
-      const root = new Group();
-      root.name = `GusanoEstable_${gate.name}`;
-      root.position.copy(gate.position).addScaledVector(gate.up, RING_CENTER);
+      const mesh = createWormholeMesh();
+      mesh.root.name = `GusanoEstable_${gate.name}`;
+      mesh.root.position.copy(gate.position).addScaledVector(gate.up, RING_CENTER);
       // El plano del velo es perpendicular a hacia dónde mira el anillo.
       rotation.setFromUnitVectors(forward, gate.forward);
-      root.quaternion.copy(rotation);
-      const time = { value: 0 };
-      const material = new ShaderMaterial({
-        vertexShader: VERTEX,
-        fragmentShader: FRAGMENT,
-        uniforms: { uTime: time, uGlow: { value: 1 } },
-        transparent: true,
-        depthWrite: false,
-        blending: AdditiveBlending,
-        side: 2,
-      });
-      const veil = new Mesh(new CircleGeometry(OPENING, 48), material);
-      const halo = new Mesh(new TorusGeometry(OPENING + 0.04, 0.035, 8, 56), ringMaterial);
-      root.add(veil, halo);
-      runtime.world.scene.add(root);
-      entries.push({ gate, root, time, material, center: new Vector3() });
+      mesh.root.quaternion.copy(rotation);
+      runtime.world.scene.add(mesh.root);
+      entries.push({ gate, mesh, center: new Vector3() });
     }
   }
 
@@ -122,10 +144,10 @@ export function createGateWormholes(
       let bestPosition: Vector3 | undefined;
       for (const entry of entries) {
         const open = isOpen(entry.gate);
-        entry.root.visible = open;
+        entry.mesh.root.visible = open;
         if (!open) continue;
-        entry.time.value = time;
-        entry.root.getWorldPosition(world);
+        entry.mesh.time.value = time;
+        entry.mesh.root.getWorldPosition(world);
         const p = proximity(world.distanceTo(eye));
         if (p > best) {
           best = p;
@@ -140,11 +162,7 @@ export function createGateWormholes(
       return entries.length;
     },
     dispose() {
-      for (const { root, material } of entries) {
-        root.removeFromParent();
-        material.dispose();
-      }
-      ringMaterial.dispose();
+      for (const { mesh } of entries) mesh.dispose();
     },
   };
 }

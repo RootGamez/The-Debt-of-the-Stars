@@ -495,6 +495,11 @@ export const EN: Readonly<Record<string, string>> = {
     'The sand draws {rings} ring(s), but not the whole signature: some clamp is not where it should be.',
   'La arena dibuja el símbolo entero.': 'The sand draws the whole symbol.',
   'La placa no canta.': 'The plate does not sing.',
+  'Se abre una boca en el cielo. Solo se llega a ella con la nave.':
+    'A mouth opens in the sky. You can only reach it with the ship.',
+  Abrir: 'Open',
+  '¿Abrir la boca hacia «{view}»? Se abrirá en el cielo y solo se llega a ella con la nave.':
+    'Open the mouth toward “{view}”? It will open in the sky and can only be reached with the ship.',
   'donde está': 'where it is',
   'donde parece': 'where it seems',
   'Dibujo: una estrella se ve dieciocho grados más allá de donde está, junto a un punto oscuro que dobla la luz':
