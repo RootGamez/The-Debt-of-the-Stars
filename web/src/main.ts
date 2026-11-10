@@ -31,6 +31,7 @@ import { createWaterPlay } from './game/waterPlay';
 import { createWaterEffects } from './render/waterEffects';
 import { createTideEffects } from './game/tideEffects';
 import { insideCavity } from './physics/gravity';
+import { lookAlong } from './physics/surfaceFrame';
 import { createInteriorLights } from './render/interiorLight';
 import { createNearDetail } from './render/nearDetail';
 import { createLensView } from './render/lensView';
@@ -66,6 +67,8 @@ import { cinematicCenter, cinematicShipPosition } from './game/wormholeCinematic
 import { awakeningPose } from './game/awakening';
 import { spawnOnGround } from './physics/spawn';
 import { createWarpDistortion } from './ui/warpDistortion';
+import { gateSplit, gateStretch } from './game/gateWormhole';
+import { createGateWormholes, type GateWormholeSample } from './render/gateWormholeView';
 import { createWormholeView } from './render/wormholeView';
 import { Player } from './core/player';
 import { absorptionWindow, quietChronology, triggersAsEvents } from './core/timeline';
@@ -132,6 +135,8 @@ const FIRST_ARRIVAL = {
 } as const;
 
 const NEAR_PLANE = 0.05;
+/** Lo que «pesa» para la lente del cielo una Puerta plegada pegada a ella (m): las estrellas se doblan a su alrededor. */
+const GATE_LENS_RADIUS = 14;
 /** Desde aquí, durante este evento, la imagen del Nudo se ve con claridad (cronologia.json). */
 const OBSERVATORY = 'observatorio';
 const ALIGNMENT_EVENT = 'alineacion';
@@ -761,6 +766,15 @@ function start(): void {
       passage.reset(player.state.position);
       return placed;
     };
+    window.__juego.toGate = (name, distance = 5) => {
+      const gate = currentWorld.gates.find((g) => g.name === name);
+      if (!gate || flight?.piloting) return false;
+      const feet = gate.position.clone().addScaledVector(gate.forward, -distance);
+      player.moveTo(feet, lookAlong(gate.up, gate.forward));
+      passage.reset(player.state.position);
+      return true;
+    };
+    window.__juego.gates = () => currentWorld.gates.map((g) => g.name);
     window.__juego.place = () => ({
       world: currentWorld.id,
       inside: insideCavity(player.state.position, currentWorld.well),
@@ -925,6 +939,10 @@ function start(): void {
   const wormholeView = inPrologue ? createWormholeView() : undefined;
   // Mientras arrastra la nave, la imagen se separa en colores y crece un destello.
   const warpDistortion = inPrologue ? createWarpDistortion(renderer.domElement) : undefined;
+  // Las Puertas plegadas son agujeros de gusano estables (T11): su velo, y la imagen que se deforma al acercarse.
+  const gateWormholes = createGateWormholes(runtimes.values(), gateOpen);
+  const gateWarp = createWarpDistortion(renderer.domElement);
+  let gateSample: GateWormholeSample | undefined;
   let crossingAsked = false;
   function openWormhole(): void {
     const moon = systemScene.groupOf(WORMHOLE.world);
@@ -1130,6 +1148,12 @@ function start(): void {
         horizonCross = 'horizonte';
       }
       // Al abrirse el gusano la vista se estira (después de la marea, que fija la de cada fotograma).
+      gateSample = gateWormholes.update(camera.position, performance.now() / 1000);
+      gateWarp.update(gateSplit(gateSample.proximity));
+      if (gateSample.proximity > 0 && !reducedMotion) {
+        camera.fov *= 1 + gateStretch(gateSample.proximity);
+        camera.updateProjectionMatrix();
+      }
       if (wormholeView && wormholeView.stretch > 0 && !reducedMotion) {
         camera.fov *= 1 + wormholeView.stretch;
         camera.updateProjectionMatrix();
@@ -1204,7 +1228,12 @@ function start(): void {
         aligned: session.activeEventIds.includes(ALIGNMENT_EVENT),
         inObservatory: systemScene.referenceWorld === OBSERVATORY,
         time: performance.now() / 1000,
-        hole: hole ?? wormholeView?.lens(),
+        hole:
+          hole ??
+          wormholeView?.lens() ??
+          (gateSample.position && gateSample.proximity > 0.05
+            ? { position: gateSample.position, radius: GATE_LENS_RADIUS * gateSample.proximity }
+            : undefined),
       });
       soundtrack.update({
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,

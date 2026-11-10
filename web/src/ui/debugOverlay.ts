@@ -141,6 +141,8 @@ declare global {
       archivo?(): ArchivoSnapshot | null;
       depths?(): DepthsSnapshot | null;
       bench?(): BenchSnapshot | null;
+      toGate?(name: string, distance?: number): boolean;
+      gates?(): string[];
       benchNotch?(notch: number | undefined): void;
       benchHole?(hole: number | undefined): void;
       depthsPendulum?(pendulum: number | undefined): void;
