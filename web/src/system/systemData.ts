@@ -35,12 +35,39 @@ export interface BodySpec {
   spin: 'locked' | number;
   /** Ángulo de giro al empezar el ciclo, o respecto a la órbita si está bloqueado (rad). */
   spinPhase: number;
+  /** Si el cuerpo está fijo en un punto (los anclajes del Cerco, fuera del plano de las órbitas): su sitio (m). */
+  fixedPosition?: readonly [number, number, number];
   /** Oculto (el Nudo, `"oculto": true`): la nave no lo ofrece como objetivo hasta tenerlo cerca. */
   hidden: boolean;
 }
 
+/** Un anillo del Cerco: un círculo máximo que pasa siempre por los dos polos. */
+export interface RingSpec {
+  /** Radio (m). */
+  radius: number;
+  /** Segundos por vuelta alrededor del eje de los polos; el signo es el sentido. */
+  period: number;
+  /** Cuánto está construido (0 a 1). */
+  complete: number;
+  /** Giro al empezar el ciclo (rad). */
+  phase: number;
+}
+
+/** La estructura inconclusa alrededor de la estrella (el Cerco de los Ausentes). */
+export interface StructureSpec {
+  rings: readonly RingSpec[];
+  /** Ancho de la banda (m, a lo largo del eje) y grosor (m, en radial). */
+  width: number;
+  thickness: number;
+  /** Dovelas por anillo. */
+  segments: number;
+  seed: number;
+}
+
 export interface SystemSpec {
   star: StarSpec;
+  /** La estructura que rodea la estrella, si la hay. */
+  structure: StructureSpec | undefined;
   bodies: readonly BodySpec[];
   bodyOf(world: string): BodySpec | undefined;
   /** Mundo donde espera la nave (`"nave"`); `undefined` = este sistema no tiene nave. */
@@ -140,26 +167,85 @@ function parseStar(raw: Record<string, unknown>): StarSpec {
   };
 }
 
+function parseFixedPosition(world: string, raw: unknown): readonly [number, number, number] {
+  if (!Array.isArray(raw) || raw.length !== 3)
+    fail(`${world}.posicion debe ser una lista de tres números [x, y, z]`);
+  const [x, y, z] = raw.map((value: unknown, i) =>
+    finiteNumber(value, `${world}.posicion[${String(i)}]`),
+  );
+  return [x ?? 0, y ?? 0, z ?? 0];
+}
+
 function parseBody(raw: unknown, starRadius: number, knownWorlds: readonly string[]): BodySpec {
   if (!isRecord(raw) || typeof raw.mundo !== 'string')
     fail('cada cuerpo necesita un "mundo" de texto');
   const world = raw.mundo;
   if (!knownWorlds.includes(world)) fail(`mundo desconocido "${world}"`);
+  if (raw.oculto !== undefined && typeof raw.oculto !== 'boolean')
+    fail(`${world}.oculto debe ser true o false`);
+  const common = {
+    hidden: raw.oculto === true,
+    world,
+    spin: parseSpin(world, raw.rotacion),
+    spinPhase: optionalNumber(raw.faseRotacion, `${world}.faseRotacion`),
+  };
+  if (raw.posicion !== undefined) {
+    if (raw.orbita !== undefined) fail(`${world} no puede tener órbita y posición fija a la vez`);
+    if (raw.periodo !== undefined && raw.periodo !== 0)
+      fail(`${world}: un cuerpo con posición fija no se mueve (periodo 0)`);
+    const fixedPosition = parseFixedPosition(world, raw.posicion);
+    const orbitRadius = Math.hypot(...fixedPosition);
+    if (orbitRadius <= starRadius) fail(`${world} está dentro de la estrella`);
+    return { ...common, fixedPosition, orbitRadius, period: 0, phase: 0 };
+  }
   const orbitRadius = finiteNumber(raw.orbita, `${world}.orbita`);
   if (orbitRadius <= 0) fail(`${world}.orbita debe ser mayor que 0`);
   if (orbitRadius <= starRadius) fail(`${world} orbita dentro de la Brasa`);
   const period = finiteNumber(raw.periodo, `${world}.periodo`);
   if (period < 0) fail(`${world}.periodo no puede ser negativo`);
-  if (raw.oculto !== undefined && typeof raw.oculto !== 'boolean')
-    fail(`${world}.oculto debe ser true o false`);
+  return { ...common, orbitRadius, period, phase: optionalNumber(raw.fase, `${world}.fase`) };
+}
+
+function parseRing(raw: unknown, index: number, starRadius: number): RingSpec {
+  const at = `estructura.anillos[${String(index)}]`;
+  if (!isRecord(raw)) fail(`${at} debe ser un objeto`);
+  const radius = finiteNumber(raw.radio, `${at}.radio`);
+  if (radius <= starRadius) fail(`${at} queda dentro de la estrella`);
+  const period = finiteNumber(raw.giro, `${at}.giro`);
+  if (period === 0) fail(`${at}.giro no puede ser 0 (segundos por vuelta, con signo)`);
   return {
-    hidden: raw.oculto === true,
-    world,
-    orbitRadius,
+    radius,
     period,
-    phase: optionalNumber(raw.fase, `${world}.fase`),
-    spin: parseSpin(world, raw.rotacion),
-    spinPhase: optionalNumber(raw.faseRotacion, `${world}.faseRotacion`),
+    complete: optionalRange(raw.terminado, `${at}.terminado`, 1, 1),
+    phase: optionalNumber(raw.fase, `${at}.fase`),
+  };
+}
+
+function parseStructure(raw: unknown, starRadius: number): StructureSpec | undefined {
+  if (raw === undefined) return undefined;
+  if (!isRecord(raw)) fail('"estructura" debe ser un objeto');
+  if (!Array.isArray(raw.anillos) || raw.anillos.length !== 2)
+    fail('estructura.anillos debe tener exactamente dos anillos');
+  const rings = raw.anillos.map((ring: unknown, i) => parseRing(ring, i, starRadius));
+  const [a, b] = rings;
+  if (a && b) {
+    if (a.radius === b.radius) fail('los dos anillos no pueden tener el mismo radio');
+    if (Math.sign(a.period) === Math.sign(b.period))
+      fail('los dos anillos deben girar en sentidos opuestos');
+  }
+  const segments = finiteNumber(raw.dovelas, 'estructura.dovelas');
+  if (!Number.isInteger(segments) || segments < 8)
+    fail('estructura.dovelas debe ser un entero de 8 o más');
+  const width = finiteNumber(raw.ancho, 'estructura.ancho');
+  const thickness = finiteNumber(raw.grosor, 'estructura.grosor');
+  if (width <= 0 || thickness <= 0)
+    fail('estructura.ancho y estructura.grosor deben ser mayores que 0');
+  return {
+    rings,
+    width,
+    thickness,
+    segments,
+    seed: optionalNumber(raw.semilla, 'estructura.semilla'),
   };
 }
 
@@ -179,6 +265,7 @@ export function parseSystem(raw: unknown, knownWorlds: readonly string[]): Syste
     fail('"bucle" debe ser true o false');
   return {
     star,
+    structure: parseStructure(raw.estructura, radius),
     bodies,
     bodyOf: (world) => byWorld.get(world),
     ship: parseShip(raw.nave, byWorld),

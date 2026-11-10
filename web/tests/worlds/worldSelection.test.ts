@@ -94,7 +94,7 @@ describe('worldFromQuery', () => {
     expect(worldFromQuery('?mundo=marte')).toBe(DEFAULT_WORLD);
   });
 
-  it('knows the eight base worlds of CONTEXTO_PLANETAS.md and the Archivo de las Puertas', () => {
+  it('knows the eight base worlds of CONTEXTO_PLANETAS.md, the Archivo de las Puertas and the two anchorages', () => {
     expect(WORLD_IDS).toEqual([
       'umbral',
       'archivo',
@@ -105,6 +105,8 @@ describe('worldFromQuery', () => {
       'hogar',
       'luna',
       'puertas',
+      'anclaje_norte',
+      'anclaje_sur',
     ]);
   });
 });
@@ -112,5 +114,6 @@ describe('worldFromQuery', () => {
 describe('worldTitle', () => {
   it('capitalizes the provisional name', () => {
     expect(worldTitle('cicatriz')).toBe('Cicatriz');
+    expect(worldTitle('anclaje_norte')).toBe('Anclaje Norte');
   });
 });

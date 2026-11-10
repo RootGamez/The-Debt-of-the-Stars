@@ -13,6 +13,8 @@
   "absorcion": {
     "cicatriz": [810, 825],
     "taller": [825, 840],
+    "anclaje_norte": [830, 842],
+    "anclaje_sur": [832, 844],
     "archivo": [840, 860],
     "umbral": [860, 885],
     "observatorio": [885, 900]

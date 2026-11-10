@@ -14,6 +14,24 @@ const spec = (patch: Partial<BodySpec> = {}): BodySpec => ({
   ...patch,
 });
 
+describe('bodyPose of a fixed body', () => {
+  const pole = spec({ fixedPosition: [0, 270, 0], orbitRadius: 270, period: 0, spin: 0 });
+
+  it('stays where it was put, at rest, whatever the time', () => {
+    for (const t of [0, 77, 900]) {
+      const pose = bodyPose(pole, t);
+
+      expect(pose.position.toArray()).toEqual([0, 270, 0]);
+      expect(pose.velocity.length()).toBe(0);
+    }
+  });
+
+  it('does not turn unless it has a spin', () => {
+    expect(bodyPose(pole, 500).orientation.angleTo(bodyPose(pole, 0).orientation)).toBeCloseTo(0);
+    expect(bodyPose(pole, 0).spinRate).toBe(0);
+  });
+});
+
 describe('bodyPose', () => {
   it('starts on the orbit at the initial phase', () => {
     const pose = bodyPose(spec({ phase: 0 }), 0);

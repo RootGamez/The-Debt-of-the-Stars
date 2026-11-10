@@ -33,8 +33,20 @@ function orbitRate(spec: BodySpec): number {
   return spec.period > 0 ? TWO_PI / spec.period : 0;
 }
 
+/** Un cuerpo fijo en un punto (fuera del plano de las órbitas): quieto, y gira solo si tiene `rotacion` en segundos. */
+function fixedPose(spec: BodySpec, t: number, target: BodyPose): BodyPose {
+  const [x, y, z] = spec.fixedPosition ?? [0, 0, 0];
+  target.position.set(x, y, z);
+  target.velocity.set(0, 0, 0);
+  const turning = typeof spec.spin === 'number' && spec.spin > 0;
+  target.spinRate = turning ? TWO_PI / (spec.spin as number) : 0;
+  target.orientation.setFromAxisAngle(AXIS_Y, spec.spinPhase + target.spinRate * t);
+  return target;
+}
+
 /** Pose del cuerpo en el instante `t` del reloj de Umbral. Escribe en `target` y lo devuelve. */
 export function bodyPose(spec: BodySpec, t: number, target: BodyPose = createPose()): BodyPose {
+  if (spec.fixedPosition) return fixedPose(spec, t, target);
   const rate = orbitRate(spec);
   const angle = spec.phase + rate * t;
   const sin = Math.sin(angle);

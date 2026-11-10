@@ -7,6 +7,7 @@ import { Group, Quaternion, Vector3, type Light, type Object3D, type Scene } fro
 import { SYSTEM_FRAME, toLocalPosition, toSystemPosition } from '../system/frames';
 import { bodyPose, createPose, type BodyPose } from '../system/orbits';
 import type { BodySpec, SystemSpec } from '../system/systemData';
+import { createCercoView, type CercoView } from './cercoRings';
 import { createStarView, type StarView } from './starModel';
 
 const ORIGIN = new Vector3();
@@ -60,6 +61,11 @@ export function createSystemScene(options: SystemSceneOptions): SystemScene {
   // La estrella de este sistema: su cuerpo modelado y la luz que da (color e intensidad de su tipo).
   const star: StarView | undefined = system ? createStarView(system.star) : undefined;
   if (star) scene.add(star.object);
+  // El Cerco que la rodea (si lo hay): cuelga de la estrella y gira con el marco del sistema.
+  const cerco: CercoView | undefined = system?.structure
+    ? createCercoView(system.structure)
+    : undefined;
+  if (cerco) scene.add(cerco.object);
   if (system) {
     sun.color.setHex(system.star.lightColor);
     sun.intensity = system.star.intensity;
@@ -110,7 +116,13 @@ export function createSystemScene(options: SystemSceneOptions): SystemScene {
       }
       toLocalPosition(referencePose, ORIGIN, starPosition);
       star?.object.position.copy(starPosition);
+      star?.object.quaternion.copy(inverse);
       star?.update(t);
+      if (cerco) {
+        cerco.object.position.copy(starPosition);
+        cerco.object.quaternion.copy(inverse);
+        cerco.update(t);
+      }
       sun.position.copy(starPosition);
       sky.quaternion.copy(inverse);
     },
@@ -131,6 +143,10 @@ export function createSystemScene(options: SystemSceneOptions): SystemScene {
       if (star) {
         scene.remove(star.object);
         star.dispose();
+      }
+      if (cerco) {
+        scene.remove(cerco.object);
+        cerco.dispose();
       }
     },
   };

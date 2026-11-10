@@ -13,6 +13,8 @@ export const WORLD_IDS = [
   'hogar',
   'luna',
   'puertas',
+  'anclaje_norte',
+  'anclaje_sur',
 ] as const;
 
 export type WorldId = (typeof WORLD_IDS)[number];
@@ -84,7 +86,8 @@ export function replayHref(href: string, saved: boolean): string {
   return url.toString();
 }
 
-/** "umbral" → "Umbral". */
+/** "umbral" → "Umbral"; "anclaje_norte" → "Anclaje Norte". */
 export function worldTitle(id: string): string {
-  return t(id.charAt(0).toUpperCase() + id.slice(1));
+  const words = id.split('_').map((word) => word.charAt(0).toUpperCase() + word.slice(1));
+  return t(words.join(' '));
 }

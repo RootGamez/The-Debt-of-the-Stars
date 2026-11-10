@@ -31,6 +31,8 @@ export const WORLD_LOG: readonly LoggedWorld[] = [
   { id: 'cicatriz', name: t('Cicatriz'), where: t('junto al Taller · luz roja') },
   { id: 'observatorio', name: t('Observatorio'), where: t('la luz llega tarde') },
   { id: 'laboratorio', name: t('Laboratorio Oculto'), where: t('dentro del Nudo') },
+  { id: 'anclaje_norte', name: t('Anclaje Norte'), where: t('un polo del Cerco') },
+  { id: 'anclaje_sur', name: t('Anclaje Sur'), where: t('el otro polo del Cerco') },
 ];
 
 /** Casa: no se nombran, ya tienen nombre. */

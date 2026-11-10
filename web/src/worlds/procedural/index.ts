@@ -1,6 +1,7 @@
 // Los mundos, modelados por código (Fase 11, docs/plan-fase-11-modelado-por-codigo.md): sustituyen a los .glb que
 // se exportaban de Blender, con la misma forma de escena.
 import type { Group } from 'three';
+import { buildAnclaje } from './anclaje';
 import { buildArchivo } from './archivo';
 import { buildCicatriz } from './cicatriz';
 import { buildHogar } from './hogar';
@@ -21,6 +22,8 @@ const BUILDERS: ReadonlyMap<string, () => Group> = new Map([
   ['observatorio', () => buildObservatorio()],
   ['laboratorio', () => buildLaboratorio()],
   ['puertas', () => buildPuertas()],
+  ['anclaje_norte', () => buildAnclaje('norte')],
+  ['anclaje_sur', () => buildAnclaje('sur')],
 ]);
 
 /** Si ese mundo se construye por código. */

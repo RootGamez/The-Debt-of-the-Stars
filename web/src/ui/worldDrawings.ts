@@ -461,6 +461,37 @@ function dusk(umbral: boolean): Painter {
   };
 }
 
+/** Un polo del Cerco: la estación de los anillos, con la estrella roja detrás y los brazos que se cruzan. */
+function anclaje(p: Paint): void {
+  const { ctx, W, H } = p;
+  p.fillSky([
+    [0, '#05050b'],
+    [0.7, '#1a0c12'],
+    [1, '#3a1612'],
+  ]);
+  p.stars(120, 0.8, 0.9);
+  const glow = ctx.createRadialGradient(W * 0.5, H * 1.05, H * 0.05, W * 0.5, H * 1.05, H * 0.9);
+  glow.addColorStop(0, 'rgba(255,90,40,.85)');
+  glow.addColorStop(1, 'rgba(255,90,40,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+  // Los dos anillos, en cruz, y la estación en su cruce.
+  ctx.strokeStyle = '#a8643a';
+  ctx.lineWidth = Math.max(2, H * 0.012);
+  for (const tilt of [0.35, -0.35]) {
+    ctx.beginPath();
+    ctx.ellipse(W * 0.5, H * 0.5, W * 0.4, H * 0.12, tilt, 0.2, Math.PI * 1.6);
+    ctx.stroke();
+  }
+  const hub = ctx.createRadialGradient(W * 0.46, H * 0.46, H * 0.02, W * 0.5, H * 0.5, H * 0.2);
+  hub.addColorStop(0, '#8a919c');
+  hub.addColorStop(1, '#2a3038');
+  p.disc(W * 0.5, H * 0.5, H * 0.2, hub);
+  ctx.fillStyle = '#7a5438';
+  ctx.fillRect(W * 0.5 - H * 0.2, H * 0.47, H * 0.4, H * 0.06);
+  p.disc(W * 0.5, H * 0.34, H * 0.015, '#ffcf8a');
+}
+
 const PAINTERS: Readonly<Record<string, Painter>> = {
   hogar,
   luna,
@@ -470,6 +501,8 @@ const PAINTERS: Readonly<Record<string, Painter>> = {
   cicatriz: dusk(false),
   observatorio,
   laboratorio,
+  anclaje_norte: anclaje,
+  anclaje_sur: anclaje,
 };
 
 /** La semilla del azar de cada dibujo (la de la maqueta). */

@@ -51,7 +51,7 @@ export function createShipMap(options: ShipMapOptions): ShipMap {
   root.append(title, canvas, help);
   document.body.append(root);
   const context = canvas.getContext('2d');
-  const shown = spec.bodies.filter((body) => !body.hidden);
+  const shown = spec.bodies.filter((body) => !body.hidden && !body.fixedPosition);
   const reach = Math.max(...shown.map((b) => b.orbitRadius)) * 1.05;
   const scale = (SIZE / 2 - MARGIN) / reach;
   let timer: number | undefined;

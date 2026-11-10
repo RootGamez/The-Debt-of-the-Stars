@@ -49,6 +49,7 @@ export function createOrbitMap(
     context.fillRect(0, 0, SIZE, SIZE);
     context.strokeStyle = 'rgba(255, 255, 255, 0.18)';
     for (const body of system.bodies) {
+      if (body.fixedPosition) continue; // los anclajes no orbitan: no tienen círculo
       context.beginPath();
       context.arc(half, half, body.orbitRadius * scale, 0, Math.PI * 2);
       context.stroke();

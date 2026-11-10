@@ -115,6 +115,94 @@ describe('parseSystem', () => {
     expect(() => parseSystem({ ...valid, estrella: star }, WORLD_IDS)).toThrow(/^sistema: /);
   });
 
+  it('places a fixed body at a point instead of on an orbit', () => {
+    const fixed = parseSystem(
+      withBody({ orbita: undefined, posicion: [0, 270, 0], periodo: undefined, rotacion: 0 }),
+      WORLD_IDS,
+    );
+    const body = fixed.bodies[0];
+
+    expect(body?.fixedPosition).toEqual([0, 270, 0]);
+    expect(body?.orbitRadius).toBe(270);
+    expect(body?.period).toBe(0);
+    expect(fixed.bodies[1]?.fixedPosition).toBeUndefined();
+  });
+
+  it.each([
+    ['a fixed position that is not three numbers', { orbita: undefined, posicion: [0, 270] }],
+    ['a fixed position inside the star', { orbita: undefined, posicion: [0, 50, 0] }],
+    ['an orbit and a fixed position together', { posicion: [0, 270, 0] }],
+    ['a fixed body that moves', { orbita: undefined, posicion: [0, 270, 0], periodo: 10 }],
+  ])('rejects %s with a Spanish message', (_name, patch) => {
+    expect(() => parseSystem(withBody({ periodo: 0, ...patch }), WORLD_IDS)).toThrow(/^sistema: /);
+  });
+
+  it('reads the unfinished structure around the star', () => {
+    const cerco = {
+      anillos: [
+        { radio: 260, giro: 720, terminado: 0.7 },
+        { radio: 280, giro: -540, terminado: 0.45, fase: 1 },
+      ],
+      ancho: 14,
+      grosor: 6,
+      dovelas: 48,
+      semilla: 4,
+    };
+    const system = parseSystem({ ...valid, estructura: cerco }, WORLD_IDS);
+
+    expect(system.structure).toMatchObject({ width: 14, thickness: 6, segments: 48, seed: 4 });
+    expect(system.structure?.rings).toEqual([
+      { radius: 260, period: 720, complete: 0.7, phase: 0 },
+      { radius: 280, period: -540, complete: 0.45, phase: 1 },
+    ]);
+    expect(parseSystem(valid, WORLD_IDS).structure).toBeUndefined();
+  });
+
+  it.each([
+    ['one ring only', { anillos: [{ radio: 260, giro: 720, terminado: 0.5 }] }],
+    [
+      'two rings of the same radius',
+      {
+        anillos: [
+          { radio: 260, giro: 720, terminado: 0.5 },
+          { radio: 260, giro: -720, terminado: 0.5 },
+        ],
+      },
+    ],
+    [
+      'rings turning the same way',
+      {
+        anillos: [
+          { radio: 260, giro: 720, terminado: 0.5 },
+          { radio: 280, giro: 540, terminado: 0.5 },
+        ],
+      },
+    ],
+    [
+      'a ring inside the star',
+      {
+        anillos: [
+          { radio: 90, giro: 720, terminado: 0.5 },
+          { radio: 280, giro: -540, terminado: 0.5 },
+        ],
+      },
+    ],
+    [
+      'a completion above 1',
+      {
+        anillos: [
+          { radio: 260, giro: 720, terminado: 2 },
+          { radio: 280, giro: -540, terminado: 0.5 },
+        ],
+      },
+    ],
+  ])('rejects a structure with %s', (_name, patch) => {
+    const base = { ancho: 14, grosor: 6, dovelas: 48, semilla: 4 };
+    expect(() => parseSystem({ ...valid, estructura: { ...base, ...patch } }, WORLD_IDS)).toThrow(
+      /^sistema: /,
+    );
+  });
+
   it('looks bodies up by world', () => {
     const system = parseSystem(valid, WORLD_IDS);
 
@@ -150,9 +238,18 @@ async function radiusOf(world: string): Promise<number> {
 describe('the real system (sistema.json)', () => {
   const system = parseSystem(systemData, WORLD_IDS);
 
-  it('holds the five worlds of the alien system and the hidden Nudo', () => {
+  it('holds the five worlds of the alien system, the hidden Nudo and the two anchorages of the Cerco', () => {
     expect(system.bodies.map((b) => b.world).sort()).toEqual(
-      ['archivo', 'cicatriz', 'laboratorio', 'observatorio', 'taller', 'umbral'].sort(),
+      [
+        'anclaje_norte',
+        'anclaje_sur',
+        'archivo',
+        'cicatriz',
+        'laboratorio',
+        'observatorio',
+        'taller',
+        'umbral',
+      ].sort(),
     );
     expect(system.bodies.filter((b) => b.hidden).map((b) => b.world)).toEqual(['laboratorio']);
   });
@@ -166,8 +263,10 @@ describe('the real system (sistema.json)', () => {
       // Todo el alcance de su gravedad (3 radios desde el centro) queda fuera de la Brasa.
       expect(body.orbitRadius - system.star.radius).toBeGreaterThan(radiusOfWorld(body.world) * 3);
     }
-    for (const a of system.bodies) {
-      for (const b of system.bodies) {
+    // Los anclajes están fijos fuera del plano de las órbitas: se comprueban aparte.
+    const orbiting = system.bodies.filter((b) => !b.fixedPosition);
+    for (const a of orbiting) {
+      for (const b of orbiting) {
         if (a.world >= b.world) continue;
         const surfaces = radiusOfWorld(a.world) + radiusOfWorld(b.world);
         expect(Math.abs(a.orbitRadius - b.orbitRadius)).toBeGreaterThan(surfaces * 2);
@@ -176,11 +275,20 @@ describe('the real system (sistema.json)', () => {
   });
 
   it('puts the inner worlds on faster orbits (Kepler)', () => {
-    const periods = [...system.bodies]
+    const periods = system.bodies
+      .filter((b) => !b.fixedPosition)
       .sort((a, b) => a.orbitRadius - b.orbitRadius)
       .map((b) => b.period);
 
     expect([...periods].sort((a, b) => a - b)).toEqual(periods);
+  });
+
+  it('ties the two anchorages to the poles of the Cerco, half way between its two rings', () => {
+    const radii = (system.structure?.rings ?? []).map((r) => r.radius);
+    const middle = (Math.min(...radii) + Math.max(...radii)) / 2;
+
+    expect(system.bodyOf('anclaje_norte')?.fixedPosition).toEqual([0, middle, 0]);
+    expect(system.bodyOf('anclaje_sur')?.fixedPosition).toEqual([0, -middle, 0]);
   });
 
   it('gives Taller a day of three minutes (CONTEXTO_PLANETAS.md)', () => {

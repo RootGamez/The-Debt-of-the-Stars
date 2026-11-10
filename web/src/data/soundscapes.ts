@@ -118,6 +118,33 @@ export const WORLD_SOUNDSCAPES: Readonly<Record<string, Soundscape>> = {
     tones: [{ frequency: 120, gain: 0.02, type: 'sine' }],
     pulse: { everySeconds: 1, frequency: 1800, decay: 0.03, gain: 0.1, noise: true },
   },
+  // 🟡 Los anclajes del Cerco: la estructura crujiendo despacio y un zumbido grave de cojinetes que nadie apagó.
+  anclaje_norte: {
+    noise: {
+      filter: 'lowpass',
+      frequency: 220,
+      q: 0.8,
+      gain: 0.03,
+      swell: { hz: 0.06, depth: 0.5 },
+    },
+    tones: [
+      { frequency: 58, gain: 0.025, type: 'sine' },
+      { frequency: 87, gain: 0.01, type: 'triangle', detune: 6 },
+    ],
+  },
+  anclaje_sur: {
+    noise: {
+      filter: 'lowpass',
+      frequency: 200,
+      q: 0.8,
+      gain: 0.03,
+      swell: { hz: 0.05, depth: 0.5 },
+    },
+    tones: [
+      { frequency: 55, gain: 0.025, type: 'sine' },
+      { frequency: 82, gain: 0.01, type: 'triangle', detune: -6 },
+    ],
+  },
   // Un mundo vivo: viento templado.
   hogar: {
     noise: {

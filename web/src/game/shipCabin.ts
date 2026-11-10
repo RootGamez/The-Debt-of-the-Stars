@@ -38,6 +38,8 @@ const LADDER_STOWED_LENGTH = 0.25;
 /** Colores de los mundos en el planetario (🟡): por orden de la Brasa hacia fuera. */
 const ORRERY_COLORS = ['#c96f4a', '#d9b26a', '#5fa0c8', '#9b8bd0', '#7bb37a', '#d68aa1', '#a0a0a0'];
 
+const ANCHORAGE_COLOR = '#caa56a';
+
 /** Cada cuánto parpadean las luces de posición (s) y cuánto dura cada destello (s): dos destellos seguidos. */
 export const BEACON = { period: 1.6, flash: 0.12, gap: 0.22 } as const;
 
@@ -76,11 +78,16 @@ function orreryBalls(spec: SystemSpec | undefined, parent: Object3D): Map<string
   const visible = [...spec.bodies]
     .filter((b) => !b.hidden)
     .sort((a, b) => a.orbitRadius - b.orbitRadius);
-  visible.forEach((body, k) => {
+  // Los anclajes del Cerco (fijos, fuera del plano) no cuentan para el color de los mundos que orbitan.
+  let orbiting = 0;
+  visible.forEach((body) => {
+    const color = body.fixedPosition
+      ? ANCHORAGE_COLOR
+      : ORRERY_COLORS[orbiting++ % ORRERY_COLORS.length];
     const mesh = new Mesh(
       ball(0.035, 1),
       new MeshStandardMaterial({
-        color: ORRERY_COLORS[k % ORRERY_COLORS.length],
+        color,
         flatShading: true,
       }),
     );
