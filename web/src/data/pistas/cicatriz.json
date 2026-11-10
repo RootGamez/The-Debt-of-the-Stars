@@ -295,5 +295,34 @@
       ],
       "hechos": []
     }
+  },
+  {
+    "id": "cicatriz.placa_motor",
+    "mundo": "cicatriz",
+    "tipo": "texto",
+    "titulo": "La placa del motor viejo",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una placa de hierro clavada en un poste junto a la palanca, con letra apretada:",
+        "«Motor de la garganta: seis medidas, a dos palmos del eje.»"
+      ],
+      "hechos": ["contrapeso.motor_medidas"]
+    }
+  },
+  {
+    "id": "cicatriz.placa",
+    "mundo": "cicatriz",
+    "tipo": "observacion",
+    "lector": "placa",
+    "titulo": "La placa que canta",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una placa cuadrada de bronce sobre un pie, con arena fina esparcida. Cada vez que late la máquina, la arena salta y corre.",
+        "Hay seis agujeros en su borde y tres pinzas. Según por dónde se sujete la placa, la arena se queda en un sitio o en otro."
+      ],
+      "hechos": ["cicatriz.firma", "deuda.resonancia"]
+    }
   }
 ]

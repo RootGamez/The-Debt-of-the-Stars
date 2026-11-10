@@ -528,6 +528,67 @@ const BUILDERS: Readonly<Record<string, () => Sketch>> = {
     };
   },
 
+  /** `contrapeso.equilibrio`: la viga con la maqueta del motor viejo y las pesas. */
+  balanza() {
+    const pen = new Pen(149);
+    pen.line([100, 112], [100, 62]);
+    pen.line([84, 112], [116, 112]);
+    pen.line([28, 62], [176, 62]);
+    pen.circle(100, 62, 3, true);
+    pen.line([54, 62], [54, 74]);
+    pen.poly([
+      [44, 74],
+      [64, 74],
+      [64, 92],
+      [44, 92],
+      [44, 74],
+    ]);
+    pen.label(54, 106, t('6 × 2'));
+    pen.line([152, 62], [152, 70]);
+    pen.circle(152, 76, 6, true);
+    pen.label(152, 94, t('3 × 4'), 'middle', true);
+    for (let k = 1; k <= 6; k++) pen.line([100 + k * 12, 58], [100 + k * 12, 66]);
+    pen.label(100, 24, t('peso por distancia'), 'middle');
+    return {
+      alt: t(
+        'Dibujo: una viga sobre un poste con la maqueta del motor a un lado, seis medidas a dos del eje, y una pesa de tres a cuatro muescas del otro lado: doce y doce',
+      ),
+      shapes: pen.shapes,
+    };
+  },
+
+  /** `cicatriz.firma`: la placa con tres pinzas y la arena formando el símbolo. */
+  placa() {
+    const pen = new Pen(151);
+    pen.poly([
+      [44, 22],
+      [156, 22],
+      [156, 118],
+      [44, 118],
+      [44, 22],
+    ]);
+    const cx = 100;
+    const cy = 70;
+    pen.circle(cx, cy, 22, true);
+    pen.circle(cx, cy, 40, true);
+    for (const hole of [1, 3, 5]) {
+      const a = (((hole - 1) / 6) * 360 * Math.PI) / 180;
+      pen.dot(cx + Math.cos(a) * 40, cy + Math.sin(a) * 40, 3.6, true);
+      pen.line([cx, cy], [cx + Math.cos(a) * 40, cy + Math.sin(a) * 40], true, true);
+    }
+    for (const hole of [2, 4, 6]) {
+      const a = (((hole - 1) / 6) * 360 * Math.PI) / 180;
+      pen.circle(cx + Math.cos(a) * 40, cy + Math.sin(a) * 40, 2.6);
+    }
+    pen.label(100, 132, t('tres pinzas, un símbolo'), 'middle');
+    return {
+      alt: t(
+        'Dibujo: una placa cuadrada con tres pinzas en tres de sus seis agujeros y la arena formando dos aros y tres rayas: el símbolo entero',
+      ),
+      shapes: pen.shapes,
+    };
+  },
+
   /** `bocas.relojes_distintos`: tres bocas de Puerta, cada una con su hora. */
   bocas() {
     const pen = new Pen(79);

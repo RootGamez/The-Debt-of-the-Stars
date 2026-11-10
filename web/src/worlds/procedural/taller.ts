@@ -46,6 +46,7 @@ import {
   type Triple,
 } from './kit';
 import { seededRandom, type Random } from './noise';
+import { buildBalance } from './benchBuilders';
 import { followSun, sunInWorld } from './sun';
 import {
   BRIDGE_EVENT,
@@ -373,6 +374,15 @@ class TallerBuilder {
     this.mark('INT_cuna', f, [0, -1.6, 1.2], { clue_id: 'taller.cuna', kind: 'objeto' });
     this.mark('INT_nota_cuna', f, [3.4, -2.6, 1.0], { clue_id: 'taller.nota_cuna', kind: 'texto' });
     this.mark('INT_manual', f, [-3.6, -3, 1.2], { clue_id: 'taller.manual', kind: 'texto' });
+    // La Balanza del Contrapeso (P6): su viga, la maqueta y las pesas las dibuja render/benchView.ts.
+    buildBalance(
+      v,
+      f,
+      (name, frame, at, props) => {
+        this.mark(name, frame, at, props);
+      },
+      { post: P.metal, base: P.dark, accent: P.amber, plate: P.wall, hole: P.dark },
+    );
   }
 
   /** Los Dormitorios: tres cabinas y, fuera, las camas de los gemelos bajo un toldo. */

@@ -87,5 +87,24 @@
       "“Synchronization. Note how long the Counterweight spends on each leg and the clock each place keeps. Each leg is corrected with the pace of its place: what happens in a slow place counts for less than what happens in a fast one. Add the corrections: that is the drift to take off.”",
       "An example, in pencil: “Ten minutes at the testing site, five in flight and four at the Workshop.” And at the foot: “The machine keeps its own pace. Match it in the cradle.”"
     ]
+  },
+  "taller.pesa_1": {
+    "titulo": "The weight of one measure",
+    "superficial": ["An iron weight the size of a fist, with one line engraved: one measure."]
+  },
+  "taller.pesa_2": {
+    "titulo": "The weight of two measures",
+    "superficial": ["A slightly larger iron weight, with two lines engraved: two measures."]
+  },
+  "taller.pesa_3": {
+    "titulo": "The weight of three measures",
+    "superficial": ["A large iron weight, with three lines engraved: three measures."]
+  },
+  "taller.balanza": {
+    "titulo": "The Counterweight Balance",
+    "superficial": [
+      "A bronze beam on a post. On one side hangs the model of the old motor; on the other, six notches marked with lines, each farther from the axis than the last.",
+      "Everything weighs less here than anywhere else, but a balance evens out all the same: what counts is the weight and how far out it hangs."
+    ]
   }
 }

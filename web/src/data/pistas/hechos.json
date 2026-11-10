@@ -554,5 +554,28 @@
     "rumor": "¿Qué figura forman los brazos del Contrapeso?",
     "enlaces": ["contrapeso.desafina"],
     "dibujo": "escalera"
+  },
+  {
+    "id": "contrapeso.equilibrio",
+    "hilos": ["H6"],
+    "frase": "El Contrapeso se instaló equilibrando peso por distancia, también donde todo pesa menos.",
+    "rumor": "¿Cómo se equilibraba la instalación del Contrapeso?",
+    "enlaces": ["contrapeso.reloj"],
+    "dibujo": "balanza"
+  },
+  {
+    "id": "contrapeso.motor_medidas",
+    "hilos": ["H6"],
+    "frase": "El motor viejo de la garganta pesa seis medidas y cuelga a dos palmos del eje.",
+    "rumor": "¿Cuánto pesa el motor viejo y a qué distancia?",
+    "enlaces": ["contrapeso.sustituye_motor"]
+  },
+  {
+    "id": "cicatriz.firma",
+    "hilos": ["H2"],
+    "frase": "Cada Puerta canta su figura: el símbolo es la firma de su frecuencia.",
+    "rumor": "¿Qué es el símbolo que se repite?",
+    "enlaces": ["casa.simbolo_encaja"],
+    "dibujo": "placa"
   }
 ]

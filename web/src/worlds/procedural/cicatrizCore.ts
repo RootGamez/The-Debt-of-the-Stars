@@ -3,6 +3,7 @@
 // una banda de 12 m de radio que se camina por dentro, con el micro agujero encima. En ella, la cuna, la palanca,
 // la bitácora, la lista de mundos y el visor del núcleo (todo lo de la Fase 10C, recolocado). La sostienen el Eje
 // (la columna desde la cara interior, con su Puerta plegada) y los Radios.
+import { buildMotorPlate } from './benchBuilders';
 import {
   AdditiveBlending,
   BackSide,
@@ -475,6 +476,21 @@ function lever(builder: CicatrizBuilder): void {
   );
   v.add(PALETTE.ember, ball(0.07, 1), f.at([0, -0.29, 1.58]), 'light', { glow: 1.8 });
   builder.mark('INT_palanca', f, [0, -0.7, 1.25], { clue_id: 'cicatriz.palanca', kind: 'objeto' });
+  // La placa del motor viejo (pista de la Balanza del Taller, P6).
+  buildMotorPlate(
+    v,
+    f,
+    (name, frame, at, props) => {
+      builder.mark(name, frame, at, props);
+    },
+    {
+      post: PALETTE.slate,
+      base: PALETTE.black,
+      accent: PALETTE.ember,
+      plate: PALETTE.rust,
+      hole: PALETTE.black,
+    },
+  );
 }
 
 /** La bitácora (una consola con tiras de papel) y la lista de mundos (un panel con huecos). */

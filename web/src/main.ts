@@ -12,6 +12,7 @@ import { loadChronology } from './core/chronology';
 import { createSoundtrack } from './audio/soundtrack';
 import { machineTime } from './game/counterweight';
 import { createArchivoRig } from './game/archivoRig';
+import { createBenchRig } from './game/benchRig';
 import { DEPTHS } from './game/depthsPlay';
 import { createDepthsRig } from './game/depthsRig';
 import { createBellsRig } from './game/bellsRig';
@@ -460,6 +461,7 @@ function start(): void {
       bells?.play.reset();
       archivoPuzzles?.play.reset();
       depths?.play.reset();
+      bench?.play.reset();
       track?.reset();
       arrive(startWorld);
     },
@@ -487,6 +489,8 @@ function start(): void {
   const archivoPuzzles = createArchivoRig({ scene, runtimes });
   // La cisterna del Fondo y los péndulos de la Sala Cerrada (T7).
   const depths = createDepthsRig({ scene, runtimes });
+  // La Balanza del Contrapeso del Taller y la placa que canta de Cicatriz (T8).
+  const bench = createBenchRig({ scene, runtimes });
   // Las campanas del Anfiteatro de Umbral (P1): coger, poner en el canal y oír a la bola pasar.
   const bells = createBellsRig({
     scene,
@@ -606,6 +610,7 @@ function start(): void {
       bells?.play.actions,
       archivoPuzzles?.play.actions,
       depths?.play.actions,
+      bench?.play.actions,
       epilogue?.play.actions,
       homecoming?.play.actions,
     ]),
@@ -614,6 +619,7 @@ function start(): void {
       ...bells?.readers,
       ...archivoPuzzles?.readers,
       ...depths?.readers,
+      ...bench?.readers,
       ...epilogue?.readers,
       ...(track && { pista: (status, _solved, solve) => trackClockBody(track, status, solve) }),
       ocular: (status, solved, solve) => ocularBody(ocularSource, status, solved, solve),
@@ -800,6 +806,13 @@ function start(): void {
     window.__juego.absorption = () => absorption?.snapshot() ?? null;
     window.__juego.counterweight = () => counterweight?.play.snapshot() ?? null;
     window.__juego.bells = () => bells?.play.snapshot() ?? null;
+    window.__juego.bench = () => bench?.play.snapshot() ?? null;
+    window.__juego.benchNotch = (notch) => {
+      bench?.forceNotch(notch);
+    };
+    window.__juego.benchHole = (hole) => {
+      bench?.forceHole(hole);
+    };
     window.__juego.depths = () => depths?.play.snapshot() ?? null;
     window.__juego.depthsPendulum = (pendulum) => {
       depths?.forcePendulum(pendulum);
@@ -1215,6 +1228,7 @@ function start(): void {
       );
       bells?.update(camera, t, timeRuns ? dt : 0);
       depths?.update(camera, t);
+      bench?.update(camera);
       archivoPuzzles?.update(
         camera,
         timeRuns ? dt : 0,

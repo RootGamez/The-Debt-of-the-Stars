@@ -145,5 +145,19 @@
     "profunda": [
       "Below, another hand added: “All of this was ground. What the Gates bit off and did not take stayed here, turning. The rest fell into other skies.”"
     ]
+  },
+  "cicatriz.placa_motor": {
+    "titulo": "The plate of the old motor",
+    "superficial": [
+      "An iron plate nailed to a post beside the lever, in cramped writing:",
+      "“Throat motor: six measures, at two palms from the axis.”"
+    ]
+  },
+  "cicatriz.placa": {
+    "titulo": "The singing plate",
+    "superficial": [
+      "A square bronze plate on a stand, with fine sand scattered on it. Each time the machine beats, the sand jumps and runs.",
+      "There are six holes on its edge and three clamps. Depending on where the plate is held, the sand stays in one place or another."
+    ]
   }
 }

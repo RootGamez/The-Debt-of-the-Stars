@@ -84,7 +84,8 @@ describe('Cicatriz built in code', () => {
   });
 
   it('keeps every source of the clue graph and the old motor with its place outside', () => {
-    expect(world.markers.interactions.map((i) => i.clueId).sort()).toEqual(
+    // La placa que canta tiene una marca por agujero: varias marcas comparten fuente.
+    expect([...new Set(world.markers.interactions.map((i) => i.clueId))].sort()).toEqual(
       cicatrizSources.map((s) => s.id).sort(),
     );
     const names = new Set<string>();

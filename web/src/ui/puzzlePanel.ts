@@ -220,6 +220,8 @@ export function createPuzzlePanel(
         return { body: element('p', 'puzzle-hint', t('La manivela no gira.')) };
       case 'pendulos':
         return { body: element('p', 'puzzle-hint', t('El cerrojo no cede.')) };
+      case 'placa':
+        return { body: element('p', 'puzzle-hint', t('La placa no canta.')) };
     }
   }
 

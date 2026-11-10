@@ -32,6 +32,7 @@ export const PUZZLE_READERS = [
   'campanas',
   'planetario',
   'pendulos',
+  'placa',
 ] as const;
 export type PuzzleReader = (typeof PUZZLE_READERS)[number];
 

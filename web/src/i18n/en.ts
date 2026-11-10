@@ -475,6 +475,26 @@ export const EN: Readonly<Record<string, string>> = {
     'The pendulums no longer go together, but the beam keeps trembling: it is not the figure yet.',
   'La trampilla de la Sala Cerrada está abierta.': 'The hatch of the Sealed Room is open.',
   'El cerrojo no cede.': 'The latch will not give.',
+  '6 × 2': '6 × 2',
+  '3 × 4': '3 × 4',
+  'peso por distancia': 'weight times distance',
+  'Dibujo: una viga sobre un poste con la maqueta del motor a un lado, seis medidas a dos del eje, y una pesa de tres a cuatro muescas del otro lado: doce y doce':
+    'Drawing: a beam on a post with the model of the motor on one side, six measures at two from the axis, and a weight of three at four notches on the other side: twelve and twelve',
+  'tres pinzas, un símbolo': 'three clamps, one symbol',
+  'Dibujo: una placa cuadrada con tres pinzas en tres de sus seis agujeros y la arena formando dos aros y tres rayas: el símbolo entero':
+    'Drawing: a square plate with three clamps in three of its six holes and the sand forming two rings and three lines: the whole symbol',
+  'La arena se junta en dos aros y tres marcas: la firma entera. La placa canta.':
+    'The sand gathers into two rings and three marks: the whole signature. The plate sings.',
+  'La placa vibra con el latido de la máquina, pero la arena no dibuja nada. Faltan las pinzas.':
+    'The plate vibrates with the beat of the machine, but the sand draws nothing. The clamps are missing.',
+  'La arena corre por la placa y no se queda: ningún agujero es el bueno.':
+    'The sand runs over the plate and does not stay: none of the holes is the right one.',
+  'La arena se queda en {rings} aro(s). Faltan pinzas por poner.':
+    'The sand stays in {rings} ring(s). There are clamps still to put on.',
+  'La arena dibuja {rings} aro(s), pero no la firma entera: alguna pinza no está donde toca.':
+    'The sand draws {rings} ring(s), but not the whole signature: some clamp is not where it should be.',
+  'La arena dibuja el símbolo entero.': 'The sand draws the whole symbol.',
+  'La placa no canta.': 'The plate does not sing.',
   'donde está': 'where it is',
   'donde parece': 'where it seems',
   'Dibujo: una estrella se ve dieciocho grados más allá de donde está, junto a un punto oscuro que dobla la luz':

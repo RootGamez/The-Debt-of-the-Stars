@@ -12,7 +12,7 @@ import {
   type PointsMaterial,
 } from 'three';
 import { holeEinstein } from '../system/blackHole';
-import { apparentDirection, einsteinRadius, imageClarity } from '../system/lens';
+import { apparentDirection, doorGlow, einsteinRadius, imageClarity } from '../system/lens';
 
 /** A qué distancia de la cámara se dibuja la imagen (m) y qué ángulo ocupa (rad). */
 const IMAGE_DISTANCE = 2500;
@@ -20,6 +20,9 @@ const IMAGE_ANGLE = (0.7 * Math.PI) / 180;
 /** Más lejos de esto las estrellas no se doblan: de lejos, nada delata dónde está el Nudo. */
 const STAR_BEND_RANGE = 1200;
 const IMAGE_COLOR = 0xd8f0e0;
+/** El tamaño del brillo de la Puerta (m) y lo fuerte que llega a verse (0–1). */
+const DOOR_SIZE = 18;
+const DOOR_STRENGTH = 0.55;
 
 export interface LensInput {
   /** Posición de la cámara en la escena. */
@@ -140,6 +143,20 @@ export function createLensView(scene: Object3D, sky: Points, bending = true): Le
   const size = 2 * IMAGE_DISTANCE * Math.tan(IMAGE_ANGLE / 2);
   image.scale.set(size, size, 1);
   scene.add(image);
+  // El brillo tenue de la Puerta, en el sitio donde está de verdad (a menos de 300 m).
+  const doorMaterial = new SpriteMaterial({
+    map: texture,
+    color: IMAGE_COLOR,
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+    blending: AdditiveBlending,
+  });
+  const door = new Sprite(doorMaterial);
+  door.name = 'Brillo de la Puerta del Nudo';
+  door.visible = false;
+  door.scale.set(DOOR_SIZE, DOOR_SIZE, 1);
+  scene.add(door);
 
   // Lente 0: el Nudo. Lente 1: el agujero negro.
   const lensCenters = { value: [new Vector3(), new Vector3()] };
@@ -164,6 +181,7 @@ export function createLensView(scene: Object3D, sky: Points, bending = true): Le
       if (hole) lensCenters.value[1]?.copy(hole.position);
       if (!nudo) {
         image.visible = false;
+        door.visible = false;
         lensRadii.value[0] = 0;
         state = { visible: false, clarity: 0, offsetDegrees: null, bending, holeLens };
         return;
@@ -171,6 +189,12 @@ export function createLensView(scene: Object3D, sky: Points, bending = true): Le
       nudo.getWorldPosition(nudoPosition);
       truth.subVectors(nudoPosition, camera);
       const distance = truth.length();
+      const glow = doorGlow(distance);
+      door.visible = glow > 0;
+      if (door.visible) {
+        door.position.copy(nudoPosition);
+        doorMaterial.opacity = glow * DOOR_STRENGTH;
+      }
       lensCenters.value[0]?.copy(nudoPosition);
       lensRadii.value[0] = distance < STAR_BEND_RANGE ? einsteinRadius(distance) : 0;
 
@@ -195,6 +219,8 @@ export function createLensView(scene: Object3D, sky: Points, bending = true): Le
     },
     dispose() {
       scene.remove(image);
+      scene.remove(door);
+      doorMaterial.dispose();
       material.dispose();
       texture.dispose();
     },

@@ -48,7 +48,7 @@
         "«No lo muevan sin ajustar el reloj. Lleva la hora de aquí, y la de aquí no es la de allí. Si lo mueven a ciegas llegará con la hora equivocada, y entonces no encaja.»",
         "Debajo, con otra letra: «Ya lo sabemos.» Y debajo de eso, con la primera: «Pues no lo parece.»"
       ],
-      "hechos": ["contrapeso.reloj"]
+      "hechos": ["contrapeso.reloj", "contrapeso.equilibrio"]
     }
   },
   {
@@ -172,6 +172,57 @@
         "Un ejemplo, a lápiz: «Diez minutos en el sitio de pruebas, cinco de vuelo y cuatro en el Taller.» Y al pie: «La máquina marcha a su paso. Iguálalo en la cuna.»"
       ],
       "hechos": ["contrapeso.cuenta_sincronia"]
+    }
+  },
+  {
+    "id": "taller.pesa_1",
+    "mundo": "taller",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "La pesa de una medida",
+    "borrador": true,
+    "superficial": {
+      "texto": ["Una pesa de hierro del tamaño de un puño, con una raya grabada: una medida."],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.pesa_2",
+    "mundo": "taller",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "La pesa de dos medidas",
+    "borrador": true,
+    "superficial": {
+      "texto": ["Una pesa de hierro algo mayor, con dos rayas grabadas: dos medidas."],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.pesa_3",
+    "mundo": "taller",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "La pesa de tres medidas",
+    "borrador": true,
+    "superficial": {
+      "texto": ["Una pesa de hierro grande, con tres rayas grabadas: tres medidas."],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.balanza",
+    "mundo": "taller",
+    "tipo": "objeto",
+    "ambiente": true,
+    "titulo": "La Balanza del Contrapeso",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Una viga de bronce sobre un poste. A un lado cuelga la maqueta del motor viejo; al otro, seis muescas marcadas con rayas, cada una más lejos del eje que la anterior.",
+        "Aquí todo pesa menos que en cualquier otro sitio, pero una balanza se equilibra igual: cuenta el peso y cuenta lo lejos que cuelga."
+      ],
+      "hechos": []
     }
   }
 ]

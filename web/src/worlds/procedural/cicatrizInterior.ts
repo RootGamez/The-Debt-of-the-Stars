@@ -2,6 +2,7 @@
 // máquina: la Fundición (donde la roca del centro se fundía en anillos de Puerta), la Sala de Partidas (andenes,
 // equipaje y el tablero de salidas tachadas), el Friso de la Excavación (cómo vaciaron el planeta), los Dormideros y,
 // por todas partes, farolas, columnas de estratos que cuelgan y caminos de losas.
+import { buildPlate } from './benchBuilders';
 import { Vector3 } from 'three';
 import { angleBetween, ball, box, cone, cylinder, direction, torus, torusArc } from './kit';
 import { BITES, biteAxis, eyeAngle, INNER_RADIUS, INNER_SITES } from './cicatrizShape';
@@ -16,6 +17,21 @@ function fundicion(builder: CicatrizBuilder): void {
   const { lat, lon } = INNER_SITES.fundicion;
   const f = insideFrame(lat, lon, { footprint: 9, heading: 40 });
   const v = builder.inside;
+  // La placa que canta (P7), entre dos crisoles.
+  buildPlate(
+    v,
+    f,
+    (name, frame, at, props) => {
+      builder.mark(name, frame, at, props);
+    },
+    {
+      post: PALETTE.slate,
+      base: PALETTE.black,
+      accent: PALETTE.ember,
+      plate: '#B08A4A',
+      hole: PALETTE.black,
+    },
+  );
   v.add(PALETTE.ash, cylinder(10, 22), f.at([0, 0, -0.5], [0, 0, 0], [1, 1, 1.2]));
   for (let k = 0; k < 3; k++) {
     const a = (k * 2 * Math.PI) / 3;

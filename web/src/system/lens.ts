@@ -88,3 +88,18 @@ export function imageClarity({ aligned, inObservatory, distance, time }: Clarity
   const flicker = 0.5 + 0.5 * Math.sin(time * 5.3 + Math.sin(time * 1.7) * 2.5);
   return FAINT * (0.35 + 0.65 * flicker);
 }
+
+/** Desde qué distancia (m) se nota el brillo tenue de la Puerta del Nudo, y a cuánta se ve del todo (D6). */
+export const DOOR_GLOW_RANGE = 300;
+export const DOOR_GLOW_NEAR = 60;
+
+/**
+ * El brillo tenue de la Puerta del Nudo (0–1): nada a más de 300 m y cada vez más fuerte al acercarse. La deducción
+ * dice dónde está; el brillo evita buscar un punto negro sobre negro (✅ Anthony, 2026-11-06).
+ */
+export function doorGlow(distance: number): number {
+  if (!(distance < DOOR_GLOW_RANGE)) return 0;
+  if (distance <= DOOR_GLOW_NEAR) return 1;
+  const k = (DOOR_GLOW_RANGE - distance) / (DOOR_GLOW_RANGE - DOOR_GLOW_NEAR);
+  return k * k * (3 - 2 * k);
+}

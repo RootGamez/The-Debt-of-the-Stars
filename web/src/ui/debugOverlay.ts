@@ -4,6 +4,7 @@
 import { Vector3, type WebGLRenderer } from 'three';
 import type { Player } from '../core/player';
 import type { ArchivoSnapshot } from '../game/archivoPlay';
+import type { BenchSnapshot } from '../game/benchPlay';
 import type { DepthsSnapshot } from '../game/depthsPlay';
 import type { BellsSnapshot } from '../game/bellsPlay';
 import type { CounterweightSnapshot } from '../game/counterweightPlay';
@@ -139,6 +140,9 @@ declare global {
       bells?(): BellsSnapshot | null;
       archivo?(): ArchivoSnapshot | null;
       depths?(): DepthsSnapshot | null;
+      bench?(): BenchSnapshot | null;
+      benchNotch?(notch: number | undefined): void;
+      benchHole?(hole: number | undefined): void;
       depthsPendulum?(pendulum: number | undefined): void;
       archivoRail?(rail: number | undefined): void;
       bellsMark?(mark: number | undefined): void;

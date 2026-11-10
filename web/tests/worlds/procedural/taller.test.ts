@@ -121,7 +121,8 @@ describe('the Taller built in code', () => {
   });
 
   it('keeps every source of the clue graph, the arms, the model of the core and the lights', () => {
-    expect(world.markers.interactions.map((i) => i.clueId).sort()).toEqual(
+    // La Balanza tiene una marca por muesca: varias marcas comparten fuente.
+    expect([...new Set(world.markers.interactions.map((i) => i.clueId))].sort()).toEqual(
       tallerSources.map((s) => s.id).sort(),
     );
     const animated = world.markers.animated.map((a) => [a.object.name, a.event]);

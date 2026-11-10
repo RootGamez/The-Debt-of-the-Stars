@@ -281,5 +281,17 @@
   "contrapeso.escalera": {
     "frase": "The Counterweight has five arms of different lengths, in a staircase: one, three, two, five, four.",
     "rumor": "What figure do the arms of the Counterweight make?"
+  },
+  "contrapeso.equilibrio": {
+    "frase": "The Counterweight was installed by balancing weight against distance, even where everything weighs less.",
+    "rumor": "How was the installation of the Counterweight balanced?"
+  },
+  "contrapeso.motor_medidas": {
+    "frase": "The old throat motor weighs six measures and hangs two palms from the axis.",
+    "rumor": "How much does the old motor weigh, and at what distance?"
+  },
+  "cicatriz.firma": {
+    "frase": "Every Gate sings its own figure: the symbol is the signature of its frequency.",
+    "rumor": "What is the symbol that keeps repeating?"
   }
 }

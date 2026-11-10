@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
 import {
   apparentDirection,
+  doorGlow,
+  DOOR_GLOW_RANGE,
   einsteinRadius,
   imageClarity,
   LENS_DEFLECTION,
@@ -115,5 +117,19 @@ describe('how clearly the image of the Nudo shows', () => {
 
   it('is gone up close, where the shell itself can be seen', () => {
     expect(imageClarity({ ...base, aligned: true, inObservatory: true, distance: 300 })).toBe(0);
+  });
+});
+
+describe('the faint glow of the door of the Knot (D6)', () => {
+  it('is nothing beyond 300 m, so nothing gives away where the Knot is from afar', () => {
+    expect(doorGlow(DOOR_GLOW_RANGE)).toBe(0);
+    expect(doorGlow(5000)).toBe(0);
+  });
+
+  it('grows as you get closer and is full close to it', () => {
+    expect(doorGlow(250)).toBeGreaterThan(0);
+    expect(doorGlow(150)).toBeGreaterThan(doorGlow(250));
+    expect(doorGlow(60)).toBe(1);
+    expect(doorGlow(10)).toBe(1);
   });
 });
