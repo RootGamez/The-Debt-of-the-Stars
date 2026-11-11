@@ -24,10 +24,48 @@ export function systemOf(world: string): SystemSpec | undefined {
     .find((system) => system.bodyOf(world));
 }
 
+/** Los mundos que hay que construir para empezar en `startWorld`. */
+function worldsToBuild(spec: SystemSpec | undefined, startWorld: string): string[] {
+  return spec ? spec.bodies.map((body) => body.world) : [startWorld];
+}
+
+function buildRuntime(id: string, without: readonly string[]): WorldRuntime {
+  return createWorldRuntime(leaveOut(loadWorld(id), without));
+}
+
 export function loadSystem(startWorld: string, without: readonly string[] = []): LoadedSystem {
   const spec = systemOf(startWorld);
-  const ids = spec ? spec.bodies.map((body) => body.world) : [startWorld];
-  const worlds = ids.map((id) => leaveOut(loadWorld(id), without));
-  const runtimes = new Map(worlds.map((world) => [world.info.id, createWorldRuntime(world)]));
+  const runtimes = new Map(
+    worldsToBuild(spec, startWorld).map((id) => {
+      const runtime = buildRuntime(id, without);
+      return [runtime.world.info.id, runtime] as const;
+    }),
+  );
+  return { spec, startWorld, runtimes };
+}
+
+export interface LoadProgress {
+  /** Cuántos mundos hay ya construidos y cuántos hay que construir. */
+  onWorld?: (built: number, total: number) => void;
+  /** Se espera antes de cada mundo: deja respirar al navegador (dibujar la pantalla de carga, oír un gesto). */
+  pause?: () => Promise<void>;
+}
+
+/** Lo mismo que `loadSystem`, pero un mundo cada vez, avisando de cuántos lleva (la pantalla de carga). */
+export async function loadSystemStepwise(
+  startWorld: string,
+  without: readonly string[] = [],
+  progress: LoadProgress = {},
+): Promise<LoadedSystem> {
+  const spec = systemOf(startWorld);
+  const ids = worldsToBuild(spec, startWorld);
+  const runtimes = new Map<string, WorldRuntime>();
+  progress.onWorld?.(0, ids.length);
+  for (const id of ids) {
+    await progress.pause?.();
+    const runtime = buildRuntime(id, without);
+    runtimes.set(runtime.world.info.id, runtime);
+    progress.onWorld?.(runtimes.size, ids.length);
+  }
   return { spec, startWorld, runtimes };
 }

@@ -29,6 +29,9 @@ import { createMusicDirector } from './audio/musicDirector';
 import { createFoley, soundOf, surfaceOf } from './audio/foley';
 import { createShipSound } from './audio/shipSound';
 import { createSoundtrack, type Soundtrack } from './audio/soundtrack';
+import { nextFrame } from './core/nextFrame';
+import { warmUpShaders } from './render/warmUp';
+import { createLoadingScreen, type LoadingScreen } from './ui/loadingScreen';
 import { createVolumeSettings } from './audio/volumePreferences';
 import { machineTime } from './game/counterweight';
 import { createArchivoRig } from './game/archivoRig';
@@ -107,7 +110,7 @@ import {
 } from './data/movement';
 import { loadClues } from './data/pistas';
 import { createControls, ON_FOOT } from './game/controls';
-import { loadSystem } from './game/loadSystem';
+import { loadSystemStepwise } from './game/loadSystem';
 import { approachPoint, createHorizon } from './game/horizon';
 import { createShipFlight, type ShipAction, type ShipFlight } from './game/shipFlight';
 import type { MotorEnvironment } from './physics/characterMotor';
@@ -239,6 +242,16 @@ let soundtrackRef: Soundtrack | undefined;
 /** El menú principal está a la vista mientras carga el juego (para mostrar el fallo si lo hay). */
 let activeMenu: MainMenu | undefined;
 
+/** La pantalla de carga, mientras está puesta (para decir ahí si el juego no pudo cargarse). */
+let activeLoading: LoadingScreen | undefined;
+
+/** Con el menú detrás, la pantalla de carga se ve al menos esto (ms): sus fotos no deben ser un parpadeo. */
+const LOADING_MIN_MS = 3500;
+/** Cada cuánto se da al audio la mezcla de la carga (ms): sin mundo aún, solo la música. */
+const LOADING_SOUND_MS = 100;
+/** Sin menú, el tema principal se apaga al quitar la pantalla de carga (s) y luego manda el director. */
+const LOADING_MUSIC_FADE = 3;
+
 /** Sin menú al saltar a un mundo (pruebas, `?debug`), al volver de un final ni al cruzar el gusano. */
 function wantsMenu(): boolean {
   const query = new URLSearchParams(window.location.search);
@@ -256,7 +269,7 @@ const hasProgress = (data: Readonly<SaveData>): boolean =>
 /** Hasta dónde llega la mirada al buscar dónde dejar algo (m); más allá no se deja. */
 const LOOSE_AIM_REACH = 3.5;
 
-function start(): void {
+async function start(): Promise<void> {
   const display = setUpDisplay();
   if (isTouchDevice()) {
     // Mantener pulsado no selecciona ni abre menús; el pellizco de iOS solo se bloquea sobre el juego y sus botones.
@@ -282,10 +295,25 @@ function start(): void {
   document.title = t('La deuda de las estrellas');
   const canvas = requireElement('game', HTMLCanvasElement);
   const status = requireElement('status', HTMLParagraphElement);
-  status.textContent = t('Cargando…');
+  status.textContent = '';
   // Si se viene del gusano, la pantalla sigue en blanco hasta que esté el mundo.
   const arrivedBy = takeCrossing(sessionStore());
   const arrival = arrivedBy ? createArrivalLayer(arrivedBy) : undefined;
+  // El sonido arranca ya: el tema principal acompaña la carga y el menú (suena tras el primer gesto, que la
+  // pantalla de carga invita a hacer) y se apaga al pulsar Jugar. Llegando por el gusano no hay pantalla ni tema.
+  const soundtrack = createSoundtrack();
+  soundtrackRef = soundtrack;
+  soundtrack.setVolumes(display.volumes.current);
+  if (!arrivedBy) soundtrack.playMusic('music.main', { fade: 4 });
+  const loading = createLoadingScreen({
+    minDisplayMs: activeMenu ? LOADING_MIN_MS : 0,
+    passthrough: !activeMenu,
+    audioRunning: () => soundtrack.snapshot().running,
+  });
+  activeLoading = loading;
+  const loadingSound = window.setInterval(() => {
+    soundtrack.updateLoading();
+  }, LOADING_SOUND_MS);
   const { renderer, scene, camera, sun, ambient } = createStage(canvas);
   setupCamera(camera);
   watchGraphicsContext(canvas, status);
@@ -303,9 +331,17 @@ function start(): void {
   const homecomingEnding = endingFromQuery(window.location.search);
   const home = homecomingEnding ? homeLook(homecomingEnding) : undefined;
   // Una partida de una versión más nueva (que no se toca) ya pasó por casa: se empieza en Umbral.
-  const { spec, startWorld, runtimes } = loadSystem(
+  // Todos los mundos del sistema se construyen ahora, uno a uno y con la barra de carga avanzando: así no hay
+  // tirones al llegar a ellos.
+  const { spec, startWorld, runtimes } = await loadSystemStepwise(
     firstWorld(window.location.search, saved.data.prologueDone || saved.readOnly),
     home?.without,
+    {
+      onWorld: (built, total) => {
+        loading.show({ kind: 'worlds', built, total });
+      },
+      pause: nextFrame,
+    },
   );
   // La nave espera donde diga su sistema: junto a La Boca o en el hangar del Instituto.
   const shipHome = spec?.ship !== undefined && runtimes.has(spec.ship) ? spec.ship : undefined;
@@ -559,12 +595,6 @@ function start(): void {
       game.ui?.notify(t('Se abre una boca en el cielo. Solo se llega a ella con la nave.'));
     },
   });
-  // El sonido se sintetiza (sin archivos) y arranca con el primer gesto del jugador.
-  const soundtrack = createSoundtrack();
-  soundtrackRef = soundtrack;
-  soundtrack.setVolumes(display.volumes.current);
-  // El tema principal acompaña al menú (empieza tras el primer gesto) y se apaga al pulsar Jugar.
-  if (activeMenu) soundtrack.playMusic('music.main', { fade: 4 });
   const shipSound = createShipSound(soundtrack);
   const edges = createEdgeTracker();
   const wormholeHum = createLoopFollower(soundtrack, 'wormhole.idle');
@@ -862,17 +892,18 @@ function start(): void {
     !(shipMap?.isOpen ?? false) &&
     !(homecoming?.blocking ?? false);
   // El menú principal cubre la pantalla de pausa hasta que el jugador pulsa Jugar o Continuar.
+  // Jugar se activa al quitar la pantalla de carga (antes, la tecla que despierta la música lo pulsaría).
   const menu = activeMenu;
-  if (menu) {
-    overlay.setInert(true);
-    menu.ready(() => {
+  if (menu) overlay.setInert(true);
+  const enableMenu = (): void => {
+    menu?.ready(() => {
       soundtrack.stopMusic(3);
       menu.dispose();
       activeMenu = undefined;
       overlay.setInert(false);
       overlay.begin();
     });
-  }
+  };
   const canAct = (): boolean => overlay.playing && free();
   function shipAction(action: ShipAction): void {
     // En el prólogo, T son las tareas (las abre la lectura): la nave ya apunta sola a lo que toca.
@@ -1215,6 +1246,13 @@ function start(): void {
     for (const root of [...explorerRoots, shipModel?.object]) if (root) castShadowsFrom(root);
     sunShadow.register(scene);
   }
+
+  // Los sombreadores de todos los mundos se compilan aún bajo la pantalla de carga, no al llegar a cada uno.
+  await warmUpShaders(renderer, scene, camera, (done, total) => {
+    loading.show({ kind: 'light', done, total });
+  });
+  // Desde aquí la mezcla la pone cada fotograma (con el mundo ya puesto).
+  window.clearInterval(loadingSound);
 
   let awoke = false;
   const feet = new Vector3();
@@ -1626,6 +1664,14 @@ function start(): void {
       orbitMap?.update(dt);
     },
   );
+  // Los primeros fotogramas (sombras, gusanos) también se dibujan aún tapados; luego se quita la pantalla.
+  await nextFrame();
+  await nextFrame();
+  // Sin menú detrás manda ya el director de música (con sus silencios): el tema principal se apaga.
+  if (!menu) soundtrack.stopMusic(LOADING_MUSIC_FADE);
+  await loading.finish();
+  activeLoading = undefined;
+  enableMenu();
 }
 
 /** Delante y unos 25° por encima del horizonte del punto de llegada (provisional, Fase 3). */
@@ -1640,9 +1686,7 @@ function setupCamera(camera: PerspectiveCamera): void {
   camera.updateProjectionMatrix();
 }
 
-try {
-  start();
-} catch (error: unknown) {
+start().catch((error: unknown) => {
   console.error(error);
   // Que se lea el aviso, sin el blanco del gusano.
   endArrivingPaint();
@@ -1650,5 +1694,6 @@ try {
   const status = document.getElementById('status');
   const message = t('No se pudo cargar el mundo. Revisa la consola.');
   if (status) status.textContent = message;
+  activeLoading?.fail(message);
   activeMenu?.fail(message);
-}
+});

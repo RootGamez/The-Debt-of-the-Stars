@@ -142,3 +142,14 @@ export function computeMix(input: MixInput): Mix {
     muffle: OPEN_MUFFLE - (OPEN_MUFFLE - CLOSED_MUFFLE) * absorption * absorption,
   };
 }
+
+/** La mezcla de la pantalla de carga: ningún ambiente, solo la música (y el silencio de la M). */
+export function musicOnlyMix(muted: boolean): Mix {
+  return {
+    voices: [],
+    tempo: 1,
+    pitch: 1,
+    master: muted ? 0 : MASTER_VOLUME,
+    muffle: OPEN_MUFFLE,
+  };
+}

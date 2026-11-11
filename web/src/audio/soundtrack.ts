@@ -3,7 +3,7 @@
 // la mezcla al motor. Lo cubren las pruebas de Playwright (e2e/audio.spec.ts).
 import { browserStore } from '../core/save';
 import { createAudioEngine, type AudioEngine } from './engine';
-import { computeMix, type Mix, type MixInput } from './mix';
+import { computeMix, musicOnlyMix, type Mix, type MixInput } from './mix';
 import { loadMuted, saveMuted } from './mutePreference';
 import type { LoopHandle, LoopOptions, PlayOptions } from './samplePlayer';
 import type { VolumePreferences } from './volumePreferences';
@@ -24,6 +24,8 @@ export interface Soundtrack {
     levels: Record<string, number>;
   };
   update(input: Omit<MixInput, 'muted'>): void;
+  /** Mientras carga el juego (sin mundo aún): solo suena la música. */
+  updateLoading(): void;
   /** La voz de letras de un texto que se escribe (no suena en silencio). */
   blip(frequency: number): void;
   /** El toque de una campana (no suena en silencio). */
@@ -93,6 +95,10 @@ export function createSoundtrack(engine: AudioEngine = createAudioEngine()): Sou
     },
     update(input) {
       last = computeMix({ ...input, muted });
+      engine.update(last);
+    },
+    updateLoading() {
+      last = musicOnlyMix(muted);
       engine.update(last);
     },
     blip(frequency) {

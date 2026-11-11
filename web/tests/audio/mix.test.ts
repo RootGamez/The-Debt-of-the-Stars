@@ -7,7 +7,7 @@ import {
   WORLD_SOUNDSCAPES,
   type Soundscape,
 } from '../../src/data/soundscapes';
-import { computeMix, type MixInput } from '../../src/audio/mix';
+import { computeMix, musicOnlyMix, type MixInput } from '../../src/audio/mix';
 import { WORLD_IDS } from '../../src/worlds/worldSelection';
 
 const calm: MixInput = {
@@ -265,5 +265,17 @@ describe('the soundscape data', () => {
     }
     expect(total).toBeGreaterThan(0);
     expect(total).toBeLessThan(0.6);
+  });
+});
+
+describe('the loading screen mix', () => {
+  it('lets only the music through, at the usual master volume', () => {
+    const loading = musicOnlyMix(false);
+    expect(loading.voices).toEqual([]);
+    expect(loading.master).toBe(computeMix(calm).master);
+  });
+
+  it('stays silent when muted', () => {
+    expect(musicOnlyMix(true).master).toBe(0);
   });
 });
