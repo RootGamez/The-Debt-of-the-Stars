@@ -563,6 +563,8 @@ function start(): void {
   const soundtrack = createSoundtrack();
   soundtrackRef = soundtrack;
   soundtrack.setVolumes(display.volumes.current);
+  // El tema principal acompaña al menú (empieza tras el primer gesto) y se apaga al pulsar Jugar.
+  if (activeMenu) soundtrack.playMusic('music.main', { fade: 4 });
   const shipSound = createShipSound(soundtrack);
   const edges = createEdgeTracker();
   const wormholeHum = createLoopFollower(soundtrack, 'wormhole.idle');
@@ -862,6 +864,7 @@ function start(): void {
   if (menu) {
     overlay.setInert(true);
     menu.ready(() => {
+      soundtrack.stopMusic(3);
       menu.dispose();
       activeMenu = undefined;
       overlay.setInert(false);

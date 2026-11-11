@@ -3,6 +3,8 @@
 // (generate.ts) solo llama a la API, escribe archivos y guarda el libro de cuentas.
 
 export interface GenerateSoundSpec {
+  /** `sfx` (por defecto): efecto de texto a sonido; `music`: pieza de música instrumental. */
+  kind?: 'sfx' | 'music';
   category: string;
   gain?: number;
   loop?: boolean;
@@ -31,6 +33,7 @@ export interface Job {
   duration: number;
   loop: boolean;
   promptInfluence: number | undefined;
+  kind: 'sfx' | 'music';
   credits: number;
 }
 
@@ -51,6 +54,9 @@ export interface Ledger {
 
 /** Lo que se estima antes de medir el coste real. */
 export const DEFAULT_CREDITS_PER_SECOND = 40;
+
+/** Lo que se estima por segundo de música (la estimación de ElevenLabs fue de 1.500 créditos para 2 minutos). */
+export const MUSIC_CREDITS_PER_SECOND = 12.5;
 
 export function estimateCredits(duration: number, creditsPerSecond: number): number {
   return Math.max(1, Math.ceil(duration * creditsPerSecond));
@@ -89,7 +95,11 @@ export function planJobs(
         duration: spec.duration,
         loop: spec.loop ?? false,
         promptInfluence: spec.promptInfluence,
-        credits: estimateCredits(spec.duration, creditsPerSecond),
+        kind: spec.kind ?? 'sfx',
+        credits: estimateCredits(
+          spec.duration,
+          spec.kind === 'music' ? MUSIC_CREDITS_PER_SECOND : creditsPerSecond,
+        ),
       });
     }
   }

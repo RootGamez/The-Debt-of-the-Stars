@@ -91,6 +91,33 @@ describe('planJobs', () => {
   });
 });
 
+describe('music jobs', () => {
+  const withMusic: GenerateManifest = {
+    ...MANIFEST,
+    sounds: {
+      ...MANIFEST.sounds,
+      'music.main': {
+        kind: 'music',
+        category: 'music',
+        duration: 60,
+        variants: 1,
+        prompt: 'a theme',
+      },
+    },
+  };
+
+  it('are marked as music and paid at the music rate, not the effects one', () => {
+    const job = planJobs(withMusic, new Set(), 40, { only: ['music.main'] }).jobs[0];
+
+    expect(job?.kind).toBe('music');
+    expect(job?.credits).toBe(750);
+  });
+
+  it('leave effects as effects', () => {
+    expect(planJobs(MANIFEST, new Set(), 40).jobs.every((job) => job.kind === 'sfx')).toBe(true);
+  });
+});
+
 describe('the ledger', () => {
   it('tells how much of the budget is left', () => {
     expect(budgetLeft({ ...LEDGER, spent: 4000 })).toBe(11000);

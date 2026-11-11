@@ -35,6 +35,7 @@ const API = 'https://api.elevenlabs.io/v1';
 const DEFAULT_BUDGET = 15000;
 const DEFAULT_BATCH_CAP = 2000;
 const MP3_BITRATE = '96k';
+const MUSIC_BITRATE = '128k';
 
 function argument(name: string): string | undefined {
   const at = process.argv.indexOf(name);
@@ -77,19 +78,39 @@ async function creditsUsed(key: string): Promise<number | undefined> {
 async function generateOne(
   key: string,
   model: string,
-  job: { prompt: string; duration: number; loop: boolean; promptInfluence: number | undefined },
+  job: {
+    kind: 'sfx' | 'music';
+    prompt: string;
+    duration: number;
+    loop: boolean;
+    promptInfluence: number | undefined;
+  },
 ): Promise<Buffer> {
-  const response = await fetch(`${API}/sound-generation?output_format=mp3_44100_128`, {
-    method: 'POST',
-    headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      text: job.prompt,
-      duration_seconds: job.duration,
-      loop: job.loop,
-      model_id: model,
-      ...(job.promptInfluence === undefined ? {} : { prompt_influence: job.promptInfluence }),
-    }),
-  });
+  const music = job.kind === 'music';
+  const response = await fetch(
+    `${API}/${music ? 'music' : 'sound-generation'}?output_format=mp3_44100_128`,
+    {
+      method: 'POST',
+      headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
+      body: JSON.stringify(
+        music
+          ? {
+              prompt: job.prompt,
+              music_length_ms: Math.round(job.duration * 1000),
+              force_instrumental: true,
+            }
+          : {
+              text: job.prompt,
+              duration_seconds: job.duration,
+              loop: job.loop,
+              model_id: model,
+              ...(job.promptInfluence === undefined
+                ? {}
+                : { prompt_influence: job.promptInfluence }),
+            },
+      ),
+    },
+  );
   if (!response.ok) {
     throw new Error(
       `ElevenLabs respondió ${response.status}: ${(await response.text()).slice(0, 300)}`,
@@ -108,9 +129,20 @@ function processRaw(manifest: GenerateManifest): void {
       const name = `${id.replace(/[^a-zA-Z0-9]+/g, '_')}_${variant}.mp3`;
       const input = join(RAW_DIR, name);
       if (!existsSync(input) || statSync(input).size === 0) continue;
-      const args = ['-y', '-v', 'error', '-i', input, '-ac', '1', '-ar', '44100'];
+      // La música se queda en estéreo; los efectos pasan a mono.
+      const args = [
+        '-y',
+        '-v',
+        'error',
+        '-i',
+        input,
+        '-ac',
+        spec.kind === 'music' ? '2' : '1',
+        '-ar',
+        '44100',
+      ];
       if (spec.lowpass !== undefined) args.push('-af', `lowpass=f=${spec.lowpass}`);
-      args.push('-b:a', MP3_BITRATE, join(OUT_DIR, name));
+      args.push('-b:a', spec.kind === 'music' ? MUSIC_BITRATE : MP3_BITRATE, join(OUT_DIR, name));
       const run = spawnSync('ffmpeg', args, { encoding: 'utf8' });
       if (run.status !== 0) throw new Error(`ffmpeg falló con ${name}: ${run.stderr}`);
       files.push(name);

@@ -98,6 +98,7 @@ export const EN: Readonly<Record<string, string>> = {
     'Delete everything you have learned? This cannot be undone.',
   'Volumen de los efectos': 'Effects volume',
   'Volumen de los ambientes': 'Ambience volume',
+  'Volumen de la música': 'Music volume',
   'Velocidad del texto': 'Text speed',
   'Sonido de letras': 'Letter sounds',
   Sí: 'Yes',

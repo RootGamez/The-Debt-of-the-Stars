@@ -25,7 +25,7 @@ function memoryStore(initial: Record<string, string> = {}): KeyValueStore {
 describe('the volume preferences', () => {
   it('starts at full volume for both buses', () => {
     expect(loadVolumes(memoryStore())).toEqual(DEFAULT_VOLUMES);
-    expect(DEFAULT_VOLUMES).toEqual({ effects: 1, ambient: 1 });
+    expect(DEFAULT_VOLUMES).toEqual({ effects: 1, ambient: 1, music: 0.75 });
   });
 
   it('offers silence and four more steps', () => {
@@ -35,9 +35,9 @@ describe('the volume preferences', () => {
   it('remembers what the player chose', () => {
     const store = memoryStore();
 
-    saveVolumes(store, { effects: 0.5, ambient: 0.25 });
+    saveVolumes(store, { effects: 0.5, ambient: 0.25, music: 0.75 });
 
-    expect(loadVolumes(store)).toEqual({ effects: 0.5, ambient: 0.25 });
+    expect(loadVolumes(store)).toEqual({ effects: 0.5, ambient: 0.25, music: 0.75 });
   });
 
   it('falls back to the defaults for anything it does not understand', () => {
@@ -50,7 +50,22 @@ describe('the volume preferences', () => {
   it('keeps the valid half when the other is wrong', () => {
     const store = memoryStore({ [VOLUME_KEY]: '{"effects":0,"ambient":0.3}' });
 
-    expect(loadVolumes(store)).toEqual({ effects: 0, ambient: 1 });
+    expect(loadVolumes(store)).toEqual({ effects: 0, ambient: 1, music: 0.75 });
+  });
+
+  it('remembers the music volume apart, and starts it a little lower than the rest', () => {
+    const store = memoryStore();
+
+    saveVolumes(store, { effects: 1, ambient: 1, music: 0.25 });
+
+    expect(loadVolumes(store).music).toBe(0.25);
+    expect(DEFAULT_VOLUMES.music).toBeLessThan(DEFAULT_VOLUMES.effects);
+  });
+
+  it('keeps the default music volume for an old save that did not have it', () => {
+    const store = memoryStore({ [VOLUME_KEY]: '{"effects":0.5,"ambient":0.5}' });
+
+    expect(loadVolumes(store)).toEqual({ effects: 0.5, ambient: 0.5, music: 0.75 });
   });
 
   it('does not throw without storage', () => {
@@ -79,22 +94,22 @@ describe('the live volume settings', () => {
 
     settings.update({ effects: 0.25 });
 
-    expect(settings.current).toEqual({ effects: 0.25, ambient: 1 });
-    expect(loadVolumes(store)).toEqual({ effects: 0.25, ambient: 1 });
+    expect(settings.current).toEqual({ effects: 0.25, ambient: 1, music: 0.75 });
+    expect(loadVolumes(store)).toEqual({ effects: 0.25, ambient: 1, music: 0.75 });
     // La primera llamada es la de arranque; la segunda, el cambio.
     expect(seen).toEqual([
-      { effects: 1, ambient: 1 },
-      { effects: 0.25, ambient: 1 },
+      { effects: 1, ambient: 1, music: 0.75 },
+      { effects: 0.25, ambient: 1, music: 0.75 },
     ]);
   });
 
   it('tell the listener the saved volumes right away', () => {
     const store = memoryStore();
-    saveVolumes(store, { effects: 0.75, ambient: 0 });
+    saveVolumes(store, { effects: 0.75, ambient: 0, music: 0.75 });
     const seen: unknown[] = [];
 
     createVolumeSettings(store, (volumes) => seen.push(volumes));
 
-    expect(seen).toEqual([{ effects: 0.75, ambient: 0 }]);
+    expect(seen).toEqual([{ effects: 0.75, ambient: 0, music: 0.75 }]);
   });
 });

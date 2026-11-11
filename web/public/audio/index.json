@@ -446,6 +446,12 @@
       "category": "foley",
       "gain": 0.7,
       "loop": true
+    },
+    "music.main": {
+      "files": ["music_main_1.mp3"],
+      "category": "music",
+      "gain": 0.8,
+      "loop": false
     }
   }
 }

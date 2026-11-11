@@ -106,6 +106,14 @@
       "variants": 1,
       "lowpass": 2000,
       "prompt": "Underwater ambience heard from inside a diving helmet: muffled deep water rumble with faint distant bubbles, seamless loop, no music, no voice"
+    },
+    "music.main": {
+      "kind": "music",
+      "category": "music",
+      "gain": 0.8,
+      "duration": 60,
+      "variants": 1,
+      "prompt": "A melancholic, contemplative instrumental main theme for a solitary space exploration game about ancient ruins and a time loop. A solo piano plays a slow, simple, memorable melody in a minor key, supported by long, soft, warm strings and gentle synthesizer pads. Slow tempo around 60 BPM, a vast sense of space, loneliness, quiet sadness and wonder, with generous silences between phrases. No drums, no percussion, no vocals, no choir."
     }
   }
 }

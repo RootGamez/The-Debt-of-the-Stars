@@ -1,6 +1,6 @@
 {
   "budget": 15000,
-  "spent": 2360,
+  "spent": 3110,
   "entries": [
     {
       "id": "loop.reset",
@@ -122,6 +122,12 @@
       "file": "underwater_1.mp3",
       "credits": 200,
       "at": "2026-11-11T17:33:03.577Z"
+    },
+    {
+      "id": "music.main",
+      "file": "music_main_1.mp3",
+      "credits": 750,
+      "at": "2026-11-11T18:10:58.550Z"
     }
   ]
 }

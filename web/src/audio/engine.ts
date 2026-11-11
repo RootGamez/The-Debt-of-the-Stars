@@ -22,6 +22,8 @@ const MASTER_SMOOTH = 0.15;
 const MUFFLE_SMOOTH = 0.4;
 /** Lo que tarda en detenerse una voz tras empezar a apagarse. */
 const RELEASE_AFTER = 4;
+/** Lo que tarda por defecto en entrar y salir una pieza de música (s). */
+const DEFAULT_MUSIC_FADE = 3;
 /** Hasta dónde por delante se programan los golpes. */
 const PULSE_LOOKAHEAD = 0.25;
 const NOISE_SECONDS = 2;
@@ -69,6 +71,15 @@ export interface AudioEngine {
   sampleReady(id: string): boolean;
   /** Volumen de los efectos y de los ambientes (Configuración). */
   setVolumes(volumes: Readonly<VolumePreferences>): void;
+  /**
+   * Pide una pieza de música: suena en bucle, entra en `fade` segundos y sustituye a la que sonara (que sale con otro
+   * fundido). Si aún no hay audio o la pieza no está cargada, empieza en cuanto pueda. Nunca falla.
+   */
+  playMusic(id: string, options?: { level?: number; fade?: number }): void;
+  /** Apaga la música en `fade` segundos. */
+  stopMusic(fade?: number): void;
+  /** La pieza de música que suena ahora (o `undefined`). */
+  readonly music: string | undefined;
   /** Pestaña oculta: el audio se detiene con el tiempo del juego. */
   suspend(): void;
   resume(): void;
@@ -282,10 +293,16 @@ export function createAudioEngine(
   let noise: AudioBuffer | undefined;
   let bus: GainNode | undefined;
   let effectsBus: GainNode | undefined;
+  let musicBus: GainNode | undefined;
   let master: GainNode | undefined;
   let muffle: BiquadFilterNode | undefined;
   let bank: SampleBank | undefined;
   let player: SamplePlayer | undefined;
+  let musicPlayer: SamplePlayer | undefined;
+  /** La pieza que se ha pedido y la que suena (con su manejador): `syncMusic` las junta. */
+  let musicWanted: { id: string; level: number; fade: number } | undefined;
+  let musicNow: { id: string; handle: LoopHandle } | undefined;
+  const musicRequested = new Set<string>();
   let volumes: Readonly<VolumePreferences> = DEFAULT_VOLUMES;
   /** Lo pedido antes de que hubiera audio: se carga al desbloquearlo. */
   const wanted = new Set<string>();
@@ -295,6 +312,7 @@ export function createAudioEngine(
   function applyVolumes(now: number, smooth: number): void {
     bus?.gain.setTargetAtTime(volumes.ambient, now, smooth);
     effectsBus?.gain.setTargetAtTime(volumes.effects, now, smooth);
+    musicBus?.gain.setTargetAtTime(volumes.music, now, smooth);
   }
 
   function build(): void {
@@ -304,6 +322,8 @@ export function createAudioEngine(
     bus.gain.value = volumes.ambient;
     effectsBus = created.createGain();
     effectsBus.gain.value = volumes.effects;
+    musicBus = created.createGain();
+    musicBus.gain.value = volumes.music;
     muffle = created.createBiquadFilter();
     muffle.type = 'lowpass';
     muffle.frequency.value = 18000;
@@ -315,6 +335,7 @@ export function createAudioEngine(
     limiter.ratio.value = 6;
     bus.connect(muffle);
     effectsBus.connect(muffle);
+    musicBus.connect(muffle);
     muffle.connect(limiter);
     limiter.connect(master);
     master.connect(created.destination);
@@ -324,10 +345,45 @@ export function createAudioEngine(
       decode: (data) => created.decodeAudioData(data),
     });
     player = createSamplePlayer({ context: created, bank, destination: effectsBus });
+    musicPlayer = createSamplePlayer({ context: created, bank, destination: musicBus });
     const started = bank;
     // Con pocos sonidos se carga todo el índice nada más desbloquear el audio; si crece, se pedirá por mundos.
-    void started.init().then(() => started.load([...wanted, ...started.ids()]));
+    void started.init().then(() => {
+      // La música no se baja de golpe con los efectos: pesa mucho; se pide cuando hace falta.
+      const effects = started.ids().filter((id) => started.entry(id)?.category !== 'music');
+      return started.load([...wanted, ...effects]);
+    });
     context = created;
+  }
+
+  /** Junta lo que se ha pedido de música con lo que suena: carga la pieza, la arranca y apaga la anterior. */
+  function syncMusic(): void {
+    const current = context;
+    const loaded = bank;
+    if (!current || !loaded || !musicPlayer || current.state !== 'running') return;
+    if (musicNow && musicNow.id !== musicWanted?.id) {
+      musicNow.handle.stop(musicWanted?.fade ?? DEFAULT_MUSIC_FADE);
+      musicNow = undefined;
+    }
+    if (!musicWanted) return;
+    const { id, level, fade } = musicWanted;
+    if (!loaded.loaded(id)) {
+      // La música no se carga con los efectos (pesa): se baja una vez, la primera vez que se pide.
+      if (!musicRequested.has(id)) {
+        musicRequested.add(id);
+        void loaded
+          .init()
+          .then(() => loaded.load([id]))
+          .then(syncMusic);
+      }
+      return;
+    }
+    if (!musicNow) {
+      const handle = musicPlayer.loop(id, { level: 0 });
+      if (!handle) return;
+      musicNow = { id, handle };
+    }
+    musicNow.handle.setLevel(level, fade / 3);
   }
 
   function dropVoices(): void {
@@ -349,7 +405,7 @@ export function createAudioEngine(
       if (failed) return;
       try {
         if (!context) build();
-        if (!heldBack) void context?.resume().catch(() => undefined);
+        if (!heldBack) void context?.resume().then(syncMusic, () => undefined);
       } catch (error) {
         failed = true;
         console.warn(t('Sin sonido: no se pudo crear el audio.'), error);
@@ -436,6 +492,22 @@ export function createAudioEngine(
       volumes = next;
       if (context) applyVolumes(context.currentTime, MASTER_SMOOTH);
     },
+    playMusic(id, options = {}) {
+      musicWanted = { id, level: options.level ?? 1, fade: options.fade ?? DEFAULT_MUSIC_FADE };
+      syncMusic();
+    },
+    stopMusic(fade = DEFAULT_MUSIC_FADE) {
+      if (musicWanted) musicWanted = { ...musicWanted, fade };
+      const previous = musicNow;
+      musicWanted = undefined;
+      if (previous) {
+        previous.handle.stop(fade);
+        musicNow = undefined;
+      }
+    },
+    get music() {
+      return musicNow?.id;
+    },
     suspend() {
       heldBack = true;
       void context?.suspend().catch(() => undefined);
@@ -446,11 +518,14 @@ export function createAudioEngine(
     },
     dispose() {
       player?.stopAll();
+      musicPlayer?.stopAll();
+      musicNow = undefined;
       dropVoices();
       void context?.close().catch(() => undefined);
       context = undefined;
       bank = undefined;
       player = undefined;
+      musicPlayer = undefined;
     },
   };
 }

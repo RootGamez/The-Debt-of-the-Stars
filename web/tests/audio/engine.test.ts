@@ -270,10 +270,122 @@ describe('the samples', () => {
     const engine = make(samplesFetch());
 
     expect(() => {
-      engine.setVolumes({ effects: 0.5, ambient: 0 });
+      engine.setVolumes({ effects: 0.5, ambient: 0, music: 0.75 });
       engine.unlock();
-      engine.setVolumes({ effects: 1, ambient: 0.25 });
+      engine.setVolumes({ effects: 1, ambient: 0.25, music: 0.75 });
     }).not.toThrow();
+  });
+});
+
+describe('the music', () => {
+  function answer(body: unknown): Response {
+    return {
+      ok: true,
+      json: () => Promise.resolve(body),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(4)),
+    } as unknown as Response;
+  }
+
+  /** Un servidor de mentira con una pieza de música y un efecto. */
+  function musicFetch() {
+    return vi.fn((url: string) =>
+      Promise.resolve(
+        url.endsWith('index.json')
+          ? answer({
+              version: 1,
+              sounds: {
+                'music.main': { files: ['m.mp3'], category: 'music' },
+                'music.other': { files: ['o.mp3'], category: 'music' },
+                step: { files: ['s.mp3'] },
+              },
+            })
+          : answer(null),
+      ),
+    ) as unknown as typeof fetch;
+  }
+
+  const make = (fetchFn: typeof fetch) =>
+    createAudioEngine(() => fakeContext(), { baseUrl: '/audio/', fetchFn });
+
+  it('does not download the music together with the sound effects', async () => {
+    const fetchFn = musicFetch();
+    const engine = make(fetchFn);
+    engine.unlock();
+
+    await vi.waitFor(() => {
+      expect(engine.sampleReady('step')).toBe(true);
+    });
+
+    expect(engine.sampleReady('music.main')).toBe(false);
+    expect(
+      (fetchFn as unknown as { mock: { calls: [string][] } }).mock.calls.some(([url]) =>
+        url.endsWith('m.mp3'),
+      ),
+    ).toBe(false);
+  });
+
+  it('starts a piece asked for before the audio was unlocked, as soon as it can', async () => {
+    const engine = make(musicFetch());
+    engine.playMusic('music.main');
+    expect(engine.music).toBeUndefined();
+
+    engine.unlock();
+
+    await vi.waitFor(() => {
+      expect(engine.music).toBe('music.main');
+    });
+  });
+
+  it('plays a piece asked for once the audio is running, downloading it then', async () => {
+    const engine = make(musicFetch());
+    engine.unlock();
+    await Promise.resolve();
+
+    engine.playMusic('music.main', { level: 0.8, fade: 2 });
+
+    await vi.waitFor(() => {
+      expect(engine.music).toBe('music.main');
+    });
+  });
+
+  it('swaps one piece for another and stops the music on request', async () => {
+    const engine = make(musicFetch());
+    engine.unlock();
+    engine.playMusic('music.main');
+    await vi.waitFor(() => {
+      expect(engine.music).toBe('music.main');
+    });
+
+    engine.playMusic('music.other');
+    await vi.waitFor(() => {
+      expect(engine.music).toBe('music.other');
+    });
+    engine.stopMusic(1);
+
+    expect(engine.music).toBeUndefined();
+  });
+
+  it('stays silent, without throwing, when the music file is missing', async () => {
+    const engine = make(
+      vi.fn((url: string) =>
+        Promise.resolve(
+          url.endsWith('index.json')
+            ? answer({
+                version: 1,
+                sounds: { 'music.main': { files: ['m.mp3'], category: 'music' } },
+              })
+            : ({ ok: false } as Response),
+        ),
+      ) as unknown as typeof fetch,
+    );
+    engine.unlock();
+
+    expect(() => {
+      engine.playMusic('music.main');
+    }).not.toThrow();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(engine.music).toBeUndefined();
   });
 });
 

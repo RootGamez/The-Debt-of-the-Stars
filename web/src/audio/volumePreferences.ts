@@ -14,9 +14,11 @@ export interface VolumePreferences {
   effects: VolumeStep;
   /** Los ambientes de cada mundo (los sintetizados y los bucles largos). */
   ambient: VolumeStep;
+  /** La música. */
+  music: VolumeStep;
 }
 
-export const DEFAULT_VOLUMES: Readonly<VolumePreferences> = { effects: 1, ambient: 1 };
+export const DEFAULT_VOLUMES: Readonly<VolumePreferences> = { effects: 1, ambient: 1, music: 0.75 };
 
 function pick(value: unknown, fallback: VolumeStep): VolumeStep {
   return VOLUME_STEPS.find((step) => step === value) ?? fallback;
@@ -31,10 +33,11 @@ export function loadVolumes(store: KeyValueStore | null): VolumePreferences {
     raw = undefined;
   }
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return { ...DEFAULT_VOLUMES };
-  const { effects, ambient } = raw as Record<string, unknown>;
+  const { effects, ambient, music } = raw as Record<string, unknown>;
   return {
     effects: pick(effects, DEFAULT_VOLUMES.effects),
     ambient: pick(ambient, DEFAULT_VOLUMES.ambient),
+    music: pick(music, DEFAULT_VOLUMES.music),
   };
 }
 

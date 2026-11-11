@@ -212,6 +212,9 @@ export function createPauseOverlay(
           volumes.update({ ambient });
         },
       ),
+      choices(t('Volumen de la música'), VOLUME_STEPS, volumes.current.music, percent, (music) => {
+        volumes.update({ music });
+      }),
       choices(
         t('Velocidad del texto'),
         TEXT_SPEEDS,

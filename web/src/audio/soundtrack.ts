@@ -34,8 +34,11 @@ export interface Soundtrack {
   loop(id: string, options?: LoopOptions): LoopHandle | undefined;
   /** Pide cargar esos sonidos (los de un mundo al entrar en él). */
   preload(ids: readonly string[]): Promise<void>;
-  /** Volumen de efectos y de ambientes (Configuración). */
+  /** Volumen de efectos, ambientes y música (Configuración). */
   setVolumes(volumes: Readonly<VolumePreferences>): void;
+  /** Pide una pieza de música en bucle (empieza cuando pueda: tras el primer gesto y la carga). */
+  playMusic(id: string, options?: { level?: number; fade?: number }): void;
+  stopMusic(fade?: number): void;
   dispose(): void;
 }
 
@@ -107,6 +110,12 @@ export function createSoundtrack(engine: AudioEngine = createAudioEngine()): Sou
     preload: (ids) => engine.preload(ids),
     setVolumes: (volumes) => {
       engine.setVolumes(volumes);
+    },
+    playMusic: (id, options) => {
+      engine.playMusic(id, options);
+    },
+    stopMusic: (fade) => {
+      engine.stopMusic(fade);
     },
     dispose() {
       abort.abort();
