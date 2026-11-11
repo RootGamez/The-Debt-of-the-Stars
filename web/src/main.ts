@@ -19,6 +19,7 @@ import {
   type WebGLRenderer,
 } from 'three';
 import { loadChronology } from './core/chronology';
+import { carrySoundOf } from './audio/carrySounds';
 import { deathSoundOf } from './audio/deathSounds';
 import { createEdgeTracker } from './audio/edges';
 import { createLoopFollower } from './audio/loopFollower';
@@ -716,15 +717,21 @@ function start(): void {
     player,
     touch: isTouchDevice(),
     promptParent: touch?.contextSlot,
-    actions: composeActions([
-      counterweight?.play.actions,
-      bells?.play.actions,
-      archivoPuzzles?.play.actions,
-      depths?.play.actions,
-      bench?.play.actions,
-      epilogue?.play.actions,
-      homecoming?.play.actions,
-    ]),
+    actions: composeActions(
+      [
+        counterweight?.play.actions,
+        bells?.play.actions,
+        archivoPuzzles?.play.actions,
+        depths?.play.actions,
+        bench?.play.actions,
+        epilogue?.play.actions,
+        homecoming?.play.actions,
+      ],
+      (verb) => {
+        const sound = carrySoundOf(verb);
+        if (sound) soundtrack.play(sound);
+      },
+    ),
     readers: {
       ...counterweight?.readers,
       ...bells?.readers,

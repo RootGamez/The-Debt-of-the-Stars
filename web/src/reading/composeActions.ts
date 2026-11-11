@@ -4,6 +4,8 @@ import type { SourceActions } from './readingUi';
 
 export function composeActions(
   parts: readonly (SourceActions | undefined)[],
+  /** Se avisa con el verbo de lo que se acaba de hacer (para darle un sonido). */
+  onRun?: (verb: string) => void,
 ): SourceActions | undefined {
   const list = parts.filter((part): part is SourceActions => part !== undefined);
   if (list.length === 0) return undefined;
@@ -18,7 +20,10 @@ export function composeActions(
     },
     run: (id) => {
       const owner = list.find((part) => part.verb(id, false) !== undefined);
-      owner?.run(id);
+      if (!owner) return;
+      const verb = owner.verb(id, false);
+      owner.run(id);
+      if (verb !== undefined) onRun?.(verb);
     },
   };
 }

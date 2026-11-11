@@ -51,4 +51,15 @@ describe('composing the actions of several sources', () => {
     expect(all?.gone('b.gone')).toBe(true);
     expect(all?.gone('a')).toBe(false);
   });
+
+  it('tells what was done, with its verb, after running a source', () => {
+    const a = actions('a', 'coger');
+    const done: string[] = [];
+    const all = composeActions([a.actions], (verb) => done.push(verb));
+
+    all?.run('a');
+    all?.run('nobody');
+
+    expect(done).toEqual(['coger']);
+  });
 });
