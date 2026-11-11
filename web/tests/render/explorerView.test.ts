@@ -122,7 +122,25 @@ describe('the debug camera outside', () => {
     expect(position.z).toBeLessThan(-1.5);
   });
 
-  it('lights its surroundings sky blue from the chest when the body light is on, and not while piloting', () => {
+  it('shines from the tips of its antennas, with a halo seen only from outside', () => {
+    const scene = new Group();
+    const view = createExplorerView(scene);
+    const light = scene.getObjectByName('EXPLORADOR_luz') as PointLight;
+    const tips = scene.getObjectByName('EXPLORADOR_head_antenna') as Mesh;
+    const material = tips.material as MeshStandardMaterial;
+    const calm = material.emissiveIntensity;
+    for (let i = 0; i < 120; i++) view.update(frame({ lightOn: true }));
+    // Por encima de la cabeza: las antenas salen de lo alto del casco (los ojos van a ~1,06 m).
+    expect(light.position.y).toBeGreaterThan(10 + 1.2);
+    expect(material.emissiveIntensity).toBeGreaterThan(calm * 3);
+    expect(view.snapshot().halo).toBe(true);
+    for (let i = 0; i < 10; i++) view.update(frame({ lightOn: true, firstPerson: true }));
+    expect(view.snapshot().halo).toBe(false);
+    expect(light.position.y).toBeGreaterThan(10 + 1.2);
+    expect(light.intensity).toBeGreaterThan(0);
+  });
+
+  it('lights its surroundings sky blue from its antennas when the body light is on, and not while piloting', () => {
     const scene = new Group();
     const view = createExplorerView(scene);
     const light = scene.getObjectByName('EXPLORADOR_luz') as PointLight;

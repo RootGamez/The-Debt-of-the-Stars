@@ -135,7 +135,8 @@ function filaments(s: Segment, look: OolLook): void {
         s.add('suit', look.fiber, cylinder(1, 4), between(a0, a1, 0.022 - j * 0.003), 0.04);
     }
     const tip = points[points.length - 1] ?? base;
-    s.add('glow', look.glow, ball(0.024, 1), pieceMatrix([tip.x, tip.y, tip.z]), 0);
+    // La punta es su propia pieza: de ahí sale la luz del cuerpo (render/explorerView.ts la enciende).
+    s.add('antenna', look.glow, ball(0.026, 1), pieceMatrix([tip.x, tip.y, tip.z]), 0);
   }
 }
 

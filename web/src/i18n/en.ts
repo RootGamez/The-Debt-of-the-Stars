@@ -440,8 +440,10 @@ export const EN: Readonly<Record<string, string>> = {
     'The Albatross II is waiting on the hangar pad. Next to the hatch, tap Board; at the seat, tap Pilot',
   'Busca la pieza en la isla del primer Albatros': "Find the piece on the first Albatross's island",
   Isla: 'Island',
-  'Vuela al oeste, más allá del mar, siguiendo las boyas con farol. Ratón para apuntar · W avanzar · Espacio/C subir y bajar · X frena. Posa la nave con F y examina la pieza con E':
-    'Fly west, beyond the sea, following the lantern buoys. Mouse to aim · W forward · Space/C up and down · X brakes. Land the ship, get out with F and examine the piece with E',
+  'Vuela al oeste, más allá del mar, siguiendo las boyas con farol. Ratón para apuntar · W avanzar · Espacio/C subir y bajar · X frena. Posa la nave con F y examina la pieza con E. Allí es de noche: L enciende la luz de tus antenas':
+    'Fly west, beyond the sea, following the lantern buoys. Mouse to aim · W forward · Space/C up and down · X brakes. Land the ship, get out with F and examine the piece with E. It is night there: L turns on the light of your antennae',
+  'Aquí es de noche: pulsa L para encender la luz de tus antenas (otra vez L la apaga)':
+    'It is night here: press L to turn on the light of your antennae (L again turns it off)',
   'Vuela al oeste, más allá del mar, siguiendo las boyas con farol. Posa la nave, bájate y toca Examinar junto a la pieza':
     'Fly west, beyond the sea, following the lantern buoys. Land the ship, get out and tap Examine next to the piece',
   'Lleva la pieza a la Directora': 'Take the piece to the Director',

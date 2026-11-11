@@ -5,6 +5,7 @@ import {
   Group,
   Matrix4,
   Mesh,
+  Object3D,
   MeshBasicMaterial,
   MeshStandardMaterial,
   Vector3,
@@ -142,6 +143,8 @@ export interface ExplorerMaterials {
   suit: MeshStandardMaterial;
   metal: MeshStandardMaterial;
   glow: MeshStandardMaterial;
+  /** Las puntas de las antenas: brillan como `glow` y se encienden mucho más con la luz del cuerpo. */
+  antenna: MeshStandardMaterial;
   glass: MeshStandardMaterial;
   shine: MeshBasicMaterial;
 }
@@ -161,6 +164,12 @@ function createMaterials(): ExplorerMaterials {
       emissive: look.glow,
       emissiveIntensity: look.glowIntensity,
       roughness: 0.6,
+    }),
+    antenna: new MeshStandardMaterial({
+      vertexColors: true,
+      emissive: look.glow,
+      emissiveIntensity: look.glowIntensity,
+      roughness: 0.4,
     }),
     glass: new MeshStandardMaterial({
       color: '#dff4ff',
@@ -183,6 +192,8 @@ export interface ExplorerRig {
   root: Group;
   bones: Record<BoneName, Group>;
   materials: ExplorerMaterials;
+  /** Un punto vacío en medio de las puntas de las antenas (cuelga de la cabeza): de ahí sale la luz del cuerpo. */
+  antennas: Object3D;
   /** Triángulos de todo el modelo. */
   triangles: number;
   /** Pone el cuerpo en una pose; `plant` (0–1) baja o sube la pelvis para que el pie más bajo pise el suelo. */
@@ -217,6 +228,21 @@ function boneGroup(spec: BoneSpec, materials: ExplorerMaterials, parentPivot: Tr
   return group;
 }
 
+/** El centro de las puntas de las antenas, como un punto vacío colgado de la cabeza (sigue sus giros). */
+function antennaAnchor(head: Group): Object3D {
+  const anchor = new Object3D();
+  anchor.name = 'EXPLORADOR_antenas';
+  const tips = head.children.find(
+    (c): c is Mesh => c instanceof Mesh && c.name.endsWith('_antenna'),
+  );
+  if (tips) {
+    tips.geometry.computeBoundingBox();
+    tips.geometry.boundingBox?.getCenter(anchor.position);
+  }
+  head.add(anchor);
+  return anchor;
+}
+
 /** El cristal y los reflejos van de un solo color: sin colores por vértice (no todos los trozos los tienen). */
 function stripColor<T extends { deleteAttribute(name: string): unknown }>(g: T): T {
   g.deleteAttribute('color');
@@ -240,6 +266,7 @@ export function buildExplorer(): ExplorerRig {
   root.traverse((o) => {
     if (o instanceof Mesh) triangles += (o as Mesh).geometry.getAttribute('position').count / 3;
   });
+  const antennas = antennaAnchor(bones.head);
   const pelvisRest = bones.pelvis.position.clone();
   const torsoMeshes = bones.torso.children.filter((c): c is Mesh => c instanceof Mesh);
   const ankleRest = toBody(JOINTS.ankle).y;
@@ -269,6 +296,7 @@ export function buildExplorer(): ExplorerRig {
     root,
     bones,
     materials,
+    antennas,
     triangles,
     setPose(pose, plant) {
       bones.pelvis.position.set(pelvisRest.x + pose.sway, pelvisRest.y + pose.bob, pelvisRest.z);

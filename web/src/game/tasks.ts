@@ -201,7 +201,7 @@ const PROLOGUE_DEFS: readonly TaskDef[] = [
     label: t('Isla'),
     hint: {
       keys: t(
-        'Vuela al oeste, más allá del mar, siguiendo las boyas con farol. Ratón para apuntar · W avanzar · Espacio/C subir y bajar · X frena. Posa la nave con F y examina la pieza con E',
+        'Vuela al oeste, más allá del mar, siguiendo las boyas con farol. Ratón para apuntar · W avanzar · Espacio/C subir y bajar · X frena. Posa la nave con F y examina la pieza con E. Allí es de noche: L enciende la luz de tus antenas',
       ),
       touch: t(
         'Vuela al oeste, más allá del mar, siguiendo las boyas con farol. Posa la nave, bájate y toca Examinar junto a la pieza',

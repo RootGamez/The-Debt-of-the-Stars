@@ -1657,6 +1657,7 @@ async function start(): Promise<void> {
         world: currentWorld.id,
         position: player.state.position,
         registryOpen: ui.blocking && reading.current === null,
+        lightOn: bodyLight.on,
       });
       sight.update();
       touch?.update();

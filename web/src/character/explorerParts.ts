@@ -5,10 +5,20 @@ import { BufferAttribute, Color, Matrix4, Quaternion, Vector3, type BufferGeomet
 import { box, torus, type Triple } from '../worlds/procedural/kit';
 import { seededRandom, type Random } from '../worlds/procedural/noise';
 
-/** Tela y cuero (mate), metal (latón, cobre, hierro), lo que brilla, el cristal del casco y sus reflejos. */
-export type PartKind = 'suit' | 'metal' | 'glow' | 'glass' | 'shine';
+/**
+ * Tela y cuero (mate), metal (latón, cobre, hierro), lo que brilla, las puntas de las antenas (de ahí sale la luz
+ * del cuerpo), el cristal del casco y sus reflejos.
+ */
+export type PartKind = 'suit' | 'metal' | 'glow' | 'antenna' | 'glass' | 'shine';
 
-export const PART_KINDS: readonly PartKind[] = ['suit', 'metal', 'glow', 'glass', 'shine'];
+export const PART_KINDS: readonly PartKind[] = [
+  'suit',
+  'metal',
+  'glow',
+  'antenna',
+  'glass',
+  'shine',
+];
 
 /** Un hueso rígido: todo lo que cuelga de una articulación, en coordenadas absolutas de diseño. */
 export class Segment {
@@ -16,6 +26,7 @@ export class Segment {
     suit: [],
     metal: [],
     glow: [],
+    antenna: [],
     glass: [],
     shine: [],
   };

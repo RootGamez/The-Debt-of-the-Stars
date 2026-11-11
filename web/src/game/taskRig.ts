@@ -9,6 +9,8 @@ import type { SystemScene } from '../render/systemScene';
 import { createGuideView } from '../ui/guideView';
 import { createTaskPanel } from '../ui/taskPanel';
 import { createWaypointView } from '../ui/taskWaypoint';
+import { t } from '../i18n';
+import { LightTip } from './lightTip';
 import { placeWaypoint } from './waypoint';
 import {
   TaskHints,
@@ -38,6 +40,8 @@ export interface TaskFrame {
   position: Vector3;
   /** El cuaderno está abierto. */
   registryOpen: boolean;
+  /** La luz de las antenas está encendida (para el aviso de la L en la isla). */
+  lightOn?: boolean;
 }
 
 export interface TaskRigOptions {
@@ -115,6 +119,11 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
   const guideView = createGuideView();
   const waypoint = createWaypointView();
   const hints = new TaskHints();
+  // El aviso de la L (la luz de las antenas) al bajar en la isla de la pieza, que está de noche. Sin teclado no sale.
+  const lightTip = touch ? undefined : new LightTip();
+  const lightTipText = t(
+    'Aquí es de noche: pulsa L para encender la luz de tus antenas (otra vez L la apaga)',
+  );
   panel.setHidden(loadHidden());
   const places = new Map<string, Place>();
   for (const [world, set] of options.sources) {
@@ -165,6 +174,12 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
     point.copy(place.local);
     systemScene.groupOf(place.world)?.localToWorld(point);
     return { radius: 0 };
+  }
+
+  /** Distancia (m) desde la cámara hasta el sitio de la tarea, si tiene uno. */
+  function distanceTo(id: TaskId): number | undefined {
+    const where = whereIs(id);
+    return where ? Math.max(0, point.distanceTo(camera.position) - where.radius) : undefined;
   }
 
   function showWaypoint(id: TaskId | undefined, show: boolean): void {
@@ -220,9 +235,22 @@ export function createTaskRig(options: TaskRigOptions): TaskRig {
       }
       panel.update(tracker.items(touch), frame.visible);
       const hintId = hints.update(current, frame.dt);
+      const tipShown =
+        lightTip?.update({
+          task: current,
+          piloting: frame.piloting,
+          lightOn: frame.lightOn ?? false,
+          meters: current && !frame.piloting ? distanceTo(current) : undefined,
+          dt: frame.dt,
+        }) ?? false;
+      // El aviso de la luz manda sobre el de la tarea mientras se ve (los dos van en la misma línea de arriba).
       guideView.update(
-        hintId ? { id: hintId, text: taskHint(hintId, touch) } : undefined,
-        frame.visible && !panel.hidden,
+        tipShown
+          ? { id: 'luz', text: lightTipText }
+          : hintId
+            ? { id: hintId, text: taskHint(hintId, touch) }
+            : undefined,
+        frame.visible && (tipShown || !panel.hidden),
       );
       if (frame.piloting) {
         const target = current ? tracker.target(current) : undefined;

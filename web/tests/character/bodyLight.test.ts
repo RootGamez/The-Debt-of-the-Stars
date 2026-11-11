@@ -3,6 +3,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   BODY_LIGHT,
+  bodyLightFlash,
+  bodyLightGlow,
   bodyLightIntensity,
   createBodyLight,
   stepBodyLight,
@@ -65,6 +67,22 @@ describe('the body light of the explorer', () => {
     const red = (BODY_LIGHT.color >> 16) & 0xff;
     expect(blue).toBeGreaterThan(red);
     expect(BODY_LIGHT.range).toBeGreaterThanOrEqual(10);
+  });
+
+  it('sparks briefly when switched on and then settles', () => {
+    const on = toggleBodyLight(createBodyLight());
+    expect(bodyLightFlash(on)).toBeCloseTo(BODY_LIGHT.flash);
+    const lit = run(on, 0.4);
+    expect(bodyLightIntensity(lit)).toBeGreaterThan(BODY_LIGHT.intensity * 1.05);
+    expect(bodyLightFlash(run(on, 2))).toBeLessThan(0.01);
+    expect(bodyLightFlash(toggleBodyLight(lit))).toBe(0);
+  });
+
+  it('does not spark again when switched off and keeps its glow in proportion', () => {
+    const lit = run(toggleBodyLight(createBodyLight()), 2);
+    const off = toggleBodyLight(lit);
+    expect(off.since).toBe(lit.since);
+    expect(bodyLightIntensity(lit)).toBeCloseTo(BODY_LIGHT.intensity * bodyLightGlow(lit));
   });
 
   it('ignores a pause or a negative step', () => {
