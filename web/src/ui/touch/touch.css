@@ -363,3 +363,31 @@ html.is-touch [role='dialog'] {
     padding: 20px 28px 16px;
   }
 }
+
+/* ---------- «Más» con varias opciones: en columnas si no cabe ---------- */
+.touch-more-sheet {
+  flex-wrap: wrap;
+  align-content: flex-end;
+  max-height: calc(100dvh - 2 * var(--tc-edge) - 56px);
+}
+
+/* ---------- Mano zurda: el dock a la izquierda (el joystick pasa a la mitad derecha en touchControls.ts) ---------- */
+.touch.is-left .touch-dock {
+  right: auto;
+  left: max(var(--tc-edge), env(safe-area-inset-left));
+  align-items: flex-start;
+}
+
+.touch.is-left .touch-context,
+.touch.is-left .touch-primary {
+  flex-direction: row;
+}
+
+.touch.is-left .touch-context {
+  flex-wrap: wrap-reverse;
+}
+
+/* ---------- Interfaz muy ampliada: solo iconos en los contextuales ---------- */
+.touch.is-compact .touch-context .touch-btn-label {
+  display: none;
+}

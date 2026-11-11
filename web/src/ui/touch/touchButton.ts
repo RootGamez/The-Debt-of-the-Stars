@@ -140,7 +140,10 @@ export function createTouchButton(options: TouchButtonOptions): TouchButton {
     else el.prepend(next);
     iconNode = next;
   };
+  // Un botón con rótulo y sin aria-label propio se llama como su rótulo (aunque el rótulo se esconda con poco sitio).
+  const autoLabel = ariaLabel === undefined;
   const setLabel = (text: string): void => {
+    if (autoLabel) el.setAttribute('aria-label', text);
     if (!labelNode) {
       labelNode = document.createElement('span');
       labelNode.className = 'touch-btn-label';

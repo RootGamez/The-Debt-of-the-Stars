@@ -204,6 +204,47 @@ test('the dock stays inside the screen and apart from the top buttons', async ()
   }
 });
 
+test('More opens the extra options inside the screen and Esc closes it', async () => {
+  await tapButton('more');
+  const screen = page.viewportSize();
+  for (const id of ['hud', 'fullscreen', 'light', 'sight', 'sound', 'tasks', 'hand']) {
+    await expect(visible(id)).toBeVisible();
+    const box = await visible(id).boundingBox();
+    expect(box?.x ?? -1).toBeGreaterThanOrEqual(0);
+    expect(box?.y ?? -1).toBeGreaterThanOrEqual(0);
+    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(screen?.height ?? 0);
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(47);
+  }
+  await page.keyboard.press('Escape');
+  await expect(visible('light')).toBeHidden();
+});
+
+test('left-handed mode mirrors the dock and is remembered', async () => {
+  const width = page.viewportSize()?.width ?? 0;
+  // Esc también pausa el juego (es la tecla de siempre): se sigue jugando antes de probar el dock.
+  const overlay = await page.locator('.overlay').boundingBox();
+  if (overlay) await page.touchscreen.tap(overlay.x + 20, overlay.y + 20);
+  await expect.poll(() => value(page, 'playing')).toBe(true);
+  // El dock (aunque no tenga botones a la vista) está en la mitad del pulgar.
+  const dockCenter = (): Promise<number> =>
+    page.evaluate(() => {
+      const box = document.querySelector('.touch-primary')?.getBoundingClientRect();
+      return box ? box.left + box.width : -1;
+    });
+  expect(await dockCenter()).toBeGreaterThan(width / 2);
+
+  await tapButton('more');
+  await tapButton('hand');
+  await expect(page.locator('.touch')).toHaveClass(/is-left/);
+  expect(await dockCenter()).toBeLessThan(width / 2);
+  expect(await page.evaluate(() => localStorage.getItem('bucle-tiempo:mano'))).toBe('izquierda');
+
+  await tapButton('more');
+  await tapButton('hand');
+  await expect(page.locator('.touch')).not.toHaveClass(/is-left/);
+  expect(await page.evaluate(() => localStorage.getItem('bucle-tiempo:mano'))).toBe('derecha');
+});
+
 test('in portrait the game asks to turn the phone and pauses', async () => {
   expect(await value(page, 'playing')).toBe(true);
   await expect(page.locator('.rotate-guard')).toBeHidden();

@@ -4,12 +4,14 @@
 // Distribución (plan-mobile, §4): abajo a la derecha el dock (acción principal y, encima, las contextuales),
 // arriba a la derecha pausa y «Más». Solo se crean en pantallas táctiles.
 import type { ShipAction } from '../game/shipFlight';
-import { intentFromStick, type MoveIntent } from '../core/input';
+import { intentFromStick, runFromStick, type MoveIntent } from '../core/input';
+import { browserStore } from '../core/save';
 import type { InputController } from '../core/inputController';
 import { MOUSE_LOOK_SENSITIVITY, TOUCH_LOOK_SENSITIVITY } from '../data/movement';
 import { EMPTY_FLIGHT_KEYS, type FlightKeys } from '../ship/shipInput';
 import { t } from '../i18n';
 import { canFullscreen, toggleFullscreen } from './fullscreen';
+import { loadLeftHanded, saveLeftHanded, stickSideIsLeft } from './touch/handedness';
 import { createTouchButton, type TouchButton } from './touch/touchButton';
 import type { IconName } from './touch/touchIcons';
 import {
@@ -21,6 +23,8 @@ import {
 
 const STICK_RADIUS = 56; // px
 const DEAD_ZONE = 0.15;
+/** Desde esta escala de interfaz los botones contextuales pierden el rótulo. */
+const COMPACT_SCALE = 1.75;
 /** InputController acumula píxeles que main.ts multiplica por la sensibilidad del ratón. */
 const LOOK_SCALE = TOUCH_LOOK_SENSITIVITY / MOUSE_LOOK_SENSITIVITY;
 
@@ -62,7 +66,10 @@ export function createTouchControls(
   input: InputController,
   { isPlaying, context, onShipAction, onPause }: TouchOptions,
 ): TouchControls {
+  const store = browserStore();
+  let leftHanded = loadLeftHanded(store);
   const layer = div('touch', document.body);
+  layer.classList.toggle('is-left', leftHanded);
   const base = div('touch-stick', layer);
   const knob = div('touch-knob', base);
   const more = div('touch-more', layer);
@@ -79,6 +86,7 @@ export function createTouchControls(
   const lastLook = { x: 0, y: 0 };
   let jumping = false;
   let running = false; // Mayús: bajar nadando
+  let stickRun = false; // el joystick empujado hasta el borde: correr
   let stick = { x: 0, z: 0 };
   let flightTouch: FlightKeys = EMPTY_FLIGHT_KEYS;
   let state: TouchContext = {
@@ -103,7 +111,9 @@ export function createTouchControls(
   };
 
   const publish = (): void => {
-    const intent: MoveIntent = { ...stick, run: running, jump: jumping };
+    // Correr con el joystick solo a pie (nadando, «run» es bucear; pilotando no cuenta).
+    const sprint = stickRun && !state.swimming && !state.piloting;
+    const intent: MoveIntent = { ...stick, run: running || sprint, jump: jumping };
     input.setTouchIntent(intent);
     publishFlight();
   };
@@ -189,6 +199,50 @@ export function createTouchControls(
       closeSheet();
     },
   });
+
+  // Lo que en el teclado son L, G, M y H: el mismo gesto, sin duplicar lo que ya hace cada sistema con su tecla.
+  const pressKey = (code: string): void => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { code, bubbles: true }));
+    window.dispatchEvent(new KeyboardEvent('keyup', { code, bubbles: true }));
+  };
+  const keyItem = (
+    id: string,
+    icon: 'light' | 'sight' | 'sound' | 'tasks',
+    label: string,
+    code: string,
+  ) =>
+    createTouchButton({
+      id,
+      parent: sheet,
+      trigger: 'up',
+      size: 'sm',
+      icon,
+      label,
+      onPress: () => {
+        pressKey(code);
+        closeSheet();
+      },
+    });
+  const light = keyItem('light', 'light', t('Luz del cuerpo'), 'KeyL');
+  const sight = keyItem('sight', 'sight', t('Mira graduada'), 'KeyG');
+  const sound = keyItem('sound', 'sound', t('Sonido'), 'KeyM');
+  const tasks = keyItem('tasks', 'tasks', t('Tareas'), 'KeyH');
+  const hand = createTouchButton({
+    id: 'hand',
+    parent: sheet,
+    mode: 'toggle',
+    size: 'sm',
+    icon: 'hand',
+    label: t('Mano zurda'),
+    onToggle: (left) => {
+      leftHanded = left;
+      layer.classList.toggle('is-left', left);
+      saveLeftHanded(store, left);
+      reset();
+      closeSheet();
+    },
+  });
+  hand.setActive(leftHanded);
 
   // ---- El dock: una fila de acción principal y otra de contextuales (el primero de cada fila, a la derecha) ----
   const ship = (action: ShipAction) => () => {
@@ -335,7 +389,18 @@ export function createTouchControls(
     ...flightKey('rollLeft'),
   });
 
-  const buttons: readonly TouchButton[] = [pause, moreButton, hud, screen, ...actions.values()];
+  const buttons: readonly TouchButton[] = [
+    pause,
+    moreButton,
+    hud,
+    screen,
+    light,
+    sight,
+    sound,
+    tasks,
+    hand,
+    ...actions.values(),
+  ];
 
   const reset = (): void => {
     for (const button of buttons) button.release();
@@ -343,6 +408,7 @@ export function createTouchControls(
     stickId = null;
     lookId = null;
     stick = { x: 0, z: 0 };
+    stickRun = false;
     jumping = false;
     running = false;
     flightTouch = EMPTY_FLIGHT_KEYS;
@@ -352,7 +418,7 @@ export function createTouchControls(
 
   const onDown = (e: PointerEvent): void => {
     if (e.pointerType === 'mouse' || !isPlaying()) return;
-    const leftHalf = e.clientX < window.innerWidth / 2;
+    const leftHalf = stickSideIsLeft(e.clientX, window.innerWidth, leftHanded);
     if (leftHalf && stickId === null) {
       stickId = e.pointerId;
       origin.x = e.clientX;
@@ -375,6 +441,7 @@ export function createTouchControls(
       const k = length > STICK_RADIUS ? STICK_RADIUS / length : 1;
       knob.style.transform = `translate(${dx * k}px, ${dy * k}px)`;
       stick = intentFromStick(dx / STICK_RADIUS, dy / STICK_RADIUS, DEAD_ZONE);
+      stickRun = runFromStick(length / STICK_RADIUS, stickRun);
       publish();
     } else if (e.pointerId === lookId) {
       input.addLook((e.clientX - lastLook.x) * LOOK_SCALE, (e.clientY - lastLook.y) * LOOK_SCALE);
@@ -387,6 +454,7 @@ export function createTouchControls(
     if (e.pointerId === stickId) {
       stickId = null;
       stick = { x: 0, z: 0 };
+      stickRun = false;
       base.hidden = true;
       publish();
     } else if (e.pointerId === lookId) {
@@ -408,6 +476,15 @@ export function createTouchControls(
   window.addEventListener('pointermove', onMove, { signal });
   window.addEventListener('pointerup', onUp, { signal });
   window.addEventListener('pointercancel', onUp, { signal });
+  window.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.code !== 'Escape' || sheet.hidden) return;
+      closeSheet();
+      moreButton.el.focus({ preventScroll: true }); // el foco no se pierde al cerrar la hoja
+    },
+    { signal },
+  );
 
   let shown: string | undefined;
   /** Solo toca el DOM cuando cambia algo de lo que se ve (se llama cada fotograma). */
@@ -441,6 +518,11 @@ export function createTouchControls(
     setVisible(visible) {
       layer.hidden = !visible;
       shown = undefined;
+      // Con la interfaz muy ampliada no caben los rótulos de los contextuales: quedan solo los iconos.
+      const scale = Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--ui-scale'),
+      );
+      layer.classList.toggle('is-compact', scale >= COMPACT_SCALE);
       if (!visible) reset();
       else syncActions();
     },

@@ -5,6 +5,7 @@ import {
   intentFromKeys,
   intentFromStick,
   mergeIntents,
+  runFromStick,
 } from '../../src/core/input';
 
 describe('applyKey', () => {
@@ -87,5 +88,14 @@ describe('mergeIntents', () => {
 
     expect(Math.hypot(merged.x, merged.z)).toBeCloseTo(1);
     expect(merged.jump).toBe(true);
+  });
+});
+
+describe('runFromStick', () => {
+  it('runs at the edge of the stick and keeps running until it eases off', () => {
+    expect(runFromStick(0.5, false)).toBe(false);
+    expect(runFromStick(1, false)).toBe(true);
+    expect(runFromStick(0.9, true)).toBe(true);
+    expect(runFromStick(0.8, true)).toBe(false);
   });
 });

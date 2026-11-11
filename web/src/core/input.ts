@@ -74,6 +74,11 @@ export function intentFromStick(
   return { x: (screenX / length) * scaled, z: (-screenY / length) * scaled };
 }
 
+/** Correr empujando el joystick hasta el borde (con holgura al soltar para que no parpadee). */
+export function runFromStick(length: number, wasRunning: boolean): boolean {
+  return length >= (wasRunning ? 0.85 : 1);
+}
+
 export function mergeIntents(a: MoveIntent, b: MoveIntent): MoveIntent {
   return { ...clampLength(a.x + b.x, a.z + b.z), run: a.run || b.run, jump: a.jump || b.jump };
 }
