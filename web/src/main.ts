@@ -22,6 +22,8 @@ import { loadChronology } from './core/chronology';
 import { carrySoundOf } from './audio/carrySounds';
 import { deathSoundOf } from './audio/deathSounds';
 import { createEdgeTracker } from './audio/edges';
+import { createLooseCarry, type LooseAim, type LooseCarrier } from './game/looseCarry';
+import type { SourceActions } from './reading/readingUi';
 import { createLoopFollower } from './audio/loopFollower';
 import { createFoley, soundOf, surfaceOf } from './audio/foley';
 import { createShipSound } from './audio/shipSound';
@@ -96,6 +98,7 @@ import { Player } from './core/player';
 import { absorptionWindow, quietChronology, triggersAsEvents } from './core/timeline';
 import { createAbsorptionView } from './render/absorptionView';
 import {
+  EYE_HEIGHT,
   FIELD_OF_VIEW,
   MAX_PHYSICS_STEPS_PER_FRAME,
   MOUSE_LOOK_SENSITIVITY,
@@ -249,6 +252,9 @@ function wantsMenu(): boolean {
 
 const hasProgress = (data: Readonly<SaveData>): boolean =>
   data.loopsCompleted > 0 || data.prologueDone || data.facts.length > 0;
+
+/** Hasta dónde llega la mirada al buscar dónde dejar algo (m); más allá no se deja. */
+const LOOSE_AIM_REACH = 3.5;
 
 function start(): void {
   const display = setUpDisplay();
@@ -707,6 +713,45 @@ function start(): void {
     ? new TaskTracker()
     : new TaskTracker('bucle', saved.data.tasks.filter(isLoopTask));
   const touchUi = isTouchDevice();
+  // Dejar lo que se lleva en el suelo o en una mesa, y volver a cogerlo mirándolo (E, sin apuntar a una fuente).
+  const looseCarry = createLooseCarry(
+    [bells?.carrier, archivoPuzzles?.carrier, bench?.carrier].filter(
+      (carrier): carrier is LooseCarrier => carrier !== undefined,
+    ),
+  );
+  const aimUp = new Vector3();
+  const aimEye = new Vector3();
+  const aimDirection = new Vector3();
+  /** Adónde mira el jugador: desde sus ojos (también en tercera persona) hacia donde apunta la cámara. */
+  function looseAim(): LooseAim {
+    upOf(player.state.body, aimUp);
+    aimEye.copy(player.state.position).addScaledVector(aimUp, EYE_HEIGHT);
+    camera.getWorldDirection(aimDirection);
+    const hit = currentWorld.collision.raycastHit(aimEye, aimDirection, LOOSE_AIM_REACH);
+    return {
+      world: currentWorld.id,
+      origin: aimEye,
+      direction: aimDirection,
+      hit: hit ? { point: hit.point, normal: hit.normal, distance: hit.distance } : undefined,
+      up: aimUp,
+    };
+  }
+  const looseActions: SourceActions = {
+    gone: () => false,
+    verb: () => undefined,
+    run: () => undefined,
+    ambient: {
+      verb: () => (looseCarry.active() ? looseCarry.verb(looseAim()) : undefined),
+      run: () => {
+        if (!looseCarry.active()) return;
+        const aim = looseAim();
+        const verb = looseCarry.verb(aim);
+        looseCarry.run(aim);
+        const sound = verb && carrySoundOf(verb);
+        if (sound) soundtrack.play(sound);
+      },
+    },
+  };
   const ui = createReadingUi({
     camera,
     sources: startSources,
@@ -726,6 +771,7 @@ function start(): void {
         bench?.play.actions,
         epilogue?.play.actions,
         homecoming?.play.actions,
+        looseActions,
       ],
       (verb) => {
         const sound = carrySoundOf(verb);

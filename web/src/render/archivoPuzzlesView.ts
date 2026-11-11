@@ -22,6 +22,7 @@ import {
   type Scene,
 } from 'three';
 import type { PieceWhere } from '../game/archivoPlay';
+import { placeLoose } from './looseObjects';
 import { alignedAngles, ORRERY, type SphereId } from '../puzzles/orrery';
 import {
   RAIL_MARK_LIFT,
@@ -32,6 +33,9 @@ import {
 
 const HELD_OFFSET = new Vector3(0.18, -0.3, -0.7);
 const HELD_TILT = new Quaternion().setFromEuler(new Euler(0.1, 0, 0));
+/** Del centro de una esfera (unos 0,28 m de ancho) y del prisma a su base, para apoyarlos (m). */
+const SPHERE_REST = 0.14;
+const PRISM_LIFT = 0.2;
 /** Cuánto se hunde una pieza en reposo bajo su marca (m). */
 const HOME_DROP = 0.35;
 
@@ -118,6 +122,8 @@ export interface ArchivoAnchors {
   stand: Object3D;
   /** La tablilla de la ranura: adonde apunta el abanico. */
   tablet: Object3D | undefined;
+  /** El marco del mundo: de él cuelgan las piezas que se dejan sueltas por ahí. */
+  world: Object3D;
 }
 
 export interface ArchivoShown {
@@ -190,6 +196,14 @@ export function createArchivoPuzzlesView(
           object.visible = home !== undefined;
         } else if (where === 'stand') {
           place(object, anchors.stand, new Vector3(0, 0, -0.26));
+          object.visible = true;
+        } else if ('loose' in where) {
+          placeLoose(
+            object,
+            anchors.world,
+            where.loose,
+            id === 'prisma' ? PRISM_LIFT : SPHERE_REST,
+          );
           object.visible = true;
         } else {
           const rail = anchors.rails[where.rail - 1];

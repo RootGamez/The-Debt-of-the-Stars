@@ -183,3 +183,40 @@ describe('cycles and debugging', () => {
     });
   });
 });
+
+describe('leaving a piece anywhere', () => {
+  const pose = { position: [1, 2, 3], normal: [0, 0, 1] } as const;
+
+  it('drops what is carried and reports the piece as loose', () => {
+    const game = setup();
+    take(game, sphereSource(ORRERY.spheres[0] ?? 'taller'));
+
+    expect(game.play.loosely.drop(pose)).toBe(true);
+
+    expect(game.play.held).toBeUndefined();
+    const piece = game.play.pieces().find((p) => typeof p.where === 'object' && 'loose' in p.where);
+    expect(piece?.where).toEqual({ loose: pose });
+  });
+
+  it('picks it up and keeps it from being placed twice', () => {
+    const game = setup();
+    const sphere = ORRERY.spheres[0] ?? 'taller';
+    take(game, sphereSource(sphere));
+    game.play.loosely.drop(pose);
+
+    expect(game.play.loosely.take(sphere)).toBe(true);
+    expect(game.play.held).toBe(sphere);
+  });
+
+  it('drops the prism the same way and sends everything home on a new cycle', () => {
+    const game = setup();
+    take(game, ARCHIVO_PLAY.prism);
+    game.play.loosely.drop(pose);
+    expect(game.play.loosely.loose().map((l) => l.id)).toEqual(['prisma']);
+
+    game.play.reset();
+
+    expect(game.play.loosely.loose()).toEqual([]);
+    expect(game.play.pieces().every((p) => p.where === 'home')).toBe(true);
+  });
+});

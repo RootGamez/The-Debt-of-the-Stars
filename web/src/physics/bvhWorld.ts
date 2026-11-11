@@ -24,7 +24,18 @@ import {
   type RaycastWorld,
 } from './collisionWorld';
 
-export type BvhWorld = CollisionWorld & RaycastWorld;
+/** Un impacto de rayo: a qué distancia, dónde y hacia dónde mira la superficie (hacia quien lanzó el rayo). */
+export interface RayHit {
+  distance: number;
+  point: Vector3;
+  normal: Vector3;
+}
+
+export type BvhWorld = CollisionWorld &
+  RaycastWorld & {
+    /** Como `raycast`, pero con el punto y la normal de la superficie. Los vectores son nuevos en cada llamada. */
+    raycastHit(origin: Vector3, direction: Vector3, maxDistance: number): RayHit | null;
+  };
 
 const segment = new Line3();
 const bounds = new Box3();
@@ -125,6 +136,17 @@ export function createBvhWorld(colliders: readonly Mesh[]): BvhWorld {
       // Ambas caras: la colisión de la cápsula tampoco depende del orden de los vértices.
       const hit = bvh.raycastFirst(ray, DoubleSide, 0, maxDistance);
       return hit ? hit.distance : null;
+    },
+
+    raycastHit(origin: Vector3, direction: Vector3, maxDistance: number): RayHit | null {
+      ray.origin.copy(origin);
+      ray.direction.copy(direction);
+      const hit = bvh.raycastFirst(ray, DoubleSide, 0, maxDistance);
+      if (!hit?.face) return null;
+      // La malla está unida en coordenadas del mundo: la normal de la cara ya está en ese marco.
+      const normal = hit.face.normal.clone().normalize();
+      if (normal.dot(direction) > 0) normal.negate();
+      return { distance: hit.distance, point: hit.point.clone(), normal };
     },
   };
 }

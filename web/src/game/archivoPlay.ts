@@ -9,12 +9,16 @@ import {
   carryWhere,
   createCarry,
   heldBy,
+  looseAccess,
+  loosePoseOf,
   placeHeld,
   placedAt,
   resetCarry,
   takeFromSlot,
   takeObject,
   type CarryState,
+  type LooseAccess,
+  type LoosePose,
 } from './carry';
 
 /** Fuentes con acción (archivo.json). */
@@ -37,7 +41,7 @@ const railSlot = (rail: number): string => `${RAIL_PREFIX}${String(rail)}`;
 /** Lo que tarda la manivela en llevar el Planetario a su alineación (s). */
 export const CRANK_SECONDS = 14;
 
-export type PieceWhere = 'home' | 'hands' | 'stand' | { rail: number };
+export type PieceWhere = 'home' | 'hands' | 'stand' | { rail: number } | { loose: LoosePose };
 
 export interface ArchivoSnapshot {
   placement: Record<number, string>;
@@ -49,6 +53,8 @@ export interface ArchivoSnapshot {
 
 export interface ArchivoPlay {
   readonly actions: SourceActions;
+  /** Dejar una pieza en cualquier sitio y volver a cogerla (game/looseCarry.ts). */
+  readonly loosely: LooseAccess;
   /** Lo que llevas en las manos: una esfera, el prisma o nada. */
   readonly held: string | undefined;
   /** Las esferas en cada riel (por su número). */
@@ -142,6 +148,12 @@ export function createArchivoPlay(options: ArchivoPlayOptions): ArchivoPlay {
 
   return {
     actions,
+    loosely: looseAccess(
+      () => carry,
+      (next) => {
+        carry = next;
+      },
+    ),
     get held() {
       return holding();
     },
@@ -158,8 +170,10 @@ export function createArchivoPlay(options: ArchivoPlayOptions): ArchivoPlay {
     pieces() {
       return ids.map((id) => {
         const where = carryWhere(carry, id) ?? RACK;
-        const spot: PieceWhere =
-          where === RACK
+        const pose = loosePoseOf(where);
+        const spot: PieceWhere = pose
+          ? { loose: pose }
+          : where === RACK
             ? 'home'
             : where === STAND_SLOT
               ? 'stand'

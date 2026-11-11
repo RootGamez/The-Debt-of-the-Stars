@@ -164,3 +164,40 @@ describe('cycles and debugging', () => {
     });
   });
 });
+
+describe('leaving a weight anywhere', () => {
+  const pose = { position: [1, 2, 3], normal: [0, 0, 1] } as const;
+
+  it('drops the weight in hand and reports it by what it weighs', () => {
+    const game = setup();
+    game.play.actions.run(BENCH.weights[2]);
+
+    expect(game.play.loosely.drop(pose)).toBe(true);
+
+    expect(game.play.held).toBeUndefined();
+    expect(game.play.looseWeights()).toEqual({ 2: pose });
+  });
+
+  it('picks it up again and puts it on a notch', () => {
+    const game = setup();
+    game.play.actions.run(BENCH.weights[2]);
+    game.play.loosely.drop(pose);
+
+    expect(game.play.loosely.take('pesa_2')).toBe(true);
+    game.notch(3);
+    game.play.actions.run(BENCH.balance);
+
+    expect(game.play.placement()).toEqual({ 3: 2 });
+    expect(game.play.looseWeights()).toEqual({});
+  });
+
+  it('forgets it with the next cycle', () => {
+    const game = setup();
+    game.play.actions.run(BENCH.weights[1]);
+    game.play.loosely.drop(pose);
+
+    game.play.reset();
+
+    expect(game.play.looseWeights()).toEqual({});
+  });
+});

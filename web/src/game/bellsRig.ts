@@ -13,6 +13,7 @@ import {
 import type { Triple } from '../worlds/procedural/kit';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 import { BELL_IDS, BELLS_CHANNEL, createBellsPlay, type BellsPlay } from './bellsPlay';
+import type { LooseCarrier } from './looseCarry';
 
 const WORLD = 'umbral';
 /** A qué distancia se oyen las campanas (m). */
@@ -31,6 +32,8 @@ export interface BellsRigOptions {
 
 export interface BellsRig {
   readonly play: BellsPlay;
+  /** Para dejar las campanas en cualquier sitio y volver a cogerlas. */
+  readonly carrier: LooseCarrier;
   /** El lector del atril. */
   readonly readers: CustomReaders;
   /** Depuración: fija la marca más cercana (para probar sin andar al milímetro); undefined la suelta. */
@@ -48,7 +51,7 @@ export function createBellsRig(options: BellsRigOptions): BellsRig | undefined {
   if (!anchor) return undefined;
   const first = CHANNEL_INTERACT[0] ?? 0;
   const anchorAt: Triple = channelPoint(first, INTERACT_LIFT);
-  const view = createBellsView(scene, anchor, anchorAt, BELL_IDS);
+  const view = createBellsView(scene, anchor, anchorAt, BELL_IDS, runtime.world.scene);
   const eye = new Vector3();
   const where = new Vector3();
 
@@ -61,6 +64,7 @@ export function createBellsRig(options: BellsRigOptions): BellsRig | undefined {
 
   return {
     play,
+    carrier: { world: WORLD, ...play.loosely },
     forceMark(mark) {
       forced = mark;
     },

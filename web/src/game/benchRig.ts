@@ -14,12 +14,15 @@ import { plateBody } from '../ui/plateBody';
 import type { CustomReaders } from '../ui/puzzlePanel';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 import { BENCH, createBenchPlay, type BenchPlay } from './benchPlay';
+import type { LooseCarrier } from './looseCarry';
 
 /** A cuánto de una muesca o un agujero se considera «delante de él» (m). */
 const REACH = 1.2;
 
 export interface BenchRig {
   readonly play: BenchPlay;
+  /** Para dejar las pesas en cualquier sitio y volver a cogerlas (solo si hay balanza). */
+  readonly carrier: LooseCarrier | undefined;
   readonly readers: CustomReaders;
   /** Depuración: fija la muesca o el agujero más cercano (undefined los suelta). */
   forceNotch(notch: number | undefined): void;
@@ -76,13 +79,16 @@ export function createBenchRig(options: {
     nearestNotch: () => (hasBalance ? nearest(notches, forcedNotch) : undefined),
     nearestHole: () => (hasPlate ? nearest(holes, forcedHole) : undefined),
   });
-  const balance: BalanceView | undefined = hasBalance
-    ? createBalanceView(options.scene, { notches, homes })
-    : undefined;
+  const tallerWorld = options.runtimes.get('taller')?.world.scene;
+  const balance: BalanceView | undefined =
+    hasBalance && tallerWorld
+      ? createBalanceView(options.scene, { notches, homes, world: tallerWorld })
+      : undefined;
   const plate: PlateView | undefined = hasPlate ? createPlateView(holes) : undefined;
 
   return {
     play,
+    carrier: balance ? { world: 'taller', ...play.loosely } : undefined,
     readers: { placa: (status, _solved, solve) => plateBody(play, status, solve) },
     forceNotch(notch) {
       forcedNotch = notch;
@@ -92,7 +98,15 @@ export function createBenchRig(options: {
     },
     update(camera) {
       eye.copy(camera.position);
-      balance?.update({ placement: play.placement(), held: play.held, lean: play.lean }, camera);
+      balance?.update(
+        {
+          placement: play.placement(),
+          held: play.held,
+          loose: play.looseWeights(),
+          lean: play.lean,
+        },
+        camera,
+      );
       plate?.update({ clamps: play.clamps(), figure: play.figure() });
     },
   };

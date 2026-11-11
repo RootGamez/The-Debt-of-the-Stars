@@ -2,7 +2,7 @@
 // de su estante, se encaja en un sitio libre y se puede volver a coger. Lógica pura y sin mutación: cada paso
 // devuelve un estado nuevo (o el mismo, si no se puede). Todo vuelve a su estante al empezar el ciclo (D2).
 
-/** Dónde está cada objeto: en su estante, en las manos o en un encaje (por su id). */
+/** Dónde está cada objeto: en su estante, en las manos, en un encaje (por su id) o suelto en un sitio (`loose:…`). */
 export type CarryWhere = string;
 
 export const RACK = 'rack';
@@ -69,4 +69,77 @@ export function takeFromSlot(state: CarryState, slot: string): CarryState {
 /** Ciclo nuevo: todo al estante. */
 export function resetCarry(state: CarryState): CarryState {
   return createCarry(state.ids);
+}
+
+/** Un punto (m) o una dirección en el marco del mundo donde está el puzle. */
+export type Vec3 = readonly [number, number, number];
+
+/** Dónde se dejó un objeto: el punto de la superficie y hacia dónde mira (la normal, para que quede en pie). */
+export interface LoosePose {
+  readonly position: Vec3;
+  readonly normal: Vec3;
+}
+
+const LOOSE_PREFIX = 'loose:';
+/** Cuántos decimales se guardan (milímetros): el sitio va dentro de un texto, sin estado aparte. */
+const LOOSE_DECIMALS = 3;
+
+function encodeLoose(pose: LoosePose): CarryWhere {
+  const numbers = [...pose.position, ...pose.normal].map((n) => n.toFixed(LOOSE_DECIMALS));
+  return `${LOOSE_PREFIX}${numbers.join(',')}`;
+}
+
+/** El sitio donde está suelto un objeto, si `where` es uno; `undefined` si no. */
+export function loosePoseOf(where: CarryWhere | undefined): LoosePose | undefined {
+  if (!where?.startsWith(LOOSE_PREFIX)) return undefined;
+  const numbers = where.slice(LOOSE_PREFIX.length).split(',').map(Number);
+  if (numbers.length !== 6 || numbers.some((n) => !Number.isFinite(n))) return undefined;
+  const [x, y, z, nx, ny, nz] = numbers as [number, number, number, number, number, number];
+  return { position: [x, y, z], normal: [nx, ny, nz] };
+}
+
+/** Deja lo que se lleva en ese sitio (en el suelo, en una mesa…): ya no está en las manos ni en ningún encaje. */
+export function dropHeld(state: CarryState, pose: LoosePose): CarryState {
+  const held = heldBy(state);
+  return held === undefined ? state : moved(state, held, encodeLoose(pose));
+}
+
+/** Los objetos que están sueltos y dónde. */
+export function looseObjects(state: CarryState): { id: string; pose: LoosePose }[] {
+  return state.ids.flatMap((id) => {
+    const pose = loosePoseOf(state.where[id]);
+    return pose ? [{ id, pose }] : [];
+  });
+}
+
+/** Vuelve a coger un objeto suelto (con las manos libres). */
+export function takeLoose(state: CarryState, id: string): CarryState {
+  return heldBy(state) === undefined && loosePoseOf(state.where[id]) !== undefined
+    ? moved(state, id, HANDS)
+    : state;
+}
+
+/** Lo que un puzle ofrece para dejar y volver a coger cosas sueltas (game/looseCarry.ts lo usa sin conocer el puzle). */
+export interface LooseAccess {
+  held(): boolean;
+  /** Deja lo que se lleva; false si las manos estaban vacías. */
+  drop(pose: LoosePose): boolean;
+  loose(): { id: string; pose: LoosePose }[];
+  /** Coge ese objeto suelto; false si no se puede (manos ocupadas o no está suelto). */
+  take(id: string): boolean;
+}
+
+/** Los accesos de un puzle a partir de cómo lee y cambia su estado de `carry`. */
+export function looseAccess(get: () => CarryState, set: (next: CarryState) => void): LooseAccess {
+  const apply = (next: CarryState): boolean => {
+    const changed = next !== get();
+    if (changed) set(next);
+    return changed;
+  };
+  return {
+    held: () => heldBy(get()) !== undefined,
+    drop: (pose) => apply(dropHeld(get(), pose)),
+    loose: () => looseObjects(get()),
+    take: (id) => apply(takeLoose(get(), id)),
+  };
 }

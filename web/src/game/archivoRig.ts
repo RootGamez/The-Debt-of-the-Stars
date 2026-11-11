@@ -7,6 +7,7 @@ import { orreryBody } from '../ui/orreryBody';
 import type { CustomReaders } from '../ui/puzzlePanel';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 import { ARCHIVO_PLAY, createArchivoPlay, sphereSource, type ArchivoPlay } from './archivoPlay';
+import type { LooseCarrier } from './looseCarry';
 
 const WORLD = 'archivo';
 /** A cuánto de un riel se considera «delante de él» (m). */
@@ -14,6 +15,8 @@ const RAIL_REACH = 1.6;
 
 export interface ArchivoRig {
   readonly play: ArchivoPlay;
+  /** Para dejar las piezas en cualquier sitio y volver a cogerlas. */
+  readonly carrier: LooseCarrier;
   readonly readers: CustomReaders;
   /** Depuración: fija el riel más cercano (undefined lo suelta). */
   forceRail(rail: number | undefined): void;
@@ -48,6 +51,7 @@ export function createArchivoRig(options: {
     rails,
     stand,
     tablet: byClue(ARCHIVO_PLAY.slotTablet),
+    world: runtime.world.scene,
   });
 
   const eye = new Vector3();
@@ -70,6 +74,7 @@ export function createArchivoRig(options: {
 
   return {
     play,
+    carrier: { world: WORLD, ...play.loosely },
     readers: { planetario: (status, _solved, solve) => orreryBody(play, status, solve) },
     forceRail(rail) {
       forced = rail;

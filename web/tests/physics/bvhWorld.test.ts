@@ -44,6 +44,33 @@ describe('createBvhWorld', () => {
   });
 });
 
+describe('raycastHit', () => {
+  const box = new Mesh(new BoxGeometry(2, 2, 2), new MeshBasicMaterial());
+  box.position.set(10, 0, 0);
+  box.updateMatrixWorld(true);
+  const boxWorld = createBvhWorld([box]);
+
+  it('tells where the ray hits and the normal of that surface, facing the ray', () => {
+    const hit = boxWorld.raycastHit(new Vector3(20, 0.2, 0), new Vector3(-1, 0, 0), 100);
+
+    expect(hit?.distance).toBeCloseTo(9);
+    expect(hit?.point.x).toBeCloseTo(11);
+    expect(hit?.normal.x).toBeCloseTo(1);
+    expect(hit?.normal.y).toBeCloseTo(0);
+  });
+
+  it('flips the normal to face the ray even when it hits from inside', () => {
+    const hit = boxWorld.raycastHit(new Vector3(10, 0, 0), new Vector3(0, 1, 0), 100);
+
+    expect(hit?.normal.y).toBeCloseTo(-1);
+  });
+
+  it('finds nothing out of reach or when looking away', () => {
+    expect(boxWorld.raycastHit(new Vector3(20, 0, 0), new Vector3(-1, 0, 0), 5)).toBeNull();
+    expect(boxWorld.raycastHit(new Vector3(20, 0, 0), new Vector3(1, 0, 0), 100)).toBeNull();
+  });
+});
+
 describe('raycast on Umbral', () => {
   it('hits the ground when casting towards the center', () => {
     const origin = new Vector3(0, 300, 0);

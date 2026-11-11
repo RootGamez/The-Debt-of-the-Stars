@@ -17,7 +17,9 @@ import {
   type Object3D,
   type Scene,
 } from 'three';
+import type { LoosePose } from '../game/carry';
 import { BALANCE } from '../puzzles/balance';
+import { placeLoose } from './looseObjects';
 import { PLATE, type SandFigure } from '../puzzles/chladni';
 import {
   BEAM_HEIGHT,
@@ -54,12 +56,16 @@ export interface BalanceAnchors {
   notches: readonly Object3D[];
   /** El sitio de cada pesa (su pedestal). */
   homes: Readonly<Record<Weight, Object3D>>;
+  /** El marco del mundo: de él cuelgan las pesas que se dejan sueltas por ahí. */
+  world: Object3D;
 }
 
 export interface BalanceShown {
   /** Lo que hay en cada muesca (su número) y lo que pesa. */
   placement: Readonly<Record<number, number>>;
   held: Weight | undefined;
+  /** Las pesas dejadas sueltas y dónde. */
+  loose: Readonly<Partial<Record<Weight, LoosePose>>>;
   /** −1 hacia la maqueta, 1 hacia las pesas. */
   lean: number;
 }
@@ -118,11 +124,14 @@ export function createBalanceView(scene: Scene, anchors: BalanceAnchors): Balanc
         if (!mesh) continue;
         const size = WEIGHT_SIZE[w];
         const notch = onNotch.get(w);
+        const loosePose = shown.loose[w];
         if (shown.held === w) {
           // La cámara no cuelga de la escena: se copia su pose (coordenadas de la escena).
           if (mesh.parent !== scene) scene.add(mesh);
           mesh.position.copy(HELD_OFFSET).applyQuaternion(camera.quaternion).add(camera.position);
           mesh.quaternion.copy(camera.quaternion).multiply(HELD_TILT);
+        } else if (loosePose) {
+          placeLoose(mesh, anchors.world, loosePose, size / 2);
         } else if (notch !== undefined) {
           if (mesh.parent !== beam) beam.add(mesh);
           mesh.position.set(notch * MEASURE, 0, -0.12 - size / 2);

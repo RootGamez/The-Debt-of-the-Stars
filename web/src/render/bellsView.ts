@@ -30,6 +30,8 @@ import {
   channelPoint,
 } from '../worlds/procedural/umbralBellsShape';
 import type { Triple } from '../worlds/procedural/kit';
+import type { LoosePose } from '../game/carry';
+import { placeLoose } from './looseObjects';
 
 /** Altura de una campana (m) y radio de su boca. */
 const BELL_HEIGHT = 0.24;
@@ -60,7 +62,10 @@ function bellProfile(): Vector2[] {
 
 export interface BellsShown {
   /** Las campanas por su id y dónde están. */
-  bells: readonly { id: string; where: 'rack' | 'hands' | { mark: number } }[];
+  bells: readonly {
+    id: string;
+    where: 'rack' | 'hands' | { mark: number } | { loose: LoosePose };
+  }[];
   /** Dónde va la bola (m desde arriba), o undefined. */
   ball: number | undefined;
   /** La marca del canal que se enciende (donde irá la campana que llevas), o undefined. */
@@ -82,6 +87,8 @@ export function createBellsView(
   /** Dónde está `anchor` en el marco del Anfiteatro: las posiciones del marco se pasan a las suyas restándolo. */
   anchorAt: Triple,
   ids: readonly string[],
+  /** El marco del mundo: de él cuelgan las campanas que se dejan sueltas por ahí. */
+  looseParent: Object3D,
 ): BellsView {
   const toAnchor = (p: Triple): Vector3 =>
     new Vector3(p[0] - anchorAt[0], p[1] - anchorAt[1], p[2] - anchorAt[2]);
@@ -167,6 +174,10 @@ export function createBellsView(
           object.quaternion.copy(camera.quaternion).multiply(HELD_TILT);
           object.rotateX(-Math.PI / 2);
           object.scale.setScalar(0.8);
+          continue;
+        }
+        if (typeof where === 'object' && 'loose' in where) {
+          placeLoose(object, looseParent, where.loose, BELL_HEIGHT + 0.005);
           continue;
         }
         if (object.parent !== root) {

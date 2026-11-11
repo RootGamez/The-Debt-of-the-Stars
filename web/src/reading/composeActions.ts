@@ -9,7 +9,22 @@ export function composeActions(
 ): SourceActions | undefined {
   const list = parts.filter((part): part is SourceActions => part !== undefined);
   if (list.length === 0) return undefined;
+  const ambients = list.flatMap((part) => (part.ambient ? [part.ambient] : []));
   return {
+    ...(ambients.length > 0 && {
+      ambient: {
+        verb: () => {
+          for (const ambient of ambients) {
+            const verb = ambient.verb();
+            if (verb !== undefined) return verb;
+          }
+          return undefined;
+        },
+        run: () => {
+          ambients.find((ambient) => ambient.verb() !== undefined)?.run();
+        },
+      },
+    }),
     gone: (id) => list.some((part) => part.gone(id)),
     verb: (id, unread) => {
       for (const part of list) {

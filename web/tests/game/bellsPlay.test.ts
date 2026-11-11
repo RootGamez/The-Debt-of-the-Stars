@@ -152,3 +152,56 @@ describe('the bells in play', () => {
     ]);
   });
 });
+
+describe('leaving a bell anywhere', () => {
+  const pose = { position: [1, 2, 3], normal: [0, 0, 1] } as const;
+
+  it('drops the bell in hand where it is told, and shows it there', () => {
+    const game = setup();
+    game.play.actions.run(BELLS_RACK);
+
+    expect(game.play.loosely.drop(pose)).toBe(true);
+
+    expect(game.play.held).toBe(false);
+    const loose = game.play
+      .bells()
+      .filter((bell) => typeof bell.where === 'object' && 'loose' in bell.where);
+    expect(loose).toHaveLength(1);
+    expect(game.play.onRack()).toBe(3);
+    expect(game.play.placedMarks()).toEqual([]);
+  });
+
+  it('picks it up again to place it on the channel afterwards', () => {
+    const game = setup();
+    game.play.actions.run(BELLS_RACK);
+    game.play.loosely.drop(pose);
+    const [first] = game.play.loosely.loose();
+
+    expect(game.play.loosely.take(first?.id ?? '')).toBe(true);
+    game.play.actions.run(BELLS_CHANNEL);
+
+    expect(game.play.placedMarks()).toEqual([1]);
+  });
+
+  it('does not let a loose bell count as placed, nor be taken from the rack again', () => {
+    const game = setup();
+    game.play.actions.run(BELLS_RACK);
+    game.play.loosely.drop(pose);
+    game.play.actions.run(BELLS_RACK);
+    game.play.actions.run(BELLS_RACK);
+
+    expect(game.play.loosely.loose()).toHaveLength(1);
+    expect(game.play.onRack()).toBe(2);
+  });
+
+  it('sends it back to the rack with the next cycle', () => {
+    const game = setup();
+    game.play.actions.run(BELLS_RACK);
+    game.play.loosely.drop(pose);
+
+    game.play.reset();
+
+    expect(game.play.loosely.loose()).toEqual([]);
+    expect(game.play.onRack()).toBe(4);
+  });
+});

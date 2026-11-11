@@ -11,12 +11,16 @@ import {
   carryWhere,
   createCarry,
   heldBy,
+  looseAccess,
+  loosePoseOf,
   placeHeld,
   placedAt,
   resetCarry,
   takeFromSlot,
   takeObject,
   type CarryState,
+  type LooseAccess,
+  type LoosePose,
 } from './carry';
 
 /** Fuentes con acción (taller.json y cicatriz.json). */
@@ -48,6 +52,10 @@ export interface BenchSnapshot {
 
 export interface BenchPlay {
   readonly actions: SourceActions;
+  /** Dejar una pesa en cualquier sitio y volver a cogerla (game/looseCarry.ts). */
+  readonly loosely: LooseAccess;
+  /** Las pesas que están sueltas (por lo que pesan) y dónde. */
+  looseWeights(): Partial<Record<Weight, LoosePose>>;
   /** La pesa que llevas (1, 2 o 3), si alguna. */
   readonly held: Weight | undefined;
   /** Lo que hay en cada muesca (su número) y lo que pesa. */
@@ -145,6 +153,20 @@ export function createBenchPlay(options: BenchPlayOptions): BenchPlay {
 
   return {
     actions,
+    loosely: looseAccess(
+      () => carry,
+      (next) => {
+        carry = next;
+      },
+    ),
+    looseWeights() {
+      const result: Partial<Record<Weight, LoosePose>> = {};
+      for (const w of WEIGHTS) {
+        const pose = loosePoseOf(carryWhere(carry, weightId(w)));
+        if (pose) result[w] = pose;
+      }
+      return result;
+    },
     get held() {
       return heldWeight();
     },

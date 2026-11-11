@@ -78,6 +78,11 @@ export interface SourceActions {
    */
   verb(id: string, unread: boolean): string | undefined;
   run(id: string): void;
+  /**
+   * Lo que se puede hacer sin apuntar a ninguna fuente, mirando el suelo o una mesa (dejar lo que llevas, coger algo
+   * que quedó suelto): el verbo del aviso, o `undefined` si ahora no hay nada que hacer.
+   */
+  ambient?: { verb(): string | undefined; run(): void };
 }
 
 export interface RegistrySnapshot {
@@ -334,6 +339,8 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     } else if (canInteract() && target) {
       if (actionOf(target.id) !== undefined) actions?.run(target.id);
       else openReading(target.id);
+    } else if (canInteract() && actions?.ambient?.verb() !== undefined) {
+      actions.ambient.run();
     }
   }
 
@@ -372,7 +379,8 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
         readingOpen: reading.frozen,
         registryOpen: registryPanel.isOpen,
         canInteract: canInteract(),
-        hasTarget: target !== undefined,
+        // También cuenta lo que se puede hacer sin fuente delante: dejar lo que llevas o coger algo suelto.
+        hasTarget: target !== undefined || actions?.ambient?.verb() !== undefined,
         hasTasks: options.prologue !== undefined,
       },
       event,
@@ -437,7 +445,12 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       const verb = target ? actionOf(target.id) : undefined;
       if (target && verb !== undefined) prompt.show(verbLabel(verb, touch));
       else if (target && kind) prompt.show(promptLabel(kind, touch));
-      else prompt.hide();
+      else {
+        // Sin ninguna fuente delante, el aviso de dejar lo que llevas o de coger lo que quedó suelto.
+        const ambient = target ? undefined : actions?.ambient?.verb();
+        if (ambient !== undefined) prompt.show(verbLabel(ambient, touch));
+        else prompt.hide();
+      }
       current.markers.update(timeSeconds, camera.position, wantsMarker);
     },
     setWorld(sources) {

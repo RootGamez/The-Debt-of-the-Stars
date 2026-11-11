@@ -62,4 +62,25 @@ describe('composing the actions of several sources', () => {
 
     expect(done).toEqual(['coger']);
   });
+
+  it('has no ambient action unless some part has one', () => {
+    expect(composeActions([actions('a', 'coger').actions])?.ambient).toBeUndefined();
+  });
+
+  it('uses the ambient action of the first part that has something to do', () => {
+    const quiet = vi.fn();
+    const busy = vi.fn();
+    const withAmbient = (verb: string | undefined, run: () => void): SourceActions => ({
+      gone: () => false,
+      verb: () => undefined,
+      run: () => undefined,
+      ambient: { verb: () => verb, run },
+    });
+    const all = composeActions([withAmbient(undefined, quiet), withAmbient('dejar', busy)]);
+
+    expect(all?.ambient?.verb()).toBe('dejar');
+    all?.ambient?.run();
+    expect(busy).toHaveBeenCalledTimes(1);
+    expect(quiet).not.toHaveBeenCalled();
+  });
 });

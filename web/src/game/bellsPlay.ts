@@ -8,6 +8,8 @@ import {
   carryWhere,
   createCarry,
   heldBy,
+  looseAccess,
+  loosePoseOf,
   placeHeld,
   placedAt,
   resetCarry,
@@ -15,6 +17,8 @@ import {
   takeFromRack,
   takeFromSlot,
   type CarryState,
+  type LooseAccess,
+  type LoosePose,
 } from './carry';
 
 /** Fuentes con acción (umbral.json): el estante de campanas, el canal y el atril (un lector de puzle). */
@@ -30,7 +34,7 @@ const SLOT_PREFIX = 'marca_';
 const slotOf = (mark: number): string => `${SLOT_PREFIX}${String(mark)}`;
 
 /** Dónde está una campana. */
-export type BellWhere = 'rack' | 'hands' | { mark: number };
+export type BellWhere = 'rack' | 'hands' | { mark: number } | { loose: LoosePose };
 
 export interface BellsFrame {
   /** Lo que se oye en este fotograma: el índice de cada campana puesta que acaba de sonar (0 = la primera de arriba). */
@@ -48,6 +52,8 @@ export interface BellsSnapshot {
 export interface BellsPlay {
   readonly actions: SourceActions;
   readonly held: boolean;
+  /** Dejar una campana en cualquier sitio y volver a cogerla (game/looseCarry.ts). */
+  readonly loosely: LooseAccess;
   /** Las cuatro suenan a compás: el atril está abierto. */
   readonly solved: boolean;
   /** Las marcas con campana, de arriba abajo. */
@@ -110,6 +116,12 @@ export function createBellsPlay(options: BellsPlayOptions): BellsPlay {
 
   return {
     actions,
+    loosely: looseAccess(
+      () => carry,
+      (next) => {
+        carry = next;
+      },
+    ),
     get held() {
       return holding();
     },
@@ -122,8 +134,10 @@ export function createBellsPlay(options: BellsPlayOptions): BellsPlay {
     bells() {
       return BELL_IDS.map((id) => {
         const where = carryWhere(carry, id) ?? RACK;
-        const spot: BellWhere =
-          where === RACK
+        const pose = loosePoseOf(where);
+        const spot: BellWhere = pose
+          ? { loose: pose }
+          : where === RACK
             ? 'rack'
             : where.startsWith(SLOT_PREFIX)
               ? { mark: Number(where.slice(SLOT_PREFIX.length)) }
