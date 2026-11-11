@@ -1,6 +1,6 @@
 {
   "budget": 15000,
-  "spent": 3110,
+  "spent": 8360,
   "entries": [
     {
       "id": "loop.reset",
@@ -128,6 +128,43 @@
       "file": "music_main_1.mp3",
       "credits": 750,
       "at": "2026-11-11T18:10:58.550Z"
+    },
+    {
+      "id": "music.umbral",
+      "file": "music_umbral_1.mp3",
+      "credits": 750,
+      "at": "2026-11-11T19:57:17.079Z"
+    },
+    {
+      "id": "music.archivo",
+      "file": "music_archivo_1.mp3",
+      "credits": 750,
+      "at": "2026-11-11T19:57:27.983Z"
+    },
+    {
+      "id": "music.taller",
+      "file": "music_taller_1.mp3",
+      "credits": 1500,
+      "at": "2026-11-11T19:57:39.490Z"
+    },
+    {
+      "id": "music.cicatriz",
+      "file": "music_cicatriz_1.mp3",
+      "credits": 750,
+      "at": "2026-11-11T19:57:51.584Z"
+    },
+    {
+      "id": "music.cielo_rojo",
+      "file": "music_cielo_rojo_1.mp3",
+      "credits": 750,
+      "at": "2026-11-11T19:58:02.524Z"
+    },
+    {
+      "id": "music.agujero_negro",
+      "file": "music_agujero_negro_1.mp3",
+      "credits": 750,
+      "at": "2026-11-11T19:58:33.576Z"
     }
-  ]
+  ],
+  "creditsPerSecond": 25
 }

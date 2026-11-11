@@ -452,6 +452,42 @@
       "category": "music",
       "gain": 0.8,
       "loop": false
+    },
+    "music.umbral": {
+      "files": ["music_umbral_1.mp3"],
+      "category": "music",
+      "gain": 0.8,
+      "loop": false
+    },
+    "music.archivo": {
+      "files": ["music_archivo_1.mp3"],
+      "category": "music",
+      "gain": 0.8,
+      "loop": false
+    },
+    "music.taller": {
+      "files": ["music_taller_1.mp3"],
+      "category": "music",
+      "gain": 0.8,
+      "loop": false
+    },
+    "music.cicatriz": {
+      "files": ["music_cicatriz_1.mp3"],
+      "category": "music",
+      "gain": 0.8,
+      "loop": false
+    },
+    "music.cielo_rojo": {
+      "files": ["music_cielo_rojo_1.mp3"],
+      "category": "music",
+      "gain": 0.7,
+      "loop": false
+    },
+    "music.agujero_negro": {
+      "files": ["music_agujero_negro_1.mp3"],
+      "category": "music",
+      "gain": 0.8,
+      "loop": false
     }
   }
 }

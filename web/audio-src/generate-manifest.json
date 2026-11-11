@@ -114,6 +114,54 @@
       "duration": 60,
       "variants": 1,
       "prompt": "A melancholic, contemplative instrumental main theme for a solitary space exploration game about ancient ruins and a time loop. A solo piano plays a slow, simple, memorable melody in a minor key, supported by long, soft, warm strings and gentle synthesizer pads. Slow tempo around 60 BPM, a vast sense of space, loneliness, quiet sadness and wonder, with generous silences between phrases. No drums, no percussion, no vocals, no choir."
+    },
+    "music.umbral": {
+      "kind": "music",
+      "category": "music",
+      "gain": 0.8,
+      "duration": 60,
+      "variants": 1,
+      "prompt": "Ambient music for a quiet amber desert world with low sun and light wind: slow warm piano notes over long soft strings, about 60 BPM, wistful and spacious. Instrumental, no drums, no percussion, no vocals. Melancholic and contemplative, with piano and strings plus soft synthesizer pads, generous silences, seamless loop."
+    },
+    "music.archivo": {
+      "kind": "music",
+      "category": "music",
+      "gain": 0.8,
+      "duration": 60,
+      "variants": 1,
+      "prompt": "Ambient music for a vast cold flooded archive of crystal halls: sparse piano with long echo and reverb, glassy high strings and cold pads, slow, awe and solitude. Instrumental, no drums, no percussion, no vocals. Melancholic and contemplative, with piano and strings plus soft synthesizer pads, generous silences, seamless loop."
+    },
+    "music.taller": {
+      "kind": "music",
+      "category": "music",
+      "gain": 0.8,
+      "duration": 60,
+      "variants": 1,
+      "prompt": "Ambient music for an abandoned giant factory still working for nobody: slow soft pulsing low synth, piano motif, mournful strings, subtle mechanical rhythm but very quiet, sad. Instrumental, no drums, no percussion, no vocals. Melancholic and contemplative, with piano and strings plus soft synthesizer pads, generous silences, seamless loop."
+    },
+    "music.cicatriz": {
+      "kind": "music",
+      "category": "music",
+      "gain": 0.8,
+      "duration": 60,
+      "variants": 1,
+      "prompt": "Dark ambient music for a hollow scarred world: very low slow cellos and deep drones, sparse low piano notes, sombre, heavy, sorrowful. Instrumental, no drums, no percussion, no vocals. Melancholic and contemplative, with piano and strings plus soft synthesizer pads, generous silences, seamless loop."
+    },
+    "music.cielo_rojo": {
+      "kind": "music",
+      "category": "music",
+      "gain": 0.7,
+      "duration": 60,
+      "variants": 1,
+      "prompt": "Tension layer: a red sky is rising. Sustained uneasy strings and dissonant soft pads with a slow low piano pulse, anxious but restrained, building slowly. Instrumental, no drums, no percussion, no vocals. Melancholic and contemplative, with piano and strings plus soft synthesizer pads, generous silences, seamless loop."
+    },
+    "music.agujero_negro": {
+      "kind": "music",
+      "category": "music",
+      "gain": 0.8,
+      "duration": 60,
+      "variants": 1,
+      "prompt": "Intense final countdown layer as a black hole swallows the sky: massive deep drone, swelling strings, slow heavy low piano hits, overwhelming, sombre and grand. Instrumental, no drums, no percussion, no vocals. Melancholic and contemplative, with piano and strings plus soft synthesizer pads, generous silences, seamless loop."
     }
   }
 }
