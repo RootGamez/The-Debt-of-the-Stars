@@ -1,0 +1,241 @@
+/* Controles táctiles: lo común a todos los botones (touch-button.ts) y las guardas del teléfono (touchGuards.ts).
+   Las medidas siguen en px: scripts/postcss-ui-scale.ts las multiplica por --ui-scale. */
+
+:root {
+  /* Zona de toque mínima: 48 (iOS 44 pt, Android 48 dp) y 8 de aire entre botones. */
+  --tc-size-sm: 48px;
+  --tc-size-md: 64px;
+  --tc-size-lg: 84px;
+  --tc-gap: 12px;
+  --tc-edge: 16px;
+}
+
+/* ---------- Guardas: nada se selecciona ni abre menús al mantener pulsado ---------- */
+html.is-touch,
+html.is-touch body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+/* Donde se escribe sí se puede seleccionar (y en iOS, sin esto, ni se escribe). */
+html.is-touch input,
+html.is-touch textarea,
+html.is-touch [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+html.is-touch img,
+html.is-touch svg,
+html.is-touch canvas {
+  -webkit-user-drag: none;
+}
+
+/* Los paneles con desplazamiento propio no arrastran la página al llegar al final. */
+html.is-touch .overlay,
+html.is-touch [role='dialog'] {
+  overscroll-behavior: contain;
+}
+
+/* ---------- El botón ---------- */
+.touch-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-btn[hidden] {
+  display: none;
+}
+
+/* Mantener o alternar: el dedo no arrastra ni hace zoom sobre ellos. */
+.touch-btn[data-mode='hold'],
+.touch-btn[data-mode='toggle'] {
+  touch-action: none;
+}
+
+.touch-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Pulsado: se ilumina sin moverse ni cambiar de tamaño (nada se desplaza bajo el dedo). */
+.touch-btn.is-pressed {
+  filter: brightness(1.35);
+}
+
+.touch-btn:focus-visible {
+  outline: 3px solid var(--glow);
+  outline-offset: 3px;
+}
+
+.touch-btn-icon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.touch-btn-label {
+  font: inherit;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ---------- Aspecto del sistema (los botones con `size`) ---------- */
+.touch-btn--sm,
+.touch-btn--md,
+.touch-btn--lg {
+  padding: 0 14px;
+  border: 2px solid rgb(var(--glow-rgb) / 55%);
+  border-radius: 999px;
+  background: rgb(var(--night-rgb) / 72%);
+  color: var(--text);
+  font-family: var(--f-hand);
+  font-size: 18px;
+}
+
+.touch-btn--sm {
+  min-width: var(--tc-size-sm);
+  min-height: var(--tc-size-sm);
+}
+
+.touch-btn--md {
+  min-width: var(--tc-size-md);
+  min-height: var(--tc-size-md);
+}
+
+.touch-btn--lg {
+  min-width: var(--tc-size-lg);
+  min-height: var(--tc-size-lg);
+  padding: 0;
+}
+
+.touch-btn--lg .touch-btn-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.touch-btn--primary {
+  border-color: var(--glow);
+  background: rgb(var(--night-rgb) / 82%);
+}
+
+.touch-btn--flight {
+  border-color: rgb(72 224 146 / 70%);
+}
+
+.touch-btn--danger {
+  border-color: rgb(255 120 104 / 75%);
+}
+
+.touch-btn.is-active {
+  background: rgb(var(--glow-rgb) / 28%);
+}
+
+/* ---------- Entrar y salir (solo transform y opacity, 160 / 120 ms) ---------- */
+.touch-btn.is-entering {
+  animation: touchBtnIn 160ms ease-out backwards;
+}
+
+.touch-btn.is-leaving {
+  pointer-events: none;
+  animation: touchBtnOut 120ms ease-in forwards;
+}
+
+@keyframes touchBtnIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+@keyframes touchBtnOut {
+  to {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .touch-btn.is-entering,
+  .touch-btn.is-leaving {
+    animation: none;
+  }
+}
+
+/* ---------- «Gira el teléfono»: solo se juega en horizontal (rotateGuard.ts) ---------- */
+.rotate-guard {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  background: var(--night);
+  color: var(--text);
+  text-align: center;
+  touch-action: none;
+}
+
+.rotate-guard[hidden] {
+  display: none;
+}
+
+.rotate-guard-phone {
+  width: 84px;
+  height: 84px;
+  fill: none;
+  stroke: var(--glow);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: rotatePhone 2.6s ease-in-out infinite;
+}
+
+.rotate-guard strong {
+  font: 700 34px/1.1 var(--f-hand);
+}
+
+.rotate-guard span {
+  max-width: 320px;
+  font: 400 19px/1.4 var(--f-body);
+}
+
+@keyframes rotatePhone {
+  0%,
+  20% {
+    transform: rotate(0deg);
+  }
+  70%,
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rotate-guard-phone {
+    animation: none;
+    transform: rotate(-45deg);
+  }
+}

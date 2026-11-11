@@ -7,6 +7,7 @@ import '@fontsource/alegreya/latin-400-italic.css';
 import '@fontsource/alegreya/latin-700.css';
 import './style.css';
 import './ui/theme.css';
+import './ui/touch/touch.css';
 import {
   InstancedMesh,
   Mesh,
@@ -121,6 +122,9 @@ import { bodyPose } from './system/orbits';
 import { createDebugOverlay, type SystemSnapshot } from './ui/debugOverlay';
 import { createOrbitMap } from './ui/orbitMap';
 import { isTouchDevice } from './ui/pauseOverlay';
+import { installLandscapeLock } from './ui/touch/orientationLock';
+import { createRotateGuard } from './ui/touch/rotateGuard';
+import { installTouchGuards } from './ui/touch/touchGuards';
 import { createArrivalLayer, endArrivingPaint, sessionStore, takeCrossing } from './ui/arrival';
 import { lockGameKeys } from './ui/endingCard';
 import { createPlaceCard } from './ui/placeCard';
@@ -230,6 +234,16 @@ const hasProgress = (data: Readonly<SaveData>): boolean =>
 
 function start(): void {
   const display = setUpDisplay();
+  if (isTouchDevice()) {
+    // Mantener pulsado no selecciona ni abre menús; el pellizco de iOS solo se bloquea sobre el juego y sus botones.
+    installTouchGuards(document, {
+      blocksGesture: (target) =>
+        target instanceof Element && (target.id === 'game' || target.closest('.touch') !== null),
+    });
+    // Solo se juega en horizontal: se pide el bloqueo de pantalla (ayuda) y, en vertical, «Gira el teléfono» cubre todo.
+    installLandscapeLock(document, window.screen);
+  }
+  const rotateGuard = createRotateGuard({ touch: isTouchDevice() });
   if (wantsMenu()) {
     activeMenu = createMainMenu({
       hasProgress: hasProgress(loadSave(browserStore()).data),
@@ -575,6 +589,17 @@ function start(): void {
       },
     },
   );
+  // En vertical el juego se pausa y se sueltan dedos y teclas; al volver a horizontal queda en la pausa normal.
+  const holdForRotation = (): void => {
+    overlay.pause();
+    touch?.reset();
+    input.reset();
+  };
+  rotateGuard.subscribe((active) => {
+    if (active) holdForRotation();
+    else overlay.focus(); // el foco vuelve a la pausa que se había quedado detrás del aviso
+  });
+  if (rotateGuard.active) holdForRotation(); // la página se abrió ya en vertical
   // La luz del explorador: la L enciende los puntos de su cuerpo, que alumbran de azul celeste en todas direcciones.
   const bodyLight = createBodyLightSwitch(() => overlay.playing);
   // De vuelta en casa: la Directora cierra el viaje con la tarjeta del final.

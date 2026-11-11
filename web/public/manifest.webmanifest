@@ -1,0 +1,13 @@
+{
+  "name": "La deuda de las estrellas",
+  "short_name": "Deuda de las estrellas",
+  "description": "Un juego de bucle de tiempo en el navegador",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#15211b",
+  "theme_color": "#15211b",
+  "icons": [{ "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

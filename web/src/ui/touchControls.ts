@@ -1,5 +1,6 @@
 // Controles táctiles: joystick que aparece donde se toca en la mitad izquierda, arrastre en la mitad
 // derecha para mirar, botón de salto y botón de pausa. Solo se crean en pantallas táctiles.
+// Los botones salen del componente común (ui/touch/touchButton.ts).
 import type { ShipAction } from '../game/shipFlight';
 import { intentFromStick, type MoveIntent } from '../core/input';
 import type { InputController } from '../core/inputController';
@@ -7,6 +8,7 @@ import { MOUSE_LOOK_SENSITIVITY, TOUCH_LOOK_SENSITIVITY } from '../data/movement
 import { EMPTY_FLIGHT_KEYS, type FlightKeys } from '../ship/shipInput';
 import { t } from '../i18n';
 import { canFullscreen, toggleFullscreen } from './fullscreen';
+import { createTouchButton, type TouchButton } from './touch/touchButton';
 
 const STICK_RADIUS = 56; // px
 const DEAD_ZONE = 0.15;
@@ -37,15 +39,6 @@ function div(className: string, parent: HTMLElement): HTMLDivElement {
   return element;
 }
 
-function button(className: string, label: string, parent: HTMLElement): HTMLButtonElement {
-  const element = document.createElement('button');
-  element.className = className;
-  element.type = 'button';
-  element.textContent = label;
-  parent.append(element);
-  return element;
-}
-
 export function createTouchControls(
   canvas: HTMLCanvasElement,
   input: InputController,
@@ -54,26 +47,7 @@ export function createTouchControls(
   const layer = div('touch', document.body);
   const base = div('touch-stick', layer);
   const knob = div('touch-knob', base);
-  const jump = button('touch-jump', t('Saltar'), layer);
-  const pause = button('touch-pause', t('Pausa'), layer);
-  const hud = button('touch-hud', '👁', layer);
-  const screen = button('touch-screen', '⛶', layer);
   const shipPanel = div('touch-ship-controls', layer);
-  const board = button('touch-ship-action', t('Nave'), shipPanel);
-  const target = button('touch-ship-action', t('Objetivo'), shipPanel);
-  const stabilize = button('touch-ship-action', t('Estab.'), shipPanel);
-  const up = button('touch-ship-action', '↑', shipPanel);
-  const down = button('touch-ship-action', '↓', shipPanel);
-  const match = button('touch-ship-action', t('Frenar'), shipPanel);
-  up.classList.add('touch-ship-flight');
-  down.classList.add('touch-ship-flight');
-  match.classList.add('touch-ship-flight');
-  pause.setAttribute('aria-label', t('Pausar el juego'));
-  hud.setAttribute('aria-label', t('Ocultar o mostrar la interfaz'));
-  hud.title = t('Ocultar o mostrar la interfaz');
-  screen.setAttribute('aria-label', t('Pantalla completa'));
-  screen.title = t('Pantalla completa');
-  screen.hidden = !canFullscreen(document);
   shipPanel.setAttribute('aria-label', t('Controles de la nave'));
   base.hidden = true;
 
@@ -101,7 +75,116 @@ export function createTouchControls(
     publishFlight();
   };
 
+  const setJump = (value: boolean): void => {
+    jumping = value;
+    publish();
+  };
+
+  const setFlightKey = (key: keyof FlightKeys, value: boolean): void => {
+    flightTouch = { ...flightTouch, [key]: value };
+    publishFlight();
+  };
+
+  // Los botones: acciones del juego al tocar (o mientras se mantienen); los del sistema, al soltar sobre ellos.
+  const jump = createTouchButton({
+    id: 'jump',
+    parent: layer,
+    mode: 'hold',
+    className: 'touch-jump',
+    label: t('Saltar'),
+    onPress: () => {
+      setJump(true);
+    },
+    onRelease: () => {
+      setJump(false);
+    },
+  });
+  const pause = createTouchButton({
+    id: 'pause',
+    parent: layer,
+    trigger: 'up',
+    className: 'touch-pause',
+    label: t('Pausa'),
+    ariaLabel: t('Pausar el juego'),
+    onPress: onPause,
+  });
+  // Como la H del teclado: quita la lista de tareas, los relojes y demás papeles para ver (o grabar) solo el mundo.
+  const hud = createTouchButton({
+    id: 'hud',
+    parent: layer,
+    mode: 'toggle',
+    className: 'touch-hud',
+    icon: 'eye',
+    ariaLabel: t('Ocultar o mostrar la interfaz'),
+    onToggle: (hidden) => {
+      document.body.classList.toggle('interfaz-oculta', hidden);
+      hud.el.classList.toggle('touch-hud-off', hidden);
+    },
+  });
+  hud.el.title = t('Ocultar o mostrar la interfaz');
+  const screen = createTouchButton({
+    id: 'fullscreen',
+    parent: layer,
+    trigger: 'up',
+    className: 'touch-screen',
+    icon: 'fullscreen',
+    ariaLabel: t('Pantalla completa'),
+    visible: canFullscreen(document),
+    onPress: () => {
+      void toggleFullscreen(document);
+    },
+  });
+  screen.el.title = t('Pantalla completa');
+
+  const shipAction = (id: string, label: string, action: ShipAction): TouchButton =>
+    createTouchButton({
+      id,
+      parent: shipPanel,
+      className: 'touch-ship-action',
+      label,
+      onPress: () => {
+        onShipAction(action);
+      },
+    });
+  const board = shipAction('board', t('Nave'), 'board');
+  const target = shipAction('target', t('Objetivo'), 'target');
+  const stabilize = shipAction('stabilize', t('Estab.'), 'stabilize');
+  const flightKey = (
+    id: string,
+    key: 'up' | 'down' | 'match',
+    spec: { icon: 'up' | 'down'; ariaLabel: string } | { label: string },
+  ): TouchButton =>
+    createTouchButton({
+      id,
+      parent: shipPanel,
+      mode: 'hold',
+      className: 'touch-ship-action touch-ship-flight',
+      ...spec,
+      onPress: () => {
+        setFlightKey(key, true);
+      },
+      onRelease: () => {
+        setFlightKey(key, false);
+      },
+    });
+  const up = flightKey('up', 'up', { icon: 'up', ariaLabel: t('Subir la nave') });
+  const down = flightKey('down', 'down', { icon: 'down', ariaLabel: t('Bajar la nave') });
+  const match = flightKey('match', 'match', { label: t('Frenar') });
+  const buttons: readonly TouchButton[] = [
+    jump,
+    pause,
+    hud,
+    screen,
+    board,
+    target,
+    stabilize,
+    up,
+    down,
+    match,
+  ];
+
   const reset = (): void => {
+    for (const button of buttons) button.release();
     stickId = null;
     lookId = null;
     stick = { x: 0, z: 0 };
@@ -155,16 +238,6 @@ export function createTouchControls(
     }
   };
 
-  const setJump = (value: boolean): void => {
-    jumping = value;
-    publish();
-  };
-
-  const setFlightKey = (key: keyof FlightKeys, value: boolean): void => {
-    flightTouch = { ...flightTouch, [key]: value };
-    publishFlight();
-  };
-
   const abort = new AbortController();
   const { signal } = abort;
   canvas.addEventListener('pointerdown', onDown, { signal });
@@ -179,87 +252,6 @@ export function createTouchControls(
   window.addEventListener('pointermove', onMove, { signal });
   window.addEventListener('pointerup', onUp, { signal });
   window.addEventListener('pointercancel', onUp, { signal });
-  jump.addEventListener(
-    'pointerdown',
-    (e) => {
-      e.preventDefault();
-      setJump(true);
-    },
-    { signal },
-  );
-  for (const type of ['pointerup', 'pointercancel', 'pointerleave'] as const) {
-    jump.addEventListener(
-      type,
-      () => {
-        setJump(false);
-      },
-      { signal },
-    );
-  }
-  board.addEventListener(
-    'pointerdown',
-    (e) => {
-      e.preventDefault();
-      onShipAction('board');
-    },
-    { signal },
-  );
-  target.addEventListener(
-    'pointerdown',
-    (e) => {
-      e.preventDefault();
-      onShipAction('target');
-    },
-    { signal },
-  );
-  stabilize.addEventListener(
-    'pointerdown',
-    (e) => {
-      e.preventDefault();
-      onShipAction('stabilize');
-    },
-    { signal },
-  );
-  for (const [element, key] of [
-    [up, 'up'],
-    [down, 'down'],
-    [match, 'match'],
-  ] as const) {
-    element.addEventListener(
-      'pointerdown',
-      (e) => {
-        e.preventDefault();
-        setFlightKey(key, true);
-      },
-      { signal },
-    );
-    for (const type of ['pointerup', 'pointercancel', 'pointerleave'] as const) {
-      element.addEventListener(
-        type,
-        () => {
-          setFlightKey(key, false);
-        },
-        { signal },
-      );
-    }
-  }
-  pause.addEventListener('click', onPause, { signal });
-  // Como la H del teclado: quita la lista de tareas, los relojes y demás papeles para ver (o grabar) solo el mundo.
-  hud.addEventListener(
-    'click',
-    () => {
-      const hidden = document.body.classList.toggle('interfaz-oculta');
-      hud.classList.toggle('touch-hud-off', hidden);
-    },
-    { signal },
-  );
-  screen.addEventListener(
-    'click',
-    () => {
-      void toggleFullscreen(document);
-    },
-    { signal },
-  );
 
   let shownPiloting: boolean | undefined;
   /** Solo toca el DOM cuando cambia el modo (se llama cada fotograma). */
@@ -268,8 +260,10 @@ export function createTouchControls(
     if (piloting === shownPiloting) return;
     shownPiloting = piloting;
     shipPanel.classList.toggle('piloting', piloting);
-    jump.hidden = piloting;
-    board.textContent = piloting ? t('Levantarse') : t('Nave');
+    jump.setVisible(!piloting);
+    // Los de vuelo solo existen pilotando; al dejar de pilotar sueltan lo que sostuvieran (la nave no empuja sola).
+    for (const flight of [up, down, match]) flight.setVisible(piloting);
+    board.setLabel(piloting ? t('Levantarse') : t('Nave'));
   };
 
   return {
@@ -282,6 +276,7 @@ export function createTouchControls(
     update: syncShipControls,
     dispose() {
       abort.abort();
+      for (const button of buttons) button.dispose();
       layer.remove();
     },
   };
