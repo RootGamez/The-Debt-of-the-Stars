@@ -139,6 +139,16 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - Con `?debug`: **F6** cámara exterior, **F7** la gira; `__juego.outside(true, Math.PI)` (de frente), `__juego.pitch(-1.2)` y `__juego.explorer()`.
 - **Luz del cuerpo** (los puntos de bioluminiscencia de los Ool): **L** la enciende y la apaga; alumbra de azul celeste en todas direcciones para ver interiores y sitios oscuros. Lógica pura en `character/bodyLight.ts` (fundido, latido, color y alcance), tecla en `game/bodyLightSwitch.ts`; la `PointLight` la cuelga `explorerView.ts` de la escena (nunca se esconde: cambiar el número de luces recompilaría todos los materiales; pilotando se queda a 0). Debe añadirse después de la estrella (la luz 0).
 
+## Audio (plan: `docs/plan-audio.md`)
+
+- El sonido sintético (`audio/engine.ts`, `mix.ts`, `data/soundscapes.ts`) sigue siendo la base y el respaldo. Encima van los **samples** (efectos, bucles, y más adelante la música): `audio/sampleBank.ts` (lee `public/audio/index.json` y carga bajo demanda), `audio/samplePlayer.ts` (reproduce con variante al azar, tono/volumen variables, panorámica y límite de voces por categoría; lógica pura en `audio/sfxLogic.ts`). Sin índice o sin archivo no pasa nada: `play()` devuelve `false` y quien llama usa el sintético.
+- Desde el juego: `soundtrack.play(id, opciones)`, `soundtrack.loop(id)` (devuelve un manejador con `setLevel`/`setRate`/`stop`) y `soundtrack.preload([ids])` (los sonidos de un mundo al entrar en él). Respetan la tecla M.
+- Volúmenes de efectos y ambientes en Configuración (`audio/volumePreferences.ts`, guardados en `bucle-tiempo:volumen`).
+- Los archivos de `public/audio/` salen de ElevenLabs (generados) o de stock **CC0**; cada uno queda registrado con su origen y licencia. Presupuesto del primer lote de ElevenLabs: 15.000 créditos (ver el plan). Nunca subas ni imprimas la clave de ElevenLabs (`web/.env.local`, ignorado por git).
+- Con `?debug`: `await __juego.sfx('id')` carga y reproduce un sample.
+- **Stock importado (Kenney, CC0)**: `audio-src/stock-map.json` dice qué sonido del juego sale de qué archivo de cada paquete; `node scripts/audio/importStock.ts --src <carpeta con impact/ rpg/ interface/ scifi/>` los pasa a mp3 en `public/audio/` y escribe `index.json` y `audio-src/stock-credits.json` (autor y licencia de cada archivo). Después de importar, `npx prettier --write public/audio/index.json`. Los zips descomprimidos no se guardan en el repo.
+- Dónde suena: pasos, saltos y aterrizajes (`audio/foley.ts`, lógica pura; el suelo sale del mundo con `surfaceOf`; se llama desde `main.ts` con `explorer.speed`); la nave (`audio/shipAudio.ts` puro + `shipSound.ts`; `ShipFlight.audioFrame(dt)` da el empuje de las 24 toberas, la escotilla y los golpes: cada tobera suena al encenderse, con la panorámica de su sitio, y cada grupo tiene su rugido); luz del cuerpo, leer y Registro (`audio/edges.ts`). Con pocos sonidos el motor carga todo el índice al desbloquear el audio; si crece, cargar por mundos.
+
 ## Idiomas y accesibilidad
 
 - Español (por defecto) e inglés. El texto en español del código es la clave: `t('Volver')` (`web/src/i18n/`); la traducción está en `i18n/en.ts` y `tests/i18n/dictionary.test.ts` falla si un `t('...')` no tiene entrada. Huecos: `t('Ciclos: {n}', { n })`; plurales: `plural(n, 'día', 'días')`.

@@ -19,7 +19,11 @@ import {
   type WebGLRenderer,
 } from 'three';
 import { loadChronology } from './core/chronology';
-import { createSoundtrack } from './audio/soundtrack';
+import { createEdgeTracker } from './audio/edges';
+import { createFoley, soundOf, surfaceOf } from './audio/foley';
+import { createShipSound } from './audio/shipSound';
+import { createSoundtrack, type Soundtrack } from './audio/soundtrack';
+import { createVolumeSettings } from './audio/volumePreferences';
 import { machineTime } from './game/counterweight';
 import { createArchivoRig } from './game/archivoRig';
 import { SKY_MOUTH, crossesMouth, createSkyMouth, skyMouthCenter } from './game/skyMouth';
@@ -215,8 +219,15 @@ function setUpDisplay() {
     saveLanguage(store, next);
     window.location.reload(); // el progreso ya está guardado; el texto se dibuja de nuevo en el idioma elegido
   };
-  return { language, accessibility, chooseLanguage };
+  // Los volúmenes llegan al motor de sonido en cuanto existe (soundtrackRef se rellena al crearlo).
+  const volumes = createVolumeSettings(store, (current) => {
+    soundtrackRef?.setVolumes(current);
+  });
+  return { language, accessibility, chooseLanguage, volumes };
 }
+
+/** El sonido en marcha, para que Configuración le pase los volúmenes. */
+let soundtrackRef: Soundtrack | undefined;
 
 /** El menú principal está a la vista mientras carga el juego (para mostrar el fallo si lo hay). */
 let activeMenu: MainMenu | undefined;
@@ -324,6 +335,7 @@ function start(): void {
   // Tú: el explorador (un Ool con su traje), que anda con el jugador; al mirar abajo se ve su cuerpo.
   const childrenBeforeExplorer = scene.children.length;
   const explorer = createExplorerView(scene);
+  const foley = createFoley();
   const explorerRoots = scene.children.slice(childrenBeforeExplorer);
   const helmetRim = createHelmetRim();
   // Con `?debug`, F6 pone la cámara fuera, detrás del explorador, para verlo andar; F7 la gira a su alrededor.
@@ -494,6 +506,7 @@ function start(): void {
     // Cada ciclo empieza en el mundo de llegada, a pie, con la nave esperando (y sin tensión de marea).
     onRestart: () => {
       game.flight?.reset();
+      shipSound.reset();
       enterWorld(startWorld);
       tides.reset();
       diving.reset();
@@ -533,6 +546,10 @@ function start(): void {
   });
   // El sonido se sintetiza (sin archivos) y arranca con el primer gesto del jugador.
   const soundtrack = createSoundtrack();
+  soundtrackRef = soundtrack;
+  soundtrack.setVolumes(display.volumes.current);
+  const shipSound = createShipSound(soundtrack);
+  const edges = createEdgeTracker();
   // El Planetario y el prisma del Archivo (T6): esferas, rieles y soporte.
   const archivoPuzzles = createArchivoRig({ scene, runtimes });
   // La cisterna del Fondo y los péndulos de la Sala Cerrada (T7).
@@ -844,6 +861,7 @@ function start(): void {
     window.__juego.landHome = () => {
       if (!flight?.piloting) return false;
       flight.reset();
+      shipSound.reset();
       enterWorld(startWorld);
       return true;
     };
@@ -871,6 +889,10 @@ function start(): void {
       flight?.standAt(currentWorld.id, station) ?? false;
     window.__juego.toLadder = () => flight?.standAtLadder(currentWorld.id) ?? false;
     window.__juego.audio = () => soundtrack.snapshot();
+    window.__juego.sfx = async (id, options) => {
+      await soundtrack.preload([id]);
+      return soundtrack.play(id, options);
+    };
     window.__juego.lens = () => lens.snapshot();
     window.__juego.tide = () => tides.snapshot();
     window.__juego.dive = () => ({ ...diving.snapshot(), effects: waterEffects.snapshot() });
@@ -1326,6 +1348,24 @@ function start(): void {
         reading: reading.current !== null,
         lightOn: bodyLight.on,
       });
+      // Pasos, salto y aterrizaje: se siguen siempre (el contador de aterrizajes no debe perder uno) y suenan solo
+      // cuando el cuerpo se ve y el tiempo corre.
+      const bodyEvents = foley.update({
+        dt,
+        speed: explorer.speed,
+        grounded: player.state.grounded,
+        swimming: player.state.swimming,
+        verticalSpeed: explorer.verticalSpeed,
+        landings: player.state.landings,
+        landingSpeed: player.state.lastLandingSpeed,
+        surface: surfaceOf(currentWorld.id),
+      });
+      if (timeRuns && !piloting && !(awakening && !awakening.noted)) {
+        for (const event of bodyEvents) {
+          const { id, options } = soundOf(event);
+          soundtrack.play(id, options);
+        }
+      }
       helmetRim.update(!piloting && !outside && overlay.playing);
       camera.position.add(session.shake);
       const t = session.director.clock.t;
@@ -1404,6 +1444,22 @@ function start(): void {
       epilogue?.update();
       homecoming?.update(dt);
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
+      if (flight) {
+        // Con el tiempo parado (pausa, lectura, Registro) los rugidos callan en vez de quedarse con el último empuje.
+        const shipFrame = flight.audioFrame(dt);
+        shipFrame.paused = !timeRuns;
+        shipSound.update(shipFrame);
+      }
+      // Un sonido por cada vez que se enciende o se apaga la luz del cuerpo, se abre una lectura o el Registro.
+      const edgeSounds: [string, boolean, string, string][] = [
+        ['light', bodyLight.on, 'bodylight.on', 'bodylight.off'],
+        ['reading', reading.current !== null, 'read.open', 'read.close'],
+        ['registry', ui.blocking && reading.current === null, 'registro.open', 'registro.close'],
+      ];
+      for (const [name, state, onSound, offSound] of edgeSounds) {
+        const edge = edges.update(name, state);
+        if (edge) soundtrack.play(edge === 'on' ? onSound : offSound);
+      }
       ui.update(performance.now() / 1000);
       ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);
       filaments.update(reading.current !== null, reading.known.size);

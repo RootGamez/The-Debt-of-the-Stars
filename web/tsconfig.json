@@ -24,6 +24,7 @@
     "e2e",
     "vite.config.ts",
     "scripts/postcss-ui-scale.ts",
+    "scripts/audio",
     "playwright.config.ts"
   ]
 }

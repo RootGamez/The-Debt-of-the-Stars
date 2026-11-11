@@ -24,6 +24,7 @@ import { createShipInput, type FlightKeys } from '../ship/shipInput';
 import { createShipCabin } from './shipCabin';
 import type { ShipEnvironment } from '../ship/shipPhysics';
 import { TargetingSystem } from '../ship/targeting';
+import type { ShipAudioFrame } from '../audio/shipAudio';
 import { SYSTEM_FRAME, toLocalPosition, toLocalVelocity, toSystemPosition } from '../system/frames';
 import { pickReference, SPHERE_RADII, type Sphere } from '../system/influence';
 import { bodyPose, createPose, type BodyPose } from '../system/orbits';
@@ -132,6 +133,11 @@ export interface ShipFlight {
   /** Ciclo nuevo: el jugador a pie y la nave esperando en su sitio. */
   reset(): void;
   snapshot(): ShipSnapshot;
+  /**
+   * Lo que el sonido necesita de la nave en este fotograma (empuje de cada tobera, escotilla, golpes). El objeto se
+   * reutiliza; el golpe pendiente se entrega una sola vez.
+   */
+  audioFrame(dt: number): ShipAudioFrame;
   /** Depuración (`?debug`): pone al jugador de pie dentro de la nave, frente a un sitio, si está en su mundo. */
   standAt(onFootWorld: string, station: StationId): boolean;
   /** Depuración (`?debug`): pone al jugador en el suelo, al pie de la escalerilla. */
@@ -239,6 +245,19 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
   const poses = new Map<string, BodyPose>();
   const look = { x: 0, y: 0 };
   let flightTime = 0;
+  /** El golpe más fuerte desde el último fotograma de sonido (y si fue un choque que destruye la nave). */
+  let pendingImpact = 0;
+  let pendingCrash = false;
+  const audioState: ShipAudioFrame = {
+    dt: 0,
+    piloting: false,
+    landed: true,
+    speed: 0,
+    levels: ship.state.thrusters,
+    hatch: 0,
+    impact: 0,
+    crashed: false,
+  };
 
   // Temporales.
   const sysPosition = new Vector3();
@@ -548,6 +567,8 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
       const result = ship.step(input, environment, groundOf(ship.frame), dt);
       if (!ship.landed) flightTime += dt;
       followSpheres(t);
+      pendingImpact = Math.max(pendingImpact, result.impactSpeed);
+      pendingCrash ||= result.crashed;
       if (result.crashed) return 'choque';
       if (ship.frame !== undefined) {
         const { well, world } = runtimeOf(runtimes, ship.frame);
@@ -645,6 +666,19 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
       look.x = look.y = 0;
       parkAtHome();
       cabin.reset();
+    },
+    audioFrame(dt) {
+      audioState.dt = dt;
+      audioState.piloting = boarding.isPiloting;
+      audioState.landed = ship.landed;
+      audioState.speed = ship.state.velocity.length();
+      audioState.levels = ship.state.thrusters;
+      audioState.hatch = cabin.hatch;
+      audioState.impact = pendingImpact;
+      audioState.crashed = pendingCrash;
+      pendingImpact = 0;
+      pendingCrash = false;
+      return audioState;
     },
     snapshot() {
       return {

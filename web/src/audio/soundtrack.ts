@@ -5,6 +5,8 @@ import { browserStore } from '../core/save';
 import { createAudioEngine, type AudioEngine } from './engine';
 import { computeMix, type Mix, type MixInput } from './mix';
 import { loadMuted, saveMuted } from './mutePreference';
+import type { LoopHandle, LoopOptions, PlayOptions } from './samplePlayer';
+import type { VolumePreferences } from './volumePreferences';
 
 const UNLOCK_EVENTS = ['pointerdown', 'keydown', 'touchstart'] as const;
 
@@ -26,6 +28,14 @@ export interface Soundtrack {
   blip(frequency: number): void;
   /** El toque de una campana (no suena en silencio). */
   chime(frequency: number): void;
+  /** Un sample puntual; false si está en silencio o no está cargado (quien llama usa el sintético). */
+  play(id: string, options?: PlayOptions): boolean;
+  /** Un bucle de sample; `undefined` en silencio o si no está cargado. */
+  loop(id: string, options?: LoopOptions): LoopHandle | undefined;
+  /** Pide cargar esos sonidos (los de un mundo al entrar en él). */
+  preload(ids: readonly string[]): Promise<void>;
+  /** Volumen de efectos y de ambientes (Configuración). */
+  setVolumes(volumes: Readonly<VolumePreferences>): void;
   dispose(): void;
 }
 
@@ -87,6 +97,16 @@ export function createSoundtrack(engine: AudioEngine = createAudioEngine()): Sou
     },
     chime(frequency) {
       if (!muted) engine.chime(frequency);
+    },
+    play(id, options) {
+      return muted ? false : engine.play(id, options);
+    },
+    loop(id, options) {
+      return muted ? undefined : engine.loop(id, options);
+    },
+    preload: (ids) => engine.preload(ids),
+    setVolumes: (volumes) => {
+      engine.setVolumes(volumes);
     },
     dispose() {
       abort.abort();

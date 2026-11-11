@@ -3,6 +3,7 @@
 // Es una página del cuaderno (plan del HUD, D.6), con un botón Configuración que solo lleva lo nuevo del HUD: la
 // velocidad del texto y el sonido de letras (se guardan en el navegador, typewriter/textPreferences.ts).
 import { TEXT_SCALES, UI_SCALES, type AccessibilitySettings } from '../accessibility/preferences';
+import { VOLUME_STEPS, type VolumeSettings } from '../audio/volumePreferences';
 import { LANGUAGE_NAMES, LANGUAGES, t, type Language } from '../i18n';
 import { TEXT_SPEED_LABELS, TEXT_SPEEDS, type TextSettings } from '../typewriter/textPreferences';
 
@@ -48,6 +49,8 @@ function line(tag: 'strong' | 'span' | 'small', text: string, className?: string
 export interface DisplaySettings {
   readonly language: Language;
   readonly accessibility: AccessibilitySettings;
+  /** Volumen de los efectos y de los ambientes. */
+  readonly volumes: VolumeSettings;
   /** Guarda el idioma y recarga la página (el progreso ya está guardado). */
   readonly chooseLanguage: (language: Language) => void;
 }
@@ -153,7 +156,7 @@ export function createPauseOverlay(
 
   const settingsView = (): HTMLElement[] => {
     const prefs = options.settings.current;
-    const { accessibility, language } = options.display;
+    const { accessibility, language, volumes } = options.display;
     const back = actionButton(t('Volver'), () => {
       inSettings = false;
       render();
@@ -189,6 +192,24 @@ export function createPauseOverlay(
         percent,
         (textScale) => {
           accessibility.update({ textScale });
+        },
+      ),
+      choices(
+        t('Volumen de los efectos'),
+        VOLUME_STEPS,
+        volumes.current.effects,
+        percent,
+        (effects) => {
+          volumes.update({ effects });
+        },
+      ),
+      choices(
+        t('Volumen de los ambientes'),
+        VOLUME_STEPS,
+        volumes.current.ambient,
+        percent,
+        (ambient) => {
+          volumes.update({ ambient });
         },
       ),
       choices(

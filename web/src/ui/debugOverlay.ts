@@ -193,6 +193,14 @@ declare global {
         master: number;
         levels: Record<string, number>;
       };
+      /**
+       * Los samples: `sfx(id)` carga el sonido si hace falta y lo reproduce (true si sonó; false si no hay
+       * audio, está en silencio o el sonido no existe).
+       */
+      sfx?(
+        id: string,
+        options?: { volume?: number; rate?: number; pan?: number },
+      ): Promise<boolean>;
     };
   }
 }

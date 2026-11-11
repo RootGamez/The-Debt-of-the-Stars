@@ -4,6 +4,15 @@
 // (los navegadores no dejan sonar antes). Si no hay Web Audio, el motor no hace nada.
 import type { NoiseBed, Soundscape, Tone } from '../data/soundscapes';
 import type { Mix } from './mix';
+import { createSampleBank, type SampleBank } from './sampleBank';
+import {
+  createSamplePlayer,
+  type LoopHandle,
+  type LoopOptions,
+  type PlayOptions,
+  type SamplePlayer,
+} from './samplePlayer';
+import { DEFAULT_VOLUMES, type VolumePreferences } from './volumePreferences';
 import { t } from '../i18n';
 
 /** Constantes de tiempo (s) de los cambios suaves. */
@@ -47,6 +56,19 @@ export interface AudioEngine {
   blip(frequency: number): void;
   /** El toque de una campana de bronce (las campanas del Anfiteatro): un tono con su armónico que se apaga despacio. */
   chime(frequency: number): void;
+  /**
+   * Suena un sample (paso, golpe, portal…). Devuelve false si no hay audio o el sonido no está cargado: quien
+   * llama decide si usa el sintético de siempre.
+   */
+  play(id: string, options?: PlayOptions): boolean;
+  /** Arranca un bucle de sample; `undefined` si no hay audio o el sonido no está cargado. */
+  loop(id: string, options?: LoopOptions): LoopHandle | undefined;
+  /** Pide cargar esos sonidos (si aún no hay audio, se cargan al desbloquearlo). Nunca falla. */
+  preload(ids: readonly string[]): Promise<void>;
+  /** El sample está descargado y decodificado. */
+  sampleReady(id: string): boolean;
+  /** Volumen de los efectos y de los ambientes (Configuración). */
+  setVolumes(volumes: Readonly<VolumePreferences>): void;
   /** Pestaña oculta: el audio se detiene con el tiempo del juego. */
   suspend(): void;
   resume(): void;
@@ -245,20 +267,43 @@ class Voice {
   }
 }
 
-export function createAudioEngine(createContext: () => AudioContext = defaultContext): AudioEngine {
+/** Dónde están los samples (la carpeta `public/audio/`); las pruebas ponen los suyos. */
+export interface EngineSamples {
+  baseUrl?: string;
+  fetchFn?: typeof fetch;
+}
+
+export function createAudioEngine(
+  createContext: () => AudioContext = defaultContext,
+  samples: EngineSamples = {},
+): AudioEngine {
   let context: AudioContext | undefined;
   let failed = false;
   let noise: AudioBuffer | undefined;
   let bus: GainNode | undefined;
+  let effectsBus: GainNode | undefined;
   let master: GainNode | undefined;
   let muffle: BiquadFilterNode | undefined;
+  let bank: SampleBank | undefined;
+  let player: SamplePlayer | undefined;
+  let volumes: Readonly<VolumePreferences> = DEFAULT_VOLUMES;
+  /** Lo pedido antes de que hubiera audio: se carga al desbloquearlo. */
+  const wanted = new Set<string>();
   let heldBack = false; // la pestaña está oculta: no reanudar hasta que vuelva
   const voices = new Map<string, Voice>();
+
+  function applyVolumes(now: number, smooth: number): void {
+    bus?.gain.setTargetAtTime(volumes.ambient, now, smooth);
+    effectsBus?.gain.setTargetAtTime(volumes.effects, now, smooth);
+  }
 
   function build(): void {
     const created = createContext();
     noise = createNoise(created);
     bus = created.createGain();
+    bus.gain.value = volumes.ambient;
+    effectsBus = created.createGain();
+    effectsBus.gain.value = volumes.effects;
     muffle = created.createBiquadFilter();
     muffle.type = 'lowpass';
     muffle.frequency.value = 18000;
@@ -269,9 +314,19 @@ export function createAudioEngine(createContext: () => AudioContext = defaultCon
     limiter.threshold.value = -18;
     limiter.ratio.value = 6;
     bus.connect(muffle);
+    effectsBus.connect(muffle);
     muffle.connect(limiter);
     limiter.connect(master);
     master.connect(created.destination);
+    bank = createSampleBank({
+      baseUrl: samples.baseUrl ?? `${import.meta.env.BASE_URL}audio/`,
+      fetchFn: samples.fetchFn,
+      decode: (data) => created.decodeAudioData(data),
+    });
+    player = createSamplePlayer({ context: created, bank, destination: effectsBus });
+    const started = bank;
+    // Con pocos sonidos se carga todo el índice nada más desbloquear el audio; si crece, se pedirá por mundos.
+    void started.init().then(() => started.load([...wanted, ...started.ids()]));
     context = created;
   }
 
@@ -354,10 +409,32 @@ export function createAudioEngine(createContext: () => AudioContext = defaultCon
         gain.gain.exponentialRampToValueAtTime(level, now + CHIME_ATTACK);
         gain.gain.exponentialRampToValueAtTime(SILENCE, now + length);
         tone.connect(gain);
-        gain.connect(master);
+        gain.connect(effectsBus ?? master); // la campana es un efecto: la baja «Volumen de los efectos»
         tone.start(now);
         tone.stop(now + length + 0.01);
       }
+    },
+    play(id, options) {
+      if (!context || context.state !== 'running') return false;
+      return player?.play(id, options) ?? false;
+    },
+    loop(id, options) {
+      if (!context || context.state !== 'running') return undefined;
+      return player?.loop(id, options);
+    },
+    async preload(ids) {
+      for (const id of ids) wanted.add(id);
+      const current = bank;
+      if (!current) return;
+      await current.init();
+      await current.load(ids);
+    },
+    sampleReady(id) {
+      return bank?.loaded(id) ?? false;
+    },
+    setVolumes(next) {
+      volumes = next;
+      if (context) applyVolumes(context.currentTime, MASTER_SMOOTH);
     },
     suspend() {
       heldBack = true;
@@ -368,9 +445,12 @@ export function createAudioEngine(createContext: () => AudioContext = defaultCon
       void context?.resume().catch(() => undefined);
     },
     dispose() {
+      player?.stopAll();
       dropVoices();
       void context?.close().catch(() => undefined);
       context = undefined;
+      bank = undefined;
+      player = undefined;
     },
   };
 }

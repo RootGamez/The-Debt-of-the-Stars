@@ -50,6 +50,9 @@ export interface ExplorerFrame {
 
 export interface ExplorerView {
   update(frame: ExplorerFrame): void;
+  /** Velocidad sobre el suelo (m/s) y hacia arriba (m/s) del último fotograma: de aquí salen los pasos. */
+  readonly speed: number;
+  readonly verticalSpeed: number;
   /** Para depurar: velocidad sobre el suelo, fase del paso y mezclas. */
   snapshot(): {
     visible: boolean;
@@ -85,10 +88,17 @@ export function createExplorerView(parent: Object3D): ExplorerView {
   let glow = 1;
   let plant = 1;
   let speed = 0;
+  let verticalSpeed = 0;
   let hasForward = false;
   let firstPerson = false;
 
   return {
+    get speed() {
+      return speed;
+    },
+    get verticalSpeed() {
+      return verticalSpeed;
+    },
     update(frame) {
       rig.root.visible = frame.visible;
       bodyLight = stepBodyLight(
@@ -104,6 +114,7 @@ export function createExplorerView(parent: Object3D): ExplorerView {
       forwardOf(frame.body, forward);
       planar.copy(frame.velocity).addScaledVector(up, -frame.velocity.dot(up));
       speed = planar.length();
+      verticalSpeed = frame.velocity.dot(up);
       const turnRate = hasForward && frame.dt > 0 ? lastForward.angleTo(forward) / frame.dt : 0;
       lastForward.copy(forward);
       hasForward = true;
@@ -113,7 +124,7 @@ export function createExplorerView(parent: Object3D): ExplorerView {
         forward: speed > 0.05 ? planar.dot(forward) / speed : 1,
         grounded: frame.grounded,
         swimming: frame.swimming,
-        verticalSpeed: frame.velocity.dot(up),
+        verticalSpeed,
         turnRate,
         landings: frame.landings,
         landingSpeed: frame.landingSpeed,

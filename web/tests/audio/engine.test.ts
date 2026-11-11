@@ -200,6 +200,83 @@ describe('the voice of the letters', () => {
   });
 });
 
+describe('the samples', () => {
+  function answer(body: unknown, ok = true): Response {
+    return {
+      ok,
+      json: () => Promise.resolve(body),
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(4)),
+    } as unknown as Response;
+  }
+
+  /** Un servidor de mentira con el índice y un único sonido `step`. */
+  function samplesFetch(withIndex = true) {
+    return vi.fn((url: string) =>
+      Promise.resolve(
+        url.endsWith('index.json')
+          ? answer({ version: 1, sounds: { step: { files: ['s.mp3'] } } }, withIndex)
+          : answer(null),
+      ),
+    ) as unknown as typeof fetch;
+  }
+
+  const make = (fetchFn: typeof fetch) =>
+    createAudioEngine(() => fakeContext(), { baseUrl: '/audio/', fetchFn });
+
+  it('cannot play anything before the audio is unlocked', () => {
+    const engine = make(samplesFetch());
+
+    expect(engine.play('step')).toBe(false);
+    expect(engine.loop('step')).toBeUndefined();
+  });
+
+  it('plays a sample once it is unlocked and loaded', async () => {
+    const engine = make(samplesFetch());
+    engine.unlock();
+
+    await engine.preload(['step']);
+
+    expect(engine.sampleReady('step')).toBe(true);
+    expect(engine.play('step')).toBe(true);
+    expect(engine.loop('step')).toBeDefined();
+  });
+
+  it('loads what was asked for before the unlock as soon as it can', async () => {
+    const engine = make(samplesFetch());
+    await engine.preload(['step']);
+    expect(engine.sampleReady('step')).toBe(false);
+
+    engine.unlock();
+
+    await vi.waitFor(() => {
+      expect(engine.sampleReady('step')).toBe(true);
+    });
+  });
+
+  it('keeps working, silently, when there are no sample files', async () => {
+    const engine = make(samplesFetch(false));
+    engine.unlock();
+
+    await engine.preload(['step']);
+
+    expect(engine.sampleReady('step')).toBe(false);
+    expect(engine.play('step')).toBe(false);
+    expect(() => {
+      engine.update(computeMix(input));
+    }).not.toThrow();
+  });
+
+  it('accepts bus volumes before and after the unlock', () => {
+    const engine = make(samplesFetch());
+
+    expect(() => {
+      engine.setVolumes({ effects: 0.5, ambient: 0 });
+      engine.unlock();
+      engine.setVolumes({ effects: 1, ambient: 0.25 });
+    }).not.toThrow();
+  });
+});
+
 describe('the bell', () => {
   it('stays silent until unlocked and then plays two partials', async () => {
     let oscillators = 0;

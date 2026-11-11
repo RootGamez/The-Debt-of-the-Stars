@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "packs": {
+    "impact": {
+      "name": "Impact Sounds",
+      "url": "https://kenney.nl/assets/impact-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0"
+    },
+    "rpg": {
+      "name": "RPG Audio",
+      "url": "https://kenney.nl/assets/rpg-audio",
+      "author": "Kenney",
+      "license": "CC0 1.0"
+    },
+    "interface": {
+      "name": "Interface Sounds",
+      "url": "https://kenney.nl/assets/interface-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0"
+    },
+    "scifi": {
+      "name": "Sci-fi Sounds",
+      "url": "https://kenney.nl/assets/sci-fi-sounds",
+      "author": "Kenney",
+      "license": "CC0 1.0"
+    }
+  },
+  "sounds": {
+    "step.dust": {
+      "category": "foley",
+      "gain": 0.85,
+      "lowpass": 2200,
+      "from": ["impact:footstep_carpet_*"]
+    },
+    "step.rock": { "category": "foley", "gain": 0.9, "from": ["impact:footstep_concrete_*"] },
+    "step.soft": { "category": "foley", "gain": 0.9, "from": ["impact:footstep_grass_*"] },
+    "step.metal": { "category": "foley", "gain": 0.45, "from": ["impact:impactMetal_light_*"] },
+    "step.glass": { "category": "foley", "gain": 0.35, "from": ["impact:impactGlass_light_*"] },
+    "jump": {
+      "category": "foley",
+      "gain": 0.7,
+      "from": ["rpg:cloth1", "rpg:cloth2", "rpg:cloth3", "rpg:cloth4"]
+    },
+    "land.light": { "category": "foley", "gain": 0.8, "from": ["impact:impactSoft_medium_*"] },
+    "land.medium": { "category": "foley", "gain": 0.9, "from": ["impact:impactSoft_heavy_*"] },
+    "land.hard": { "category": "foley", "gain": 1, "from": ["impact:impactPunch_heavy_*"] },
+    "bodylight.on": {
+      "category": "foley",
+      "gain": 0.8,
+      "from": ["interface:toggle_001", "interface:toggle_002"]
+    },
+    "bodylight.off": {
+      "category": "foley",
+      "gain": 0.8,
+      "from": ["interface:toggle_003", "interface:toggle_004"]
+    },
+    "carry.pickup": { "category": "foley", "gain": 0.8, "from": ["rpg:handleSmallLeather*"] },
+    "carry.drop": { "category": "foley", "gain": 0.9, "from": ["rpg:dropLeather"] },
+    "carry.snap": {
+      "category": "foley",
+      "gain": 0.9,
+      "from": ["rpg:metalClick", "rpg:metalLatch"]
+    },
+    "read.open": { "category": "foley", "gain": 0.8, "from": ["rpg:bookOpen"] },
+    "read.close": { "category": "foley", "gain": 0.8, "from": ["rpg:bookClose"] },
+    "read.page": { "category": "foley", "gain": 0.8, "from": ["rpg:bookFlip*"] },
+    "registro.open": { "category": "ui", "gain": 0.7, "from": ["interface:open_*"] },
+    "registro.close": { "category": "ui", "gain": 0.7, "from": ["interface:close_*"] },
+
+    "ship.hatch.open": { "category": "ship", "gain": 0.9, "from": ["scifi:doorOpen_*"] },
+    "ship.hatch.close": { "category": "ship", "gain": 0.9, "from": ["scifi:doorClose_*"] },
+    "ship.seat": { "category": "ship", "gain": 0.7, "from": ["rpg:creak*"] },
+    "ship.station": {
+      "category": "ship",
+      "gain": 0.7,
+      "from": ["interface:select_001", "interface:select_002", "interface:select_003"]
+    },
+    "ship.power.up": {
+      "category": "ship",
+      "gain": 0.8,
+      "from": ["scifi:forceField_000", "scifi:forceField_001", "scifi:forceField_002"]
+    },
+    "ship.power.down": {
+      "category": "ship",
+      "gain": 0.8,
+      "from": ["scifi:forceField_003", "scifi:forceField_004"]
+    },
+    "ship.hud.lock": { "category": "ship", "gain": 0.6, "from": ["interface:question_*"] },
+    "ship.hud.warn": {
+      "category": "ship",
+      "gain": 0.6,
+      "trim": 1,
+      "from": ["scifi:computerNoise_*"]
+    },
+    "ship.stabilizer": {
+      "category": "ship",
+      "gain": 0.6,
+      "from": ["interface:switch_001", "interface:switch_002", "interface:switch_003"]
+    },
+    "thr.ignite": {
+      "category": "ship",
+      "gain": 0.9,
+      "trim": 1.4,
+      "lowpass": 2200,
+      "from": ["scifi:thrusterFire_*"]
+    },
+    "thr.puff": {
+      "category": "ship",
+      "gain": 0.6,
+      "trim": 0.4,
+      "from": ["scifi:spaceEngineSmall_*"]
+    },
+    "thr.loop.main": {
+      "category": "ship",
+      "gain": 0.8,
+      "loop": true,
+      "from": ["scifi:spaceEngineLow_000"]
+    },
+    "thr.loop.lift": {
+      "category": "ship",
+      "gain": 0.7,
+      "loop": true,
+      "from": ["scifi:spaceEngine_000"]
+    },
+    "thr.loop.retro": {
+      "category": "ship",
+      "gain": 0.75,
+      "loop": true,
+      "lowpass": 700,
+      "from": ["scifi:spaceEngineLow_001"]
+    },
+    "thr.loop.rcs": {
+      "category": "ship",
+      "gain": 0.5,
+      "loop": true,
+      "lowpass": 1200,
+      "from": ["scifi:engineCircular_000"]
+    },
+    "ship.touchdown.soft": {
+      "category": "ship",
+      "gain": 0.9,
+      "from": ["impact:impactPlate_medium_*"]
+    },
+    "ship.touchdown.hard": {
+      "category": "ship",
+      "gain": 1,
+      "from": ["impact:impactPlate_heavy_*"]
+    },
+    "ship.hit.light": { "category": "ship", "gain": 0.8, "from": ["scifi:impactMetal_*"] },
+    "ship.hit.heavy": { "category": "ship", "gain": 1, "from": ["impact:impactMetal_heavy_*"] },
+    "ship.crash": { "category": "ship", "gain": 1, "from": ["scifi:explosionCrunch_*"] },
+
+    "ui.click": {
+      "category": "ui",
+      "gain": 0.7,
+      "from": ["interface:click_001", "interface:click_002", "interface:click_003"]
+    },
+    "ui.hover": {
+      "category": "ui",
+      "gain": 0.5,
+      "from": ["interface:tick_001", "interface:tick_002", "interface:tick_004"]
+    },
+    "ui.back": { "category": "ui", "gain": 0.7, "from": ["interface:back_*"] },
+    "ui.confirm": { "category": "ui", "gain": 0.7, "from": ["interface:confirmation_*"] },
+    "ui.error": {
+      "category": "ui",
+      "gain": 0.7,
+      "from": ["interface:error_001", "interface:error_002", "interface:error_003"]
+    }
+  }
+}

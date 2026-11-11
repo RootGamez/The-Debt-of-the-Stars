@@ -96,6 +96,8 @@ export const EN: Readonly<Record<string, string>> = {
   'Empezar de cero': 'Start over',
   '¿Borrar todo lo aprendido? No se puede deshacer.':
     'Delete everything you have learned? This cannot be undone.',
+  'Volumen de los efectos': 'Effects volume',
+  'Volumen de los ambientes': 'Ambience volume',
   'Velocidad del texto': 'Text speed',
   'Sonido de letras': 'Letter sounds',
   Sí: 'Yes',
