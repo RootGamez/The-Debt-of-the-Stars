@@ -6,6 +6,7 @@
     <!-- Instalado como app, el teléfono se queda en horizontal y a pantalla completa (public/manifest.webmanifest). -->
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <meta name="theme-color" content="#15211b" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -310,6 +311,12 @@
       <p class="loading-music" hidden></p>
     </div>
     <p id="status" role="status"></p>
+    <script>
+      // Instalable desde el navegador del teléfono: hace falta un service worker (public/sw.js). Solo en la versión publicada.
+      if ('serviceWorker' in navigator && location.protocol === 'https:') {
+        addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+      }
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
