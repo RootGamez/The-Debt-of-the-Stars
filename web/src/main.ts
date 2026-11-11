@@ -25,6 +25,7 @@ import { createEdgeTracker } from './audio/edges';
 import { createLooseCarry, type LooseAim, type LooseCarrier } from './game/looseCarry';
 import type { SourceActions } from './reading/readingUi';
 import { createLoopFollower } from './audio/loopFollower';
+import { createMusicDirector } from './audio/musicDirector';
 import { createFoley, soundOf, surfaceOf } from './audio/foley';
 import { createShipSound } from './audio/shipSound';
 import { createSoundtrack, type Soundtrack } from './audio/soundtrack';
@@ -571,6 +572,8 @@ function start(): void {
   const holeRumble = createLoopFollower(soundtrack, 'blackhole.rumble');
   const cabinHum = createLoopFollower(soundtrack, 'cabin.hum');
   const underwater = createLoopFollower(soundtrack, 'underwater');
+  const musicDirector = createMusicDirector();
+  let lastMusic: string | undefined;
   let lastCrossing: string | undefined;
   let lastTarget: string | undefined;
   let stabilizerOn = true;
@@ -1588,6 +1591,21 @@ function start(): void {
       }
       // El zumbido de un portal crece al acercarte; el rumor del agujero negro, con lo que ocupa en el cielo.
       const portalNear = Math.max(gateSample.proximity, skyNear, wormholeView?.active ? 1 : 0);
+      // La música: con el menú abierto manda el tema principal; después, el director (silencios y tensión).
+      if (!activeMenu) {
+        const music = musicDirector.update({
+          dt,
+          worldId: spec ? systemScene.referenceWorld : currentWorld.id,
+          events: session.activeEventIds,
+          phase: session.director.phase,
+          playing: timeRuns,
+        });
+        if (music.id !== lastMusic) {
+          lastMusic = music.id;
+          if (music.id) soundtrack.playMusic(music.id, { fade: music.fade });
+          else soundtrack.stopMusic(music.fade);
+        }
+      }
       wormholeHum.follow(portalNear * 0.9);
       cabinHum.follow(piloting ? 0.7 : 0);
       underwater.follow(player.state.swimming ? 0.8 : 0);
