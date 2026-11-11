@@ -129,6 +129,7 @@ export const EN: Readonly<Record<string, string>> = {
   Más: 'More',
   'Luz del cuerpo': 'Body light',
   'Mira graduada': 'Sight scale',
+  'Tercera persona': 'Third person',
   Sonido: 'Sound',
   'Mano zurda': 'Left-handed',
   'Más opciones': 'More options',

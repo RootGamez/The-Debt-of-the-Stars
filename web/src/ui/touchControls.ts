@@ -207,7 +207,7 @@ export function createTouchControls(
   };
   const keyItem = (
     id: string,
-    icon: 'light' | 'sight' | 'sound' | 'tasks',
+    icon: 'light' | 'sight' | 'sound' | 'tasks' | 'camera',
     label: string,
     code: string,
   ) =>
@@ -227,6 +227,8 @@ export function createTouchControls(
   const sight = keyItem('sight', 'sight', t('Mira graduada'), 'KeyG');
   const sound = keyItem('sound', 'sound', t('Sonido'), 'KeyM');
   const tasks = keyItem('tasks', 'tasks', t('Tareas'), 'KeyH');
+  // La V: a pie alterna la tercera persona (pilotando, la cámara de la nave, que ya tiene su botón en el dock).
+  const view = keyItem('view', 'camera', t('Tercera persona'), 'KeyV');
   const hand = createTouchButton({
     id: 'hand',
     parent: sheet,
@@ -398,6 +400,7 @@ export function createTouchControls(
     sight,
     sound,
     tasks,
+    view,
     hand,
     ...actions.values(),
   ];
