@@ -54,7 +54,7 @@ export function createTaskPanel(
   showButton.title = t('Mostrar tareas');
   document.body.append(root, showButton);
 
-  let expanded = true;
+  let expanded = !touch; // en el teléfono arranca recogida: solo la tarea de ahora; un toque en el título la despliega
   let visible = false;
   let hidden = false;
   let lastKey = '';

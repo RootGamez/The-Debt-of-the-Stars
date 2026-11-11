@@ -391,3 +391,31 @@ html.is-touch [role='dialog'] {
 .touch.is-compact .touch-context .touch-btn-label {
   display: none;
 }
+
+/* ---------- La lista de tareas en un teléfono de lado: cabe, se lee y se desplaza ---------- */
+@media (pointer: coarse) and (max-height: 500px) {
+  .tareas,
+  .tareas-mostrar {
+    left: max(var(--tc-edge), env(safe-area-inset-left));
+    top: max(8px, env(safe-area-inset-top));
+  }
+
+  .tareas {
+    width: min(280px, 42vw);
+    max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    font-size: 16px;
+    line-height: 1.2;
+    transform: none;
+  }
+
+  .tareas-titulo {
+    font-size: 18px;
+  }
+
+  .tareas.tareas-desplegada .tareas-pista {
+    font-size: 14px;
+  }
+}
