@@ -22,11 +22,29 @@ export const DEFAULT_ACCESSIBILITY: Readonly<AccessibilityPreferences> = {
   textScale: 1,
 };
 
+/** Lo que se sabe de la pantalla para elegir el tamaño de partida. */
+export interface ScreenInfo {
+  touch: boolean;
+  /** Alto útil en px (en horizontal, el de un teléfono ronda 360–430). */
+  height: number;
+}
+
+/** Un teléfono de lado (táctil y bajo) arranca con la interfaz al 125 %; lo que se guardó siempre manda. */
+export function defaultAccessibility(screen: ScreenInfo): AccessibilityPreferences {
+  return screen.touch && screen.height < 500
+    ? { uiScale: 1.25, textScale: 1 }
+    : { ...DEFAULT_ACCESSIBILITY };
+}
+
 function pick<T extends number>(allowed: readonly T[], value: unknown, fallback: T): T {
   return allowed.find((option) => option === value) ?? fallback;
 }
 
-export function loadAccessibility(store: KeyValueStore | null): AccessibilityPreferences {
+export function loadAccessibility(
+  store: KeyValueStore | null,
+  screen?: ScreenInfo,
+): AccessibilityPreferences {
+  const fallback = screen ? defaultAccessibility(screen) : { ...DEFAULT_ACCESSIBILITY };
   let raw: unknown;
   try {
     const text = store?.getItem(ACCESSIBILITY_KEY);
@@ -35,12 +53,12 @@ export function loadAccessibility(store: KeyValueStore | null): AccessibilityPre
     raw = undefined;
   }
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
-    return { ...DEFAULT_ACCESSIBILITY };
+    return fallback;
   }
   const { uiScale, textScale } = raw as Record<string, unknown>;
   return {
-    uiScale: pick(UI_SCALES, uiScale, DEFAULT_ACCESSIBILITY.uiScale),
-    textScale: pick(TEXT_SCALES, textScale, DEFAULT_ACCESSIBILITY.textScale),
+    uiScale: pick(UI_SCALES, uiScale, fallback.uiScale),
+    textScale: pick(TEXT_SCALES, textScale, fallback.textScale),
   };
 }
 
@@ -78,8 +96,9 @@ export interface AccessibilitySettings {
 export function createAccessibilitySettings(
   store: KeyValueStore | null,
   target: StyleTarget,
+  screen?: ScreenInfo,
 ): AccessibilitySettings {
-  let current: Readonly<AccessibilityPreferences> = loadAccessibility(store);
+  let current: Readonly<AccessibilityPreferences> = loadAccessibility(store, screen);
   applyAccessibility(target, current);
   return {
     get current() {

@@ -4,6 +4,7 @@ import {
   ACCESSIBILITY_KEY,
   DEFAULT_ACCESSIBILITY,
   createAccessibilitySettings,
+  defaultAccessibility,
   loadAccessibility,
   saveAccessibility,
 } from '../../src/accessibility/preferences';
@@ -77,5 +78,26 @@ describe('the accessibility preferences', () => {
     expect(root.vars.get('--ui-scale')).toBe('1.75');
     expect(root.vars.get('--text-scale')).toBe('1');
     expect(loadAccessibility(store).uiScale).toBe(1.75);
+  });
+});
+
+describe('defaults for a phone held sideways', () => {
+  const phone = { touch: true, height: 390 };
+
+  it('start the interface at 125 % on a low touch screen', () => {
+    expect(defaultAccessibility(phone)).toEqual({ uiScale: 1.25, textScale: 1 });
+  });
+
+  it('keep 100 % with a mouse or on a tall screen', () => {
+    expect(defaultAccessibility({ touch: false, height: 390 })).toEqual(DEFAULT_ACCESSIBILITY);
+    expect(defaultAccessibility({ touch: true, height: 820 })).toEqual(DEFAULT_ACCESSIBILITY);
+  });
+
+  it('are used only when nothing was saved', () => {
+    expect(loadAccessibility(memoryStore(), phone)).toEqual({ uiScale: 1.25, textScale: 1 });
+    const saved = memoryStore({
+      [ACCESSIBILITY_KEY]: JSON.stringify({ uiScale: 1, textScale: 1 }),
+    });
+    expect(loadAccessibility(saved, phone)).toEqual({ uiScale: 1, textScale: 1 });
   });
 });

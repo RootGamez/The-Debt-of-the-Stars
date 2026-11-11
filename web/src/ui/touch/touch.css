@@ -318,3 +318,48 @@ html.is-touch [role='dialog'] {
 .touch-more-sheet[hidden] {
   display: none;
 }
+
+/* ---------- Teléfono de lado (táctil y bajo): menús y paneles medidos para el pulgar (plan-mobile, M4) ---------- */
+@media (pointer: coarse) and (max-height: 500px) {
+  .overlay-actions button,
+  .overlay-choices button,
+  .reader-close,
+  .recorder-close,
+  .registry-close,
+  .puzzle-close,
+  .discover-save,
+  .ending-choice,
+  .registry-turn {
+    min-width: var(--tc-size-sm);
+    min-height: var(--tc-size-sm);
+    padding-inline: 16px;
+  }
+
+  .overlay-actions button {
+    min-width: 160px;
+    min-height: 56px;
+  }
+
+  .overlay-actions,
+  .overlay-choices {
+    gap: var(--tc-gap);
+  }
+
+  /* Hojas: bajo la altura de la pantalla, con un solo desplazamiento y sin tirar de la página. */
+  .overlay-page,
+  .discover,
+  .registry-book,
+  .reader-sheet,
+  .puzzle-card,
+  .recorder-card,
+  .ending-card,
+  .ship-map {
+    max-height: calc(100dvh - 2 * max(8px, env(safe-area-inset-top)));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .overlay-page {
+    padding: 20px 28px 16px;
+  }
+}

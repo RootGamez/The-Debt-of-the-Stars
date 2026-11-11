@@ -47,11 +47,17 @@ test('marks the page as touch and shows the shared buttons', async () => {
   // Sin emoji ni letras sueltas: los iconos son SVG. Las opciones raras viven en «Más», cerrada al empezar.
   await expect(page.locator('[data-touch-id="more"] svg')).toHaveCount(1);
   await expect(page.locator('[data-touch-id="hud"]')).toBeHidden();
-  // El aspecto de antes no cambia: la pausa sigue arriba a la derecha, a 16 px del borde.
+  // En un teléfono de lado la interfaz arranca al 125 %: la pausa sigue arriba a la derecha, a 16 px (escalados).
+  const scale = Number(
+    await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--ui-scale'),
+    ),
+  );
+  expect(scale).toBe(1.25);
   const pause = await page.locator('[data-touch-id="pause"]').boundingBox();
   expect(pause).not.toBeNull();
-  expect(Math.round(844 - ((pause?.x ?? 0) + (pause?.width ?? 0)))).toBe(16);
-  expect(Math.round(pause?.y ?? 0)).toBe(16);
+  expect(Math.round(844 - ((pause?.x ?? 0) + (pause?.width ?? 0)))).toBe(16 * scale);
+  expect(Math.round(pause?.y ?? 0)).toBe(16 * scale);
 });
 
 test('long press does not select text or open the browser menu', async () => {

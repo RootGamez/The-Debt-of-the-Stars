@@ -206,7 +206,10 @@ function setUpDisplay() {
   const store = browserStore();
   const language = getLanguage(); // ya decidido al cargar src/i18n
   document.documentElement.lang = language;
-  const accessibility = createAccessibilitySettings(store, document.documentElement.style);
+  const accessibility = createAccessibilitySettings(store, document.documentElement.style, {
+    touch: isTouchDevice(),
+    height: Math.min(window.innerWidth, window.innerHeight),
+  });
   const chooseLanguage = (next: Language): void => {
     if (next === language) return;
     saveLanguage(store, next);
