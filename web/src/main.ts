@@ -95,7 +95,7 @@ import {
   PHYSICS_STEP,
 } from './data/movement';
 import { loadClues } from './data/pistas';
-import { createControls } from './game/controls';
+import { createControls, ON_FOOT } from './game/controls';
 import { loadSystem } from './game/loadSystem';
 import { approachPoint, createHorizon } from './game/horizon';
 import { createShipFlight, type ShipAction, type ShipFlight } from './game/shipFlight';
@@ -581,7 +581,12 @@ function start(): void {
       },
     },
     {
-      isPiloting: () => game.flight?.piloting ?? false,
+      context: () => ({
+        // Con una lectura, un panel, una escena o la pausa abiertos solo queda la pausa.
+        playing: overlay.playing && free() && !ui.blocking,
+        swimming: player.state.swimming,
+        ...(game.flight?.touchState ?? ON_FOOT),
+      }),
       onShipAction: (action) => {
         // En el prólogo el botón Objetivo abre las tareas (la nave ya apunta sola a lo que toca).
         if (action === 'target' && inPrologue) ui.openTasks();
@@ -663,6 +668,7 @@ function start(): void {
     overlay,
     player,
     touch: isTouchDevice(),
+    promptParent: touch?.contextSlot,
     actions: composeActions([
       counterweight?.play.actions,
       bells?.play.actions,

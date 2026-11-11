@@ -30,6 +30,7 @@ import { bodyPose, createPose, type BodyPose } from '../system/orbits';
 import { reframe } from '../system/reframe';
 import type { SystemSpec } from '../system/systemData';
 import { createShipHud, type ShipHudTarget } from '../ui/shipHud';
+import { LANDING_ALTITUDE, type TouchContext } from '../ui/touch/touchContext';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 import { worldTitle } from '../worlds/worldSelection';
 import { t } from '../i18n';
@@ -65,6 +66,12 @@ export interface ShipFlightOptions {
   /** Los relojes del ciclo, para el reloj doble de pared y el planetario. */
   clock?: () => { t: number; tau: number; duration: number };
 }
+
+/** Parte del contexto táctil que sale de la nave (el resto lo pone quien pinta los botones). */
+export type ShipTouchState = Pick<
+  TouchContext,
+  'piloting' | 'landed' | 'altitude' | 'stabilize' | 'station'
+>;
 
 export interface ShipSnapshot {
   piloting: boolean;
@@ -102,6 +109,8 @@ export interface ShipFlight {
   readonly frame: string | undefined;
   /** Dónde está la nave aunque no se pilote: su marco y su posición en él (`undefined` en espacio abierto). */
   readonly shipPlace: { world: string; local: Vector3 } | undefined;
+  /** Lo que los botones táctiles necesitan saber de la nave (se actualiza una vez por fotograma). */
+  readonly touchState: ShipTouchState;
   /** El mundo fijado como objetivo (o `undefined`). */
   readonly targetId: string | undefined;
   /** Fija el objetivo de la nave (o lo quita con `undefined`): en el prólogo lo pone la tarea de ahora. */
@@ -142,7 +151,6 @@ export const CRASH_PARK = 'PARK_Caida';
 /** Segundos que se muestran los controles tras despegar. */
 const CONTROLS_HINT_SECONDS = 12;
 /** Por debajo de esta altura (m) se sugiere cómo posarse. */
-const LANDING_HINT_ALTITUDE = 15;
 const MARKER_MARGIN = 0.12;
 /** A esta distancia (m) del Nudo ya se ve su cáscara y la nave lo puede fijar como objetivo. */
 const HIDDEN_REVEAL_DISTANCE = 400;
@@ -163,11 +171,6 @@ const STATION_PROMPTS: Record<Station['id'], string> = {
   registro: t('E · abrir el Registro'),
   mapa: t('E · mirar el mapa de órbitas'),
 };
-const TOUCH_STATION_PROMPTS: Record<Station['id'], string> = {
-  asiento: t('Nave · sentarse a pilotar'),
-  registro: t('Nave · abrir el Registro'),
-  mapa: t('Nave · mirar el mapa de órbitas'),
-};
 /** Ejes de referencia para orientar la nave cuando apunta derecho al centro de un mundo. */
 const Y_AXIS = new Vector3(0, 1, 0);
 const X_AXIS = new Vector3(1, 0, 0);
@@ -179,12 +182,12 @@ const KEY_HINTS = {
   land: t('Mantén C para posarte'),
 };
 const AUTO_KEY_LANDED = t('Espacio despegar · F levantarse · V cámara · T tareas');
-const AUTO_TOUCH_LANDED = t('↑ despegar · Nave para levantarse · Objetivo: tareas');
+const AUTO_TOUCH_LANDED = t('Subir para despegar · Levantarse · Objetivo: tareas');
 const TOUCH_HINTS = {
-  landed: t('↑ despegar · Nave para levantarse · Objetivo'),
+  landed: t('Subir para despegar · Levantarse · Objetivo'),
   free: t('Modo libre: sin ayudas (Estab. las devuelve)'),
-  controls: t('Palanca avanzar · arrastra para girar · ↑ subir · ↓ bajar'),
-  land: t('Mantén ↓ para posarte'),
+  controls: t('Palanca avanzar · arrastra para girar · Subir · Bajar'),
+  land: t('Mantén Posarse para bajar despacio'),
 };
 
 function runtimeOf(runtimes: ReadonlyMap<string, WorldRuntime>, id: string): WorldRuntime {
@@ -466,19 +469,12 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
     ? { ...base, landed: options.touch ? AUTO_TOUCH_LANDED : AUTO_KEY_LANDED }
     : base;
 
-  function prompt(onFootWorld: string, active: boolean): string | undefined {
-    if (!active || boarding.isPiloting) return undefined;
-    const station = focused(onFootWorld);
-    if (!station) return undefined;
-    return (options.touch ? TOUCH_STATION_PROMPTS : STATION_PROMPTS)[station.id];
-  }
-
   function hint(): string | undefined {
     if (ship.landed) return hints.landed;
     if (!ship.stabilize) return hints.free;
     if (flightTime < CONTROLS_HINT_SECONDS) return hints.controls;
     const altitude = ship.frame ? altitudeOf(ship.frame) : undefined;
-    if (altitude !== undefined && altitude < LANDING_HINT_ALTITUDE) return hints.land;
+    if (altitude !== undefined && altitude < LANDING_ALTITUDE) return hints.land;
     return undefined;
   }
 
@@ -497,9 +493,20 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
     };
   }
 
+  let touchState: ShipTouchState = {
+    piloting: false,
+    landed: true,
+    altitude: undefined,
+    stabilize: true,
+    station: undefined,
+  };
+
   parkAtHome();
 
   return {
+    get touchState() {
+      return touchState;
+    },
     get piloting() {
       return boarding.isPiloting;
     },
@@ -584,11 +591,21 @@ export function createShipFlight(options: ShipFlightOptions): ShipFlight {
         clock: options.clock?.() ?? { t, tau: t, duration: 1 },
       });
 
+      const station = active && !boarding.isPiloting ? focused(onFootWorld)?.id : undefined;
+      const altitude = ship.frame ? altitudeOf(ship.frame) : undefined;
+      touchState = {
+        piloting: boarding.isPiloting,
+        landed: ship.landed,
+        altitude,
+        stabilize: ship.stabilize,
+        station,
+      };
       hud.update({
         piloting: boarding.isPiloting,
-        prompt: prompt(onFootWorld, active),
+        // En el teléfono el propio botón (Sentarse, Registro, Mapa) es el aviso.
+        prompt: options.touch || station === undefined ? undefined : STATION_PROMPTS[station],
         speed: ship.state.velocity.length(),
-        altitude: ship.frame ? altitudeOf(ship.frame) : undefined,
+        altitude,
         stabilize: ship.stabilize,
         landed: ship.landed,
         target: boarding.isPiloting ? hudTarget(t, camera) : undefined,

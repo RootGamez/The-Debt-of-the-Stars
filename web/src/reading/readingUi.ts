@@ -48,6 +48,8 @@ export interface ReadingUiOptions {
   overlay: PauseOverlay;
   player: Player;
   touch: boolean;
+  /** Dónde va el botón táctil «Leer»/«Coger»…: el dock de los controles táctiles (por defecto, la página). */
+  promptParent?: HTMLElement;
   /** Lo que se hace con algunas fuentes además de leerlas (coger el Contrapeso, tirar de la palanca…). */
   actions?: SourceActions;
   /** Lectores de puzle que trae el juego (las ruedas de la cuna, que miran el Contrapeso en vivo). */
@@ -222,9 +224,13 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
     },
     touch,
   );
-  const prompt = createInteractPrompt(touch, () => {
-    activate();
-  });
+  const prompt = createInteractPrompt(
+    touch,
+    () => {
+      activate();
+    },
+    options.promptParent,
+  );
 
   function canInteract(): boolean {
     return (

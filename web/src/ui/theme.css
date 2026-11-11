@@ -1375,9 +1375,7 @@ body {
 .ending-choice {
   min-height: 44px;
 }
-.touch-pause,
-.touch-jump,
-.touch-ship-action {
+.touch-pause {
   border-color: rgb(var(--glow-rgb) / 55%);
   font-family: var(--f-hand);
   font-size: 18px;

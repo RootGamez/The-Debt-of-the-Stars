@@ -128,9 +128,23 @@ html.is-touch [role='dialog'] {
   padding: 0;
 }
 
+.touch-btn--md,
+.touch-btn--lg {
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.touch-btn--md .touch-btn-icon {
+  width: 26px;
+  height: 26px;
+}
+
 .touch-btn--lg .touch-btn-icon {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
 }
 
 .touch-btn--primary {
@@ -238,4 +252,69 @@ html.is-touch [role='dialog'] {
     animation: none;
     transform: rotate(-45deg);
   }
+}
+
+/* ---------- Distribución (plan-mobile, §4) ---------- */
+
+/* Abajo a la derecha: la acción principal y, encima, lo que sirve ahora (sentarse, objetivo, leer…). */
+.touch-dock {
+  position: absolute;
+  right: max(var(--tc-edge), env(safe-area-inset-right));
+  bottom: max(var(--tc-edge), env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--tc-gap);
+  max-width: calc(100% - 2 * var(--tc-edge));
+  pointer-events: none;
+}
+
+.touch-context,
+.touch-primary {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  gap: var(--tc-gap);
+  pointer-events: none;
+}
+
+/* Si no caben en una línea, las que sobran suben (nunca tapan la acción principal). */
+.touch-context {
+  flex-wrap: wrap-reverse;
+  justify-content: flex-start;
+}
+
+/* El «Leer» de las fuentes vive en el dock, con el aspecto de un botón más. */
+.touch-context .prompt {
+  position: static;
+  transform: none;
+  min-height: var(--tc-size-sm);
+  padding: 0 16px 0 10px;
+  border: 2px solid rgb(var(--glow-rgb) / 55%);
+  border-radius: 999px;
+  background: rgb(var(--night-rgb) / 72%);
+  pointer-events: auto;
+}
+
+/* «Más»: debajo de la pausa; su hoja se abre hacia la izquierda. */
+.touch-more {
+  position: absolute;
+  top: calc(max(var(--tc-edge), env(safe-area-inset-top)) + 56px);
+  right: max(var(--tc-edge), env(safe-area-inset-right));
+  pointer-events: none;
+}
+
+.touch-more-sheet {
+  position: absolute;
+  top: 0;
+  right: calc(100% + 8px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.touch-more-sheet[hidden] {
+  display: none;
 }

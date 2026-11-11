@@ -17,7 +17,11 @@ function span(className: string, text: string): HTMLSpanElement {
   return element;
 }
 
-export function createInteractPrompt(touch: boolean, onActivate: () => void): InteractPrompt {
+export function createInteractPrompt(
+  touch: boolean,
+  onActivate: () => void,
+  parent: HTMLElement = document.body,
+): InteractPrompt {
   const element = document.createElement(touch ? 'button' : 'p');
   element.className = touch ? 'prompt prompt-button' : 'prompt';
   if (element instanceof HTMLButtonElement) {
@@ -25,7 +29,7 @@ export function createInteractPrompt(touch: boolean, onActivate: () => void): In
     element.addEventListener('click', onActivate);
   }
   element.hidden = true;
-  document.body.append(element);
+  parent.append(element);
   let current = '';
 
   return {

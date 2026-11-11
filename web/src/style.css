@@ -135,22 +135,6 @@ body {
   background: rgb(var(--ink-rgb) / 45%);
 }
 
-.touch-jump {
-  position: absolute;
-  right: max(24px, env(safe-area-inset-right));
-  bottom: max(32px, env(safe-area-inset-bottom));
-  width: 76px;
-  height: 76px;
-  border: 2px solid rgb(var(--ink-rgb) / 50%);
-  border-radius: 50%;
-  background: rgb(var(--night-rgb) / 35%);
-  color: var(--text);
-  font: inherit;
-  font-size: 13px;
-  pointer-events: auto;
-  touch-action: none;
-}
-
 .touch[hidden] {
   display: none;
 }
@@ -160,47 +144,14 @@ body {
   top: max(16px, env(safe-area-inset-top));
   right: max(16px, env(safe-area-inset-right));
   min-width: 64px;
-  height: 44px;
+  height: 48px;
   border: 2px solid rgb(var(--ink-rgb) / 50%);
-  border-radius: 22px;
+  border-radius: 24px;
   background: rgb(var(--night-rgb) / 35%);
   color: var(--text);
   font: inherit;
   font-size: 13px;
   pointer-events: auto;
-}
-
-.touch-hud,
-.touch-screen {
-  position: absolute;
-  top: 16px;
-  min-width: 44px;
-  height: 44px;
-  border: 2px solid rgb(var(--ink-rgb) / 50%);
-  border-radius: 22px;
-  background: rgb(var(--night-rgb) / 35%);
-  color: var(--text);
-  font: inherit;
-  font-size: 18px;
-  pointer-events: auto;
-}
-
-.touch-hud {
-  top: calc(max(16px, env(safe-area-inset-top)) + 56px);
-  right: max(16px, env(safe-area-inset-right));
-}
-
-.touch-screen {
-  top: calc(max(16px, env(safe-area-inset-top)) + 112px);
-  right: max(16px, env(safe-area-inset-right));
-}
-
-.touch-hud.touch-hud-off {
-  opacity: 0.55;
-}
-
-.touch-screen[hidden] {
-  display: none;
 }
 
 /* La interfaz oculta (botón del ojo): se ve solo el mundo, con los controles táctiles. */
@@ -211,39 +162,6 @@ body {
 .interfaz-oculta .hud-book,
 .interfaz-oculta .place {
   display: none !important;
-}
-
-.touch-ship-controls {
-  position: absolute;
-  right: max(24px, env(safe-area-inset-right));
-  bottom: calc(max(32px, env(safe-area-inset-bottom)) + 88px);
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-  width: 190px;
-  pointer-events: none;
-}
-
-.touch-ship-action {
-  min-width: 56px;
-  min-height: 44px;
-  border: 2px solid rgb(var(--ink-rgb) / 50%);
-  border-radius: 22px;
-  background: rgb(var(--night-rgb) / 65%);
-  color: var(--text);
-  font: inherit;
-  font-size: 12px;
-  pointer-events: auto;
-  touch-action: none;
-}
-
-.touch-ship-controls.piloting .touch-ship-action {
-  border-color: rgb(72 224 146 / 65%);
-}
-
-.touch-ship-controls:not(.piloting) .touch-ship-flight {
-  display: none;
 }
 
 .clock-hud {

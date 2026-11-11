@@ -10,11 +10,24 @@ import {
   type PauseOverlay,
 } from '../ui/pauseOverlay';
 import { createTouchControls, type TouchControls } from '../ui/touchControls';
+import type { TouchContext } from '../ui/touch/touchContext';
 
 export interface TouchShipControls {
-  isPiloting: () => boolean;
+  /** Lo que pasa ahora en el juego, para mostrar solo los botones táctiles que sirven. */
+  context: () => TouchContext;
   onShipAction: (action: ShipAction) => void;
 }
+
+/** Sin nave (los mundos sin ella): a pie, jugando. */
+export const ON_FOOT: TouchContext = {
+  playing: true,
+  piloting: false,
+  landed: true,
+  altitude: undefined,
+  stabilize: true,
+  station: undefined,
+  swimming: false,
+};
 
 export function createControls(
   canvas: HTMLCanvasElement,
@@ -47,7 +60,7 @@ export function createControls(
   if (isTouchDevice()) {
     touch = createTouchControls(canvas, input, {
       isPlaying: () => overlay.playing,
-      isPiloting: shipControls?.isPiloting ?? (() => false),
+      context: shipControls?.context ?? (() => ON_FOOT),
       onShipAction: shipControls?.onShipAction ?? (() => {}),
       onPause: () => {
         overlay.pause();

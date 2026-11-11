@@ -60,12 +60,12 @@ export const EN: Readonly<Record<string, string>> = {
   'W avanzar · ratón girar · Espacio subir · C bajar · X frenar':
     'W forward · mouse turn · Space up · C down · X brake',
   'Mantén C para posarte': 'Hold C to land',
-  '↑ despegar · Nave para levantarse · Objetivo': '↑ take off · Ship to stand up · Target',
+  'Subir para despegar · Levantarse · Objetivo': 'Up to take off · Stand up · Target',
   'Modo libre: sin ayudas (Estab. las devuelve)':
     'Free mode: no assists (Stabilizer brings them back)',
-  'Palanca avanzar · arrastra para girar · ↑ subir · ↓ bajar':
-    'Stick forward · drag to turn · ↑ up · ↓ down',
-  'Mantén ↓ para posarte': 'Hold ↓ to land',
+  'Palanca avanzar · arrastra para girar · Subir · Bajar':
+    'Stick forward · drag to turn · Up · Down',
+  'Mantén Posarse para bajar despacio': 'Hold Land to come down slowly',
   'Volver a jugar': 'Play again',
   'Volver al Archivo': 'Back to the Archive',
   'No se ha podido guardar el final.': 'The ending could not be saved.',
@@ -116,17 +116,23 @@ export const EN: Readonly<Record<string, string>> = {
   Frenar: 'Brake',
   'Gira el teléfono': 'Turn your phone',
   'Este juego se juega en horizontal.': 'This game is played in landscape.',
-  'Subir la nave': 'Raise the ship',
-  'Bajar la nave': 'Lower the ship',
+  Sentarse: 'Sit down',
+  Mapa: 'Map',
+  Subir: 'Up',
+  Bajar: 'Down',
+  Posarse: 'Land',
+  Cámara: 'Camera',
+  'Alabear a la izquierda': 'Roll left',
+  'Alabear a la derecha': 'Roll right',
+  Más: 'More',
+  'Más opciones': 'More options',
+  'Ocultar interfaz': 'Hide interface',
   'Pausar el juego': 'Pause the game',
   'Controles de la nave': 'Ship controls',
   Levantarse: 'Stand up',
   'F · sentarse a pilotar': 'F · sit down to fly',
   'E · abrir el Registro': 'E · open the Registry',
   'E · mirar el mapa de órbitas': 'E · look at the orbit map',
-  'Nave · sentarse a pilotar': 'Ship · sit down to fly',
-  'Nave · abrir el Registro': 'Ship · open the Registry',
-  'Nave · mirar el mapa de órbitas': 'Ship · look at the orbit map',
   'Mapa de órbitas': 'Orbit map',
   'La Brasa en el centro y cada mundo en su órbita':
     'The Ember in the centre and each world on its orbit',
@@ -426,8 +432,8 @@ export const EN: Readonly<Record<string, string>> = {
   Aprendido: 'Learned',
   'Espacio despegar · F levantarse · V cámara · T tareas':
     'Space take off · F get up · V camera · T tasks',
-  '↑ despegar · Nave para levantarse · Objetivo: tareas':
-    '↑ take off · Ship to get up · Objective: tasks',
+  'Subir para despegar · Levantarse · Objetivo: tareas':
+    'Up to take off · Stand up · Objective: tasks',
   'Ocultar tareas': 'Hide tasks',
   'Mostrar tareas': 'Show tasks',
   'Ocultar o mostrar la interfaz': 'Hide or show the interface',
