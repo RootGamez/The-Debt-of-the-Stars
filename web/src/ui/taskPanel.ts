@@ -103,17 +103,20 @@ export function createTaskPanel(
       title.textContent = `${mission} ${String(done)}/${String(items.length)}`;
       hint.textContent = current?.hint ?? '';
       list.replaceChildren(
-        ...items.map((item) => {
-          const li = node('li', 'tarea');
-          li.classList.toggle('tarea-hecha', item.done);
-          li.classList.toggle('tarea-actual', item.current);
-          li.append(
-            node('span', 'tarea-casilla', item.done ? '☑' : '☐'),
-            node('span', 'tarea-texto', item.title),
-          );
-          if (item.current) li.setAttribute('aria-current', 'step');
-          return li;
-        }),
+        // Solo la tarea pendiente: el resto ya hecho o por venir no satura la pantalla.
+        ...items
+          .filter((item) => item.current)
+          .map((item) => {
+            const li = node('li', 'tarea');
+            li.classList.toggle('tarea-hecha', item.done);
+            li.classList.toggle('tarea-actual', item.current);
+            li.append(
+              node('span', 'tarea-casilla', item.done ? '☑' : '☐'),
+              node('span', 'tarea-texto', item.title),
+            );
+            if (item.current) li.setAttribute('aria-current', 'step');
+            return li;
+          }),
       );
     },
     toggle() {

@@ -513,18 +513,26 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
 
   function goToPage(page: number): void {
     const target = spreadOf(page);
-    const step = (): void => {
-      if (flipped === target) {
-        if (narrow()) {
-          side = page % 2 === 1 ? 'left' : 'right';
-          placeShift();
-          writeVisible();
-        }
-        return;
+    if (busy) return;
+    // Directo: las hojas intermedias se colocan de golpe y solo la última se pasa con animación.
+    const dir = target > flipped ? 1 : -1;
+    if (Math.abs(target - flipped) > 1) {
+      const from = target - dir;
+      leaves.forEach((leaf, k) => {
+        setAngle(leaf, k < from ? 180 : 0);
+      });
+      flipped = from;
+      restack();
+    }
+    const arrive = (): void => {
+      if (narrow()) {
+        side = page % 2 === 1 ? 'left' : 'right';
+        placeShift();
+        writeVisible();
       }
-      flip(target > flipped ? 1 : -1, step);
     };
-    step();
+    if (flipped === target) arrive();
+    else flip(dir, arrive);
   }
 
   function build(): void {
