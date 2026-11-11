@@ -374,6 +374,48 @@
       "category": "ui",
       "gain": 0.7,
       "loop": false
+    },
+    "loop.reset": {
+      "files": ["loop_reset_1.mp3", "loop_reset_2.mp3"],
+      "category": "cosmos",
+      "gain": 0.9,
+      "loop": false
+    },
+    "horizon.cross": {
+      "files": ["horizon_cross_1.mp3"],
+      "category": "cosmos",
+      "gain": 1,
+      "loop": false
+    },
+    "wormhole.cross": {
+      "files": ["wormhole_cross_1.mp3", "wormhole_cross_2.mp3"],
+      "category": "cosmos",
+      "gain": 0.9,
+      "loop": false
+    },
+    "wormhole.open": {
+      "files": ["wormhole_open_1.mp3", "wormhole_open_2.mp3"],
+      "category": "cosmos",
+      "gain": 0.9,
+      "loop": false
+    },
+    "wormhole.idle": {
+      "files": ["wormhole_idle_1.mp3"],
+      "category": "cosmos",
+      "gain": 0.7,
+      "loop": true
+    },
+    "blackhole.rumble": {
+      "files": ["blackhole_rumble_1.mp3"],
+      "category": "cosmos",
+      "gain": 0.9,
+      "loop": true
+    },
+    "blackhole.birth": {
+      "files": ["blackhole_birth_1.mp3"],
+      "category": "cosmos",
+      "gain": 1,
+      "loop": false
     }
   }
 }

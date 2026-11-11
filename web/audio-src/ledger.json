@@ -1,0 +1,67 @@
+{
+  "budget": 15000,
+  "spent": 1400,
+  "entries": [
+    {
+      "id": "loop.reset",
+      "file": "loop_reset_1.mp3",
+      "credits": 80,
+      "at": "2026-11-11T17:06:20.184Z",
+      "estimated": true
+    },
+    {
+      "id": "loop.reset",
+      "file": "loop_reset_2.mp3",
+      "credits": 80,
+      "at": "2026-11-11T17:07:29.256Z"
+    },
+    {
+      "id": "horizon.cross",
+      "file": "horizon_cross_1.mp3",
+      "credits": 160,
+      "at": "2026-11-11T17:07:34.677Z"
+    },
+    {
+      "id": "wormhole.cross",
+      "file": "wormhole_cross_1.mp3",
+      "credits": 100,
+      "at": "2026-11-11T17:07:38.865Z"
+    },
+    {
+      "id": "wormhole.cross",
+      "file": "wormhole_cross_2.mp3",
+      "credits": 100,
+      "at": "2026-11-11T17:07:43.463Z"
+    },
+    {
+      "id": "wormhole.open",
+      "file": "wormhole_open_1.mp3",
+      "credits": 120,
+      "at": "2026-11-11T17:07:49.091Z"
+    },
+    {
+      "id": "wormhole.open",
+      "file": "wormhole_open_2.mp3",
+      "credits": 120,
+      "at": "2026-11-11T17:07:54.007Z"
+    },
+    {
+      "id": "wormhole.idle",
+      "file": "wormhole_idle_1.mp3",
+      "credits": 240,
+      "at": "2026-11-11T17:07:59.360Z"
+    },
+    {
+      "id": "blackhole.rumble",
+      "file": "blackhole_rumble_1.mp3",
+      "credits": 240,
+      "at": "2026-11-11T17:08:05.669Z"
+    },
+    {
+      "id": "blackhole.birth",
+      "file": "blackhole_birth_1.mp3",
+      "credits": 160,
+      "at": "2026-11-11T17:08:09.492Z"
+    }
+  ]
+}

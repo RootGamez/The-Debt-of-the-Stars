@@ -1,0 +1,57 @@
+{
+  "model": "eleven_text_to_sound_v2",
+  "sounds": {
+    "loop.reset": {
+      "category": "cosmos",
+      "gain": 0.9,
+      "duration": 2,
+      "variants": 2,
+      "prompt": "A time loop resetting: a quick reverse rewind swoosh with a soft rising tonal sweep and a gentle low thump at the end, sci-fi, no music, no voice"
+    },
+    "horizon.cross": {
+      "category": "cosmos",
+      "gain": 1,
+      "duration": 4,
+      "variants": 1,
+      "prompt": "Crossing the event horizon of a black hole: sound stretches and slows, the pitch falls away into a long fading deep drone and then silence, eerie and vast, cinematic, no music, no voice"
+    },
+    "wormhole.cross": {
+      "category": "cosmos",
+      "gain": 0.9,
+      "duration": 2.5,
+      "variants": 2,
+      "prompt": "A spaceship passing through a wormhole: a deep resonant whoosh that rises then collapses with a shimmering bending tonal sweep, cinematic sci-fi, no voice, no music, no melody"
+    },
+    "wormhole.open": {
+      "category": "cosmos",
+      "gain": 0.9,
+      "duration": 3,
+      "variants": 2,
+      "prompt": "A wormhole opening in space: a low swelling hum with glassy shimmering harmonics blooming outward and then settling into a calm vibrating glow, cinematic sci-fi, no music, no voice"
+    },
+    "wormhole.idle": {
+      "category": "cosmos",
+      "gain": 0.7,
+      "loop": true,
+      "duration": 6,
+      "variants": 1,
+      "prompt": "Continuous ambient hum of a stable wormhole: soft deep glassy resonance with a slow gentle warbling shimmer, seamless loop, no melody, no voice, no music"
+    },
+    "blackhole.rumble": {
+      "category": "cosmos",
+      "gain": 0.9,
+      "loop": true,
+      "duration": 6,
+      "variants": 1,
+      "lowpass": 3000,
+      "prompt": "Immense distant black hole rumble: an extremely deep sub-bass drone with slow pulsing pressure and faint warped metallic groans, seamless loop, ominous, no melody, no voice, no music"
+    },
+    "blackhole.birth": {
+      "category": "cosmos",
+      "gain": 1,
+      "duration": 4,
+      "variants": 1,
+      "prompt": "A black hole being born in the sky: a violent tearing rush that collapses into a huge deep sub-bass boom followed by a lingering ominous low drone, cinematic, no music, no voice"
+    }
+  }
+}

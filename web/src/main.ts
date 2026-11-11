@@ -20,6 +20,7 @@ import {
 } from 'three';
 import { loadChronology } from './core/chronology';
 import { createEdgeTracker } from './audio/edges';
+import { createLoopFollower } from './audio/loopFollower';
 import { createFoley, soundOf, surfaceOf } from './audio/foley';
 import { createShipSound } from './audio/shipSound';
 import { createSoundtrack, type Soundtrack } from './audio/soundtrack';
@@ -113,6 +114,7 @@ import { createReadingUi, type ReadingUi } from './reading/readingUi';
 import { createWorldSources, type WorldSources } from './reading/worldSources';
 import { cameraPose, chasePose } from './render/firstPersonCamera';
 import { createExplorerView } from './render/explorerView';
+import { THIRD_PERSON_DISTANCE, easeDistance, thirdPersonPose } from './render/thirdPersonCamera';
 import { createBodyLightSwitch } from './game/bodyLightSwitch';
 import { createHelmetRim } from './ui/helmetRim';
 import { createStarfield, dimStars } from './render/sky';
@@ -341,6 +343,9 @@ function start(): void {
   // Con `?debug`, F6 pone la cámara fuera, detrás del explorador, para verlo andar; F7 la gira a su alrededor.
   let outside = false;
   let around = 0;
+  // V a pie alterna la tercera persona (cámara detrás del hombro, que no atraviesa paredes).
+  let thirdPerson = false;
+  let thirdDistance = THIRD_PERSON_DISTANCE;
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
   const chronology = looping ? loadChronology(window.location.search) : quietChronology();
   // A pie, la nave posada es un obstáculo más del mundo donde está; `ui` llega después (avisos del Contrapeso).
@@ -505,6 +510,7 @@ function start(): void {
     counterweightClock: () => counterweight?.play.clock,
     // Cada ciclo empieza en el mundo de llegada, a pie, con la nave esperando (y sin tensión de marea).
     onRestart: () => {
+      soundtrack.play('loop.reset');
       game.flight?.reset();
       shipSound.reset();
       enterWorld(startWorld);
@@ -539,6 +545,7 @@ function start(): void {
     onChoose: (id) => {
       if (!puertas || !skyView) return;
       skyMouth.open(id);
+      soundtrack.play('wormhole.open');
       skyView.open(skyMouthCenter(puertas.spawn.feet, puertas.world.info.radius));
       game.ui?.closeReading();
       game.ui?.notify(t('Se abre una boca en el cielo. Solo se llega a ella con la nave.'));
@@ -550,6 +557,9 @@ function start(): void {
   soundtrack.setVolumes(display.volumes.current);
   const shipSound = createShipSound(soundtrack);
   const edges = createEdgeTracker();
+  const wormholeHum = createLoopFollower(soundtrack, 'wormhole.idle');
+  const holeRumble = createLoopFollower(soundtrack, 'blackhole.rumble');
+  let lastCrossing: string | undefined;
   // El Planetario y el prisma del Archivo (T6): esferas, rieles y soporte.
   const archivoPuzzles = createArchivoRig({ scene, runtimes });
   // La cisterna del Fondo y los péndulos de la Sala Cerrada (T7).
@@ -792,6 +802,10 @@ function start(): void {
   function shipAction(action: ShipAction): void {
     // En el prólogo, T son las tareas (las abre la lectura): la nave ya apunta sola a lo que toca.
     if (action === 'target' && inPrologue) return;
+    if (action === 'camera' && !flight?.piloting) {
+      if (canAct()) thirdPerson = !thirdPerson;
+      return;
+    }
     if (flight && canAct()) flight.action(action, currentWorld.id, session.director.clock.t);
   }
   input.onActionKey = shipAction;
@@ -1322,7 +1336,18 @@ function start(): void {
         player.interpolatedFeet(alpha, feet);
         player.interpolatedBody(alpha, body);
         if (outside) chasePose(body, feet, camera.position, camera.quaternion, around);
-        else cameraPose(body, player.pitch, feet, camera.position, camera.quaternion);
+        else if (thirdPerson && !awakening) {
+          const clear = thirdPersonPose(
+            body,
+            player.pitch,
+            feet,
+            thirdDistance,
+            currentWorld.collision,
+            camera.position,
+            camera.quaternion,
+          );
+          thirdDistance = easeDistance(Math.min(thirdDistance, clear), clear, dt);
+        } else cameraPose(body, player.pitch, feet, camera.position, camera.quaternion);
         if (awakening && !outside) {
           // Tumbado: la vista baja hacia el suelo y mira al cielo; poco a poco se incorpora.
           const pose = awakeningPose(awakening.elapsed);
@@ -1344,7 +1369,7 @@ function start(): void {
         landingSpeed: player.state.lastLandingSpeed,
         dt,
         visible: !piloting && !(awakening && !awakening.noted),
-        firstPerson: !outside,
+        firstPerson: !outside && !(thirdPerson && !awakening),
         reading: reading.current !== null,
         lightOn: bodyLight.on,
       });
@@ -1366,7 +1391,7 @@ function start(): void {
           soundtrack.play(id, options);
         }
       }
-      helmetRim.update(!piloting && !outside && overlay.playing);
+      helmetRim.update(!piloting && !outside && !thirdPerson && overlay.playing);
       camera.position.add(session.shake);
       const t = session.director.clock.t;
       // Al final de la ventana de tu mundo caes con él: el agujero se acerca y la luz se apaga.
@@ -1450,16 +1475,32 @@ function start(): void {
         shipFrame.paused = !timeRuns;
         shipSound.update(shipFrame);
       }
-      // Un sonido por cada vez que se enciende o se apaga la luz del cuerpo, se abre una lectura o el Registro.
+      // Un sonido por cada vez que se enciende o se apaga algo: la luz del cuerpo, una lectura, el Registro, el
+      // gusano de la Luna o el agujero negro. (Sin sonido de apagado = cadena vacía.)
+      const holeEvent = session.activeEventIds.includes('agujero_negro');
       const edgeSounds: [string, boolean, string, string][] = [
         ['light', bodyLight.on, 'bodylight.on', 'bodylight.off'],
         ['reading', reading.current !== null, 'read.open', 'read.close'],
         ['registry', ui.blocking && reading.current === null, 'registro.open', 'registro.close'],
+        ['wormhole', wormholeView?.active ?? false, 'wormhole.open', ''],
+        ['blackhole', holeEvent, 'blackhole.birth', ''],
       ];
       for (const [name, state, onSound, offSound] of edgeSounds) {
         const edge = edges.update(name, state);
-        if (edge) soundtrack.play(edge === 'on' ? onSound : offSound);
+        const sound = edge === 'on' ? onSound : edge === 'off' ? offSound : '';
+        if (sound) soundtrack.play(sound);
       }
+      // Cruzar un gusano o un horizonte: un sonido por cruce, al fijarse la causa.
+      const crossing = session.director.deathCause;
+      if (crossing !== lastCrossing) {
+        lastCrossing = crossing;
+        if (crossing === 'gusano' || crossing === 'boca') soundtrack.play('wormhole.cross');
+        else if (crossing === 'horizonte') soundtrack.play('horizon.cross');
+      }
+      // El zumbido de un portal crece al acercarte; el rumor del agujero negro, con lo que ocupa en el cielo.
+      const portalNear = Math.max(gateSample.proximity, skyNear, wormholeView?.active ? 1 : 0);
+      wormholeHum.follow(portalNear * 0.9);
+      holeRumble.follow(holeEvent ? Math.sqrt(Math.min(1, Math.max(0, blackHole.fill))) : 0);
       ui.update(performance.now() / 1000);
       ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);
       filaments.update(reading.current !== null, reading.known.size);

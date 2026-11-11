@@ -6,6 +6,7 @@
 // Cada subcarpeta es un paquete ya descomprimido (los .ogg pueden estar dentro de otra carpeta).
 import { spawnSync } from 'node:child_process';
 import {
+  existsSync,
   mkdirSync,
   readdirSync,
   readFileSync,
@@ -16,7 +17,14 @@ import {
 } from 'node:fs';
 import { basename, dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildCredits, buildIndex, resolveStockMap, type StockMap } from './stockMap.ts';
+import { mergeIndex, type SoundIndex } from './generatePlan.ts';
+import {
+  buildCredits,
+  buildIndex,
+  resolveStockMap,
+  type CreditLine,
+  type StockMap,
+} from './stockMap.ts';
 
 const webRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const OUT_DIR = join(webRoot, 'public', 'audio');
@@ -100,9 +108,29 @@ function main(): void {
       count++;
     }
   }
-  writeFileSync(join(TMP_DIR, 'index.json'), `${JSON.stringify(buildIndex(sounds), null, 2)}\n`);
-  rmSync(OUT_DIR, { recursive: true, force: true });
-  renameSync(TMP_DIR, OUT_DIR);
+  // Solo se cambia lo que puso el stock: sus archivos de la vez anterior y sus entradas del índice. Lo que
+  // generó ElevenLabs (u otro productor) en la misma carpeta se queda como está.
+  mkdirSync(OUT_DIR, { recursive: true });
+  const previous = existsSync(CREDITS_FILE)
+    ? (JSON.parse(readFileSync(CREDITS_FILE, 'utf8')) as CreditLine[])
+    : [];
+  for (const line of previous) rmSync(join(OUT_DIR, line.file), { force: true });
+  for (const name of readdirSync(TMP_DIR)) renameSync(join(TMP_DIR, name), join(OUT_DIR, name));
+  rmSync(TMP_DIR, { recursive: true, force: true });
+  const indexFile = join(OUT_DIR, 'index.json');
+  const existing = existsSync(indexFile)
+    ? (JSON.parse(readFileSync(indexFile, 'utf8')) as SoundIndex)
+    : undefined;
+  const merged = mergeIndex(
+    existing,
+    [...new Set(previous.map((line) => line.sound))],
+    buildIndex(sounds).sounds,
+  );
+  writeFileSync(
+    indexFile,
+    `${JSON.stringify(merged, null, 2)}
+`,
+  );
   writeFileSync(CREDITS_FILE, `${JSON.stringify(buildCredits(sounds, map.packs), null, 2)}\n`);
   process.stdout.write(
     `${Object.keys(sounds).length} sonidos, ${count} archivos, ${(bytes / 1024).toFixed(0)} KB en ${OUT_DIR}\n`,
