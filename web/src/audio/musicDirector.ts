@@ -36,7 +36,9 @@ const WORLD_PIECES: Readonly<Record<string, string>> = {
   anclaje_norte: 'music.cicatriz',
   anclaje_sur: 'music.cicatriz',
 };
-/** Silencio antes de cada entrada y tiempo que suena (s). Las piezas duran 60 s y se repiten. */
+/** Calma al llegar a un mundo antes de la primera entrada (s): corta, para que se oiga pronto. */
+const ARRIVAL_SECONDS = 12;
+/** Silencio entre entradas y tiempo que suena cada una (s). Las piezas duran 60 s y se repiten. */
 const REST_SECONDS = 70;
 const PLAY_SECONDS = 150;
 const FADE = 4;
@@ -61,8 +63,9 @@ export function createMusicDirector(): MusicDirector {
       if (frame.playing) clock += frame.dt;
       const piece = frame.worldId ? WORLD_PIECES[frame.worldId] : undefined;
       if (!piece) return { id: undefined, fade: FADE };
-      const position = clock % (REST_SECONDS + PLAY_SECONDS);
-      return { id: position >= REST_SECONDS ? piece : undefined, fade: FADE };
+      if (clock < ARRIVAL_SECONDS) return { id: undefined, fade: FADE };
+      const position = (clock - ARRIVAL_SECONDS) % (PLAY_SECONDS + REST_SECONDS);
+      return { id: position < PLAY_SECONDS ? piece : undefined, fade: FADE };
     },
   };
 }

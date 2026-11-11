@@ -28,7 +28,7 @@ describe('the music director', () => {
     const d = createMusicDirector();
 
     expect(run(d, {}, 1).id).toBeUndefined();
-    expect(run(d, {}, 80).id).toBe('music.umbral');
+    expect(run(d, {}, 20).id).toBe('music.umbral');
   });
 
   it('plays for a while and then falls silent, again and again', () => {
