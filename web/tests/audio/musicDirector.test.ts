@@ -40,7 +40,7 @@ describe('the music director', () => {
     expect(seen.has(undefined)).toBe(true);
   });
 
-  it('has a piece for each of the four main worlds and none for the rest', () => {
+  it('has a piece for every world and none in open space', () => {
     for (const [world, id] of [
       ['archivo', 'music.archivo'],
       ['taller', 'music.taller'],
@@ -48,7 +48,11 @@ describe('the music director', () => {
     ] as const) {
       expect(run(createMusicDirector(), { worldId: world }, 100).id).toBe(id);
     }
-    expect(run(createMusicDirector(), { worldId: 'hogar' }, 300).id).toBeUndefined();
+    expect(run(createMusicDirector(), { worldId: 'hogar' }, 100).id).toBe('music.main');
+    expect(run(createMusicDirector(), { worldId: 'observatorio' }, 100).id).toBe('music.archivo');
+    expect(run(createMusicDirector(), { worldId: 'laboratorio' }, 100).id).toBe('music.umbral');
+    expect(run(createMusicDirector(), { worldId: 'puertas' }, 100).id).toBe('music.archivo');
+    expect(run(createMusicDirector(), { worldId: 'anclaje_sur' }, 100).id).toBe('music.cicatriz');
     expect(run(createMusicDirector(), { worldId: undefined }, 300).id).toBeUndefined();
   });
 

@@ -28,6 +28,13 @@ const WORLD_PIECES: Readonly<Record<string, string>> = {
   archivo: 'music.archivo',
   taller: 'music.taller',
   cicatriz: 'music.cicatriz',
+  // Piezas prestadas hasta tener las suyas: el Hogar, el tema principal; el resto, la que mejor casa con su tono.
+  hogar: 'music.main',
+  observatorio: 'music.archivo',
+  laboratorio: 'music.umbral',
+  puertas: 'music.archivo',
+  anclaje_norte: 'music.cicatriz',
+  anclaje_sur: 'music.cicatriz',
 };
 /** Silencio antes de cada entrada y tiempo que suena (s). Las piezas duran 60 s y se repiten. */
 const REST_SECONDS = 70;
