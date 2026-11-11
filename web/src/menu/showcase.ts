@@ -4,7 +4,7 @@
 import { Vector3, type Group } from 'three';
 import { disposeWorld, buildWorld, type LoadedWorld } from '../worlds/loadWorld';
 import { createStage, AMBIENT_COLOR, AMBIENT_INTENSITY } from '../render/stage';
-import { createStarfield } from '../render/sky';
+import { createStarfield, disposeStarfield } from '../render/sky';
 import { SHOTS, poseAt, showcaseState } from './shots';
 
 export interface Showcase {
@@ -98,7 +98,7 @@ export function createShowcase(canvas: HTMLCanvasElement, cover: HTMLElement): S
     dispose() {
       stage.renderer.setAnimationLoop(null);
       for (const world of worlds.values()) if (world) disposeWorld(world.scene);
-      stars.geometry.dispose();
+      disposeStarfield(stars);
       stage.dispose();
       stage.renderer.forceContextLoss();
     },

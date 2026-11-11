@@ -1,6 +1,6 @@
 // La lente del Nudo en pantalla: su imagen (un brillo pálido en la dirección donde se VE, girada hacia la
 // Brasa) y las estrellas de detrás, que se doblan alrededor de donde ESTÁ cuando se pasa cerca. Las reglas
-// están en system/lens.ts (con tests); el sombreador repite allí la cuenta de `lensedAngle`.
+// están en system/lens.ts (con tests); el sombreador de las estrellas (sky.ts) repite la cuenta de `lensedAngle`.
 import {
   AdditiveBlending,
   CanvasTexture,
@@ -8,11 +8,10 @@ import {
   SpriteMaterial,
   Vector3,
   type Object3D,
-  type Points,
-  type PointsMaterial,
 } from 'three';
 import { holeEinstein } from '../system/blackHole';
 import { apparentDirection, doorGlow, einsteinRadius, imageClarity } from '../system/lens';
+import { bendStars } from './sky';
 
 /** A qué distancia de la cámara se dibuja la imagen (m) y qué ángulo ocupa (rad). */
 const IMAGE_DISTANCE = 2500;
@@ -80,54 +79,8 @@ function glowTexture(): CanvasTexture {
   return new CanvasTexture(canvas);
 }
 
-/**
- * Hace que las estrellas se doblen alrededor de dos lentes (el Nudo y el agujero negro), una tras otra, con la
- * cuenta de una lente puntual (`lensedAngle`). Radio 0 = esa lente no dobla nada.
- */
-function bendStars(
-  material: PointsMaterial,
-  centers: { value: Vector3[] },
-  radii: { value: number[] },
-): void {
-  material.onBeforeCompile = (shader) => {
-    shader.uniforms.uLensCenter = centers;
-    shader.uniforms.uLensRadius = radii;
-    shader.vertexShader = shader.vertexShader
-      .replace(
-        '#include <common>',
-        '#include <common>\nuniform vec3 uLensCenter[2];\nuniform float uLensRadius[2];',
-      )
-      .replace(
-        '#include <project_vertex>',
-        `vec3 world = (modelMatrix * vec4(transformed, 1.0)).xyz;
-        vec3 toStar = world - cameraPosition;
-        float reach = length(toStar);
-        vec3 star = toStar / reach;
-        for (int i = 0; i < 2; i++) {
-          float einstein = uLensRadius[i];
-          if (einstein <= 0.0) continue;
-          vec3 lens = normalize(uLensCenter[i] - cameraPosition);
-          float theta = acos(clamp(dot(star, lens), -1.0, 1.0));
-          vec3 axis = cross(lens, star);
-          // Hasta dónde alcanza: se apaga suave para que no quede costura en el cielo.
-          float span = clamp(6.0 * einstein, 0.8, 3.0);
-          if (theta > 1e-5 && theta < span && dot(axis, axis) > 1e-12) {
-            float bent = (theta + sqrt(theta * theta + 4.0 * einstein * einstein)) * 0.5;
-            axis = normalize(axis);
-            float a = (bent - theta) * (1.0 - smoothstep(0.5 * span, span, theta));
-            star = star * cos(a) + cross(axis, star) * sin(a) + axis * dot(axis, star) * (1.0 - cos(a));
-          }
-        }
-        world = cameraPosition + star * reach;
-        vec4 mvPosition = viewMatrix * vec4(world, 1.0);
-        gl_Position = projectionMatrix * mvPosition;`,
-      );
-  };
-  material.needsUpdate = true;
-}
-
 /** @param bending `false` (calidad baja): las estrellas no se doblan. */
-export function createLensView(scene: Object3D, sky: Points, bending = true): LensView {
+export function createLensView(scene: Object3D, sky: Object3D, bending = true): LensView {
   const texture = glowTexture();
   const material = new SpriteMaterial({
     map: texture,
@@ -161,7 +114,7 @@ export function createLensView(scene: Object3D, sky: Points, bending = true): Le
   // Lente 0: el Nudo. Lente 1: el agujero negro.
   const lensCenters = { value: [new Vector3(), new Vector3()] };
   const lensRadii = { value: [0, 0] };
-  if (bending) bendStars(sky.material as PointsMaterial, lensCenters, lensRadii);
+  if (bending) bendStars(sky, lensCenters, lensRadii);
 
   const truth = new Vector3();
   const toBrasa = new Vector3();

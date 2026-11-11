@@ -353,7 +353,7 @@ async function start(): Promise<void> {
   const sources = new Map<string, WorldSources>(
     [...runtimes].map(([id, runtime]) => [id, createWorldSources(runtime, clues)]),
   );
-  const sky = createStarfield();
+  const sky = createStarfield(spec?.star.kind);
   scene.add(sky);
   const systemScene = createSystemScene({
     scene,
