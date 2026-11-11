@@ -75,6 +75,8 @@ export function createTouchControls(
   const more = div('touch-more', layer);
   const sheet = div('touch-more-sheet', more);
   const dock = div('touch-dock', layer);
+  /** Arriba a la izquierda: objetivo, estabilizador y cámara de la nave, lejos de los pulgares que vuelan. */
+  const shipTop = div('touch-ship-top', layer);
   const contextSlot = div('touch-context', dock);
   const primary = div('touch-primary', dock);
   base.hidden = true;
@@ -353,21 +355,21 @@ export function createTouchControls(
     label: t('Levantarse'),
     onPress: ship('board'),
   });
-  add('target', contextSlot, {
+  add('target', shipTop, {
     size: 'sm',
     tone: 'flight',
     icon: 'target',
     label: t('Objetivo'),
     onPress: ship('target'),
   });
-  const stabilize = add('stabilize', contextSlot, {
+  const stabilize = add('stabilize', shipTop, {
     size: 'sm',
     tone: 'flight',
     icon: 'stabilize',
     label: t('Estab.'),
     onPress: ship('stabilize'),
   });
-  add('camera', contextSlot, {
+  add('camera', shipTop, {
     size: 'sm',
     tone: 'flight',
     icon: 'camera',

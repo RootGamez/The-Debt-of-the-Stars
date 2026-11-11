@@ -351,6 +351,72 @@ body {
   font: 700 22px/1 var(--f-hand);
   color: var(--amber);
 }
+
+/* Configuración por categorías: pestañas arriba y, debajo, una fila por ajuste. */
+.overlay-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding-bottom: 10px;
+  border-bottom: 1.5px dashed rgb(var(--ink-rgb) / 45%);
+}
+.overlay-tabs button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1.5px solid rgb(var(--ink-rgb) / 45%);
+  border-radius: var(--hand-radius);
+  background: transparent;
+  color: var(--pencil);
+  font: 600 21px/1 var(--f-hand);
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s,
+    background 0.2s,
+    color 0.2s;
+}
+.overlay-tabs button:hover {
+  background: rgb(var(--glow-rgb) / 10%);
+  color: var(--ink);
+}
+.overlay-tabs button.active {
+  border-color: var(--ink);
+  background: rgb(var(--glow-rgb) / 30%);
+  box-shadow: 0 0 10px rgb(var(--glow-rgb) / 70%);
+  color: var(--ink);
+}
+.overlay-tabs button:focus-visible,
+.overlay-choices button:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+.overlay-settings-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 260px;
+}
+.overlay-settings-panel .overlay-choices,
+.overlay-setting {
+  justify-content: flex-start;
+  margin: 0;
+  padding: 12px 0;
+  border-bottom: 1px dotted rgb(var(--ink-rgb) / 35%);
+}
+.overlay-settings-panel .overlay-choices legend {
+  text-align: left;
+}
+.overlay-note {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.overlay-note-title {
+  font-weight: 700;
+  color: var(--amber);
+}
 .overlay-choices button {
   min-height: 44px;
   padding: 8px 16px;

@@ -284,6 +284,18 @@ html.is-touch [role='dialog'] {
   justify-content: flex-start;
 }
 
+/* Arriba a la izquierda: objetivo, estabilizador y cámara de la nave. */
+.touch-ship-top {
+  position: absolute;
+  top: max(var(--tc-edge), env(safe-area-inset-top));
+  left: max(var(--tc-edge), env(safe-area-inset-left));
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: var(--tc-gap);
+  pointer-events: none;
+}
+
 /* El «Leer» de las fuentes vive en el dock, con el aspecto de un botón más. */
 .touch-context .prompt {
   position: static;
@@ -388,7 +400,8 @@ html.is-touch [role='dialog'] {
 }
 
 /* ---------- Interfaz muy ampliada: solo iconos en los contextuales ---------- */
-.touch.is-compact .touch-context .touch-btn-label {
+.touch.is-compact .touch-context .touch-btn-label,
+.touch.is-compact .touch-ship-top .touch-btn-label {
   display: none;
 }
 

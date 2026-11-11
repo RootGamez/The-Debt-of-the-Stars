@@ -35,6 +35,21 @@ const desktopHelp = (): string =>
     'WASD moverse · ratón mirar · Espacio saltar · Shift correr · F nave · G mira · L luz · M sonido · Esc pausa · F3 datos',
   );
 
+/** Las categorías de Configuración, en el orden de las pestañas. */
+type SettingsCategory = 'sound' | 'accessibility' | 'game' | 'system';
+const SETTINGS_CATEGORIES: readonly SettingsCategory[] = [
+  'sound',
+  'accessibility',
+  'game',
+  'system',
+];
+const CATEGORY_LABELS: Readonly<Record<SettingsCategory, string>> = {
+  sound: 'Sonido',
+  accessibility: 'Accesibilidad',
+  game: 'Juego',
+  system: 'Sistema',
+};
+
 /** Lo que se lee en el botón de cada escala: 1,25 → «125 %». */
 const percent = (scale: number): string => `${Math.round(scale * 100)} %`;
 
@@ -122,6 +137,7 @@ export function createPauseOverlay(
   let confirmingReset = false;
   let resetFailed = false;
   let inSettings = false;
+  let settingsCategory: SettingsCategory = 'sound';
 
   /** Un grupo de opciones de las que se elige una (los botones dicen cuál está puesta). */
   const choices = <T extends string | number | boolean>(
@@ -154,9 +170,157 @@ export function createPauseOverlay(
     return group;
   };
 
-  const settingsView = (): HTMLElement[] => {
+  /** Las opciones de cada categoría de Configuración. */
+  const categoryPanel = (category: SettingsCategory): HTMLElement[] => {
     const prefs = options.settings.current;
     const { accessibility, language, volumes } = options.display;
+    switch (category) {
+      case 'sound':
+        return [
+          choices(
+            t('Volumen de los efectos'),
+            VOLUME_STEPS,
+            volumes.current.effects,
+            percent,
+            (effects) => {
+              volumes.update({ effects });
+            },
+          ),
+          choices(
+            t('Volumen de los ambientes'),
+            VOLUME_STEPS,
+            volumes.current.ambient,
+            percent,
+            (ambient) => {
+              volumes.update({ ambient });
+            },
+          ),
+          choices(
+            t('Volumen de la música'),
+            VOLUME_STEPS,
+            volumes.current.music,
+            percent,
+            (music) => {
+              volumes.update({ music });
+            },
+          ),
+          choices(
+            t('Sonido de letras'),
+            [true, false],
+            prefs.letterSound,
+            (on) => (on ? t('Sí') : t('No')),
+            (on) => {
+              options.settings.update({ letterSound: on });
+              if (on) options.onLetterSample?.();
+            },
+          ),
+        ];
+      case 'accessibility':
+        return [
+          choices(
+            t('Tamaño de la interfaz'),
+            UI_SCALES,
+            accessibility.current.uiScale,
+            percent,
+            (uiScale) => {
+              accessibility.update({ uiScale });
+            },
+          ),
+          choices(
+            t('Tamaño de las letras'),
+            TEXT_SCALES,
+            accessibility.current.textScale,
+            percent,
+            (textScale) => {
+              accessibility.update({ textScale });
+            },
+          ),
+        ];
+      case 'game': {
+        const controls = document.createElement('div');
+        controls.className = 'overlay-setting overlay-note';
+        controls.append(
+          line('span', t('Controles'), 'overlay-note-title'),
+          line('small', desktopHelp()),
+        );
+        return [
+          choices(
+            t('Velocidad del texto'),
+            TEXT_SPEEDS,
+            prefs.speed,
+            (s) => t(TEXT_SPEED_LABELS[s]),
+            (speed) => {
+              options.settings.update({ speed });
+            },
+          ),
+          ...(touch ? [] : [controls]),
+        ];
+      }
+      case 'system': {
+        const saving = document.createElement('div');
+        saving.className = 'overlay-setting overlay-note';
+        saving.append(
+          line('span', t('Partida'), 'overlay-note-title'),
+          line(
+            'small',
+            options.savingWorks()
+              ? t('El progreso se guarda en este navegador.')
+              : t('Este navegador no está guardando la partida.'),
+          ),
+        );
+        return [
+          choices(
+            t('Idioma'),
+            LANGUAGES,
+            language,
+            (l) => LANGUAGE_NAMES[l],
+            (l) => {
+              options.display.chooseLanguage(l);
+            },
+          ),
+          saving,
+        ];
+      }
+    }
+  };
+
+  /** Las pestañas de categoría: flechas para moverse entre ellas, como un tablist normal. */
+  const categoryTabs = (): HTMLElement => {
+    const tabs = document.createElement('div');
+    tabs.className = 'overlay-tabs';
+    tabs.setAttribute('role', 'tablist');
+    tabs.setAttribute('aria-label', t('Categorías de configuración'));
+    const select = (category: SettingsCategory): void => {
+      settingsCategory = category;
+      render();
+      overlay.querySelector<HTMLButtonElement>('[role="tab"][aria-selected="true"]')?.focus({
+        preventScroll: true,
+      });
+    };
+    SETTINGS_CATEGORIES.forEach((category, index) => {
+      const tab = actionButton(t(CATEGORY_LABELS[category]), () => {
+        select(category);
+      });
+      const active = category === settingsCategory;
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-selected', String(active));
+      tab.setAttribute('aria-controls', 'overlay-settings-panel');
+      tab.tabIndex = active ? 0 : -1;
+      if (active) tab.classList.add('active');
+      tab.addEventListener('keydown', (event) => {
+        const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+        if (step === 0) return;
+        event.preventDefault();
+        const next = (index + step + SETTINGS_CATEGORIES.length) % SETTINGS_CATEGORIES.length;
+        const target = SETTINGS_CATEGORIES[next];
+        if (target) select(target);
+      });
+      tabs.append(tab);
+    });
+    return tabs;
+  };
+
+  const settingsView = (): HTMLElement[] => {
     const back = actionButton(t('Volver'), () => {
       inSettings = false;
       render();
@@ -165,77 +329,12 @@ export function createPauseOverlay(
     const actions = document.createElement('div');
     actions.className = 'overlay-actions';
     actions.append(back);
-    return [
-      line('strong', t('Configuración')),
-      choices(
-        t('Idioma'),
-        LANGUAGES,
-        language,
-        (l) => LANGUAGE_NAMES[l],
-        (l) => {
-          options.display.chooseLanguage(l);
-        },
-      ),
-      choices(
-        t('Tamaño de la interfaz'),
-        UI_SCALES,
-        accessibility.current.uiScale,
-        percent,
-        (uiScale) => {
-          accessibility.update({ uiScale });
-        },
-      ),
-      choices(
-        t('Tamaño de las letras'),
-        TEXT_SCALES,
-        accessibility.current.textScale,
-        percent,
-        (textScale) => {
-          accessibility.update({ textScale });
-        },
-      ),
-      choices(
-        t('Volumen de los efectos'),
-        VOLUME_STEPS,
-        volumes.current.effects,
-        percent,
-        (effects) => {
-          volumes.update({ effects });
-        },
-      ),
-      choices(
-        t('Volumen de los ambientes'),
-        VOLUME_STEPS,
-        volumes.current.ambient,
-        percent,
-        (ambient) => {
-          volumes.update({ ambient });
-        },
-      ),
-      choices(t('Volumen de la música'), VOLUME_STEPS, volumes.current.music, percent, (music) => {
-        volumes.update({ music });
-      }),
-      choices(
-        t('Velocidad del texto'),
-        TEXT_SPEEDS,
-        prefs.speed,
-        (s) => t(TEXT_SPEED_LABELS[s]),
-        (speed) => {
-          options.settings.update({ speed });
-        },
-      ),
-      choices(
-        t('Sonido de letras'),
-        [true, false],
-        prefs.letterSound,
-        (on) => (on ? t('Sí') : t('No')),
-        (on) => {
-          options.settings.update({ letterSound: on });
-          if (on) options.onLetterSample?.();
-        },
-      ),
-      actions,
-    ];
+    const panel = document.createElement('div');
+    panel.className = 'overlay-settings-panel';
+    panel.id = 'overlay-settings-panel';
+    panel.setAttribute('role', 'tabpanel');
+    panel.append(...categoryPanel(settingsCategory));
+    return [line('strong', t('Configuración')), categoryTabs(), panel, actions];
   };
 
   const resetActions = (): HTMLElement => {
