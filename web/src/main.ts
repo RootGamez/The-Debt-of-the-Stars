@@ -19,6 +19,7 @@ import {
   type WebGLRenderer,
 } from 'three';
 import { loadChronology } from './core/chronology';
+import { deathSoundOf } from './audio/deathSounds';
 import { createEdgeTracker } from './audio/edges';
 import { createLoopFollower } from './audio/loopFollower';
 import { createFoley, soundOf, surfaceOf } from './audio/foley';
@@ -559,7 +560,23 @@ function start(): void {
   const edges = createEdgeTracker();
   const wormholeHum = createLoopFollower(soundtrack, 'wormhole.idle');
   const holeRumble = createLoopFollower(soundtrack, 'blackhole.rumble');
+  const cabinHum = createLoopFollower(soundtrack, 'cabin.hum');
+  const underwater = createLoopFollower(soundtrack, 'underwater');
   let lastCrossing: string | undefined;
+  let lastTarget: string | undefined;
+  let stabilizerOn = true;
+  // Cada botón de menús y paneles hace clic (los botones táctiles del juego, no: son los mandos). En captura,
+  // porque los botones de los paneles detienen la propagación del clic.
+  document.addEventListener(
+    'click',
+    (event) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest('button') && !target.closest('.touch')) {
+        soundtrack.play('ui.click');
+      }
+    },
+    true,
+  );
   // El Planetario y el prisma del Archivo (T6): esferas, rieles y soporte.
   const archivoPuzzles = createArchivoRig({ scene, runtimes });
   // La cisterna del Fondo y los péndulos de la Sala Cerrada (T7).
@@ -1490,16 +1507,34 @@ function start(): void {
         const sound = edge === 'on' ? onSound : edge === 'off' ? offSound : '';
         if (sound) soundtrack.play(sound);
       }
+      // Pilotando: el estabilizador (Z) y fijar un objetivo (T) suenan; fuera de la nave se olvidan sin sonar.
+      if (flight?.piloting) {
+        const stabilizer = flight.touchState.stabilize;
+        if (stabilizer !== stabilizerOn) soundtrack.play('ship.stabilizer');
+        stabilizerOn = stabilizer;
+        const target = flight.targetId;
+        if (target !== lastTarget && target !== undefined) soundtrack.play('ship.hud.lock');
+        lastTarget = target;
+      } else {
+        stabilizerOn = flight?.touchState.stabilize ?? true;
+        lastTarget = flight?.targetId;
+      }
       // Cruzar un gusano o un horizonte: un sonido por cruce, al fijarse la causa.
       const crossing = session.director.deathCause;
       if (crossing !== lastCrossing) {
         lastCrossing = crossing;
         if (crossing === 'gusano' || crossing === 'boca') soundtrack.play('wormhole.cross');
         else if (crossing === 'horizonte') soundtrack.play('horizon.cross');
+        else {
+          const death = deathSoundOf(crossing);
+          if (death) soundtrack.play(death);
+        }
       }
       // El zumbido de un portal crece al acercarte; el rumor del agujero negro, con lo que ocupa en el cielo.
       const portalNear = Math.max(gateSample.proximity, skyNear, wormholeView?.active ? 1 : 0);
       wormholeHum.follow(portalNear * 0.9);
+      cabinHum.follow(piloting ? 0.7 : 0);
+      underwater.follow(player.state.swimming ? 0.8 : 0);
       holeRumble.follow(holeEvent ? Math.sqrt(Math.min(1, Math.max(0, blackHole.fill))) : 0);
       ui.update(performance.now() / 1000);
       ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);

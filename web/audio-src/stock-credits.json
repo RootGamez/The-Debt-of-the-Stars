@@ -1,50 +1,5 @@
 [
   {
-    "file": "step_dust_1.mp3",
-    "sound": "step.dust",
-    "pack": "Impact Sounds",
-    "source": "footstep_carpet_000",
-    "author": "Kenney",
-    "license": "CC0 1.0",
-    "url": "https://kenney.nl/assets/impact-sounds"
-  },
-  {
-    "file": "step_dust_2.mp3",
-    "sound": "step.dust",
-    "pack": "Impact Sounds",
-    "source": "footstep_carpet_001",
-    "author": "Kenney",
-    "license": "CC0 1.0",
-    "url": "https://kenney.nl/assets/impact-sounds"
-  },
-  {
-    "file": "step_dust_3.mp3",
-    "sound": "step.dust",
-    "pack": "Impact Sounds",
-    "source": "footstep_carpet_002",
-    "author": "Kenney",
-    "license": "CC0 1.0",
-    "url": "https://kenney.nl/assets/impact-sounds"
-  },
-  {
-    "file": "step_dust_4.mp3",
-    "sound": "step.dust",
-    "pack": "Impact Sounds",
-    "source": "footstep_carpet_003",
-    "author": "Kenney",
-    "license": "CC0 1.0",
-    "url": "https://kenney.nl/assets/impact-sounds"
-  },
-  {
-    "file": "step_dust_5.mp3",
-    "sound": "step.dust",
-    "pack": "Impact Sounds",
-    "source": "footstep_carpet_004",
-    "author": "Kenney",
-    "license": "CC0 1.0",
-    "url": "https://kenney.nl/assets/impact-sounds"
-  },
-  {
     "file": "step_rock_1.mp3",
     "sound": "step.rock",
     "pack": "Impact Sounds",

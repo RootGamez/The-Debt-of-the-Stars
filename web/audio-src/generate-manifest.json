@@ -52,6 +52,60 @@
       "duration": 4,
       "variants": 1,
       "prompt": "A black hole being born in the sky: a violent tearing rush that collapses into a huge deep sub-bass boom followed by a lingering ominous low drone, cinematic, no music, no voice"
+    },
+    "step.dust": {
+      "category": "foley",
+      "gain": 0.9,
+      "duration": 0.5,
+      "variants": 4,
+      "promptInfluence": 0.7,
+      "prompt": "A single soft footstep of a boot on dry fine sand: muffled and gentle, no crunch, no squeak, close microphone, dry, very short, no music, no voice"
+    },
+    "death.caida": {
+      "category": "foley",
+      "gain": 1,
+      "duration": 2.5,
+      "variants": 1,
+      "prompt": "A body falling hard and landing on rock: a heavy dull thud with a short breathless crack, then silence, cinematic, no music, no voice"
+    },
+    "death.ahogado": {
+      "category": "foley",
+      "gain": 1,
+      "duration": 3,
+      "variants": 1,
+      "prompt": "Drowning underwater: muffled bubbling and a slowly fading low gurgle that ends in quiet, no voice, no music"
+    },
+    "death.calor": {
+      "category": "foley",
+      "gain": 1,
+      "duration": 2.5,
+      "variants": 1,
+      "prompt": "Intense heat death: a sudden searing roar and crackling sizzle that cuts off abruptly into silence, sci-fi, no voice, no music"
+    },
+    "death.absorcion": {
+      "category": "cosmos",
+      "gain": 1,
+      "duration": 4,
+      "variants": 1,
+      "prompt": "Being swallowed by a black hole: space stretching, a long deep descending groan and ripping pressure that fades into emptiness, cinematic, no music, no voice"
+    },
+    "cabin.hum": {
+      "category": "ship",
+      "gain": 0.6,
+      "loop": true,
+      "duration": 5,
+      "variants": 1,
+      "lowpass": 2500,
+      "prompt": "Quiet interior hum of a small spaceship cabin: low steady electrical ventilation drone with faint soft machinery ticks, seamless loop, calm, no music, no voice"
+    },
+    "underwater": {
+      "category": "foley",
+      "gain": 0.7,
+      "loop": true,
+      "duration": 5,
+      "variants": 1,
+      "lowpass": 2000,
+      "prompt": "Underwater ambience heard from inside a diving helmet: muffled deep water rumble with faint distant bubbles, seamless loop, no music, no voice"
     }
   }
 }

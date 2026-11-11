@@ -1,18 +1,6 @@
 {
   "version": 1,
   "sounds": {
-    "step.dust": {
-      "files": [
-        "step_dust_1.mp3",
-        "step_dust_2.mp3",
-        "step_dust_3.mp3",
-        "step_dust_4.mp3",
-        "step_dust_5.mp3"
-      ],
-      "category": "foley",
-      "gain": 0.85,
-      "loop": false
-    },
     "step.rock": {
       "files": [
         "step_rock_1.mp3",
@@ -416,6 +404,48 @@
       "category": "cosmos",
       "gain": 1,
       "loop": false
+    },
+    "step.dust": {
+      "files": ["step_dust_1.mp3", "step_dust_2.mp3", "step_dust_3.mp3", "step_dust_4.mp3"],
+      "category": "foley",
+      "gain": 0.9,
+      "loop": false
+    },
+    "death.caida": {
+      "files": ["death_caida_1.mp3"],
+      "category": "foley",
+      "gain": 1,
+      "loop": false
+    },
+    "death.ahogado": {
+      "files": ["death_ahogado_1.mp3"],
+      "category": "foley",
+      "gain": 1,
+      "loop": false
+    },
+    "death.calor": {
+      "files": ["death_calor_1.mp3"],
+      "category": "foley",
+      "gain": 1,
+      "loop": false
+    },
+    "death.absorcion": {
+      "files": ["death_absorcion_1.mp3"],
+      "category": "cosmos",
+      "gain": 1,
+      "loop": false
+    },
+    "cabin.hum": {
+      "files": ["cabin_hum_1.mp3"],
+      "category": "ship",
+      "gain": 0.6,
+      "loop": true
+    },
+    "underwater": {
+      "files": ["underwater_1.mp3"],
+      "category": "foley",
+      "gain": 0.7,
+      "loop": true
     }
   }
 }

@@ -1,6 +1,6 @@
 {
   "budget": 15000,
-  "spent": 1400,
+  "spent": 2360,
   "entries": [
     {
       "id": "loop.reset",
@@ -62,6 +62,66 @@
       "file": "blackhole_birth_1.mp3",
       "credits": 160,
       "at": "2026-11-11T17:08:09.492Z"
+    },
+    {
+      "id": "step.dust",
+      "file": "step_dust_1.mp3",
+      "credits": 20,
+      "at": "2026-11-11T17:32:27.733Z"
+    },
+    {
+      "id": "step.dust",
+      "file": "step_dust_2.mp3",
+      "credits": 20,
+      "at": "2026-11-11T17:32:32.071Z"
+    },
+    {
+      "id": "step.dust",
+      "file": "step_dust_3.mp3",
+      "credits": 20,
+      "at": "2026-11-11T17:32:36.111Z"
+    },
+    {
+      "id": "step.dust",
+      "file": "step_dust_4.mp3",
+      "credits": 20,
+      "at": "2026-11-11T17:32:40.407Z"
+    },
+    {
+      "id": "death.caida",
+      "file": "death_caida_1.mp3",
+      "credits": 100,
+      "at": "2026-11-11T17:32:45.175Z"
+    },
+    {
+      "id": "death.ahogado",
+      "file": "death_ahogado_1.mp3",
+      "credits": 120,
+      "at": "2026-11-11T17:32:49.466Z"
+    },
+    {
+      "id": "death.calor",
+      "file": "death_calor_1.mp3",
+      "credits": 100,
+      "at": "2026-11-11T17:32:53.694Z"
+    },
+    {
+      "id": "death.absorcion",
+      "file": "death_absorcion_1.mp3",
+      "credits": 160,
+      "at": "2026-11-11T17:32:56.458Z"
+    },
+    {
+      "id": "cabin.hum",
+      "file": "cabin_hum_1.mp3",
+      "credits": 200,
+      "at": "2026-11-11T17:33:00.449Z"
+    },
+    {
+      "id": "underwater",
+      "file": "underwater_1.mp3",
+      "credits": 200,
+      "at": "2026-11-11T17:33:03.577Z"
     }
   ]
 }
