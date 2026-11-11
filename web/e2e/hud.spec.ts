@@ -104,10 +104,10 @@ test('the Registro is a book: its pages turn with the arrows and the tabs jump t
   await expect(registry).toBeHidden();
 });
 
-test('a new world is named on arrival and its drawing is taped into the bitácora', async ({
+test('a new world shows its card on arrival and its drawing is taped into the bitácora', async ({
   page,
 }) => {
-  // Partida que ya pasó el prólogo y aún no ha nombrado nada: se despierta en Umbral, sin `?mundo=`.
+  // Partida que ya pasó el prólogo y aún no ha encontrado nada: se despierta en Umbral, sin `?mundo=`.
   // Se escribe antes de que arranque el juego (una partida sin guardar empezaría el prólogo y la pisaría).
   await page.addInitScript((key) => {
     if (window.sessionStorage.getItem('sembrada')) return;
@@ -134,31 +134,32 @@ test('a new world is named on arrival and its drawing is taped into the bitácor
   await expect(dialog.getByRole('img')).toHaveAttribute('src', /^data:image\//);
   const umbral = (await snapshot(page))?.loop.umbral;
   await page.waitForTimeout(600);
-  expect((await snapshot(page))?.loop.umbral).toBe(umbral); // el tiempo espera al nombre
+  expect((await snapshot(page))?.loop.umbral).toBe(umbral); // el tiempo espera a la carta
+  await expect(dialog.getByRole('heading', { name: 'Umbral' })).toBeVisible();
+  await expect(dialog.locator('.discover-about')).not.toBeEmpty();
+  await expect(dialog.getByRole('textbox')).toHaveCount(0); // ya no se pone nombre
 
-  // Aunque el foco salga del nombre (clic en la foto), ninguna tecla llega al juego: ni E, ni R, ni Esc.
+  // Aunque el foco salga del botón (clic en la foto), ninguna tecla llega al juego: R no abre el Registro.
   await dialog.getByRole('img').click();
-  await expect(page.getByLabel('Ponle nombre')).toBeFocused();
-  await page.keyboard.press('KeyE');
+  await expect(dialog.getByRole('button', { name: 'Pegar en el cuaderno' })).toBeFocused();
   await page.keyboard.press('KeyR');
-  await page.keyboard.press('Escape');
   await expect(dialog).toBeVisible();
   await expect(page.locator('.registry')).toBeHidden();
+
+  // E pega la carta, sin leer nada ni abrir la pausa.
+  await page.keyboard.press('KeyE');
+  await expect(dialog).toBeHidden();
   await expect(page.locator('.overlay')).toBeHidden();
   await expect(page.locator('.reader')).toBeHidden();
-
-  await page.getByLabel('Ponle nombre').fill('Faro');
-  await page.keyboard.press('Enter');
-  await expect(dialog).toBeHidden();
-  await expect(page.locator('.place')).toContainText('Faro');
+  await expect(page.locator('.place')).toContainText('Umbral');
 
   const worlds = await page.evaluate(
     (key) => (JSON.parse(window.localStorage.getItem(key) ?? '{}') as { worlds?: unknown }).worlds,
     SAVE_KEY,
   );
-  expect(worlds).toEqual({ umbral: { name: 'Faro', loop: 0 } });
+  expect(worlds).toEqual({ umbral: { name: 'Umbral', loop: 0 } });
 
   await page.keyboard.press('KeyR');
   await page.getByRole('button', { name: 'Ir a Mundos' }).click();
-  await expect(page.locator('.registry-world-item')).toContainText(['Hogar', 'Luna', 'Faro']);
+  await expect(page.locator('.registry-world-item')).toContainText(['Hogar', 'Luna', 'Umbral']);
 });

@@ -3,118 +3,13 @@
 // que distingue a cada mundo—, no fotos ni renders. Se pintan una vez en un lienzo pequeño y se guardan como
 // imagen; el azar es reproducible, así cada mundo sale siempre igual.
 
+import { Paint, type Painter } from './worldDrawingsPaint';
+import { anclaje, cicatriz, observatorio, taller } from './worldDrawingsFar';
+
 /** Tamaño del dibujo (4:3), como en la maqueta. */
 const DRAWING_WIDTH = 360;
 const DRAWING_HEIGHT = 270;
 const JPEG_QUALITY = 0.84;
-
-type Point = [number, number];
-type Painter = (paint: Paint) => void;
-
-/** Azar reproducible (Park–Miller), el mismo de la maqueta. */
-function seeded(seed: number): () => number {
-  let state = seed;
-  return () => {
-    state = (state * 16807) % 2147483647;
-    return (state - 1) / 2147483646;
-  };
-}
-
-/** Las herramientas de la maqueta, sobre un lienzo de `W` × `H`. */
-class Paint {
-  readonly rand: () => number;
-
-  constructor(
-    readonly ctx: CanvasRenderingContext2D,
-    readonly W: number,
-    readonly H: number,
-    seed: number,
-  ) {
-    this.rand = seeded(seed);
-  }
-
-  grad(stops: readonly [number, string][], y0 = 0, y1 = this.H): CanvasGradient {
-    const g = this.ctx.createLinearGradient(0, y0, 0, y1);
-    for (const [offset, color] of stops) g.addColorStop(offset, color);
-    return g;
-  }
-
-  fillSky(stops: readonly [number, string][]): void {
-    this.ctx.fillStyle = this.grad(stops);
-    this.ctx.fillRect(0, 0, this.W, this.H);
-  }
-
-  stars(count: number, maxY: number, alpha: number): void {
-    const { ctx, W, H, rand } = this;
-    for (let k = 0; k < count; k++) {
-      ctx.fillStyle = `rgba(255,245,230,${rand() * alpha})`;
-      const size = rand() < 0.1 ? 2 : 1.2;
-      ctx.fillRect(rand() * W, rand() * H * maxY, size, size);
-    }
-  }
-
-  halo(x: number, y: number, r: number, color: string): void {
-    const g = this.ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, color);
-    g.addColorStop(1, 'rgba(0,0,0,0)');
-    this.ctx.fillStyle = g;
-    this.ctx.fillRect(0, 0, this.W, this.H);
-  }
-
-  disc(x: number, y: number, r: number, color: string | CanvasGradient): void {
-    this.ctx.fillStyle = color;
-    this.ctx.beginPath();
-    this.ctx.arc(x, y, r, 0, Math.PI * 2);
-    this.ctx.fill();
-  }
-
-  rect(color: string, x: number, y: number, w: number, h: number): void {
-    this.ctx.fillStyle = color;
-    this.ctx.fillRect(x, y, w, h);
-  }
-
-  /** El suelo low poly: una rejilla de 14 × 6 con las juntas movidas, coloreada por triángulo. */
-  facets(yTop: number, colorAt: (t: number, n: number) => string): void {
-    const { ctx, W, H, rand } = this;
-    const nx = 14;
-    const ny = 6;
-    const pts: Point[][] = [];
-    for (let j = 0; j <= ny; j++) {
-      const row: Point[] = [];
-      for (let i = 0; i <= nx; i++) {
-        const inner = j > 0 && j < ny;
-        const y = yTop + (H - yTop) * Math.pow(j / ny, 1.4) + (inner ? (rand() - 0.5) * 14 : 0);
-        const x = (W * i) / nx + (i > 0 && i < nx ? (rand() - 0.5) * (W / nx) * 0.6 : 0);
-        row.push([x, j === 0 ? yTop + Math.sin(i * 1.3) * 6 : y]);
-      }
-      pts.push(row);
-    }
-    const at = (j: number, i: number): Point => pts[j]?.[i] ?? [0, 0];
-    for (let j = 0; j < ny; j++) {
-      for (let i = 0; i < nx; i++) {
-        const a = at(j, i);
-        const b = at(j, i + 1);
-        const c = at(j + 1, i);
-        const d = at(j + 1, i + 1);
-        for (const tri of [
-          [a, b, d],
-          [a, d, c],
-        ] as const) {
-          ctx.fillStyle = colorAt(j / ny, rand());
-          ctx.beginPath();
-          ctx.moveTo(...tri[0]);
-          ctx.lineTo(...tri[1]);
-          ctx.lineTo(...tri[2]);
-          ctx.closePath();
-          ctx.fill();
-          ctx.strokeStyle = ctx.fillStyle;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-        }
-      }
-    }
-  }
-}
 
 function hogar(p: Paint): void {
   const { ctx, W, H, rand } = p;
@@ -249,90 +144,6 @@ function archivo(p: Paint): void {
   }
 }
 
-function taller(p: Paint): void {
-  const { ctx, W, H, rand } = p;
-  p.fillSky([
-    [0, '#5f9fd8'],
-    [0.5, '#bfe0f0'],
-    [0.7, '#f6efd8'],
-  ]);
-  p.halo(W * 0.18, H * 0.18, H * 0.6, 'rgba(255,250,225,.9)');
-  p.disc(W * 0.18, H * 0.18, H * 0.05, '#fffbe8');
-  p.facets(H * 0.68, (t, n) => `hsl(${70 + n * 30} ${30 + n * 14}% ${50 - t * 20 + n * 6}%)`);
-  // Los molinos.
-  for (const [k, [x, y, h]] of (
-    [
-      [0.62, 0.7, 0.3],
-      [0.82, 0.72, 0.22],
-      [0.36, 0.72, 0.18],
-    ] as const
-  ).entries()) {
-    const bx = W * x;
-    const by = H * y;
-    const hh = H * h;
-    ctx.strokeStyle = '#4a4038';
-    ctx.lineWidth = H * 0.012;
-    ctx.beginPath();
-    ctx.moveTo(bx, by);
-    ctx.lineTo(bx, by - hh);
-    ctx.stroke();
-    ctx.lineWidth = H * 0.008;
-    for (let b = 0; b < 3; b++) {
-      const a = b * 2.094 + k;
-      ctx.beginPath();
-      ctx.moveTo(bx, by - hh);
-      ctx.lineTo(bx + Math.cos(a) * hh * 0.45, by - hh + Math.sin(a) * hh * 0.45);
-      ctx.stroke();
-    }
-    p.disc(bx, by - hh, H * 0.012, '#4a4038');
-  }
-  // El viento.
-  ctx.strokeStyle = 'rgba(255,255,255,.6)';
-  ctx.lineWidth = 1.5;
-  for (let k = 0; k < 9; k++) {
-    const y = H * (0.15 + rand() * 0.5);
-    const x = rand() * W * 0.7;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.bezierCurveTo(x + W * 0.1, y - H * 0.03, x + W * 0.2, y + H * 0.03, x + W * 0.3, y);
-    ctx.stroke();
-  }
-}
-
-function observatorio(p: Paint): void {
-  const { ctx, W, H } = p;
-  p.fillSky([
-    [0, '#020309'],
-    [0.55, '#0b1230'],
-    [0.74, '#28335e'],
-  ]);
-  // La banda de estrellas.
-  ctx.save();
-  ctx.translate(W * 0.5, H * 0.35);
-  ctx.rotate(-0.35);
-  const band = ctx.createLinearGradient(0, -H * 0.12, 0, H * 0.12);
-  band.addColorStop(0, 'rgba(0,0,0,0)');
-  band.addColorStop(0.5, 'rgba(170,180,230,.2)');
-  band.addColorStop(1, 'rgba(0,0,0,0)');
-  ctx.fillStyle = band;
-  ctx.fillRect(-W, -H * 0.12, W * 2, H * 0.24);
-  ctx.restore();
-  p.stars(320, 0.74, 1);
-  p.facets(H * 0.74, (t, n) => `hsl(${230 + n * 10} ${14 + n * 8}% ${14 - t * 8 + n * 4}%)`);
-  // La cúpula con la ranura encendida.
-  const ox = W * 0.66;
-  const oy = H * 0.76;
-  const R = H * 0.13;
-  ctx.fillStyle = '#1c1f30';
-  ctx.fillRect(ox - R, oy - R * 0.6, R * 2, R * 0.6);
-  ctx.beginPath();
-  ctx.arc(ox, oy - R * 0.6, R, Math.PI, 0);
-  ctx.fill();
-  p.rect('rgba(255,215,150,.85)', ox - R * 0.08, oy - R * 1.55, R * 0.16, R * 0.75);
-  p.halo(ox, oy - R * 1.2, R * 1.4, 'rgba(255,210,140,.18)');
-  p.disc(W * 0.26, H * 0.22, 2.6, '#ffd6a0');
-}
-
 function laboratorio(p: Paint): void {
   const { ctx, W, H } = p;
   p.fillSky([
@@ -367,138 +178,57 @@ function laboratorio(p: Paint): void {
   p.rect('#3a3046', W * 0.77, H * 0.28, W * 0.01, H * 0.03);
 }
 
-/** Umbral y Cicatriz comparten encuadre: atardecer ámbar con La Boca, o cielo rojo con el agujero y la máquina. */
-function dusk(umbral: boolean): Painter {
-  return (p) => {
-    const { ctx, W, H, rand } = p;
-    ctx.fillStyle = umbral
-      ? p.grad([
-          [0, '#1d1a2e'],
-          [0.35, '#6a3f3a'],
-          [0.62, '#e39a58'],
-          [0.72, '#f3c27e'],
-        ])
-      : p.grad([
-          [0, '#140809'],
-          [0.4, '#3d1210'],
-          [0.66, '#9a3a1e'],
-          [0.74, '#d0602c'],
-        ]);
-    ctx.fillRect(0, 0, W, H);
-    for (let k = 0; k < 70; k++) {
-      ctx.fillStyle = `rgba(255,240,220,${rand() * 0.7})`;
-      ctx.fillRect(rand() * W, rand() * H * 0.4, 1.2, 1.2);
-    }
-    const sx = W * (umbral ? 0.78 : 0.2);
-    const sy = H * 0.66;
-    const sun = ctx.createRadialGradient(sx, sy, 0, sx, sy, H * 0.6);
-    sun.addColorStop(0, umbral ? 'rgba(255,220,160,.9)' : 'rgba(255,140,80,.8)');
-    sun.addColorStop(0.12, umbral ? 'rgba(255,190,120,.45)' : 'rgba(220,80,40,.4)');
-    sun.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = sun;
-    ctx.fillRect(0, 0, W, H);
-    if (!umbral) {
-      const bx = W * 0.72;
-      const by = H * 0.26;
-      const br = H * 0.06;
-      p.disc(bx, by, br, '#000');
-      ctx.strokeStyle = 'rgba(255,170,110,.75)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.ellipse(bx, by, br * 2.2, br * 0.45, -0.2, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    p.facets(
-      H * 0.7,
-      umbral
-        ? (t, n) => `hsl(${24 + n * 6} ${38 + n * 10}% ${30 - t * 22 + n * 6}%)`
-        : (t, n) => `hsl(${6 + n * 8} ${40 + n * 10}% ${20 - t * 14 + n * 5}%)`,
-    );
-    if (umbral) {
-      // La Boca y el banco.
-      const bx = W * 0.42;
-      const by = H * 0.52;
-      const rx = H * 0.2;
-      const ry = H * 0.24;
-      ctx.lineWidth = H * 0.045;
-      ctx.strokeStyle = '#2b1a14';
-      ctx.beginPath();
-      ctx.ellipse(bx, by, rx, ry, 0, Math.PI * 0.96, Math.PI * 2.04);
-      ctx.stroke();
-      ctx.lineWidth = H * 0.012;
-      ctx.strokeStyle = 'rgba(255,220,170,.55)';
-      ctx.beginPath();
-      ctx.ellipse(bx, by, rx * 0.8, ry * 0.8, 0, Math.PI, Math.PI * 2);
-      ctx.stroke();
-      p.rect('#24160f', bx - rx - H * 0.03, by, H * 0.06, H * 0.2);
-      p.rect('#24160f', bx + rx - H * 0.03, by, H * 0.06, H * 0.2);
-      p.rect('#3a241a', W * 0.62, H * 0.66, W * 0.07, H * 0.04);
-      p.rect('#3a241a', W * 0.63, H * 0.7, W * 0.01, H * 0.04);
-      p.rect('#3a241a', W * 0.675, H * 0.7, W * 0.01, H * 0.04);
-      return;
-    }
-    // Las siluetas de la maquinaria y la mesa de la grabadora.
-    ctx.fillStyle = '#1b0907';
-    for (const [x, y, w] of [
-      [0.04, 0.3, 0.1],
-      [0.16, 0.42, 0.06],
-      [0.55, 0.36, 0.09],
-      [0.86, 0.28, 0.12],
-    ] as const) {
-      ctx.beginPath();
-      ctx.moveTo(W * x, H * 0.72);
-      ctx.lineTo(W * x, H * y);
-      ctx.lineTo(W * (x + w * 0.4), H * (y - 0.05));
-      ctx.lineTo(W * (x + w), H * y + H * 0.04);
-      ctx.lineTo(W * (x + w), H * 0.72);
-      ctx.fill();
-    }
-    p.rect('#2e1410', W * 0.4, H * 0.64, W * 0.2, H * 0.03);
-    p.rect('#2e1410', W * 0.42, H * 0.67, W * 0.015, H * 0.08);
-    p.rect('#2e1410', W * 0.565, H * 0.67, W * 0.015, H * 0.08);
-    p.rect('#4a2a20', W * 0.47, H * 0.6, W * 0.06, H * 0.04);
-    p.disc(W * 0.52, H * 0.615, 2.5, '#f0a060');
-  };
-}
-
-/** Un polo del Cerco: la estación de los anillos, con la estrella roja detrás y los brazos que se cruzan. */
-function anclaje(p: Paint): void {
-  const { ctx, W, H } = p;
+/** Umbral: atardecer ámbar con La Boca y el banco. */
+function umbral(p: Paint): void {
+  const { ctx, W, H, rand } = p;
   p.fillSky([
-    [0, '#05050b'],
-    [0.7, '#1a0c12'],
-    [1, '#3a1612'],
+    [0, '#1d1a2e'],
+    [0.35, '#6a3f3a'],
+    [0.62, '#e39a58'],
+    [0.72, '#f3c27e'],
   ]);
-  p.stars(120, 0.8, 0.9);
-  const glow = ctx.createRadialGradient(W * 0.5, H * 1.05, H * 0.05, W * 0.5, H * 1.05, H * 0.9);
-  glow.addColorStop(0, 'rgba(255,90,40,.85)');
-  glow.addColorStop(1, 'rgba(255,90,40,0)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, W, H);
-  // Los dos anillos, en cruz, y la estación en su cruce.
-  ctx.strokeStyle = '#a8643a';
-  ctx.lineWidth = Math.max(2, H * 0.012);
-  for (const tilt of [0.35, -0.35]) {
-    ctx.beginPath();
-    ctx.ellipse(W * 0.5, H * 0.5, W * 0.4, H * 0.12, tilt, 0.2, Math.PI * 1.6);
-    ctx.stroke();
+  for (let k = 0; k < 70; k++) {
+    ctx.fillStyle = `rgba(255,240,220,${rand() * 0.7})`;
+    ctx.fillRect(rand() * W, rand() * H * 0.4, 1.2, 1.2);
   }
-  const hub = ctx.createRadialGradient(W * 0.46, H * 0.46, H * 0.02, W * 0.5, H * 0.5, H * 0.2);
-  hub.addColorStop(0, '#8a919c');
-  hub.addColorStop(1, '#2a3038');
-  p.disc(W * 0.5, H * 0.5, H * 0.2, hub);
-  ctx.fillStyle = '#7a5438';
-  ctx.fillRect(W * 0.5 - H * 0.2, H * 0.47, H * 0.4, H * 0.06);
-  p.disc(W * 0.5, H * 0.34, H * 0.015, '#ffcf8a');
+  const sx = W * 0.78;
+  const sy = H * 0.66;
+  const sun = ctx.createRadialGradient(sx, sy, 0, sx, sy, H * 0.6);
+  sun.addColorStop(0, 'rgba(255,220,160,.9)');
+  sun.addColorStop(0.12, 'rgba(255,190,120,.45)');
+  sun.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sun;
+  ctx.fillRect(0, 0, W, H);
+  p.facets(H * 0.7, (t, n) => `hsl(${24 + n * 6} ${38 + n * 10}% ${30 - t * 22 + n * 6}%)`);
+  // La Boca y el banco.
+  const bx = W * 0.42;
+  const by = H * 0.52;
+  const rx = H * 0.2;
+  const ry = H * 0.24;
+  ctx.lineWidth = H * 0.045;
+  ctx.strokeStyle = '#2b1a14';
+  ctx.beginPath();
+  ctx.ellipse(bx, by, rx, ry, 0, Math.PI * 0.96, Math.PI * 2.04);
+  ctx.stroke();
+  ctx.lineWidth = H * 0.012;
+  ctx.strokeStyle = 'rgba(255,220,170,.55)';
+  ctx.beginPath();
+  ctx.ellipse(bx, by, rx * 0.8, ry * 0.8, 0, Math.PI, Math.PI * 2);
+  ctx.stroke();
+  p.rect('#24160f', bx - rx - H * 0.03, by, H * 0.06, H * 0.2);
+  p.rect('#24160f', bx + rx - H * 0.03, by, H * 0.06, H * 0.2);
+  p.rect('#3a241a', W * 0.62, H * 0.66, W * 0.07, H * 0.04);
+  p.rect('#3a241a', W * 0.63, H * 0.7, W * 0.01, H * 0.04);
+  p.rect('#3a241a', W * 0.675, H * 0.7, W * 0.01, H * 0.04);
 }
 
 const PAINTERS: Readonly<Record<string, Painter>> = {
   hogar,
   luna,
-  umbral: dusk(true),
+  umbral,
   archivo,
   taller,
-  cicatriz: dusk(false),
+  cicatriz,
   observatorio,
   laboratorio,
   anclaje_norte: anclaje,

@@ -1267,7 +1267,7 @@ body {
     0 1px 3px #000;
 }
 
-/* ---------- Un mundo nuevo: la foto que se seca y su nombre ---------- */
+/* ---------- Un mundo nuevo: la foto que se seca, su nombre y su descripción ---------- */
 .discover-backdrop {
   position: fixed;
   inset: 0;
@@ -1312,40 +1312,17 @@ body {
 .discover.is-in .discover-photo img {
   animation: develop 2.4s ease-out;
 }
-.discover-label {
-  font: 600 23px/1 var(--f-hand);
-}
-.discover-input {
-  width: 100%;
-  padding: 0.1em 0.2em;
-  border: 0;
-  border-bottom: 1.5px dashed currentColor;
-  background: transparent;
-  color: var(--ink);
+.discover-name {
+  margin: 4px 0 0;
   font: 700 36px/1.1 var(--f-hand);
+  color: var(--ink);
   text-align: center;
   text-shadow: var(--halo);
-  caret-color: var(--amber);
-  outline: none;
 }
-.discover-input:focus-visible {
-  border-bottom-style: solid;
-  border-color: var(--glow);
-}
-.discover-input::placeholder {
-  color: inherit;
-  opacity: 0.35;
-}
-.discover-foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 10px 14px;
-}
-.discover-hint {
-  margin: 0;
-  font: 400 15px/1.3 var(--f-body);
+.discover-about {
+  max-width: 34ch;
+  margin: 0 0 4px;
+  font: 400 17px/1.4 var(--f-body);
   color: var(--pencil);
   text-align: center;
 }

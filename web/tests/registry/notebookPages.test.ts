@@ -17,7 +17,7 @@ const clues = loadClues();
 const nothingNew = { facts: new Set<string>(), worlds: new Set<string>() };
 
 function pagesFor(known: ReadonlySet<string>, fresh = nothingNew): NotebookPage[] {
-  const log = withDiscovery({}, 'umbral', 'Primera luz', 0);
+  const log = withDiscovery({}, 'umbral', 0);
   return notebookPages(buildRegistryView(clues, known), worldPages(log, clues, known), fresh);
 }
 
@@ -92,7 +92,7 @@ describe('the pages of the notebook', () => {
     expect(index?.kind === 'worlds' && index.worlds.map((w) => w.name)).toEqual([
       'Hogar',
       'Luna',
-      'Primera luz',
+      'Umbral',
     ]);
   });
 });

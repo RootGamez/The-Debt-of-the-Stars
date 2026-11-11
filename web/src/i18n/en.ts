@@ -198,14 +198,12 @@ export const EN: Readonly<Record<string, string>> = {
   'Todavía no sé nada con certeza.': 'I do not know anything for certain yet.',
   'Todavía no sé nada sobre esto.': 'I do not know anything about this yet.',
   'Bitácora de mundos': 'Log of worlds',
-  'A cada mundo que encuentro le pongo nombre y pego su dibujo.':
-    'Each world I find, I name and paste its drawing.',
+  'A cada mundo que encuentro le pego su dibujo.': 'For each world I find, I paste its drawing.',
   'Aún no he anotado nada aquí.': 'I have not written anything here yet.',
   'Página anterior': 'Previous page',
   'Página siguiente': 'Next page',
   'Cerrar (Esc)': 'Close (Esc)',
   'Un mundo nuevo': 'A new world',
-  'Ponle nombre': 'Give it a name',
   'Pegar en el cuaderno': 'Paste into the notebook',
   Hogar: 'Home',
   Luna: 'Moon',
@@ -228,6 +226,26 @@ export const EN: Readonly<Record<string, string>> = {
   'órbita rapidísima': 'blistering orbit',
   'junto al Taller · luz roja': 'next to the Workshop · red light',
   'la luz llega tarde': 'the light arrives late',
+  'Mi casa: la aldea de los Ool y la cúpula del Instituto.':
+    'My home: the Ool village and the dome of the Institute.',
+  'Gris y callada. Aquí cayó el fragmento con el borde que brilla.':
+    'Grey and quiet. The fragment with the glowing edge fell here.',
+  'Un atardecer que no acaba y La Boca abierta. Aquí desperté.':
+    'A sunset that never ends and the Mouth wide open. I woke up here.',
+  'Un mundo de agua con torres y una galería seca bajo el mar. Su tiempo va lento.':
+    'A world of water with towers and a dry gallery under the sea. Its time runs slow.',
+  'Un gigante de gas sin suelo y cinco islas de roca encima. Caer a las nubes es morir.':
+    'A gas giant with no ground and five rock islands above it. Falling into the clouds is death.',
+  'Hueco y mordido por cortes redondos. En su centro duerme la máquina.':
+    'Hollow and bitten by round cuts. The machine sleeps at its centre.',
+  'Un asteroide lejano con una cúpula y un gran telescopio que mira a la Brasa.':
+    'A distant asteroid with a dome and a great telescope that looks at the Ember.',
+  'Dentro del Nudo todo está del revés. Alguien trabajó aquí a escondidas.':
+    'Inside the Knot everything is upside down. Someone worked here in secret.',
+  'Un polo del Cerco: dos anillos a medio hacer alrededor de la Brasa.':
+    'One pole of the Enclosure: two half-built rings around the Ember.',
+  'El otro polo del Cerco: dos anillos a medio hacer alrededor de la Brasa.':
+    'The other pole of the Enclosure: two half-built rings around the Ember.',
   'dentro del Nudo': 'inside the Knot',
   'Algo que aún no sé…': 'Something I do not know yet…',
   'Técnico (Taller)': 'Technician (Workshop)',
@@ -286,8 +304,6 @@ export const EN: Readonly<Record<string, string>> = {
   'Al llegar: {drift}.': 'On arrival: {drift}.',
   'Cada tramo suma lo que se adelanta o se atrasa: al llegar, {drift}. Las ruedas lo corrigen.':
     'Each leg adds what it gains or loses: on arrival, {drift}. The wheels correct it.',
-  'Intro para pegarlo · sin nombre se queda «{name}»':
-    'Enter to paste it · unnamed it stays "{name}"',
   '{total} hechos anotados': '{total} facts noted',
   '¿Cruzar hacia «{view}»? No hay vuelta atrás.': 'Cross toward "{view}"? There is no going back.',
   'p.': 'p.',

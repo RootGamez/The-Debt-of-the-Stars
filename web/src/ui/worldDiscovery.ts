@@ -1,15 +1,17 @@
-// Un mundo nuevo (plan del HUD, F.3): al llegar por primera vez, su dibujo se revela como una foto que se seca,
-// el jugador le pone nombre (como mucho 24 letras; vacío = el oficial) y la foto vuela al cuaderno de la esquina.
-// El tiempo espera mientras tanto (main.ts). Las teclas que se escriben no llegan al juego (ni E, ni R, ni M).
-import { MAX_WORLD_NAME, cleanWorldName } from '../worlds/worldLog';
+// Un mundo nuevo (plan del HUD, F.3): al llegar por primera vez sale su carta: el dibujo se revela como una foto que
+// se seca, con el nombre del mundo y una línea que lo describe. Al pegarla (botón, Intro, Espacio, E o Esc) la foto
+// vuela al cuaderno de la esquina. El tiempo espera mientras tanto (main.ts) y ninguna tecla pulsada aquí llega al
+// juego.
 import { worldDrawing } from './worldDrawings';
 import { t } from '../i18n';
 
 const FLY_MS = 800;
+/** Las teclas que pegan la carta. */
+const CLOSE_KEYS: ReadonlySet<string> = new Set(['Enter', ' ', 'e', 'E', 'Escape']);
 
 export interface WorldDiscovery {
-  /** Pide un nombre para el mundo `id`; `onNamed` recibe el nombre ya limpio. */
-  open(id: string, official: string, onNamed: (name: string) => void): void;
+  /** Enseña la carta del mundo `id`; `onClosed` se llama al pegarla en el cuaderno. */
+  open(id: string, name: string, about: string, onClosed: () => void): void;
   readonly isOpen: boolean;
   dispose(): void;
 }
@@ -41,24 +43,17 @@ export function createWorldDiscovery(book: () => HTMLElement | undefined): World
   image.width = 360;
   image.height = 270;
   photo.append(image);
-  const label = element('label', 'discover-label', t('Ponle nombre'));
-  const input = element('input', 'discover-input');
-  input.id = 'discover-name';
-  input.type = 'text';
-  input.maxLength = MAX_WORLD_NAME;
-  input.autocomplete = 'off';
-  input.spellcheck = false;
-  label.htmlFor = input.id;
-  const hint = element('p', 'discover-hint');
+  const name = element('h3', 'discover-name');
+  const about = element('p', 'discover-about');
+  about.id = 'discover-about';
+  backdrop.setAttribute('aria-describedby', about.id);
   const save = element('button', 'discover-save', t('Pegar en el cuaderno'));
   save.type = 'button';
-  const foot = element('div', 'discover-foot');
-  foot.append(hint, save);
-  card.append(title, photo, label, input, foot);
+  card.append(title, photo, name, about, save);
   backdrop.append(card);
   document.body.append(backdrop);
 
-  let pending: { official: string; onNamed: (name: string) => void } | undefined;
+  let pending: (() => void) | undefined;
 
   function flyToBook(): void {
     const target = book();
@@ -98,21 +93,21 @@ export function createWorldDiscovery(book: () => HTMLElement | undefined): World
 
   function finish(): void {
     if (!pending) return;
-    const { official, onNamed } = pending;
+    const onClosed = pending;
     pending = undefined;
-    const name = cleanWorldName(input.value, official);
     // La foto se mide con el diálogo aún visible: oculto, no ocupa sitio y la copia saldría de tamaño cero.
     flyToBook();
     backdrop.hidden = true;
-    onNamed(name);
+    onClosed();
   }
 
-  // Lo que se escribe es del nombre: ninguna tecla pulsada aquí sale hacia el juego (ni E, ni R, ni Esc), vaya donde
-  // vaya el foco dentro del diálogo. Al soltar sí llegan: si venías andando con W, el juego tiene que enterarse de
-  // que ya no la tienes pulsada.
+  // Ninguna tecla pulsada aquí sale hacia el juego (ni E, ni R, ni Esc). Al soltar sí llegan: si venías andando con
+  // W, el juego tiene que enterarse de que ya no la tienes pulsada. Una tecla que ya venía pulsada (repetición) no
+  // cierra la carta: así no se la salta quien llega con la E apretada.
   backdrop.addEventListener('keydown', (event) => {
     event.stopPropagation();
-    if (event.key === 'Enter' && event.target === input && !event.isComposing) {
+    if (event.repeat || event.isComposing) return;
+    if (CLOSE_KEYS.has(event.key)) {
       event.preventDefault();
       finish();
     }
@@ -127,31 +122,30 @@ export function createWorldDiscovery(book: () => HTMLElement | undefined): World
   // El foco no sale del diálogo: un clic en la foto o el fondo lo devolvería al cuerpo de la página, y las teclas
   // dejarían de pasar por aquí.
   backdrop.addEventListener('pointerdown', (event) => {
-    if (event.target !== input && event.target !== save) event.preventDefault();
+    if (event.target !== save) event.preventDefault();
   });
   backdrop.addEventListener('focusout', (event) => {
     if (
       pending &&
       !(event.relatedTarget instanceof Node && backdrop.contains(event.relatedTarget))
     ) {
-      input.focus({ preventScroll: true });
+      save.focus({ preventScroll: true });
     }
   });
 
   return {
-    open(id, official, onNamed) {
-      pending = { official, onNamed };
+    open(id, worldName, line, onClosed) {
+      pending = onClosed;
       image.src = worldDrawing(id);
-      image.alt = t('Dibujo de {name}', { name: official });
-      input.value = '';
-      input.placeholder = official;
-      hint.textContent = t('Intro para pegarlo · sin nombre se queda «{name}»', { name: official });
+      image.alt = t('Dibujo de {name}', { name: worldName });
+      name.textContent = worldName;
+      about.textContent = line;
       backdrop.hidden = false;
       card.classList.remove('is-in');
       card.getBoundingClientRect(); // reinicia la animación del revelado
       card.classList.add('is-in');
-      // El foco va al nombre ya: ninguna tecla llega al juego mientras la foto se revela.
-      input.focus({ preventScroll: true });
+      // El foco va al botón ya: ninguna tecla llega al juego mientras la foto se revela.
+      save.focus({ preventScroll: true });
     },
     get isOpen() {
       return pending !== undefined;

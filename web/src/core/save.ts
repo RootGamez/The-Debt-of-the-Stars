@@ -287,7 +287,7 @@ export function markEndingSeen(
   return saveProgress(store, { ...loaded.data, endings: [ending] });
 }
 
-/** Al nombrar un mundo nuevo: lo pega en la bitácora guardada, con lo demás que ya había. false si no se pudo. */
+/** Al encontrar un mundo nuevo: lo pega en la bitácora guardada, con lo demás que ya había. false si no se pudo. */
 export function markWorldNamed(
   store: KeyValueStore | null,
   loaded: LoadResult,

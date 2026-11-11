@@ -1,16 +1,14 @@
-// La bitácora de mundos (plan del HUD, hito F): cada mundo nuevo se nombra al llegar por primera vez y su dibujo
-// se pega en su página del cuaderno, junto a lo que se anotó allí. Hogar y la Luna vienen ya nombrados (son casa);
-// el Laboratorio Oculto no aparece hasta encontrarlo (ningún hueco puede decir «aquí hay algo»). El nombre propio
-// solo se usa en el cuaderno y en la nave: las placas y grabaciones de los Ausentes siguen diciendo «Umbral».
-import { MAX_WORLD_NAME, isControlChar, type NamedWorld } from '../core/save';
+// La bitácora de mundos (plan del HUD, hito F): al llegar por primera vez a un mundo nuevo sale su carta (el dibujo,
+// el nombre y una línea que lo describe) y el dibujo se pega en su página del cuaderno, junto a lo que se anotó allí.
+// Los mundos ya no se nombran a mano: se llaman siempre por su nombre. Hogar y la Luna vienen ya en la bitácora (son
+// casa); el Laboratorio Oculto no aparece hasta encontrarlo (ningún hueco puede decir «aquí hay algo»).
+import type { NamedWorld } from '../core/save';
 import type { Clues } from '../registry/clues';
 import { progressNote, worldProgress } from '../registry/worldProgress';
 import { worldTitle } from './worldSelection';
 import { t } from '../i18n';
 
-export { MAX_WORLD_NAME };
-
-/** Los mundos nombrados: id → nombre y ciclo (lo que se guarda). */
+/** Los mundos encontrados: id → nombre y ciclo (lo que se guarda; el nombre ya es siempre el oficial). */
 export type WorldNames = Readonly<Record<string, NamedWorld>>;
 
 export interface LoggedWorld {
@@ -19,53 +17,91 @@ export interface LoggedWorld {
   name: string;
   /** Lo que el explorador apunta bajo el nombre. */
   where: string;
+  /** La descripción breve de la carta de llegada. */
+  about: string;
 }
 
 /** En el orden del cuaderno. */
 export const WORLD_LOG: readonly LoggedWorld[] = [
-  { id: 'hogar', name: t('Hogar'), where: t('mi sistema · sin ciclo') },
-  { id: 'luna', name: t('Luna'), where: t('la luna de Hogar') },
-  { id: 'umbral', name: t('Umbral'), where: t('reloj de referencia') },
-  { id: 'archivo', name: t('Archivo'), where: t('masa densa · su tiempo va lento') },
-  { id: 'taller', name: t('Taller'), where: t('órbita rapidísima') },
-  { id: 'cicatriz', name: t('Cicatriz'), where: t('junto al Taller · luz roja') },
-  { id: 'observatorio', name: t('Observatorio'), where: t('la luz llega tarde') },
-  { id: 'laboratorio', name: t('Laboratorio Oculto'), where: t('dentro del Nudo') },
-  { id: 'anclaje_norte', name: t('Anclaje Norte'), where: t('un polo del Cerco') },
-  { id: 'anclaje_sur', name: t('Anclaje Sur'), where: t('el otro polo del Cerco') },
+  {
+    id: 'hogar',
+    name: t('Hogar'),
+    where: t('mi sistema · sin ciclo'),
+    about: t('Mi casa: la aldea de los Ool y la cúpula del Instituto.'),
+  },
+  {
+    id: 'luna',
+    name: t('Luna'),
+    where: t('la luna de Hogar'),
+    about: t('Gris y callada. Aquí cayó el fragmento con el borde que brilla.'),
+  },
+  {
+    id: 'umbral',
+    name: t('Umbral'),
+    where: t('reloj de referencia'),
+    about: t('Un atardecer que no acaba y La Boca abierta. Aquí desperté.'),
+  },
+  {
+    id: 'archivo',
+    name: t('Archivo'),
+    where: t('masa densa · su tiempo va lento'),
+    about: t('Un mundo de agua con torres y una galería seca bajo el mar. Su tiempo va lento.'),
+  },
+  {
+    id: 'taller',
+    name: t('Taller'),
+    where: t('órbita rapidísima'),
+    about: t(
+      'Un gigante de gas sin suelo y cinco islas de roca encima. Caer a las nubes es morir.',
+    ),
+  },
+  {
+    id: 'cicatriz',
+    name: t('Cicatriz'),
+    where: t('junto al Taller · luz roja'),
+    about: t('Hueco y mordido por cortes redondos. En su centro duerme la máquina.'),
+  },
+  {
+    id: 'observatorio',
+    name: t('Observatorio'),
+    where: t('la luz llega tarde'),
+    about: t('Un asteroide lejano con una cúpula y un gran telescopio que mira a la Brasa.'),
+  },
+  {
+    id: 'laboratorio',
+    name: t('Laboratorio Oculto'),
+    where: t('dentro del Nudo'),
+    about: t('Dentro del Nudo todo está del revés. Alguien trabajó aquí a escondidas.'),
+  },
+  {
+    id: 'anclaje_norte',
+    name: t('Anclaje Norte'),
+    where: t('un polo del Cerco'),
+    about: t('Un polo del Cerco: dos anillos a medio hacer alrededor de la Brasa.'),
+  },
+  {
+    id: 'anclaje_sur',
+    name: t('Anclaje Sur'),
+    where: t('el otro polo del Cerco'),
+    about: t('El otro polo del Cerco: dos anillos a medio hacer alrededor de la Brasa.'),
+  },
 ];
 
-/** Casa: no se nombran, ya tienen nombre. */
+/** Casa: está en la bitácora desde el principio. */
 const PRENAMED: ReadonlySet<string> = new Set(['hogar', 'luna']);
 
 function logged(id: string): LoggedWorld | undefined {
   return WORLD_LOG.find((world) => world.id === id);
 }
 
-/** Lo que escribe el jugador, limpio: sin espacios de más ni caracteres de control, y como mucho 24 letras. */
-export function cleanWorldName(input: string, official: string): string {
-  const tidy = Array.from(input)
-    .filter((char) => !isControlChar(char))
-    .join('')
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (tidy === '') return official;
-  return Array.from(tidy).slice(0, MAX_WORLD_NAME).join('').trim();
-}
-
-/** ¿Hay que pedir un nombre al llegar? Solo a los mundos de la bitácora que aún no lo tienen. */
-export function needsNaming(names: WorldNames, id: string): boolean {
+/** ¿Sale la carta de mundo nuevo al llegar? Solo en los mundos de la bitácora que aún no se han encontrado. */
+export function isNewWorld(names: WorldNames, id: string): boolean {
   return logged(id) !== undefined && !PRENAMED.has(id) && names[id] === undefined;
 }
 
-/** La bitácora con un mundo más (no toca la que se le da). */
-export function withDiscovery(
-  names: WorldNames,
-  id: string,
-  name: string,
-  loop: number,
-): WorldNames {
-  return { ...names, [id]: { name, loop } };
+/** La bitácora con un mundo más, con su nombre oficial (no toca la que se le da). */
+export function withDiscovery(names: WorldNames, id: string, loop: number): WorldNames {
+  return { ...names, [id]: { name: officialName(id), loop } };
 }
 
 export function officialName(id: string): string {
@@ -77,22 +113,14 @@ export function worldWhere(id: string): string {
   return logged(id)?.where ?? '';
 }
 
-/** El nombre que se ve en el cuaderno y en el cartel de llegada. */
-export function displayName(names: WorldNames, id: string): string {
-  return names[id]?.name ?? officialName(id);
-}
-
-/** El nombre del objetivo de la nave: el tuyo, con el oficial entre paréntesis si es distinto. */
-export function shipLabel(names: WorldNames, id: string): string {
-  const own = displayName(names, id);
-  const official = officialName(id);
-  return own === official ? official : `${own} (${official})`;
+/** La descripción breve de la carta ('' fuera de la bitácora). */
+export function worldAbout(id: string): string {
+  return logged(id)?.about ?? '';
 }
 
 export interface WorldPage {
   id: string;
   name: string;
-  official: string;
   where: string;
   /** El ciclo en que se encontró (sin él: casa, de antes del primer ciclo). */
   loop: number | undefined;
@@ -121,7 +149,7 @@ function worldOfFacts(clues: Clues): ReadonlyMap<string, string> {
   return map;
 }
 
-/** Las páginas de la bitácora: casa siempre; el resto, en cuanto tiene nombre. */
+/** Las páginas de la bitácora: casa siempre; el resto, en cuanto se ha encontrado. */
 export function worldPages(
   names: WorldNames,
   clues: Clues,
@@ -134,8 +162,7 @@ export function worldPages(
     (world): WorldPage => {
       const page: WorldPage = {
         id: world.id,
-        name: displayName(names, world.id),
-        official: world.name,
+        name: world.name,
         where: world.where,
         loop: names[world.id]?.loop,
         facts: [...worlds]

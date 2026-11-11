@@ -147,11 +147,10 @@ import { createAccessibilitySettings } from './accessibility/preferences';
 import { getLanguage, saveLanguage, t, type Language } from './i18n';
 import { voicePitch } from './typewriter/speech';
 import {
-  displayName,
-  needsNaming,
+  isNewWorld,
   officialName,
-  shipLabel,
   withDiscovery,
+  worldAbout,
   worldWhere,
   type WorldNames,
 } from './worlds/worldLog';
@@ -298,7 +297,7 @@ function start(): void {
   const textSettings = createTextSettings(browserStore());
   const quality = qualityFromQuery(window.location.search);
   document.documentElement.classList.toggle('calidad-baja', quality === 'baja');
-  // Saltar a un mundo con `?mundo=` es para probar: no se pide nombre a ningún mundo al llegar.
+  // Saltar a un mundo con `?mundo=` es para probar: no sale la carta de mundo nuevo al llegar.
   const exploring = !new URLSearchParams(window.location.search).has('mundo');
   // De vuelta a casa por una boca del Archivo (`?final=`): con A y B, el Hogar de antes, sin lo que aún no ha llegado.
   const homecomingEnding = endingFromQuery(window.location.search);
@@ -603,27 +602,27 @@ function start(): void {
       soundtrack.chime(frequency);
     },
   });
-  // La bitácora de mundos: los nombres que el jugador les puso (se guardan con la partida).
+  // La bitácora de mundos: los que ya se encontraron (se guardan con la partida).
   let worldNames: WorldNames = session.savedWorlds;
   const discovery = createWorldDiscovery(
     () => document.querySelector<HTMLElement>('.hud-book') ?? undefined,
   );
   const place = createPlaceCard();
-  /** Al despertar o aterrizar: el cartel con su nombre, o, la primera vez, ponerle uno. */
+  /** Al despertar o aterrizar: el cartel con su nombre, o, la primera vez, la carta del mundo nuevo. */
   function arrive(id: string): void {
-    if (exploring && needsNaming(worldNames, id)) {
+    const name = officialName(id);
+    if (exploring && isNewWorld(worldNames, id)) {
       overlay.releasePointer();
-      discovery.open(id, officialName(id), (name) => {
-        worldNames = withDiscovery(worldNames, id, name, session.director.loopsCompleted);
+      discovery.open(id, name, worldAbout(id), () => {
+        worldNames = withDiscovery(worldNames, id, session.director.loopsCompleted);
         session.saveWorld(id, name);
         overlay.recapturePointer();
         game.ui?.notify(t('Pegado en la bitácora: {name}', { name }));
-        place.show(name, name === officialName(id) ? worldWhere(id) : officialName(id));
+        place.show(name, worldWhere(id));
       });
       return;
     }
-    const name = displayName(worldNames, id);
-    place.show(name, name === officialName(id) ? worldWhere(id) : officialName(id));
+    place.show(name, worldWhere(id));
   }
   const { input, overlay, touch } = createControls(
     canvas,
@@ -816,7 +815,7 @@ function start(): void {
             enterWorld(world);
             arrive(world);
           },
-          nameOf: (world) => shipLabel(worldNames, world),
+          nameOf: (world) => officialName(world),
           pull: (frame, position, target) => {
             horizon.pull(frame, position, target);
           },
@@ -909,13 +908,13 @@ function start(): void {
     return { reference: systemScene.referenceWorld ?? null, bodies: positions };
   }
   const orbitMap = spec ? createOrbitMap(spec, systemSnapshot) : undefined;
-  // La mesa del mapa de la nave (Fase 11): el mapa de órbitas del juego, con los nombres que puso el jugador.
+  // La mesa del mapa de la nave (Fase 11): el mapa de órbitas del juego.
   const shipMap =
     spec && flight
       ? createShipMap({
           spec,
           read: systemSnapshot,
-          nameOf: (world) => shipLabel(worldNames, world),
+          nameOf: (world) => officialName(world),
           shipWorld: () => flight.frame,
           onOpen: () => {
             overlay.releasePointer();
@@ -1234,10 +1233,10 @@ function start(): void {
     },
     (dt) => {
       const look = input.consumeLook();
-      // Leer, abrir el Registro o nombrar un mundo detiene el ciclo.
+      // Leer, abrir el Registro o la carta de un mundo nuevo detiene el ciclo.
       const timeRuns =
         overlay.playing && !ui.blocking && !discovery.isOpen && !(shipMap?.isOpen ?? false);
-      // El primer despertar de la partida: el cartel del mundo (o ponerle nombre).
+      // El primer despertar de la partida: el cartel del mundo (o su carta de mundo nuevo).
       if (awakening) {
         if (overlay.playing) awakening.elapsed += dt;
         if (!awakening.noted && awakeningPose(awakening.elapsed).done) {

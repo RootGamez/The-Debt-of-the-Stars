@@ -147,7 +147,6 @@ function worldPhoto(world: WorldPage): HTMLElement {
 
 function worldMeta(world: WorldPage): string {
   const parts = [world.where];
-  if (world.name !== world.official) parts.unshift(world.official);
   parts.push(
     world.loop === undefined
       ? t('casa')
@@ -315,11 +314,7 @@ function pageContent(page: NotebookPage): HTMLElement[] {
       }
       return [
         node('h3', 'registry-known-title', t('Bitácora de mundos')),
-        node(
-          'p',
-          'registry-count',
-          t('A cada mundo que encuentro le pongo nombre y pego su dibujo.'),
-        ),
+        node('p', 'registry-count', t('A cada mundo que encuentro le pego su dibujo.')),
         list,
       ];
     }
