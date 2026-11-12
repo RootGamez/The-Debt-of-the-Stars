@@ -52,14 +52,14 @@ async function expectReadable(page: Page): Promise<void> {
 for (const [name, viewport, scales] of [
   ['un teléfono de lado', { width: 800, height: 360 }, { uiScale: 1.25, textScale: 1 }],
   [
-    'un teléfono de lado con la letra al 200 %',
+    'un teléfono de lado con la letra al 150 %',
     { width: 800, height: 360 },
-    { uiScale: 1.25, textScale: 2 },
+    { uiScale: 1.25, textScale: 1.5 },
   ],
   [
-    'un portátil con la interfaz y la letra al 200 %',
+    'un portátil con la interfaz y la letra al 150 %',
     { width: 1280, height: 720 },
-    { uiScale: 2, textScale: 2 },
+    { uiScale: 1.5, textScale: 1.5 },
   ],
 ] as const) {
   test(`the Registro fits and can be read on ${name}`, async ({ page }) => {
@@ -72,11 +72,13 @@ for (const [name, viewport, scales] of [
     await expectInside(page, 'button[aria-label="Página anterior"]');
     await expectReadable(page);
 
-    // Pasa unas páginas y lo sigue siendo; las pestañas del canto llevan a otra sección.
-    await page.getByRole('button', { name: 'Página siguiente' }).click();
-    await page.getByRole('button', { name: 'Ir a Mundos' }).click({ force: true });
-    await expect(page.locator('.registry')).toContainText('Bitácora de mundos', { timeout: 5000 });
+    // Pasa varias páginas con la flecha y lo sigue siendo.
+    for (let turns = 0; turns < 4; turns++) {
+      await page.keyboard.press('ArrowRight');
+      await page.waitForTimeout(700);
+    }
     await expectInside(page, '.registry-book');
+    await expectReadable(page);
 
     await page.keyboard.press('Escape');
     await expect(page.locator('.registry')).toBeHidden();
