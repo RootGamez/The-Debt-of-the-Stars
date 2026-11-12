@@ -202,6 +202,13 @@ function inView(camera: Camera): Object3D[] {
   return seen;
 }
 
+/** Qué fracción de la pantalla mide la textura del entorno que doblan las esferas (1 = completa). */
+let backdropScale = 1;
+
+export function setWormholeBackdropScale(scale: number): void {
+  backdropScale = Math.min(1, Math.max(0.25, scale));
+}
+
 /**
  * Pinta la escena. Con esferas de gusano a la vista, antes pinta el entorno sin ellas en una textura (a la que las
  * esferas se miran para doblarlo); sin ellas, es un solo pase como siempre.
@@ -213,11 +220,13 @@ export function renderWithWormholes(renderer: WebGLRenderer, scene: Scene, camer
     return;
   }
   renderer.getDrawingBufferSize(buffer);
-  if (!target || target.width !== buffer.x || target.height !== buffer.y) {
+  // La textura puede ser más pequeña que la pantalla (Configuración): las esferas la leen por coordenadas
+  // normalizadas (`uSize` sigue siendo la pantalla), así que solo se ve algo más blanda tras el cristal.
+  const width = Math.max(1, Math.round(buffer.x * backdropScale));
+  const height = Math.max(1, Math.round(buffer.y * backdropScale));
+  if (!target || target.width !== width || target.height !== height) {
     target?.dispose();
-    target = new WebGLRenderTarget(Math.max(1, buffer.x), Math.max(1, buffer.y), {
-      type: HalfFloatType,
-    });
+    target = new WebGLRenderTarget(width, height, { type: HalfFloatType });
   }
   shared.size.value.copy(buffer);
   hidden.length = 0;

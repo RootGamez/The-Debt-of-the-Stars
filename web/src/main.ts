@@ -97,7 +97,9 @@ import { gateSplit, gateStretch } from './game/gateWormhole';
 import { createGateWormholes, type GateWormholeSample } from './render/gateWormholeView';
 import { createWormholeView } from './render/wormholeView';
 import { castShadowsFrom, createSunShadow } from './render/sunShadow';
-import { renderWithWormholes } from './render/wormholeSphere';
+import { renderWithWormholes, setWormholeBackdropScale } from './render/wormholeSphere';
+import { createGraphicsSettings } from './core/graphics';
+import { createFpsGovernor } from './core/graphicsGovernor';
 import { Player } from './core/player';
 import { absorptionWindow, quietChronology, triggersAsEvents } from './core/timeline';
 import { createAbsorptionView } from './render/absorptionView';
@@ -195,16 +197,23 @@ function watchGraphicsContext(canvas: HTMLCanvasElement, status: HTMLElement): v
   });
 }
 
+/** Un fotograma largo (móvil flojo, tirón) no avanza el juego más que esto: la física no da pasos enormes. */
+const MAX_FRAME_SECONDS = 0.1;
+
 function runFrameLoop(
   renderer: WebGLRenderer,
   render: () => void,
   frame: (dt: number) => void,
+  /** Cada fotograma real (segundos): lo usa el modo automático para saber si el dispositivo llega. */
+  onFrameTime?: (seconds: number) => void,
 ): void {
   const timer = new Timer();
   timer.connect(document); // pausa el tiempo cuando la pestaña está oculta
   renderer.setAnimationLoop((time: number) => {
     timer.update(time);
-    frame(timer.getDelta());
+    const seconds = timer.getDelta();
+    onFrameTime?.(seconds);
+    frame(Math.min(seconds, MAX_FRAME_SECONDS));
     render();
   });
 }
@@ -233,7 +242,8 @@ function setUpDisplay() {
   const volumes = createVolumeSettings(store, (current) => {
     soundtrackRef?.setVolumes(current);
   });
-  return { language, accessibility, chooseLanguage, volumes };
+  const graphics = createGraphicsSettings(store, { touch: isTouchDevice() });
+  return { language, accessibility, chooseLanguage, volumes, graphics };
 }
 
 /** El sonido en marcha, para que Configuración le pase los volúmenes. */
@@ -314,7 +324,17 @@ async function start(): Promise<void> {
   const loadingSound = window.setInterval(() => {
     soundtrack.updateLoading();
   }, LOADING_SOUND_MS);
-  const { renderer, scene, camera, sun, ambient } = createStage(canvas);
+  const graphics = display.graphics;
+  const stage = createStage(canvas, {
+    antialias: graphics.details.antialias,
+    pixelRatio: graphics.details.pixelRatio,
+  });
+  const { renderer, scene, camera, sun, ambient } = stage;
+  // Resolución y portales se aplican en vivo (al elegirlos en Configuración o al bajar el modo automático).
+  graphics.subscribe((details) => {
+    stage.setPixelRatio(details.pixelRatio);
+    setWormholeBackdropScale(details.halfResPortals ? 0.5 : 1);
+  });
   setupCamera(camera);
   watchGraphicsContext(canvas, status);
 
@@ -1232,8 +1252,16 @@ async function start(): Promise<void> {
     window.location.search,
     quality,
     isSoftwareRenderer(gpuName),
+    graphics.details.shadowSize || 2048,
   );
   const sunShadow = shadowSize > 0 ? createSunShadow(shadowSize) : undefined;
+  graphics.setShadowReady(sunShadow !== undefined);
+  // Tamaño de la sombra y eclipses según Configuración (un `?sombra=` de la URL manda al arrancar).
+  if (sunShadow && !new URLSearchParams(window.location.search).has('sombra')) {
+    graphics.subscribe((details) => {
+      sunShadow.configure({ size: details.shadowSize, far: details.eclipseShadows });
+    });
+  }
   const cameraWorld = new Vector3();
   if (sunShadow) {
     scene.traverse((object) => {
@@ -1253,6 +1281,11 @@ async function start(): Promise<void> {
   });
   // Desde aquí la mezcla la pone cada fotograma (con el mundo ya puesto).
   window.clearInterval(loadingSound);
+
+  // El modo automático baja un escalón cuando el dispositivo no llega a los fotogramas (src/core/graphicsGovernor.ts).
+  const governor = createFpsGovernor(
+    new URLSearchParams(window.location.search).has('debug') ? { minFps: 0 } : {},
+  );
 
   let awoke = false;
   const feet = new Vector3();
@@ -1663,6 +1696,11 @@ async function start(): Promise<void> {
       touch?.update();
       debug.update(dt, overlay.playing);
       orbitMap?.update(dt);
+    },
+    (seconds) => {
+      // Solo se mide jugando (la pausa y los paneles no cuentan) y nunca con `?debug` (las pruebas no deben cambiar).
+      if (!overlay.playing || ui.blocking) return;
+      if (governor.sample(seconds) && graphics.stepDown()) governor.reset();
     },
   );
   // Los primeros fotogramas (sombras, gusanos) también se dibujan aún tapados; luego se quita la pantalla.

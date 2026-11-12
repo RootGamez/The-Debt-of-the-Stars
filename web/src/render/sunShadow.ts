@@ -126,6 +126,11 @@ export interface SunShadow {
   register(root: Object3D): void;
   /** Enciende o apaga el efecto (p. ej. dentro del Nudo, donde la estrella no ilumina). */
   setEnabled(enabled: boolean): void;
+  /**
+   * Lo que el jugador eligió en Configuración: tamaño de los mapas (0 apaga la sombra sin quitar nada) y si se
+   * dibujan los cuerpos lejanos (eclipses).
+   */
+  configure(config: { size: number; far: boolean }): void;
   dispose(): void;
 }
 
@@ -375,14 +380,33 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
   const toFocus = new Vector3();
   const clearColor = new Color();
   let enabled = true;
+  /** Elegido en Configuración: sin sombra (los mapas quedan como estaban, sin dibujarse). */
+  let userOff = false;
+  let farAllowed = true;
+  let currentSize = size;
 
   function switchOff(): void {
     for (const cascade of cascades) cascade.on.value = 0;
   }
 
+  function resizeCascade(cascade: Cascade, side: number): void {
+    cascade.target.setSize(side, side);
+    cascade.texel.value = 1 / side;
+  }
+
   return {
+    configure(config) {
+      userOff = config.size <= 0;
+      farAllowed = config.far;
+      if (userOff || config.size === currentSize) return;
+      currentSize = config.size;
+      resizeCascade(close, currentSize);
+      resizeCascade(near, currentSize);
+      resizeCascade(far, Math.max(256, currentSize / FAR_SIZE_DIVISOR));
+    },
+
     update(renderer, scene, star, focus, options = {}) {
-      if (!enabled) {
+      if (!enabled || userOff) {
         switchOff();
         return;
       }
@@ -399,7 +423,7 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
       // Cuánto se ve la estrella desde aquí (radio angular, rad): lo que ensancha la penumbra de los eclipses.
       shared.uSunStarAngle.value = distance > 0 ? (options.starRadius ?? 0) / distance : 0;
 
-      const useFar = distance > FAR_MIN_DISTANCE;
+      const useFar = farAllowed && distance > FAR_MIN_DISTANCE;
       far.on.value = useFar ? 1 : 0;
       if (useFar) {
         const farFit = sunShadowFocus(star, focus, { radius: FAR_RADIUS, reach: distance });

@@ -4,6 +4,14 @@
 // velocidad del texto y el sonido de letras (se guardan en el navegador, typewriter/textPreferences.ts).
 import { TEXT_SCALES, UI_SCALES, type AccessibilitySettings } from '../accessibility/preferences';
 import { VOLUME_STEPS, type VolumeSettings } from '../audio/volumePreferences';
+import {
+  GRAPHICS_PRESETS,
+  PIXEL_RATIOS,
+  SHADOW_SIZES,
+  type GraphicsPreset,
+  type GraphicsSettings,
+  type ShadowSize,
+} from '../core/graphics';
 import { LANGUAGE_NAMES, LANGUAGES, t, type Language } from '../i18n';
 import { TEXT_SPEED_LABELS, TEXT_SPEEDS, type TextSettings } from '../typewriter/textPreferences';
 
@@ -36,15 +44,17 @@ const desktopHelp = (): string =>
   );
 
 /** Las categorías de Configuración, en el orden de las pestañas. */
-type SettingsCategory = 'sound' | 'accessibility' | 'game' | 'system';
+type SettingsCategory = 'sound' | 'graphics' | 'accessibility' | 'game' | 'system';
 const SETTINGS_CATEGORIES: readonly SettingsCategory[] = [
   'sound',
+  'graphics',
   'accessibility',
   'game',
   'system',
 ];
 const CATEGORY_LABELS: Readonly<Record<SettingsCategory, string>> = {
   sound: 'Sonido',
+  graphics: 'Gráficos',
   accessibility: 'Accesibilidad',
   game: 'Juego',
   system: 'Sistema',
@@ -66,6 +76,8 @@ export interface DisplaySettings {
   readonly accessibility: AccessibilitySettings;
   /** Volumen de los efectos y de los ambientes. */
   readonly volumes: VolumeSettings;
+  /** Calidad gráfica: modo básico y detalles sueltos. */
+  readonly graphics: GraphicsSettings;
   /** Guarda el idioma y recarga la página (el progreso ya está guardado). */
   readonly chooseLanguage: (language: Language) => void;
 }
@@ -138,6 +150,7 @@ export function createPauseOverlay(
   let resetFailed = false;
   let inSettings = false;
   let settingsCategory: SettingsCategory = 'sound';
+  let showAdvanced = false;
 
   /** Un grupo de opciones de las que se elige una (los botones dicen cuál está puesta). */
   const choices = <T extends string | number | boolean>(
@@ -168,6 +181,104 @@ export function createPauseOverlay(
       group.append(button);
     }
     return group;
+  };
+
+  const PRESET_LABELS: Readonly<Record<GraphicsPreset, () => string>> = {
+    auto: () => t('Automática'),
+    bajo: () => t('Baja'),
+    medio: () => t('Media'),
+    alto: () => t('Alta'),
+    custom: () => t('Personalizada'),
+  };
+  const SHADOW_LABELS: Readonly<Record<ShadowSize, () => string>> = {
+    0: () => t('Sin sombras'),
+    512: () => t('Básicas'),
+    1024: () => t('Media'),
+    2048: () => t('Nítidas'),
+  };
+  const onOff = (on: boolean): string => (on ? t('Sí') : t('No'));
+
+  /** Gráficos: el modo básico siempre a la vista y, plegados, los detalles sueltos (que pasan el modo a personalizado). */
+  const graphicsPanel = (): HTMLElement[] => {
+    const { graphics } = options.display;
+    const { details, preferences } = graphics;
+    const presets: readonly GraphicsPreset[] =
+      preferences.preset === 'custom' ? [...GRAPHICS_PRESETS, 'custom'] : GRAPHICS_PRESETS;
+    const rows: HTMLElement[] = [
+      choices(
+        t('Calidad'),
+        presets,
+        preferences.preset,
+        (preset) => PRESET_LABELS[preset](),
+        (preset) => {
+          if (preset !== 'custom') graphics.choosePreset(preset);
+        },
+      ),
+    ];
+    if (preferences.preset === 'auto') {
+      rows.push(
+        line(
+          'small',
+          t('Automática ajusta la calidad a tu dispositivo y la baja sola si va a tirones.'),
+          'overlay-setting overlay-note',
+        ),
+      );
+    }
+    const toggle = actionButton(
+      showAdvanced ? t('Ocultar detalles avanzados') : t('Detalles avanzados'),
+      () => {
+        showAdvanced = !showAdvanced;
+        render();
+      },
+    );
+    toggle.setAttribute('aria-expanded', String(showAdvanced));
+    const toggleRow = document.createElement('div');
+    toggleRow.className = 'overlay-choices';
+    toggleRow.append(toggle);
+    rows.push(toggleRow);
+    if (showAdvanced) {
+      rows.push(
+        choices(
+          t('Sombras'),
+          SHADOW_SIZES,
+          details.shadowSize,
+          (size) => SHADOW_LABELS[size](),
+          (shadowSize) => {
+            graphics.setDetail({ shadowSize });
+          },
+        ),
+        choices(t('Sombras de eclipses'), [true, false], details.eclipseShadows, onOff, (on) => {
+          graphics.setDetail({ eclipseShadows: on });
+        }),
+        choices(t('Resolución'), PIXEL_RATIOS, details.pixelRatio, percent, (pixelRatio) => {
+          graphics.setDetail({ pixelRatio });
+        }),
+        choices(t('Suavizado de bordes'), [true, false], details.antialias, onOff, (on) => {
+          graphics.setDetail({ antialias: on });
+        }),
+        choices(
+          t('Portales a media resolución'),
+          [true, false],
+          details.halfResPortals,
+          onOff,
+          (on) => {
+            graphics.setDetail({ halfResPortals: on });
+          },
+        ),
+      );
+    }
+    if (graphics.needsReload) {
+      const reload = document.createElement('div');
+      reload.className = 'overlay-setting overlay-note';
+      reload.append(
+        line('small', t('Se aplica al recargar la página.')),
+        actionButton(t('Recargar ahora'), () => {
+          window.location.reload();
+        }),
+      );
+      rows.push(reload);
+    }
+    return rows;
   };
 
   /** Las opciones de cada categoría de Configuración. */
@@ -215,6 +326,8 @@ export function createPauseOverlay(
             },
           ),
         ];
+      case 'graphics':
+        return graphicsPanel();
       case 'accessibility':
         return [
           choices(

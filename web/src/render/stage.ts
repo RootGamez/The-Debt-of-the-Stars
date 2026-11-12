@@ -21,7 +21,15 @@ const SKY_COLOR = 0x07070c;
  */
 export const AMBIENT_COLOR = 0x7a6a8c;
 export const AMBIENT_INTENSITY = 1.0;
-const MAX_PIXEL_RATIO = 1.5;
+/** Resolución interna máxima por defecto (el jugador la cambia en Configuración). */
+const DEFAULT_PIXEL_RATIO = 1.5;
+
+export interface StageOptions {
+  /** Suavizado de bordes (MSAA): solo se decide al crear el contexto. */
+  antialias?: boolean;
+  /** Tope de la resolución interna respecto a la de la pantalla. */
+  pixelRatio?: number;
+}
 
 export interface Stage {
   renderer: WebGLRenderer;
@@ -31,13 +39,17 @@ export interface Stage {
   sun: PointLight;
   /** Luz ambiente: cada mundo puede tener la suya (ver `WorldInfo.ambient`). */
   ambient: AmbientLight;
+  /** Cambia el tope de la resolución interna sin recrear nada. */
+  setPixelRatio(cap: number): void;
   /** Deja de observar el tamaño y libera el contexto WebGL. */
   dispose(): void;
 }
 
-export function createStage(canvas: HTMLCanvasElement): Stage {
-  const renderer = new WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
+export function createStage(canvas: HTMLCanvasElement, options: StageOptions = {}): Stage {
+  const renderer = new WebGLRenderer({ canvas, antialias: options.antialias ?? true });
+  renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio, options.pixelRatio ?? DEFAULT_PIXEL_RATIO),
+  );
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = ACESFilmicToneMapping;
 
@@ -70,5 +82,10 @@ export function createStage(canvas: HTMLCanvasElement): Stage {
     renderer.dispose();
   };
 
-  return { renderer, scene, camera, sun, ambient, dispose };
+  const setPixelRatio = (cap: number): void => {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, cap));
+    resize();
+  };
+
+  return { renderer, scene, camera, sun, ambient, setPixelRatio, dispose };
 }

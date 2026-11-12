@@ -18,13 +18,15 @@ export function sunShadowSizeFromQuery(
   search: string,
   quality: Quality,
   softwareRenderer = false,
+  preferred = 2048,
 ): number {
   const requested = new URLSearchParams(search).get('sombra')?.toLowerCase() ?? '';
   if (requested === 'no') return 0;
   const size = Number(requested);
   if (SHADOW_SIZES.includes(size)) return size;
   // Una GPU por software (o la de un portátil sin tarjeta) no aguanta los mapas: sin sombra salvo que se pida.
-  return quality === 'alta' && !softwareRenderer ? 2048 : 0;
+  // `preferred` es lo que el jugador eligió en Configuración (por defecto, el tamaño de la calidad alta).
+  return quality === 'alta' && !softwareRenderer ? preferred : 0;
 }
 
 const SOFTWARE_RENDERERS = /swiftshader|llvmpipe|softpipe|software|basic render/i;
