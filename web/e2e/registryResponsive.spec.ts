@@ -40,7 +40,7 @@ async function expectReadable(page: Page): Promise<void> {
           continue;
         }
         if (child.offsetTop + child.offsetHeight > content.clientHeight + 1) {
-          out.push(content.textContent?.slice(0, 40) ?? '');
+          out.push(content.innerText.slice(0, 40));
         }
       }
     }
