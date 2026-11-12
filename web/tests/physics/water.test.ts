@@ -22,6 +22,7 @@ import {
   Breath,
   headUnder,
   isWet,
+  SHIP_SEA_SINK,
   submersion,
   withSeaSurface,
   type WaterBody,
@@ -175,7 +176,7 @@ describe('the sea surface for the ship', () => {
   it('holds a capsule up at the sea level instead of the seabed', () => {
     const capsule = placeCapsule(
       createCapsule(1),
-      new Vector3(0, SEA - 0.5, 0),
+      new Vector3(0, SEA - 0.5 - SHIP_SEA_SINK, 0),
       new Vector3(0, 1, 0),
       3,
     );

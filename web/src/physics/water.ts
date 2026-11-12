@@ -145,6 +145,8 @@ function closest(ground: number | null, sea: number | null, maxDistance: number)
 }
 const lowest = new Vector3();
 const outward = new Vector3();
+/** Lo que se hunde la nave posada en el agua (m): así el pie de la escalerilla queda al alcance de quien nada. */
+export const SHIP_SEA_SINK = 0.7;
 
 /**
  * Las colisiones de `world` más la superficie del mar como suelo: para la nave, que se posa en el agua en vez de
@@ -165,7 +167,7 @@ export function withSeaSurface(
     lowest.copy(start < end ? capsule.start : capsule.end).add(contact.correction);
     outward.subVectors(lowest, water.center);
     const distance = outward.length();
-    const sink = surfaceRadius(lowest, water) + capsule.radius - distance;
+    const sink = surfaceRadius(lowest, water) + capsule.radius - SHIP_SEA_SINK - distance;
     if (sink <= 0 || distance === 0) return hit;
     outward.divideScalar(distance);
     contact.correction.addScaledVector(outward, sink);
