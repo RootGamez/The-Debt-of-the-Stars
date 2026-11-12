@@ -1,5 +1,5 @@
 // El agujero de gusano del juego (pedido de Anthony): una esfera, como lo sería uno de verdad y como se ve en
-// *Interstellar*, no un anillo con un velo. Desde fuera es una bola de cristal que dobla el espacio: en el borde,
+// no un anillo con un velo. Desde fuera es una bola de cristal que dobla el espacio: en el borde,
 // el entorno se ve comprimido y estirado alrededor de ella (con un fino aro brillante, el anillo de Einstein) y, por
 // el centro, se asoma otro lugar (el otro lado: un cielo de estrellas y luz). Se usa igual para las Puertas
 // plegadas, la boca del cielo del Archivo de las Puertas y el gusano de la Luna.
@@ -8,6 +8,8 @@
 // esferas en un lienzo aparte y luego la pinta de verdad; si no hay ninguna esfera a la vista, es un solo pase.
 import {
   Color,
+  DoubleSide,
+  FrontSide,
   Frustum,
   HalfFloatType,
   Matrix4,
@@ -47,6 +49,7 @@ uniform float uRadius;
 uniform float uTime;
 uniform float uOpen;
 uniform vec3 uTint;
+uniform float uDark;
 varying vec3 vWorld;
 varying vec2 vCenterUv;
 
@@ -90,7 +93,8 @@ void main() {
 
   // Por el centro, el otro lado, ensanchado como un ojo de pez.
   vec3 bent = normalize(rd + offset * 1.7);
-  vec3 inside = otherSide(bent);
+  // Pintada de negro (el agujero negro): por el centro no se asoma ningún lugar, solo oscuridad.
+  vec3 inside = mix(otherSide(bent), vec3(0.0), uDark);
   float through = 1.0 - smoothstep(0.55, 0.82, b);
   vec3 color = mix(around, inside, through);
 
@@ -98,8 +102,7 @@ void main() {
   float ring = exp(-pow((b - 0.84) / 0.03, 2.0));
   color += vec3(1.0, 0.9, 0.7) * ring * 0.9;
   // Un velo suave de luz en el borde y un destello en el corazón.
-  color += uTint * pow(b, 6.0) * 0.18;
-  color += uTint * pow(1.0 - b, 4.0) * 0.12;
+  color += uTint * (pow(b, 6.0) * 0.18 + pow(1.0 - b, 4.0) * 0.12) * (1.0 - uDark);
 
   float alpha = (1.0 - smoothstep(0.97, 1.0, b)) * uOpen;
   gl_FragColor = vec4(color, alpha);
@@ -127,7 +130,15 @@ export interface WormholeSphere {
 }
 
 /** Una esfera de agujero de gusano. */
-export function createWormholeSphere(tint = 0x9cc8ff): WormholeSphere {
+export interface WormholeOptions {
+  /** Pintada de negro: dobla igual el entorno, pero por el centro no hay otro lado (agujero negro). Dibuja las dos caras. */
+  dark?: boolean;
+}
+
+export function createWormholeSphere(
+  tint = 0x9cc8ff,
+  { dark = false }: WormholeOptions = {},
+): WormholeSphere {
   const time = { value: 0 };
   const open = { value: 1 };
   const tintUniform = { value: new Color(tint) };
@@ -144,9 +155,12 @@ export function createWormholeSphere(tint = 0x9cc8ff): WormholeSphere {
       uTime: time,
       uOpen: open,
       uTint: tintUniform,
+      uDark: { value: dark ? 1 : 0 },
     },
     transparent: true,
     depthWrite: true,
+    // Quien está dentro del horizonte (en Cicatriz, donde nace) lo ve todo negro: hacen falta las caras de dentro.
+    side: dark ? DoubleSide : FrontSide,
   });
   const mesh = new Mesh(new SphereGeometry(WORMHOLE_RADIUS, 48, 32), material);
   mesh.name = 'GusanoEsfera';

@@ -11,11 +11,11 @@ import {
   Mesh,
   MeshBasicMaterial,
   RingGeometry,
-  SphereGeometry,
   Vector3,
   type Camera,
   type Object3D,
 } from 'three';
+import { createWormholeSphere } from './wormholeSphere';
 import { apparentDistance, skyFill } from '../system/absorption';
 import { blackHoleRadius, diskRadii, photonRingRadius, type HoleGrowth } from '../system/blackHole';
 
@@ -83,16 +83,16 @@ export function createBlackHoleView(
 
   // Bastantes caras: al final llena medio cielo y con pocas se le ve el polígono en el borde. Por las dos
   // caras: dentro del horizonte (en Cicatriz, donde nace) todo lo de fuera queda negro.
-  const horizon = new Mesh(
-    new SphereGeometry(1, 64, 32),
-    new MeshBasicMaterial({ color: 0x000000, side: DoubleSide }),
-  );
+  // El horizonte es una esfera de agujero de gusano pintada de negro (la misma de las Puertas): dobla la luz de
+  // alrededor con su anillo de Einstein y por el centro no deja ver nada.
+  const hole = createWormholeSphere(RING_COLOR, { dark: true });
+  const horizon = hole.root;
   const ring = new Mesh(
-    new RingGeometry(0.93, 1.07, 96),
+    new RingGeometry(0.985, 1.015, 96),
     new MeshBasicMaterial({
       color: RING_COLOR,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.55,
       blending: AdditiveBlending,
       depthWrite: false,
       side: DoubleSide,
@@ -108,6 +108,11 @@ export function createBlackHoleView(
     }),
   );
   disk.rotation.x = DISK_TILT;
+  // Primero la esfera (escribe profundidad) y encima el disco y el anillo: así el disco pasa por delante y se
+  // oculta por detrás de ella.
+  horizon.renderOrder = 0;
+  disk.renderOrder = 1;
+  ring.renderOrder = 2;
   root.add(horizon, disk, ring);
   const center = new Vector3();
   const eye = new Vector3();
@@ -141,6 +146,7 @@ export function createBlackHoleView(
       fill = skyFill(radius, drawn);
 
       horizon.scale.setScalar(radius);
+      hole.time.value += dt;
       disk.scale.setScalar(radius);
       disk.rotateZ(DISK_SPIN * 2 * Math.PI * dt);
       // El anillo de luz rodea el borde del horizonte tal como se ve: ese borde queda algo más cerca de quien
@@ -166,7 +172,8 @@ export function createBlackHoleView(
     },
     dispose() {
       root.removeFromParent();
-      for (const mesh of [horizon, ring, disk]) {
+      hole.dispose();
+      for (const mesh of [ring, disk]) {
         mesh.geometry.dispose();
         mesh.material.dispose();
       }

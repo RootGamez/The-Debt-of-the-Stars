@@ -8,12 +8,16 @@ import {
   absorptionProgress,
   anchorWeight,
   apparentDistance,
+  bodyFall,
   debrisTravel,
   finalApproach,
   finalLight,
   frozenRate,
+  holdsHole,
   holeTide,
   horizonTide,
+  implodedPoint,
+  starAbsorptionWindow,
   skyFill,
   stretchedPoint,
 } from '../../src/system/absorption';
@@ -187,5 +191,56 @@ describe('a world being swallowed, seen from outside', () => {
     expect(debrisTravel(1)).toBe(1);
     expect(debrisTravel(0.5)).toBeLessThan(0.5);
     expect(debrisTravel(2)).toBe(1);
+  });
+});
+
+describe('a world that holds the hole inside (Cicatriz)', () => {
+  const inside = new Vector3(2, 0, 0);
+
+  it('is told apart from a world with the hole at its side', () => {
+    expect(holdsHole(2, 80)).toBe(true);
+    expect(holdsHole(900, 80)).toBe(false);
+    expect(holdsHole(0, 80)).toBe(true);
+  });
+
+  it('stays still before its window and sinks completely into the hole at the end', () => {
+    const rim = new Vector3(80, 10, -5);
+    expect(implodedPoint(rim, inside, 80, 0, new Vector3()).distanceTo(rim)).toBeCloseTo(0);
+    expect(implodedPoint(rim, inside, 80, 1, new Vector3()).distanceTo(inside)).toBeCloseTo(0);
+    const far = new Vector3(300, 0, 0);
+    expect(implodedPoint(far, inside, 80, 0.5, new Vector3()).distanceTo(inside)).toBeCloseTo(0);
+  });
+
+  it('pulls every point closer as the window advances, the center before the rim', () => {
+    const rim = new Vector3(80, 0, 0);
+    const middle = new Vector3(20, 0, 0);
+    const before = implodedPoint(rim, inside, 80, 0.2, new Vector3()).distanceTo(inside);
+    const after = implodedPoint(rim, inside, 80, 0.4, new Vector3()).distanceTo(inside);
+    expect(after).toBeLessThan(before);
+    const ratio = (point: Vector3): number =>
+      implodedPoint(point, inside, 80, 0.25, new Vector3()).distanceTo(inside) /
+      point.distanceTo(inside);
+    expect(ratio(middle)).toBeLessThan(ratio(rim));
+  });
+});
+
+describe('the star falling into the hole', () => {
+  it('falls inside the cycle, after Cicatriz and before the last world, and scales with the cycle', () => {
+    const [start, end] = starAbsorptionWindow(900);
+    expect(start).toBeGreaterThan(
+      absorptionWindow(parseChronology(rawChronology), 'cicatriz')?.[1] ?? 0,
+    );
+    expect(end).toBeLessThan(900);
+    const short = starAbsorptionWindow(90);
+    expect(short[0]).toBeCloseTo(start / 10);
+    expect(short[1]).toBeCloseTo(end / 10);
+  });
+
+  it('starts whole and ends tiny, stretched and moved to the hole', () => {
+    expect(bodyFall(0)).toEqual({ along: 1, across: 1, fall: 0, size: 1 });
+    const end = bodyFall(1);
+    expect(end.fall).toBeCloseTo(1);
+    expect(end.size).toBeLessThan(0.2);
+    expect(end.along).toBeGreaterThan(end.across);
   });
 });

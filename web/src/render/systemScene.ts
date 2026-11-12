@@ -38,6 +38,8 @@ export interface SystemSceneOptions {
 export interface SystemScene {
   /** Mundo en cuyo marco estás; `undefined` = espacio abierto (marco del sistema). */
   readonly referenceWorld: string | undefined;
+  /** El cuerpo de la estrella (la Brasa), para que el agujero negro se la pueda tragar. */
+  readonly starObject: Object3D | undefined;
   setReference(world: string | undefined): void;
   /** Una vez por fotograma con el reloj de Umbral: recoloca todo respecto al mundo de referencia. */
   update(t: number): void;
@@ -111,6 +113,7 @@ export function createSystemScene(options: SystemSceneOptions): SystemScene {
     get referenceWorld() {
       return reference;
     },
+    starObject: star?.object,
     setReference(world) {
       if (world !== undefined) pivotOf(world);
       reference = world;

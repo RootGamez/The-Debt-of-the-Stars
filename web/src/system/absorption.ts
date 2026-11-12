@@ -31,6 +31,18 @@ const {
   anchorNear: ANCHOR_NEAR,
   anchorFar: ANCHOR_FAR,
 } = STRETCH_SHAPE;
+/**
+ * Un mundo cuyo centro está a menos de esta fracción de su radio del agujero lo lleva dentro (Cicatriz, donde nace):
+ * no hay eje hacia el que estirarse, así que se hunde hacia el agujero por todos lados (`implodedPoint`).
+ */
+export const IMPLODE_SPAN = 0.35;
+/** Cuánto antes cae el centro de un mundo hueco que sus bordes (fracción del tramo de caída). */
+export const IMPLODE_LAG = 0.3;
+/** La Brasa (la estrella) también se la traga el agujero: su ventana, sobre un ciclo de 900 s (se escala con él). */
+const STAR_WINDOW: readonly [number, number] = [838, 856];
+const BASE_CYCLE = 900;
+/** Hasta qué punto de la ventana tarda en hundirse del todo un mundo con el agujero dentro (el horizonte lo cubre). */
+export const IMPLODE_END = 0.45;
 /** La marea del agujero: al empezar la ventana y al final (por encima de 0,5 ya acumula tensión). */
 const HOLE_TIDE_FROM = 0.3;
 const HOLE_TIDE_MAX = 1.4;
@@ -110,6 +122,56 @@ export function stretchedPoint(
     .addScaledVector(across, 1 / Math.sqrt(1 + stretch));
   const near = clamp(0.5 + (0.5 * along) / radius, 0, 1);
   return target.lerp(hole, fallAmount(p) ** (1 + FALL_LEAD * (1 - near)));
+}
+
+/** La ventana en que cae la estrella para un ciclo de `duration` segundos. */
+export function starAbsorptionWindow(duration: number): readonly [number, number] {
+  const k = duration / BASE_CYCLE;
+  return [STAR_WINDOW[0] * k, STAR_WINDOW[1] * k];
+}
+
+/** ¿El agujero está dentro del mundo (en vez de a un lado)? Entonces se hunde en él en lugar de estirarse. */
+export function holdsHole(span: number, radius: number): boolean {
+  return radius > 0 && span < IMPLODE_SPAN * radius;
+}
+
+/**
+ * Dónde se ve un punto de un mundo que lleva el agujero dentro: se hunde hacia él por todos lados, el centro antes
+ * y los bordes después (todo llega al agujero justo al terminar). Devuelve `target`.
+ */
+export function implodedPoint(
+  point: Vector3,
+  hole: Vector3,
+  radius: number,
+  progress: number,
+  target: Vector3,
+): Vector3 {
+  const p = unit(progress / IMPLODE_END);
+  relative.subVectors(point, hole);
+  const lag = radius > 0 ? Math.min(1, relative.length() / radius) : 0;
+  const q = clamp((p - IMPLODE_LAG * lag) / (1 - IMPLODE_LAG), 0, 1);
+  return target.copy(hole).addScaledVector(relative, 1 - q * q);
+}
+
+/**
+ * Cómo se ve un cuerpo entero (la estrella) que cae en el agujero: se alarga hacia él (`along`), se adelgaza a lo
+ * ancho (`across`), se desplaza (`fall`, 0–1) y se encoge (`size`, 1 = entera).
+ */
+export function bodyFall(progress: number): {
+  along: number;
+  across: number;
+  fall: number;
+  size: number;
+} {
+  const p = unit(progress);
+  const stretch = stretchAmount(p);
+  const fall = fallAmount(p);
+  return {
+    along: 1 + stretch,
+    across: 1 / Math.sqrt(1 + stretch),
+    fall: fall ** 1.5,
+    size: 1 - 0.9 * fall ** 2,
+  };
 }
 
 /** Cuánto se deforma el suelo a `distance` metros de quien mira: nada bajo los pies, del todo a lo lejos. */

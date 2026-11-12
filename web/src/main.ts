@@ -129,7 +129,7 @@ import { THIRD_PERSON_DISTANCE, easeDistance, thirdPersonPose } from './render/t
 import { createBodyLightSwitch } from './game/bodyLightSwitch';
 import { createHelmetRim } from './ui/helmetRim';
 import { createStarfield, dimStars } from './render/sky';
-import { finalApproach, finalLight } from './system/absorption';
+import { finalApproach, finalLight, starAbsorptionWindow } from './system/absorption';
 import { AMBIENT_COLOR, AMBIENT_INTENSITY, createStage } from './render/stage';
 import { createSystemScene } from './render/systemScene';
 import { buildAlbatros } from './ship/model/albatros';
@@ -526,6 +526,12 @@ async function start(): Promise<void> {
           radius: r.world.info.radius,
           window: absorptionWindow(chronology, r.id),
         })),
+        systemScene.starObject
+          ? {
+              object: systemScene.starObject,
+              window: starAbsorptionWindow(chronology.duration),
+            }
+          : undefined,
       )
     : undefined;
   const bodies: WorldBody[] = [...runtimes.values()].map((r) => ({

@@ -6,13 +6,23 @@
 import {
   IcosahedronGeometry,
   InstancedMesh,
+  Matrix4,
   MeshLambertMaterial,
   Object3D,
   Vector3,
   type Material,
   type Mesh,
 } from 'three';
-import { absorptionProgress, debrisTravel, frozenRate, STRETCH_SHAPE } from '../system/absorption';
+import {
+  absorptionProgress,
+  bodyFall,
+  debrisTravel,
+  frozenRate,
+  IMPLODE_END,
+  IMPLODE_LAG,
+  IMPLODE_SPAN,
+  STRETCH_SHAPE,
+} from '../system/absorption';
 import { isMesh } from '../worlds/markers';
 
 /** Trozos que pueden estar cayendo a la vez (se reutilizan). */
@@ -35,6 +45,14 @@ export interface AbsorbingWorld {
   window: readonly [number, number] | undefined;
 }
 
+/** Un cuerpo entero que cae sin deformarse por vértices (la estrella): se alarga, se desplaza y se encoge. */
+export interface AbsorbingStar {
+  /** Su objeto, ya colocado cada fotograma (su matriz se toma en cuanto empieza a caer). */
+  object: Object3D;
+  /** Su ventana de absorción (reloj de Umbral). */
+  window: readonly [number, number] | undefined;
+}
+
 export interface AbsorptionFrame {
   /** Reloj de Umbral. */
   t: number;
@@ -53,6 +71,8 @@ export interface AbsorptionSnapshot {
   progress: Record<string, number>;
   /** Mundos ya tragados (su modelo no se ve). */
   swallowed: string[];
+  /** Avance de la absorción de la estrella (0–1). */
+  star: number;
   /** Trozos cayendo ahora mismo. */
   debris: number;
 }
@@ -103,28 +123,43 @@ uniform float uAbsorbProgress;
 uniform vec3 uAbsorbViewer;
 uniform float uAbsorbAnchored;`;
 
-// La misma cuenta que `stretchedPoint` y `anchorWeight`.
-const STRETCH_VERTEX = `vec3 world = (modelMatrix * vec4(transformed, 1.0)).xyz;
-if (uAbsorbProgress > 0.0) {
+// La misma cuenta que `stretchedPoint`, `implodedPoint` y `anchorWeight`. Con el agujero dentro del mundo (Cicatriz,
+// donde nace) no hay eje: se hunde hacia él por todos lados.
+const STRETCH_VERTEX = `vec4 absorbLocal = vec4(transformed, 1.0);
+#ifdef USE_BATCHING
+  absorbLocal = batchingMatrix * absorbLocal;
+#endif
+#ifdef USE_INSTANCING
+  absorbLocal = instanceMatrix * absorbLocal;
+#endif
+vec3 world = (modelMatrix * absorbLocal).xyz;
+if (uAbsorbProgress > 0.0 && uAbsorbRadius > 0.0) {
   vec3 axis = uAbsorbHole - uAbsorbCenter;
   float span = length(axis);
-  if (span > 1e-3 && uAbsorbRadius > 0.0) {
+  float p = uAbsorbProgress;
+  vec3 moved = world;
+  if (span < ${f(IMPLODE_SPAN)} * uAbsorbRadius) {
+    vec3 rel = world - uAbsorbHole;
+    float lag = min(1.0, length(rel) / uAbsorbRadius);
+    float pi = min(1.0, p / ${f(IMPLODE_END)});
+    float q = clamp((pi - ${f(IMPLODE_LAG)} * lag) / ${f(1 - IMPLODE_LAG)}, 0.0, 1.0);
+    moved = uAbsorbHole + rel * (1.0 - q * q);
+  } else {
     axis /= span;
     vec3 rel = world - uAbsorbCenter;
     float along = dot(rel, axis);
     vec3 across = rel - axis * along;
-    float p = uAbsorbProgress;
     float stretch = ${f(S.maxStretch)} * p * p;
     float ahead = max(0.0, along / uAbsorbRadius);
-    vec3 moved = uAbsorbCenter
+    moved = uAbsorbCenter
       + axis * (along * (1.0 + stretch) + ${f(S.nearPull)} * stretch * uAbsorbRadius * ahead * ahead)
       + across * inversesqrt(1.0 + stretch);
     float near = clamp(0.5 + 0.5 * along / uAbsorbRadius, 0.0, 1.0);
     float fall = pow(smoothstep(${f(S.fallFrom)}, 1.0, p), 1.0 + ${f(S.fallLead)} * (1.0 - near));
     moved = mix(moved, uAbsorbHole, fall);
-    float anchor = smoothstep(${f(S.anchorNear)}, ${f(S.anchorFar)}, distance(world, uAbsorbViewer));
-    world = mix(world, moved, mix(1.0, anchor, uAbsorbAnchored));
   }
+  float anchor = smoothstep(${f(S.anchorNear)}, ${f(S.anchorFar)}, distance(world, uAbsorbViewer));
+  world = mix(world, moved, mix(1.0, anchor, uAbsorbAnchored));
 }
 vec4 mvPosition = viewMatrix * vec4(world, 1.0);
 gl_Position = projectionMatrix * mvPosition;`;
@@ -132,8 +167,18 @@ gl_Position = projectionMatrix * mvPosition;`;
 /** La luz de un mundo que cae llega roja y débil. */
 const REDSHIFT_FRAGMENT = 'gl_FragColor.rgb *= mix(vec3(1.0), vec3(1.0, 0.45, 0.32), uRedshift);';
 
+/** Un material compartido por varias mallas se parchea una sola vez (el parche se encadena, no se sustituye). */
+const patched = new WeakSet<Material>();
+
 function patch(material: Material, uniforms: Uniforms): void {
-  material.onBeforeCompile = (shader) => {
+  if (patched.has(material)) return;
+  patched.add(material);
+  // Se encadena con lo que el material ya traía (la luz de cielo del mundo): sustituirlo lo perdería.
+  const previous = material.onBeforeCompile.bind(material);
+  const previousKey = material.customProgramCacheKey.bind(material);
+  material.customProgramCacheKey = () => `${previousKey()}|absorb`;
+  material.onBeforeCompile = (shader, renderer) => {
+    previous(shader, renderer);
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>\n${STRETCH_UNIFORMS}`)
@@ -171,6 +216,7 @@ function looseDirection(toHole: Vector3, target: Vector3): Vector3 {
 export function createAbsorptionView(
   root: Object3D,
   worlds: readonly AbsorbingWorld[],
+  star?: AbsorbingStar,
 ): AbsorptionView {
   const entries: Entry[] = worlds
     .filter((world) => world.window !== undefined)
@@ -239,6 +285,63 @@ export function createAbsorptionView(
     for (const mesh of entry.meshes) mesh.frustumCulled = still;
   }
 
+  // La estrella cae entera: no se deforma por vértices, sino con la matriz de su objeto.
+  const starAim = new Vector3();
+  const starPlace = new Vector3();
+  const starBasis = new Matrix4();
+  const starMatrix = new Matrix4();
+  let starProgress = 0;
+
+  function restoreStar(): void {
+    if (!star) return;
+    star.object.matrixAutoUpdate = true;
+    star.object.visible = true;
+  }
+
+  function updateStar(t: number, hole: Vector3 | undefined): void {
+    if (!star) return;
+    starProgress = hole ? absorptionProgress(star.window, t) : 0;
+    if (starProgress <= 0) {
+      restoreStar();
+      return;
+    }
+    const object = star.object;
+    object.visible = starProgress < 1;
+    starAim.subVectors(hole as Vector3, object.position);
+    const distance = starAim.length();
+    if (distance < 1e-6 || starProgress >= 1) return;
+    starAim.divideScalar(distance);
+    const { along, across, fall, size } = bodyFall(starProgress);
+    // size · (across · I + (along − across) · a·aᵀ) · giro del objeto, y después al sitio desplazado hacia el agujero.
+    const k = along - across;
+    starBasis.set(
+      across + k * starAim.x * starAim.x,
+      k * starAim.x * starAim.y,
+      k * starAim.x * starAim.z,
+      0,
+      k * starAim.y * starAim.x,
+      across + k * starAim.y * starAim.y,
+      k * starAim.y * starAim.z,
+      0,
+      k * starAim.z * starAim.x,
+      k * starAim.z * starAim.y,
+      across + k * starAim.z * starAim.z,
+      0,
+      0,
+      0,
+      0,
+      1,
+    );
+    starBasis.scale(starPlace.setScalar(size));
+    starMatrix.makeRotationFromQuaternion(object.quaternion);
+    starMatrix.premultiply(starBasis);
+    starPlace.copy(object.position).addScaledVector(starAim, distance * fall);
+    starMatrix.setPosition(starPlace);
+    object.matrixAutoUpdate = false;
+    object.matrix.copy(starMatrix);
+    object.matrixWorldNeedsUpdate = true;
+  }
+
   function updatePieces(hole: Vector3 | undefined, dt: number): void {
     debris.visible = live > 0;
     if (live === 0) return;
@@ -290,6 +393,7 @@ export function createAbsorptionView(
         for (; entry.owed >= 1; entry.owed -= 1) spawn(entry);
       }
       updatePieces(hole?.position, dt);
+      updateStar(t, hole?.position);
     },
     rateOf(world) {
       const entry = byId.get(world);
@@ -299,10 +403,12 @@ export function createAbsorptionView(
       return {
         progress: Object.fromEntries(entries.map((e) => [e.world.id, e.progress])),
         swallowed: entries.filter((e) => !e.world.model.visible).map((e) => e.world.id),
+        star: starProgress,
         debris: pieces.filter((piece) => piece.world !== undefined).length,
       };
     },
     dispose() {
+      restoreStar();
       root.remove(debris);
       debris.dispose();
       geometry.dispose();
