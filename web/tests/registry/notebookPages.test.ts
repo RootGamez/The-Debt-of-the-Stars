@@ -3,23 +3,35 @@ import { loadClues } from '../../src/data/pistas';
 import { TaskTracker } from '../../src/game/tasks';
 import { buildRegistryView } from '../../src/registry/registryView';
 import {
-  PAGE_CAPACITY,
+  currentTaskPage,
+  linesOf,
   notebookPages,
+  pageTopic,
   prologuePages,
   sectionPage,
   spreadOf,
+  topicPage,
   weightOf,
   type NotebookPage,
 } from '../../src/registry/notebookPages';
+import { DESIGN_FIT, bookLayout, type PageFit } from '../../src/registry/bookLayout';
 import { withDiscovery, worldPages } from '../../src/worlds/worldLog';
 
 const clues = loadClues();
 const nothingNew = { facts: new Set<string>(), worlds: new Set<string>() };
 
-function pagesFor(known: ReadonlySet<string>, fresh = nothingNew): NotebookPage[] {
+function pagesFor(
+  known: ReadonlySet<string>,
+  fresh = nothingNew,
+  fit: PageFit = DESIGN_FIT,
+): NotebookPage[] {
   const log = withDiscovery({}, 'umbral', 0);
-  return notebookPages(buildRegistryView(clues, known), worldPages(log, clues, known), fresh);
+  return notebookPages(buildRegistryView(clues, known), worldPages(log, clues, known), fresh, fit);
 }
+
+/** Un teléfono de lado con la interfaz al 125 % (como arranca) y otro con la letra al 200 %. */
+const PHONE = bookLayout({ width: 800, height: 360, uiScale: 1.25, textScale: 1 }).fit;
+const PHONE_BIG = bookLayout({ width: 800, height: 360, uiScale: 1.25, textScale: 2 }).fit;
 
 function threadPages(pages: readonly NotebookPage[]) {
   return pages.filter((page) => page.kind === 'thread');
@@ -58,7 +70,6 @@ describe('the pages of the notebook', () => {
     const pages = threadPages(pagesFor(everything));
 
     expect(pages.length).toBeGreaterThan(clues.threads.length);
-    for (const page of pages) expect(page.entries.length).toBeLessThanOrEqual(PAGE_CAPACITY);
     const parts = pages.filter((page) => page.part > 0);
     expect(parts.length).toBeGreaterThan(0);
     // Todo lo sabido sigue estando: ningún hecho se pierde al partir.
@@ -145,7 +156,7 @@ describe('the notebook of the prologue', () => {
   });
 
   it('keeps whole leaves and spills what is learned onto more pages when it does not fit', () => {
-    const pages = prologuePages(tasks, learned(PAGE_CAPACITY * 2 + 1));
+    const pages = prologuePages(tasks, learned(Math.ceil(DESIGN_FIT.lines) * 2 + 1));
     expect(pages.filter((p) => p.kind === 'learned').length).toBeGreaterThan(2);
     expect(pages.length % 2).toBe(0);
     expect(pages.at(-1)?.kind).toBe('back');
@@ -177,5 +188,102 @@ describe('the notebook of the prologue', () => {
     const sketched = { ...plain, sketch: 'mapa_cielo' };
 
     expect(weightOf(sketched)).toBeGreaterThan(weightOf(plain));
+  });
+});
+
+describe('a notebook that fits the screen', () => {
+  const facts = (pages: readonly NotebookPage[]): string[] =>
+    pages.flatMap((page) => (page.kind === 'thread' ? page.entries.map((entry) => entry.id) : []));
+
+  it('uses more pages on a small screen, and more still with bigger letters', () => {
+    const desk = pagesFor(everything).length;
+    const phone = pagesFor(everything, nothingNew, PHONE).length;
+    const big = pagesFor(everything, nothingNew, PHONE_BIG).length;
+
+    expect(phone).toBeGreaterThan(desk);
+    expect(big).toBeGreaterThan(phone);
+  });
+
+  it('never loses or repeats a fact, whatever the size of the page', () => {
+    const whole = facts(pagesFor(everything));
+    for (const fit of [PHONE, PHONE_BIG]) {
+      const pages = pagesFor(everything, nothingNew, fit);
+      expect(facts(pages)).toEqual(whole);
+      expect(pages.length % 2).toBe(0);
+      expect(pages.at(-1)?.kind).toBe('back');
+    }
+  });
+
+  it('keeps what it estimates for every question page within the lines of the page', () => {
+    for (const fit of [DESIGN_FIT, PHONE, PHONE_BIG]) {
+      for (const page of threadPages(pagesFor(everything, nothingNew, fit))) {
+        if (page.entries.length < 2) continue; // una sola entrada enorme va sola en su página
+        const used = page.entries.reduce((sum, entry) => sum + weightOf(entry, fit), 0);
+        expect(used).toBeLessThanOrEqual(fit.lines);
+      }
+    }
+  });
+
+  it('splits the conclusions, the deductions and the index of worlds too', () => {
+    const tiny: PageFit = { lines: 8, chars: 16, sketchLines: 4, photoLines: 3 };
+    const pages = pagesFor(everything, nothingNew, tiny);
+    const count = (kind: NotebookPage['kind']) => pages.filter((p) => p.kind === kind).length;
+    const view = buildRegistryView(clues, everything);
+
+    expect(count('known')).toBeGreaterThan(1);
+    expect(count('deduction')).toBeGreaterThan(view.deductions.length);
+    const known = pages.flatMap((p) => (p.kind === 'known' ? p.conclusions : []));
+    expect(known).toEqual(view.conclusions.map((c) => c.title));
+    for (const deduction of view.deductions) {
+      const pieces = pages.flatMap((p) =>
+        p.kind === 'deduction' && p.deduction.id === deduction.id ? p.pieces : [],
+      );
+      expect(pieces).toEqual(deduction.pieces);
+    }
+  });
+
+  it('still numbers every world with its page when the index takes several pages', () => {
+    const tiny: PageFit = { lines: 5, chars: 14, sketchLines: 4, photoLines: 2 };
+    const pages = pagesFor(new Set(), nothingNew, tiny);
+    const listed = pages.flatMap((page) => (page.kind === 'worlds' ? page.worlds : []));
+
+    expect(pages.filter((page) => page.kind === 'worlds').length).toBeGreaterThan(1);
+    expect(listed.map((world) => world.name)).toEqual(['Hogar', 'Luna', 'Umbral']);
+    for (const entry of listed) {
+      const page = pages[entry.page];
+      expect(page?.kind === 'world' && page.part === 0 && page.world.id).toBe(entry.id);
+    }
+  });
+
+  it('counts a long line as more lines on a narrow page', () => {
+    const line = 'x'.repeat(90);
+    expect(linesOf(line, PHONE_BIG)).toBeGreaterThan(linesOf(line, DESIGN_FIT));
+    expect(linesOf('', DESIGN_FIT)).toBe(1);
+  });
+
+  it('opens the tasks on the page that has the one to do now', () => {
+    const tasks = new TaskTracker().items(false);
+    const tiny: PageFit = { lines: 6, chars: 18, sketchLines: 4, photoLines: 2 };
+    const pages = prologuePages(tasks, [], tiny);
+    const at = currentTaskPage(pages);
+    const page = pages[at];
+
+    expect(pages.filter((p) => p.kind === 'tasks').length).toBeGreaterThan(1);
+    expect(page?.kind === 'tasks' && page.items.some((item) => item.current)).toBe(true);
+    expect(page?.kind === 'tasks' && page.total).toBe(tasks.length);
+  });
+
+  it('finds the same subject again after the pages are dealt anew', () => {
+    const before = pagesFor(everything);
+    const after = pagesFor(everything, nothingNew, PHONE_BIG);
+    const somewhere = before.findIndex((page) => page.kind === 'thread' && page.part > 0);
+    const topic = pageTopic(before[somewhere]);
+    const again = after[topicPage(after, topic)];
+
+    expect(topic.startsWith('thread:')).toBe(true);
+    expect(again?.kind === 'thread' && again.part).toBe(0);
+    expect(pageTopic(again)).toBe(topic);
+    expect(pageTopic(undefined)).toBe('');
+    expect(topicPage(after, 'world:no-existe')).toBe(-1);
   });
 });

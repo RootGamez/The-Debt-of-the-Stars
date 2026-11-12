@@ -360,12 +360,12 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
         line: lineOf(id),
         fresh: !inNotebook.has(id),
       }));
-      registryPanel.open(prologuePages(options.prologue.tasks(), learned), focus);
+      const tasks = options.prologue.tasks();
+      registryPanel.open((fit) => prologuePages(tasks, learned, fit), focus);
     } else {
       const view = buildRegistryView(clues, reading.known);
-      registryPanel.open(
-        notebookPages(view, worldPages(names, clues, reading.known, reading.opened), fresh),
-      );
+      const worlds = worldPages(names, clues, reading.known, reading.opened);
+      registryPanel.open((fit) => notebookPages(view, worlds, fresh, fit));
     }
     for (const id of [...reading.known, ...rumors]) inNotebook.add(id);
     for (const id of Object.keys(names)) namedInNotebook.add(id);

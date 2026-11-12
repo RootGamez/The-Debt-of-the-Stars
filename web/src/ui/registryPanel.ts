@@ -1,15 +1,22 @@
 // El Registro como cuaderno (plan del HUD, hito E): un libro con dos páginas abiertas y hojas que giran en 3D, con
 // sombra según el ángulo. Se pasan con clic, ← →, los botones de abajo o arrastrando la esquina (la hoja sigue al
 // dedo y, al soltar, termina o vuelve). Pestañas en el canto: Preguntas y Mundos. Lo anotado desde la última vez se
-// escribe delante del jugador al llegar a su página. En pantallas estrechas se ve una página cada vez. Solo pinta
-// lo que calcula registry/notebookPages.ts; todo entra como texto.
+// escribe delante del jugador al llegar a su página. Solo pinta lo que calcula registry/notebookPages.ts; todo
+// entra como texto.
+// El libro se adapta a la pantalla y a las escalas de accesibilidad (registry/bookLayout.ts): con poco sitio o la
+// letra grande, la página cambia de forma, se ve una sola o las flechas pasan a los lados, y lo escrito se reparte
+// en más páginas. Después de pintarlo se mide: si algo no cabe, se reparte otra vez con menos por página; lo que
+// ni así cabe (una sola entrada más larga que la página) se puede deslizar dentro de su página.
 import {
+  currentTaskPage,
+  pageTopic,
   sectionPage,
   spreadOf,
+  topicPage,
   type NotebookEntry,
   type NotebookPage,
 } from '../registry/notebookPages';
-import type { DeductionView } from '../registry/registryView';
+import { bookLayout, tighter, type BookLayout, type PageFit } from '../registry/bookLayout';
 import type { WorldPage } from '../worlds/worldLog';
 import { worldDrawing } from './worldDrawings';
 import { SKETCH_HEIGHT, SKETCH_WIDTH, sketchOf } from './notebookSketches';
@@ -19,16 +26,17 @@ import { t } from '../i18n';
 const FLIP_MS = 520;
 /** Arrastrar menos que esto es un clic. */
 const DRAG_THRESHOLD = 6;
-/** Por debajo de este ancho, una página por pantalla. */
-const NARROW_WIDTH = 640;
-/** El libro abierto es 3:2 (cada página, 3:4). */
-const BOOK_RATIO = 1.5;
+/** Cuántas veces se reparte de nuevo, con menos por página, si lo pintado no cabe. */
+const MAX_REFITS = 5;
 /** Al soltar una hoja arrastrada, termina de pasar si llegó a este ángulo. */
 const DRAG_COMMIT_ANGLE = 60;
 
+/** Reparte el cuaderno en páginas para lo que cabe en cada una (cambia con la pantalla y el tamaño de letra). */
+export type Paginate = (fit: PageFit) => NotebookPage[];
+
 export interface RegistryPanel {
   /** `focus: 'tasks'` abre por la página de las tareas (la tecla T) en vez de por lo último anotado. */
-  open(pages: readonly NotebookPage[], focus?: 'tasks'): void;
+  open(paginate: Paginate, focus?: 'tasks'): void;
   close(): void;
   readonly isOpen: boolean;
   dispose(): void;
@@ -159,14 +167,17 @@ function worldMeta(world: WorldPage): string {
  * Una página de deducción (plan de historia y puzzles, §5.1): el título de la conclusión; si está completa, lo que
  * ahora sé y qué puedo hacer; y sus trozos, los sabidos con ✓ y los que faltan como pregunta con su orientación.
  */
-function deductionContent(deduction: DeductionView): HTMLElement[] {
+function deductionContent(page: Extract<NotebookPage, { kind: 'deduction' }>): HTMLElement[] {
+  const { deduction } = page;
+  const first = page.part === 0;
   const title = node('h3', 'registry-known-title', deduction.title);
   if (deduction.unlocked) title.classList.add('registry-deduction-done');
+  if (!first) title.dataset['sigue'] = 'true';
   const parts: HTMLElement[] = [title];
-  if (deduction.unlocked && deduction.knowLine !== undefined) {
+  if (first && deduction.unlocked && deduction.knowLine !== undefined) {
     parts.push(node('p', 'registry-deduction-know', deduction.knowLine));
   }
-  if (deduction.unlocked && deduction.action !== undefined) {
+  if (first && deduction.unlocked && deduction.action !== undefined) {
     const action = node('p', 'registry-deduction-action');
     action.append(
       node('span', 'registry-deduction-label', `${t('Qué puedo hacer ahora')}: `),
@@ -182,7 +193,7 @@ function deductionContent(deduction: DeductionView): HTMLElement[] {
     ),
   );
   const list = node('ul', 'registry-facts');
-  for (const piece of deduction.pieces) {
+  for (const piece of page.pieces) {
     const item = node('li', piece.met ? 'registry-piece' : 'registry-piece registry-piece-missing');
     item.append(node('span', 'registry-line', `${piece.met ? '✓' : '?'} ${piece.line}`));
     const sketch = piece.sketch === undefined ? undefined : sketchFigure(piece.sketch);
@@ -217,22 +228,25 @@ function pageContent(page: NotebookPage): HTMLElement[] {
         ),
       ];
     case 'known': {
+      const title = node('h3', 'registry-known-title', t('Lo que sé'));
+      if (page.part > 0) title.dataset['sigue'] = 'true';
       const parts: HTMLElement[] = [
-        node('h3', 'registry-known-title', t('Lo que sé')),
+        title,
         node('p', 'registry-summary', t('{total} hechos anotados', { total: page.totalFacts })),
       ];
       const list = node('ul', 'registry-known');
       for (const title of page.conclusions) list.append(node('li', 'registry-known-item', title));
-      if (page.conclusions.length === 0) {
+      if (page.conclusions.length === 0 && page.part === 0) {
         list.append(node('li', 'registry-empty', t('Todavía no sé nada con certeza.')));
       }
       parts.push(list);
       return parts;
     }
     case 'deduction':
-      return deductionContent(page.deduction);
+      return deductionContent(page);
     case 'tasks': {
-      const done = page.items.filter((item) => item.done).length;
+      const title = node('h3', 'registry-known-title', t('Tareas'));
+      if (page.part > 0) title.dataset['sigue'] = 'true';
       const list = node('ul', 'registry-facts registry-tasks');
       for (const item of page.items) {
         const row = node('li', 'registry-task');
@@ -246,11 +260,11 @@ function pageContent(page: NotebookPage): HTMLElement[] {
         list.append(row);
       }
       return [
-        node('h3', 'registry-known-title', t('Tareas')),
+        title,
         node(
           'p',
           'registry-count',
-          t('{done} de {total} hechas', { done, total: page.items.length }),
+          t('{done} de {total} hechas', { done: page.done, total: page.total }),
         ),
         list,
       ];
@@ -312,8 +326,10 @@ function pageContent(page: NotebookPage): HTMLElement[] {
         }
         list.append(item);
       }
+      const title = node('h3', 'registry-known-title', t('Bitácora de mundos'));
+      if (page.part > 0) title.dataset['sigue'] = 'true';
       return [
-        node('h3', 'registry-known-title', t('Bitácora de mundos')),
+        title,
         node('p', 'registry-count', t('A cada mundo que encuentro le pego su dibujo.')),
         list,
       ];
@@ -331,7 +347,7 @@ function pageContent(page: NotebookPage): HTMLElement[] {
       }
       const list = node('ul', 'registry-facts');
       for (const fact of page.facts) list.append(node('li', 'registry-fact', fact.line));
-      if (page.part === 0 && page.facts.length === 0) {
+      if (page.part === 0 && page.world.facts.length === 0) {
         list.append(node('li', 'registry-empty', t('Aún no he anotado nada aquí.')));
       }
       parts.push(list);
@@ -383,6 +399,7 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
   next.setAttribute('aria-label', t('Página siguiente'));
   const close = node('button', 'registry-close', t('Cerrar (Esc)'));
   close.type = 'button';
+  close.setAttribute('aria-label', t('Cerrar (Esc)'));
   bar.append(prev, where, next, close);
   backdrop.append(book, bar);
   document.body.append(backdrop);
@@ -390,16 +407,21 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
   const { signal } = abort;
 
   let isOpen = false;
+  let paginate: Paginate = () => [];
+  let layout: BookLayout | null = null;
   let pages: readonly NotebookPage[] = [];
   let leaves: HTMLElement[] = [];
+  let tabs: HTMLElement | null = null;
   /** Hojas pasadas a la izquierda (0 = cerrado por la tapa). */
   let flipped = 0;
   /** En pantallas estrechas: qué página de la doble se ve. */
   let side: 'left' | 'right' = 'right';
   let busy = false;
   let frame = 0;
+  let resizing = 0;
 
-  const narrow = (): boolean => window.innerWidth < NARROW_WIDTH;
+  /** Una sola página a la vista (no caben dos legibles). */
+  const narrow = (): boolean => layout?.single ?? false;
 
   function setAngle(leaf: HTMLElement, angle: number): void {
     leaf.style.transform = `rotateY(${-angle}deg)`;
@@ -421,15 +443,167 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
     shift.style.transform = `translateX(${x}%)`;
   }
 
-  function size(): void {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    const room = height - 120;
-    const bookWidth = narrow()
-      ? 2 * Math.min(width - 32, room * (BOOK_RATIO / 2))
-      : Math.min(width * 0.92, room * BOOK_RATIO);
-    book.style.width = `${Math.round(bookWidth)}px`;
-    book.style.height = `${Math.round(bookWidth / BOOK_RATIO)}px`;
+  /** Mide la pantalla y las escalas de Configuración, y da al libro su tamaño, su letra y sus márgenes. */
+  function applyLayout(): BookLayout {
+    const root = getComputedStyle(document.documentElement);
+    const scale = (name: string): number => {
+      const value = Number.parseFloat(root.getPropertyValue(name));
+      return Number.isFinite(value) && value > 0 ? value : 1;
+    };
+    const uiScale = scale('--ui-scale');
+    const next = bookLayout({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      uiScale,
+      textScale: scale('--text-scale'),
+    });
+    layout = next;
+    const sides = next.chrome === 'sides';
+    backdrop.classList.toggle('registry--sides', sides);
+    book.classList.toggle('registry-book--single', next.single);
+    // Una sola página a la vista: el libro mide una hoja y se recorta (las pestañas sobresalen por el canto).
+    const shown = next.single ? next.pageWidth : 2 * next.pageWidth;
+    book.style.width = `${String(shown)}px`;
+    book.style.height = `${String(next.pageHeight)}px`;
+    const tabWidth = Math.max(26 * uiScale, 0.064 * next.pageWidth);
+    const tabHeight = Math.min(
+      Math.max(72 * uiScale, 0.24 * next.pageWidth),
+      (next.pageHeight * 0.8 - 8) / 2,
+    );
+    book.style.marginLeft = '0';
+    book.style.marginRight = next.single || sides ? `${String(Math.round(tabWidth))}px` : '0';
+    book.style.setProperty('--tab-w', `${tabWidth.toFixed(1)}px`);
+    book.style.setProperty('--tab-h', `${tabHeight.toFixed(1)}px`);
+    book.style.setProperty(
+      '--tab-font',
+      `${Math.max(13 * uiScale, 0.034 * next.pageWidth).toFixed(1)}px`,
+    );
+    const px = (value: number): string => `${value.toFixed(2)}px`;
+    book.style.setProperty('--page-font', px(next.font));
+    book.style.setProperty('--page-line', px(next.line));
+    book.style.setProperty('--pad-x', px(next.padX));
+    book.style.setProperty('--pad-top', px(next.padTop));
+    book.style.setProperty('--pad-bottom', px(next.padBottom));
+    book.style.setProperty('--photo-w', px(next.photoWidth));
+    close.textContent = sides ? '✕' : t('Cerrar (Esc)');
+    // Las pestañas van en el canto del libro; con una sola página, en el canto de la que se ve.
+    if (tabs) (next.single ? book : shift).append(tabs);
+    return next;
+  }
+
+  /** ¿Se sale lo escrito de la página? (se mide la maqueta, no lo pintado: las hojas están giradas en 3D). */
+  function overflows(content: HTMLElement, bottom: number): boolean {
+    const limit = content.clientHeight - bottom + 1;
+    for (const child of content.children) {
+      if (!(child instanceof HTMLElement) || child.classList.contains('registry-page-number')) {
+        continue;
+      }
+      if (child.offsetTop + child.offsetHeight > limit) return true;
+    }
+    return false;
+  }
+
+  /** Cuántas cosas lleva una página: una sola que no cabe no se arregla repartiendo. */
+  function itemsOn(page: NotebookPage | undefined): number {
+    switch (page?.kind) {
+      case 'thread':
+        return page.entries.length;
+      case 'world':
+      case 'learned':
+        return page.facts.length;
+      case 'known':
+        return page.conclusions.length;
+      case 'deduction':
+        return page.pieces.length;
+      case 'tasks':
+        return page.items.length;
+      case 'worlds':
+        return page.worlds.length;
+      default:
+        return 0;
+    }
+  }
+
+  /**
+   * Reparte y pinta con `fit`. Devuelve las hojas que se desbordan y cuántas de ellas apretar más podría arreglar
+   * (las de varios elementos; una sola entrada más larga que la hoja no se arregla repartiendo).
+   */
+  function paintWith(fit: PageFit, padBottom: number): { tight: HTMLElement[]; fixable: number } {
+    pages = paginate(fit);
+    build();
+    const tight: HTMLElement[] = [];
+    let fixable = 0;
+    shift.querySelectorAll<HTMLElement>('.registry-page').forEach((content, index) => {
+      if (!overflows(content, padBottom)) return;
+      // El garabato de adorno es lo primero que se quita si estorba.
+      const doodleArt = content.querySelector('.registry-doodle');
+      if (doodleArt) {
+        doodleArt.remove();
+        if (!overflows(content, padBottom)) return;
+      }
+      tight.push(content);
+      if (itemsOn(pages[index]) > 1) fixable++;
+    });
+    return { tight, fixable };
+  }
+
+  /**
+   * Reparte y pinta; si alguna hoja de varios elementos no cabe, otra vez con menos por página (pocas veces: apretar
+   * de más gasta páginas). Lo que ni así cabe, se desliza dentro de su hoja.
+   */
+  function paginateToFit(): void {
+    const { fit: designFit, padBottom } = layout ?? applyLayout();
+    let fit = designFit;
+    let best = { fit, fixable: Number.POSITIVE_INFINITY };
+    let last = paintWith(fit, padBottom);
+    for (let attempt = 0; last.fixable > 0 && attempt < MAX_REFITS; attempt++) {
+      if (last.fixable < best.fixable) best = { fit, fixable: last.fixable };
+      fit = tighter(fit);
+      last = paintWith(fit, padBottom);
+    }
+    if (last.fixable > best.fixable) {
+      // Apretar no mejoró: se vuelve al mejor reparto.
+      last = paintWith(best.fit, padBottom);
+    }
+    for (const content of last.tight) content.classList.add('registry-page--scroll');
+  }
+
+  /** Coloca el libro abierto por una doble página, sin animación. */
+  function showSpread(target: number): void {
+    flipped = Math.max(0, Math.min(leaves.length, target));
+    leaves.forEach((leaf, k) => {
+      setAngle(leaf, k < flipped ? 180 : 0);
+    });
+    restack();
+    placeShift();
+    writeVisible();
+  }
+
+  /** La pantalla o la letra han cambiado: mismo cuaderno, repartido de nuevo y abierto por donde estaba. */
+  function relayout(force = false): void {
+    const before = layout;
+    const next = applyLayout();
+    const same =
+      before !== null &&
+      before.single === next.single &&
+      Math.abs(before.fit.lines - next.fit.lines) < 0.05 &&
+      Math.abs(before.fit.chars - next.fit.chars) < 0.05;
+    if (same && !force) {
+      placeShift();
+      describe();
+      return;
+    }
+    const shown = visiblePages()[0] ?? 0;
+    const topic = pageTopic(pages[shown]);
+    cancelAnimationFrame(frame);
+    busy = false;
+    drag = null;
+    paginateToFit();
+    // Lo que ya estaba a la vista no se vuelve a escribir delante del jugador.
+    book.classList.add('registry-book--settled');
+    const at = shown === 0 ? 0 : topicPage(pages, topic);
+    if (at > 0) side = at % 2 === 1 ? 'left' : 'right';
+    showSpread(at < 0 ? 1 : spreadOf(at));
   }
 
   /** Las páginas que se ven ahora (para escribir lo nuevo y el texto de abajo). */
@@ -443,7 +617,9 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
 
   function describe(): void {
     const shown = visiblePages().filter((p) => p > 0 && p < pages.length - 1);
-    where.textContent = shown.length === 0 ? '' : `p. ${shown.join('–')}`;
+    // En el modo lateral el sitio es de 44 px: solo los números.
+    const prefix = layout?.chrome === 'sides' ? '' : 'p. ';
+    where.textContent = shown.length === 0 ? '' : `${prefix}${shown.join('–')}`;
     prev.disabled = flipped === 0;
     next.disabled = flipped === leaves.length;
   }
@@ -548,7 +724,9 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
       leaves.push(leaf);
       setAngle(leaf, 0);
     }
-    const tabs = node('div', 'registry-tabs');
+    tabs?.remove();
+    const tabStrip = node('div', 'registry-tabs');
+    tabs = tabStrip;
     const inPrologue = pages.some((page) => page.kind === 'tasks');
     const tabList = inPrologue
       ? ([
@@ -570,14 +748,13 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
         event.stopPropagation();
         goToPage(sectionPage(pages, kind));
       });
-      tabs.append(tab);
+      tabStrip.append(tab);
     }
-    shift.append(tabs);
+    (narrow() ? book : shift).append(tabStrip);
     flipped = 0;
     side = 'right';
     restack();
     placeShift();
-    size();
     describe();
   }
 
@@ -657,7 +834,22 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
     });
   };
   book.addEventListener('pointerup', endDrag, { signal });
-  book.addEventListener('pointercancel', endDrag, { signal });
+  // El navegador se queda el gesto (deslizar dentro de una página larga): la hoja vuelve y no se pasa página.
+  book.addEventListener(
+    'pointercancel',
+    () => {
+      if (!drag) return;
+      const d = drag;
+      drag = null;
+      if (!d.moved || narrow()) return;
+      busy = true;
+      animateLeaf(d.k, d.angle, d.forward ? 0 : 180, () => {
+        restack();
+        busy = false;
+      });
+    },
+    { signal },
+  );
   prev.addEventListener(
     'click',
     () => {
@@ -690,21 +882,32 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
   window.addEventListener(
     'resize',
     () => {
-      if (!isOpen) return;
-      size();
-      placeShift();
-      describe();
+      if (!isOpen || resizing !== 0) return;
+      // Girar el teléfono o esconderse la barra del navegador dispara muchos avisos: uno por fotograma basta.
+      resizing = requestAnimationFrame(() => {
+        resizing = 0;
+        if (isOpen) relayout();
+      });
     },
     { signal },
   );
 
   return {
     open(next, focus) {
-      pages = next;
-      build();
+      paginate = next;
+      // Visible antes de repartir: lo que cabe en cada página se comprueba midiendo lo pintado.
       backdrop.hidden = false;
       isOpen = true;
+      book.classList.remove('registry-book--settled');
+      applyLayout();
+      paginateToFit();
       close.focus({ preventScroll: true });
+      // Si la letra manuscrita aún está llegando, se mide otra vez cuando esté.
+      if (document.fonts.status !== 'loaded') {
+        void document.fonts.ready.then(() => {
+          if (isOpen) relayout(true);
+        });
+      }
       // Se abre por la tapa y pasa sola a la primera página, o a la primera con algo nuevo.
       const fresh = pages.findIndex(
         (page) =>
@@ -713,12 +916,14 @@ export function createRegistryPanel(onClose: () => void, reducedMotion: boolean)
           (page.kind === 'world' && page.fresh),
       );
       flip(1, () => {
-        if (focus === 'tasks') goToPage(sectionPage(pages, 'tasks'));
+        if (focus === 'tasks') goToPage(currentTaskPage(pages));
         else if (fresh > 2) goToPage(fresh);
       });
     },
     close() {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(resizing);
+      resizing = 0;
       busy = false;
       backdrop.hidden = true;
       isOpen = false;

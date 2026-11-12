@@ -687,7 +687,8 @@ body {
   flex: none;
   container-type: inline-size;
   perspective: 2400px;
-  touch-action: none;
+  /* Vertical es del navegador (deslizar dentro de una hoja larga); horizontal, de las hojas que giran. */
+  touch-action: pan-y;
   user-select: none;
   animation: bookIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -748,13 +749,13 @@ body {
     repeating-linear-gradient(
       to bottom,
       transparent 0,
-      transparent calc(2.3cqi - 1px),
-      var(--paper-ruled) calc(2.3cqi - 1px),
-      var(--paper-ruled) 2.3cqi
+      transparent calc(var(--page-line, 2.3cqi) - 1px),
+      var(--paper-ruled) calc(var(--page-line, 2.3cqi) - 1px),
+      var(--paper-ruled) var(--page-line, 2.3cqi)
     );
   background-position:
     0 0,
-    0 4.6cqi;
+    0 var(--pad-top, 4.6cqi);
   color: var(--ink);
 }
 .registry-face.cover {
@@ -774,11 +775,27 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
-  padding: 5.5cqi 4.6cqi 4.6cqi 5cqi;
-  font: 500 max(15px, 2.05cqi)/1.15 var(--f-hand);
+  /* El tamaño, la letra y los márgenes los pone registry/bookLayout.ts según la pantalla (ui/registryPanel.ts). */
+  padding: var(--pad-top, 5.5cqi) var(--pad-x, 4.6cqi) var(--pad-bottom, 4.6cqi)
+    calc(var(--pad-x, 4.6cqi) * 1.08);
+  font: 500 var(--page-font, max(15px, 2.05cqi))/1.15 var(--f-hand);
+  overflow-wrap: anywhere;
 }
 .back .registry-page {
-  padding: 5.5cqi 5cqi 4.6cqi 4.6cqi;
+  padding: var(--pad-top, 5.5cqi) calc(var(--pad-x, 4.6cqi) * 1.08) var(--pad-bottom, 4.6cqi)
+    var(--pad-x, 4.6cqi);
+}
+/* Una sola entrada más larga que la página: se desliza dentro de su hoja (el resto se reparte en más páginas). */
+.registry-page--scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--ink-rgb) / 40%) transparent;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 2.2em), transparent);
+}
+.registry-page--scroll .registry-page-number {
+  display: none;
 }
 .registry-page h3 {
   margin: 0;
@@ -798,6 +815,11 @@ body {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+/* La raya a lápiz sobre cada pregunta: su aire va con la letra, no con la pantalla. */
+.registry-thread {
+  margin-top: 0.25em;
+  padding-top: 0.5em;
 }
 .registry-count,
 .registry-summary {
@@ -910,7 +932,9 @@ body {
   filter: none;
 }
 .registry-doodle {
+  display: block;
   width: 55%;
+  margin-inline: auto;
   margin-top: auto;
   align-self: center;
   fill: none;
@@ -924,15 +948,15 @@ body {
 }
 .registry-page-number {
   position: absolute;
-  bottom: 2.4cqi;
+  bottom: calc(var(--pad-bottom, 4.6cqi) * 0.3);
   font-size: 0.8em;
   opacity: 0.55;
 }
 .front .registry-page-number {
-  right: 3.4cqi;
+  right: calc(var(--pad-x, 4.6cqi) * 0.75);
 }
 .back .registry-page-number {
-  left: 3.4cqi;
+  left: calc(var(--pad-x, 4.6cqi) * 0.75);
 }
 .registry-cover-label {
   margin: auto;
@@ -971,7 +995,8 @@ body {
 }
 .registry-photo {
   position: relative;
-  width: 72%;
+  flex: none;
+  width: var(--photo-w, 72%);
   margin: 0.4em 0 0;
   align-self: center;
   padding: 0.7cqi 0.7cqi 1.8cqi;
@@ -1011,23 +1036,26 @@ body {
 .entry-new.written {
   animation: write 1.8s steps(36) 0.25s forwards;
 }
+/* El cuaderno se repartió de nuevo estando abierto (cambió la pantalla): lo que ya estaba no se reescribe. */
+.registry-book--settled .entry-new {
+  clip-path: none;
+  animation: none;
+}
 .registry-tabs {
   position: absolute;
   top: 10%;
-  right: -3.2cqi;
+  right: calc(-1 * var(--tab-w, 3.2cqi));
   display: grid;
-  gap: 0.8cqi;
-  width: 3.2cqi;
-  min-width: 26px;
+  gap: 8px;
+  width: var(--tab-w, 3.2cqi);
 }
 .registry-tab {
-  height: 12cqi;
-  min-height: 72px;
+  height: var(--tab-h, 12cqi);
   padding: 0;
   border: 0;
   border-radius: 0 0.6cqi 0.6cqi 0;
   writing-mode: vertical-rl;
-  font: 700 max(13px, 1.7cqi)/1 var(--f-hand);
+  font: 700 var(--tab-font, max(13px, 1.7cqi))/1 var(--f-hand);
   color: var(--on-glow);
   box-shadow: 0 0 10px rgb(var(--glow-rgb) / 25%);
   cursor: pointer;
@@ -1066,10 +1094,57 @@ body {
   margin-top: 0;
   padding: 6px 18px;
 }
-@media (max-width: 639px) {
-  .registry-tabs {
-    display: none;
-  }
+/* Una sola página a la vista: las pestañas van en el canto de la que se ve (el centro del libro más media hoja). */
+.registry-book--single {
+  clip-path: inset(0 calc(-1 * var(--tab-w, 26px)) 0 0);
+}
+.registry-book--single .registry-shift {
+  inset: 0 auto 0 -50%;
+  width: 200%;
+}
+.registry-book--single > .registry-tabs {
+  z-index: 200;
+}
+/* Pantalla baja (un teléfono de lado): el libro ocupa todo el alto y las flechas y Cerrar van a los lados. */
+.registry--sides {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: auto 1fr auto;
+  place-content: center;
+  place-items: center;
+  gap: 0 10px;
+  padding: 8px;
+}
+.registry--sides .registry-bar {
+  display: contents;
+}
+.registry--sides .registry-book {
+  grid-area: 1 / 2 / 4 / 3;
+}
+.registry--sides .registry-turn,
+.registry--sides .registry-close {
+  z-index: 1;
+  background: rgb(6 12 10 / 80%);
+}
+.registry--sides .registry-turn:first-child {
+  grid-area: 1 / 1 / 4 / 2;
+}
+.registry--sides .registry-turn:nth-child(3) {
+  grid-area: 2 / 3;
+}
+.registry--sides .registry-close {
+  grid-area: 1 / 3;
+  align-self: start;
+  width: 44px;
+  padding: 0;
+}
+.registry--sides .registry-where {
+  grid-area: 3 / 3;
+  align-self: end;
+  min-width: 0;
+  font-size: 15px;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px #000;
 }
 
 /* ---------- En partida: reloj, aviso, nota, cuaderno, cartel ---------- */
