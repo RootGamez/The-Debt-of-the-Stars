@@ -1,6 +1,7 @@
-// La estrella como un cuerpo modelado, igual que los planetas: una icosfera facetada con un color por cara
-// (granulación y manchas), el borde oscurecido, una corona de dos cáscaras de luz y protuberancias que laten.
-// Es el cuerpo que se ve; la luz que da es la PointLight del escenario (ver `stage.ts`).
+// La estrella como un cuerpo modelado: una icosfera facetada (granulación y manchas por cara, muy suaves), una
+// corona pegada al borde, un resplandor alrededor (el «bloom» que hace que un sol parezca un sol) y protuberancias
+// que laten. Como en Outer Wilds, el disco se ve quemado: casi liso y brillante, sin corteza. Es solo lo que se ve;
+// la luz que da es la PointLight del escenario (ver `stage.ts`), y nada de esto ilumina el sistema.
 import {
   AdditiveBlending,
   BackSide,
@@ -12,6 +13,7 @@ import {
   IcosahedronGeometry,
   Mesh,
   MeshBasicMaterial,
+  PlaneGeometry,
   ShaderMaterial,
   SphereGeometry,
   TubeGeometry,
@@ -23,11 +25,62 @@ import type { StarSpec } from '../system/systemData';
 import { prominenceSites, starSurfaceAt, starSurfaceNoise } from './starSurface';
 
 const SURFACE_DETAIL = 22;
-const SPOT_DARKNESS = 0.22;
+/** Las manchas apenas oscurecen: una estrella no tiene corteza, a ojo se queda en un brillo casi liso. */
+const SPOT_DARKNESS = 0.8;
 const GRANULE_CONTRAST = 0.3;
-const CORONA_SCALES: readonly [number, number] = [1.12, 1.45];
+const CORONA_SCALE = 1.1;
 const PROMINENCE_COUNT: Record<StarSpec['kind'], number> = { solar: 4, enana_roja: 7, lejana: 2 };
 const TWO_PI = Math.PI * 2;
+
+/** Cómo se ve cada tipo de estrella: el disco quemado, su borde y el resplandor de alrededor. */
+interface StarLook {
+  /** Color del centro del disco (casi blanco: la estrella satura la vista). */
+  core: number;
+  /** Color hacia el borde del disco, donde se ve su tinte. */
+  edge: number;
+  /** Cuánto emite el disco antes de la exposición (1 − e^(−x)): más alto, más quemado. */
+  exposure: number;
+  /** Cuánto se nota la granulación (0 = disco liso). */
+  detail: number;
+  /** Color del resplandor. */
+  glare: number;
+  /** Tamaño del resplandor en radios de la estrella. */
+  glareSize: number;
+  /** Brillo del resplandor junto al disco. */
+  glareStrength: number;
+}
+
+// Las enanas rojas a ojo no son rojas: se ven blanco anaranjado (rondan los 3000 K). Su tinte sale en el borde y
+// en el resplandor; el centro se quema hacia un ámbar pálido.
+const LOOKS: Record<StarSpec['kind'], StarLook> = {
+  solar: {
+    core: 0xfffdf4,
+    edge: 0xffe6a8,
+    exposure: 5,
+    detail: 0.3,
+    glare: 0xfff0d0,
+    glareSize: 8,
+    glareStrength: 1.3,
+  },
+  enana_roja: {
+    core: 0xffdcae,
+    edge: 0xff6a24,
+    exposure: 4.5,
+    detail: 0.4,
+    glare: 0xff7a34,
+    glareSize: 8,
+    glareStrength: 1.6,
+  },
+  lejana: {
+    core: 0xfff8ea,
+    edge: 0xffd296,
+    exposure: 4.5,
+    detail: 0.3,
+    glare: 0xffe2b8,
+    glareSize: 7,
+    glareStrength: 1.2,
+  },
+};
 
 export interface StarView {
   readonly object: Group;
@@ -52,17 +105,54 @@ void main() {
   gl_Position = projectionMatrix * mv;
 }`;
 
+// La superficie emite: no la toca ninguna luz y no ilumina nada. Del centro (casi blanco) al borde (el tinte de
+// la estrella) sin oscurecerse del todo; la granulación de cada cara solo hace titilar el brillo. La exposición
+// (1 − e^(−x)) quema el disco sin recortar los canales de golpe.
 const SURFACE_FRAGMENT = /* glsl */ `
 uniform float uTime;
+uniform vec3 uCore;
+uniform vec3 uEdge;
+uniform float uExposure;
+uniform float uDetail;
+uniform float uBaseLum;
 varying vec3 vColor;
 varying float vPulse;
 varying vec3 vNormalView;
 varying vec3 vViewDir;
 void main() {
   float facing = clamp(dot(normalize(vNormalView), normalize(vViewDir)), 0.0, 1.0);
-  float limb = mix(0.45, 1.0, pow(facing, 0.55));
-  float beat = 1.0 + 0.07 * sin(uTime * 0.7 + vPulse * 6.2831);
-  gl_FragColor = vec4(vColor * limb * beat, 1.0);
+  float lum = dot(vColor, vec3(0.2126, 0.7152, 0.0722)) / uBaseLum;
+  float beat = 1.0 + 0.08 * sin(uTime * 0.9 + vPulse * 6.2831);
+  float detail = mix(1.0, lum * beat, uDetail);
+  vec3 tint = mix(uEdge, uCore, pow(facing, 0.6));
+  vec3 emitted = tint * mix(0.45, 1.0, pow(facing, 0.5)) * detail * uExposure;
+  gl_FragColor = vec4(1.0 - exp(-emitted), 1.0);
+}`;
+
+// El resplandor: un cuadrado que siempre mira a la cámara, con una caída suave alrededor del disco. Hace las veces
+// del «bloom» (el juego no tiene posproceso). Se dibuja con prueba de profundidad: lo tapa lo que está delante.
+const GLARE_VERTEX = /* glsl */ `
+varying vec2 vOffset;
+void main() {
+  vOffset = position.xy;
+  vec4 center = modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0);
+  float scale = length(modelMatrix[0].xyz);
+  gl_Position = projectionMatrix * (center + vec4(position.xy * scale, 0.0, 0.0));
+}`;
+
+const GLARE_FRAGMENT = /* glsl */ `
+uniform vec3 uColor;
+uniform float uStrength;
+uniform float uRadius;
+uniform float uSize;
+varying vec2 vOffset;
+void main() {
+  float r = length(vOffset) / uRadius;
+  if (r > uSize) discard;
+  float x = max(r - 1.0, 0.0);
+  float halo = 0.55 / (1.0 + 6.0 * x * x) + 0.45 * exp(-1.1 * x);
+  float fade = 1.0 - smoothstep(uSize * 0.55, uSize, r);
+  gl_FragColor = vec4(uColor * halo * fade * uStrength, 1.0);
 }`;
 
 const GLOW_FRAGMENT = /* glsl */ `
@@ -160,11 +250,20 @@ export function createStarView(spec: StarSpec, seed = 11): StarView {
   const object = new Group();
   object.name = spec.kind === 'enana_roja' ? 'La Brasa' : 'Estrella';
 
+  const look = LOOKS[spec.kind];
+  const base = new Color(spec.surfaceColor);
   const uTime = { value: 0 };
   const surface = new Mesh(
     surfaceGeometry(spec, seed),
     new ShaderMaterial({
-      uniforms: { uTime },
+      uniforms: {
+        uTime,
+        uCore: { value: new Color(look.core) },
+        uEdge: { value: new Color(look.edge) },
+        uExposure: { value: look.exposure },
+        uDetail: { value: look.detail },
+        uBaseLum: { value: Math.max(1e-3, 0.2126 * base.r + 0.7152 * base.g + 0.0722 * base.b) },
+      },
       vertexShader: SURFACE_VERTEX,
       fragmentShader: SURFACE_FRAGMENT,
       toneMapped: false,
@@ -176,11 +275,28 @@ export function createStarView(spec: StarSpec, seed = 11): StarView {
 
   const light = new Color(spec.lightColor);
   const glow = new Color(spec.surfaceColor).lerp(light, 0.5);
-  const shells = [
-    glowShell(spec.radius * CORONA_SCALES[0], glow, 2.2, 1.7),
-    glowShell(spec.radius * CORONA_SCALES[1], glow, 3.4, 0.8),
-  ];
-  for (const shell of shells) object.add(shell);
+  object.add(glowShell(spec.radius * CORONA_SCALE, new Color(look.glare), 2.4, 1.8));
+
+  const glareSize = spec.radius * look.glareSize;
+  const glare = new Mesh(
+    new PlaneGeometry(glareSize * 2, glareSize * 2),
+    new ShaderMaterial({
+      uniforms: {
+        uColor: { value: new Color(look.glare) },
+        uStrength: { value: look.glareStrength },
+        uRadius: { value: spec.radius },
+        uSize: { value: look.glareSize },
+      },
+      vertexShader: GLARE_VERTEX,
+      fragmentShader: GLARE_FRAGMENT,
+      transparent: true,
+      blending: AdditiveBlending,
+      depthWrite: false,
+      toneMapped: false,
+    }),
+  );
+  glare.name = 'Resplandor';
+  object.add(glare);
 
   // Protuberancias: arcos de luz que se levantan del borde y laten (en las enanas rojas, más y más grandes).
   const arcMaterial = new MeshBasicMaterial({
