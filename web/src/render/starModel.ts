@@ -28,6 +28,22 @@ const GRANULE_CONTRAST = 0.3;
 const CORONA_SCALES: readonly [number, number] = [1.12, 1.45];
 const PROMINENCE_COUNT: Record<StarSpec['kind'], number> = { solar: 4, enana_roja: 7, lejana: 2 };
 const TWO_PI = Math.PI * 2;
+/**
+ * Cuánto emite la superficie (antes de la exposición del sombreador): más alto, más «quemada». Las estrellas
+ * blancas se queman casi del todo, como el Sol a ojo; la enana roja guarda su granulación y sus manchas.
+ */
+const SURFACE_EXPOSURE: Record<StarSpec['kind'], number> = { solar: 4, enana_roja: 2, lejana: 3 };
+/** Cuánto se acerca el centro del disco al color caliente (0 = nada, 1 = del todo). */
+const CORE_MIX = 0.8;
+/**
+ * El color del centro del disco, el más caliente: sube de tono hacia el amarillo sin perder saturación (mezclar
+ * con blanco la dejaría rosa pálido). La enana roja arde ámbar por dentro y roja en el borde.
+ */
+const CORE_COLOR: Record<StarSpec['kind'], number> = {
+  solar: 0xfffbe8,
+  enana_roja: 0xffa43a,
+  lejana: 0xfff0cc,
+};
 
 export interface StarView {
   readonly object: Group;
@@ -52,17 +68,26 @@ void main() {
   gl_Position = projectionMatrix * mv;
 }`;
 
+// La superficie emite: no la toca ninguna luz, así que su brillo es solo el de este sombreador y no ilumina
+// nada (la luz del sistema sigue siendo la PointLight). El centro del disco se quema hacia su color más caliente
+// (CORE_COLOR) y el borde conserva el de la superficie, como una estrella real vista a ojo; la exposición
+// (1 − e^(−x)) satura sin recortar los canales, así que la granulación se sigue viendo.
 const SURFACE_FRAGMENT = /* glsl */ `
 uniform float uTime;
+uniform vec3 uCore;
+uniform float uExposure;
+uniform float uCoreMix;
 varying vec3 vColor;
 varying float vPulse;
 varying vec3 vNormalView;
 varying vec3 vViewDir;
 void main() {
   float facing = clamp(dot(normalize(vNormalView), normalize(vViewDir)), 0.0, 1.0);
-  float limb = mix(0.45, 1.0, pow(facing, 0.55));
+  float limb = mix(0.3, 1.0, pow(facing, 0.6));
   float beat = 1.0 + 0.07 * sin(uTime * 0.7 + vPulse * 6.2831);
-  gl_FragColor = vec4(vColor * limb * beat, 1.0);
+  vec3 hot = mix(vColor, uCore, uCoreMix * pow(facing, 2.2) * smoothstep(0.05, 0.35, vColor.r));
+  vec3 emitted = hot * limb * beat * uExposure;
+  gl_FragColor = vec4(1.0 - exp(-emitted), 1.0);
 }`;
 
 const GLOW_FRAGMENT = /* glsl */ `
@@ -164,7 +189,12 @@ export function createStarView(spec: StarSpec, seed = 11): StarView {
   const surface = new Mesh(
     surfaceGeometry(spec, seed),
     new ShaderMaterial({
-      uniforms: { uTime },
+      uniforms: {
+        uTime,
+        uCore: { value: new Color(CORE_COLOR[spec.kind]) },
+        uExposure: { value: SURFACE_EXPOSURE[spec.kind] },
+        uCoreMix: { value: CORE_MIX },
+      },
       vertexShader: SURFACE_VERTEX,
       fragmentShader: SURFACE_FRAGMENT,
       toneMapped: false,
@@ -177,7 +207,7 @@ export function createStarView(spec: StarSpec, seed = 11): StarView {
   const light = new Color(spec.lightColor);
   const glow = new Color(spec.surfaceColor).lerp(light, 0.5);
   const shells = [
-    glowShell(spec.radius * CORONA_SCALES[0], glow, 2.2, 1.7),
+    glowShell(spec.radius * CORONA_SCALES[0], glow, 2.8, 2.6),
     glowShell(spec.radius * CORONA_SCALES[1], glow, 3.4, 0.8),
   ];
   for (const shell of shells) object.add(shell);
