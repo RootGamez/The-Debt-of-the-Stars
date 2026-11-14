@@ -11,7 +11,11 @@ export const LABORATORIO_ID = 'laboratorio';
 export const LAB_RADIUS = 25;
 export const LAB_INNER_RADIUS = 21;
 export const LAB_GRAVITY = 0.3;
-export const LAB_CLOCK = 0.2;
+/**
+ * El ritmo del Nudo mismo (E2; antes 0,20, el Sitio Lento). El del Laboratorio (×5) no es del mundo: lo pone la
+ * burbuja del Contrapeso mientras espera en su Banco (game/counterweight.ts); si se lo llevan, queda este.
+ */
+export const NUDO_CLOCK = 1;
 const OUTER_RELIEF = 0.05;
 const OUTER_FREQUENCY = 1.9;
 const INNER_RELIEF = 0.02;

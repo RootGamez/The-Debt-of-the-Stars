@@ -1,13 +1,13 @@
 // Los lectores que enseñan la cuenta del Contrapeso (Fase 10, hito 10A): los diarios de los gemelos (una regla de
-// tres guiada), la consola de la Cabina (relojes en vivo, uno casi quieto) y la pizarra del Laboratorio (la ruta
-// tramo a tramo). Rótulos neutros y cortos: los textos de verdad son de Anthony. Lógica en reading/puzzles.ts.
+// tres guiada), la consola de la Cabina (relojes en vivo, uno que se dispara: E2) y la pizarra del Laboratorio (la
+// ruta tramo a tramo). Rótulos neutros y cortos: los textos de verdad son de Anthony. Lógica en reading/puzzles.ts.
 import { CONSOLE_CLOCKS, CONSOLE_MINUTES_PER_SECOND, ROUTE, TWINS } from '../data/puzzles';
 import {
   consoleReadings,
+  fastestClock,
   formatDrift,
   formatMinutesSeconds,
   routeDrift,
-  slowestClock,
   twins,
 } from '../reading/puzzles';
 import { choiceQuestion, element, row } from './puzzleKit';
@@ -105,21 +105,21 @@ export function consoleBody(
     element('p', 'puzzle-hint', t('Todos los relojes se igualaron a la vez. Míralos correr.')),
     list,
   );
-  const slowest = slowestClock(CONSOLE_CLOCKS);
-  if (!solved && slowest) {
+  const fastest = fastestClock(CONSOLE_CLOCKS);
+  if (!solved && fastest) {
     body.append(
       choiceQuestion(
         {
-          prompt: t('¿Qué destino se queda atrás más deprisa?'),
+          prompt: t('¿Qué destino se adelanta más deprisa?'),
           options: CONSOLE_CLOCKS.map((c) => c.id),
-          answer: slowest,
+          answer: fastest,
           label: (id) => CONSOLE_CLOCKS.find((c) => c.id === id)?.label ?? id,
-          wrong: t('Ese corre más: espera un poco y compáralos otra vez.'),
+          wrong: t('Ese corre menos: espera un poco y compáralos otra vez.'),
         },
         status,
         () => {
           status.textContent = t(
-            'La ruta sin nombre casi no avanza: allí el tiempo apenas corre. Lo que se ve de ella hay que corregirlo.',
+            'La ruta sin nombre se dispara: allí el tiempo corre deprisa. Lo que se ve de ella hay que corregirlo.',
           );
           onSolved();
         },
@@ -175,7 +175,7 @@ export function routeBody(solved: boolean, status: HTMLElement, onSolved: () => 
         options: route.step.options,
         answer: route.drift,
         label: formatDrift,
-        wrong: t('Cuenta todos los tramos: en unos se atrasa y en otros se adelanta.'),
+        wrong: t('Cuenta todos los tramos, no solo el primero: cada uno lo adelanta un poco más.'),
       },
       status,
       () => {

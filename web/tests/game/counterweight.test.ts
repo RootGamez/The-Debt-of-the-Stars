@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { BUBBLE } from '../../src/data/bubble';
 import {
   atPulse,
+  carrierBubble,
   COUNTERWEIGHT,
   COUNTERWEIGHT_START,
   driftFrom,
@@ -11,6 +13,8 @@ import {
   shownTime,
   tickCounterweight,
   turnWheel,
+  worldBubble,
+  type CounterweightPlace,
   type CounterweightState,
 } from '../../src/game/counterweight';
 
@@ -25,13 +29,22 @@ function ready(clock: number): CounterweightState {
   return placeInCradle(removeMotor(pickUp({ ...COUNTERWEIGHT_START, clock }), 100, PULSE));
 }
 
+const PLACES: readonly CounterweightPlace[] = [
+  'bench',
+  'carried',
+  'cradle',
+  'installed',
+  'rejected',
+];
+
 describe('the clock of the Counterweight', () => {
   it('runs at the rate of wherever it is', () => {
-    const onBench = tickCounterweight(COUNTERWEIGHT_START, 100, 0.2);
-    const carried = tickCounterweight(pickUp(onBench), 50, 1);
+    // E2: en su Banco el Laboratorio ya no va a 0,20 sino a 5 (su burbuja); llevado, a tu ritmo con la burbuja.
+    const onBench = tickCounterweight(COUNTERWEIGHT_START, 100, 5);
+    const carried = tickCounterweight(pickUp(onBench), 50, 2.5);
 
-    expect(onBench.clock).toBeCloseTo(20);
-    expect(carried.clock).toBeCloseTo(70);
+    expect(onBench.clock).toBeCloseTo(500);
+    expect(carried.clock).toBeCloseTo(625);
     expect(COUNTERWEIGHT_START.clock).toBe(0); // no cambia el de antes
   });
 
@@ -41,6 +54,31 @@ describe('the clock of the Counterweight', () => {
     expect(tickCounterweight(installed, 10, 1)).toBe(installed);
     expect(tickCounterweight(COUNTERWEIGHT_START, -1, 1)).toBe(COUNTERWEIGHT_START);
     expect(tickCounterweight(COUNTERWEIGHT_START, 1, Number.NaN)).toBe(COUNTERWEIGHT_START);
+  });
+});
+
+describe('the bubble of the Counterweight (E2: time runs fast around it)', () => {
+  it('keeps the numbers of the bible: ×5 on its bench, ×2,5 carried (🟡)', () => {
+    expect(BUBBLE).toEqual({ bench: 5, carried: 2.5 });
+  });
+
+  it('makes the Laboratorio run five times faster while it waits on its bench', () => {
+    expect(worldBubble('bench', COUNTERWEIGHT.world)).toBe(BUBBLE.bench);
+    expect(worldBubble('bench', 'umbral')).toBe(1);
+    expect(worldBubble('bench', COUNTERWEIGHT.installWorld)).toBe(1);
+  });
+
+  it('gives the Laboratorio back the rate of the Nudo once it leaves its bench', () => {
+    for (const place of PLACES.filter((p) => p !== 'bench')) {
+      expect(worldBubble(place, COUNTERWEIGHT.world), place).toBe(1);
+    }
+  });
+
+  it('goes with whoever carries it, in the arms or in the ship', () => {
+    expect(carrierBubble('carried')).toBe(BUBBLE.carried);
+    for (const place of PLACES.filter((p) => p !== 'carried')) {
+      expect(carrierBubble(place), place).toBe(1);
+    }
   });
 });
 

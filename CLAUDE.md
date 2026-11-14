@@ -70,6 +70,7 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 
 - Modo B (✅ Anthony): el tiempo real es el del jugador; en mundos lentos el reloj de Umbral corre más rápido (`src/data/loop.ts`, `TIME_MODE`).
 - La cronología (eventos, absorción, curvas de reloj) está en `web/src/data/cronologia.json`: se ajusta ahí, sin tocar código.
+- La burbuja del Contrapeso (E2 de `docs/plan-finales.md`; 🟡 los números en `data/bubble.ts`): con él en su Banco el Laboratorio corre ×5 (el mundo marca el del Nudo, `NUDO_CLOCK` 1) y llevándolo tu reloj corre ×2,5 en cualquier sitio. La regla está en `game/counterweight.ts` (`worldBubble`, `carrierBubble`) y la lee `system/locator.ts` (`ClockBubble`); las piezas `ANIM_` con `bubble` giran a su ritmo.
 - El guardado (`bucle-tiempo:partida` en localStorage) solo guarda ciclos y hechos; se valida al leerlo.
 
 ## Marcas de los mundos

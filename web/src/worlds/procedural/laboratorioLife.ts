@@ -117,7 +117,7 @@ function mediciones(b: LabBuilder): void {
       }
     }
   }
-  // Dos relojes de pared: «Dentro» y «Fuera». El de fuera va cinco veces más deprisa.
+  // Dos relojes de pared: «Dentro» y «Fuera». E2: el de dentro va cinco veces más deprisa (antes, el de fuera).
   [-1.1, 1.1].forEach((x, k) => {
     b.view(
       s,
@@ -126,7 +126,7 @@ function mediciones(b: LabBuilder): void {
       f.at([x, -2.85, z + 1.8], [Math.PI / 2, 0, 0], [1, 1, 0.05]),
     );
     b.view(s, P.brass, torus(0.46, 0.035, 20, 4), f.at([x, -2.82, z + 1.8]));
-    const hand = k === 0 ? 0.4 : 2.0;
+    const hand = k === 0 ? 2.0 : 0.4;
     b.view(
       s,
       P.board,

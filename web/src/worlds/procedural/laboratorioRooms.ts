@@ -184,7 +184,7 @@ function investigadora(b: LabBuilder): void {
   const z = FLOOR;
   b.platform(f, 5.5, 4.5);
   b.table(f, 0, -0.9);
-  // Silla echada hacia atrás, papeles, lámpara y el reloj de mesa con la aguja casi quieta.
+  // Silla echada hacia atrás, papeles, lámpara y el reloj de mesa (su aguja sigue a la burbuja del Contrapeso).
   b.solid(s, P.wood, box(), f.at([0.2, 0.1, z + 0.5], [0, 0, 0.3], [0.5, 0.5, 0.06]));
   b.view(s, P.wood, box(), f.at([0.3, 0.35, z + 0.85], [0.15, 0, 0.3], [0.5, 0.06, 0.6]));
   b.papers(f, -0.6, -1.0, z + 0.83, 4);
@@ -213,6 +213,7 @@ function investigadora(b: LabBuilder): void {
       ),
     );
   }
+  // La aguja gira con la burbuja del Contrapeso (E2): deprisa mientras está en su Banco; si se lo llevan, se calma.
   b.spinning(
     'ANIM_reloj_mesa',
     f.point([clock[0], clock[1], clock[2] + 0.04]),
@@ -227,6 +228,7 @@ function investigadora(b: LabBuilder): void {
         { solid: false },
       );
     },
+    true,
   );
   // Estantería con libros y cuadernos.
   b.solid(s, P.wood, box(), f.at([-2.2, -1.2, z + 0.9], undefined, [0.5, 1.4, 1.8]));

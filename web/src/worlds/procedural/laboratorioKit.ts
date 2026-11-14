@@ -86,13 +86,17 @@ export class LabBuilder {
     this.markers.push(marker(name, f.point(at), f.rotation(), props));
   }
 
-  /** Una pieza que gira (ANIM_) puesta en `matrix` (su Y local es el eje de giro). */
+  /**
+   * Una pieza que gira (ANIM_) puesta en `matrix` (su Y local es el eje de giro). Con `bubble`, gira al ritmo de
+   * la burbuja del Contrapeso (E2).
+   */
   spinning(
     name: string,
     position: Vector3,
     rotation: Quaternion,
     spin: number,
     build: (set: PieceSet) => void,
+    bubble = false,
   ): void {
     const set = new PieceSet(this.extras.length + 95);
     build(set);
@@ -101,6 +105,7 @@ export class LabBuilder {
     group.position.copy(position);
     group.quaternion.copy(rotation).multiply(Y_UP);
     group.userData.spin = spin;
+    if (bubble) group.userData.bubble = true;
     group.add(...piecesToMeshes(set, this.materials, `laboratorio_${name.slice('ANIM_'.length)}`));
     this.extras.push(group);
   }

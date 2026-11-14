@@ -148,6 +148,18 @@ describe('recordings', () => {
     expect(clues.sourceById.get('cicatriz.grabacion')?.recordedRate).toBe(0.2);
   });
 
+  it('keep a fast clock too (recorded inside the bubble of the Counterweight, E2)', () => {
+    const clues = parse(withRecording((s) => (s.reloj = 5)));
+
+    expect(clues.sourceById.get('cicatriz.grabacion')?.recordedRate).toBe(5);
+  });
+
+  it.each([10, 0.1])('reject a clock %s the speed wheel cannot undo', (reloj) => {
+    expect(() => parse(withRecording((s) => (s.reloj = reloj)))).toThrow(
+      /cicatriz\.grabacion.*reloj/,
+    );
+  });
+
   it('other sources have no clock rate', () => {
     expect(parse().sourceById.get('umbral.placa')?.recordedRate).toBeUndefined();
   });

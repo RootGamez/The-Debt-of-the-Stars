@@ -73,7 +73,8 @@ describe('Laboratorio world contract', () => {
       id: 'laboratorio',
       radius: 25,
       gravity: 0.3,
-      clockRate: 0.2,
+      // E2: el mundo marca el ritmo del Nudo; el 5 del Laboratorio lo pone la burbuja del Contrapeso (antes 0,20).
+      clockRate: 1,
       ambient: { color: 0xa8b8a8, intensity: 1.4 },
       innerRadius: 21,
       cavityTide: 'semilla',
@@ -158,6 +159,12 @@ describe('Laboratorio life', () => {
       ]),
     );
     for (const part of world.markers.animated) expect(part.spin).toBeGreaterThan(0);
+  });
+
+  it('turns the desk clock at the pace of the bubble, and only the desk clock (E2)', () => {
+    const inBubble = world.markers.animated.filter((a) => a.bubble).map((a) => a.object.name);
+
+    expect(inBubble).toEqual(['ANIM_reloj_mesa']);
   });
 
   it('keeps the floor flat under every room, so nothing sticks out or floats', () => {

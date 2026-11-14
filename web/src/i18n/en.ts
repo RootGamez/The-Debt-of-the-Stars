@@ -286,19 +286,19 @@ export const EN: Readonly<Record<string, string>> = {
     'Look at the storm: the same day, counted in both diaries.',
   'Todos los relojes se igualaron a la vez. Míralos correr.':
     'All the clocks were set equal at the same moment. Watch them run.',
-  '¿Qué destino se queda atrás más deprisa?': 'Which destination falls behind fastest?',
-  'Ese corre más: espera un poco y compáralos otra vez.':
-    'That one runs faster: wait a little and compare them again.',
-  'La ruta sin nombre casi no avanza: allí el tiempo apenas corre. Lo que se ve de ella hay que corregirlo.':
-    'The nameless route barely advances: time hardly runs there. What you see of it has to be corrected.',
+  '¿Qué destino se adelanta más deprisa?': 'Which destination gets ahead fastest?',
+  'Ese corre menos: espera un poco y compáralos otra vez.':
+    'That one runs slower: wait a little and compare them again.',
+  'La ruta sin nombre se dispara: allí el tiempo corre deprisa. Lo que se ve de ella hay que corregirlo.':
+    'The nameless route races ahead: time runs fast there. What you see of it has to be corrected.',
   Tramo: 'Leg',
   Minutos: 'Minutes',
   'El Contrapeso marca': 'The Counterweight reads',
   'La máquina marca': 'The machine reads',
   'Al llegar, ¿cómo va el Contrapeso respecto a la máquina?':
     'On arrival, how does the Counterweight stand against the machine?',
-  'Cuenta todos los tramos: en unos se atrasa y en otros se adelanta.':
-    'Count every leg: on some it falls behind and on others it gets ahead.',
+  'Cuenta todos los tramos, no solo el primero: cada uno lo adelanta un poco más.':
+    'Count every leg, not just the first: each one puts it a little further ahead.',
   'El anillo de la Pista no se enciende con su reloj desajustado. Gira las ruedas hasta que marque la hora del Taller.':
     'The Track ring will not light with its clock out of step. Turn the wheels until it shows the Workshop time.',
   'El Taller': 'The Workshop',

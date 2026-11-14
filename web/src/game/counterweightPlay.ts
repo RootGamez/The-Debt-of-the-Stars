@@ -1,12 +1,14 @@
-// El Contrapeso en juego (Fase 10, hitos 10B y 10C): su estado a lo largo del ciclo, lo que se hace con él desde
-// las fuentes (cogerlo del Banco, sacar el motor viejo con la palanca, ponerlo en la cuna), las ruedas, el pulso, su
-// reloj para el tablero y dónde se ve. La regla vive en counterweight.ts (con tests); esto lo cubren también las
-// pruebas de Playwright (e2e/counterweight.spec.ts y e2e/engineRoom.spec.ts).
+// El Contrapeso en juego (Fase 10, hitos 10B y 10C; su burbuja, E2): su estado a lo largo del ciclo, lo que se hace
+// con él desde las fuentes (cogerlo del Banco, sacar el motor viejo con la palanca, ponerlo en la cuna), las ruedas,
+// el pulso, su reloj para el tablero, cuánto acelera su burbuja los relojes (lo lee system/locator.ts) y dónde se ve.
+// La regla vive en counterweight.ts (con tests); esto lo cubren también las pruebas de Playwright
+// (e2e/counterweight.spec.ts y e2e/engineRoom.spec.ts).
 import type { MoveIntent } from '../core/input';
 import type { SourceActions } from '../reading/readingUi';
 import type { CounterweightShown } from '../render/counterweightView';
 import {
   atPulse,
+  carrierBubble,
   COUNTERWEIGHT,
   COUNTERWEIGHT_START,
   driftFrom,
@@ -16,6 +18,7 @@ import {
   shownTime,
   tickCounterweight,
   turnWheel,
+  worldBubble,
   type CounterweightPlace,
   type CounterweightState,
 } from './counterweight';
@@ -23,7 +26,7 @@ import {
 export interface CounterweightFrame {
   /** Reloj de Umbral (s). */
   t: number;
-  /** El ritmo de tu reloj donde estás: el suyo, si lo llevas. */
+  /** El ritmo de tu reloj donde estás (ya con la burbuja si lo llevas): el suyo, si lo llevas. */
   carrierRate: number;
   piloting: boolean;
 }
@@ -63,6 +66,10 @@ export interface CounterweightPlay {
   readonly clock: number | undefined;
   readonly place: CounterweightPlace;
   readonly motorOut: boolean;
+  /** Cuánto acelera su burbuja el reloj de un mundo (el Laboratorio, mientras está en su Banco: ×5). */
+  worldFactor(world: string): number;
+  /** Cuánto acelera su burbuja tu reloj si lo llevas (×2,5); si no, 1. */
+  readonly carrierFactor: number;
   /** En brazos no se corre. */
   limit(intent: MoveIntent): MoveIntent;
   /** Una vez por fotograma: avanza su reloj, aplica el pulso y dice dónde se ve. */
@@ -95,11 +102,15 @@ export function createCounterweightPlay(options: CounterweightPlayOptions): Coun
   let lastT = 0;
   let piloting = false;
 
-  /** El ritmo medio del sitio donde está entre dos instantes: el del Banco, el tuyo si lo llevas o el de Cicatriz. */
+  /**
+   * El ritmo medio del sitio donde está entre dos instantes: el del Banco (el del Nudo dentro de su burbuja), el tuyo
+   * si lo llevas (que ya trae la burbuja) o el de Cicatriz en la cuna (allí va a la par de la máquina).
+   */
   function rateBetween(from: number, to: number, carrierRate: number): number {
     if (state.place === 'carried' || !(to > from)) return carrierRate;
     const world = state.place === 'bench' ? COUNTERWEIGHT.world : COUNTERWEIGHT.installWorld;
-    return (worldClock(world, to) - worldClock(world, from)) / (to - from);
+    const site = (worldClock(world, to) - worldClock(world, from)) / (to - from);
+    return site * worldBubble(state.place, world);
   }
 
   const beforePulse = (): boolean => lastT < pulseAt;
@@ -158,6 +169,12 @@ export function createCounterweightPlay(options: CounterweightPlayOptions): Coun
     },
     get motorOut() {
       return state.motorOut;
+    },
+    worldFactor(world) {
+      return worldBubble(state.place, world);
+    },
+    get carrierFactor() {
+      return carrierBubble(state.place);
     },
     limit(intent) {
       return state.place === 'carried' && intent.run ? { ...intent, run: false } : intent;

@@ -48,7 +48,7 @@
     "id": "cicatriz.grabacion_esceptico",
     "mundo": "cicatriz",
     "tipo": "grabacion",
-    "reloj": 0.2,
+    "reloj": 5,
     "titulo": "La grabación del escéptico",
     "borrador": true,
     "superficial": {

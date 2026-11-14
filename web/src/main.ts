@@ -539,7 +539,10 @@ async function start(): Promise<void> {
     radius: r.world.info.radius,
     clockRate: r.world.info.clockRate,
   }));
-  const systemLocator = spec ? createLocator(spec, bodies, chronology) : undefined;
+  // La burbuja del Contrapeso (E2): acelera el Laboratorio mientras espera en su Banco y tu reloj si lo llevas.
+  const systemLocator = spec
+    ? createLocator(spec, bodies, chronology, counterweight?.play)
+    : undefined;
   const standalone = createStandaloneLocator(
     bodies.find((b) => b.world === startWorld) ?? { world: startWorld, radius: 1, clockRate: 1 },
     chronology,
@@ -1388,10 +1391,12 @@ async function start(): Promise<void> {
         portal.visible = track !== undefined && teleporterOpen(TELEPORTER.lock, liveEvents, track);
       }
       if (timeRuns) {
-        // Un mundo que el agujero se está tragando se ve casi quieto desde fuera.
+        // Un mundo que el agujero se está tragando se ve casi quieto desde fuera; lo que sigue a la burbuja del
+        // Contrapeso (el reloj de mesa del Laboratorio) corre mientras está cerca y se calma cuando se lo llevan.
         for (const { part, world } of animated) {
           if (!part.event || session.activeEventIds.includes(part.event)) {
-            part.object.rotateY(part.spin * dt * (absorption?.rateOf(world) ?? 1));
+            const bubble = part.bubble ? (counterweight?.play.worldFactor(world) ?? 1) : 1;
+            part.object.rotateY(part.spin * dt * (absorption?.rateOf(world) ?? 1) * bubble);
           }
         }
       }

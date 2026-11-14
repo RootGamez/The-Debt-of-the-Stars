@@ -1,12 +1,13 @@
-// Fase 7 (hito 7A): una grabación se oye al ritmo del reloj con que se grabó. La del escéptico se grabó donde
-// el tiempo iba cinco veces más lento: a ×1 no se entiende; girando la rueda hasta ×5 se entiende y, oída
-// entera, se anota en el Registro.
+// Fase 7 (hito 7A): una grabación se oye al ritmo del reloj con que se grabó. La del escéptico (E2) se grabó dentro
+// de la burbuja del Contrapeso, donde el tiempo iba cinco veces más deprisa: a ×1 suena aceleradísima y no se
+// entiende; girando la rueda hasta ×0,2 se entiende y, oída entera, se anota en el Registro. (Antes se grabó donde
+// el tiempo iba cinco veces más lento y se entendía a ×5.)
 import { expect, test, type Page } from '@playwright/test';
 import { snapshot, startPlaying } from './helpers';
 
 const SOURCE = 'cicatriz.grabacion_esceptico';
-/** Pulsaciones de flecha de la rueda de ×1,0 a ×4,9 (cada una multiplica la velocidad por ~1,07). */
-const STEPS_TO_FIVE = 23;
+/** Pulsaciones de flecha de la rueda de ×1,0 a ×0,2 (cada una divide la velocidad entre ~1,09). */
+const STEPS_TO_A_FIFTH = 19;
 
 async function openRecording(page: Page): Promise<void> {
   expect(await page.evaluate(() => window.__juego?.warpTo?.('cicatriz') ?? false)).toBe(true);
@@ -20,7 +21,7 @@ async function recording(page: Page) {
   return (await snapshot(page))?.registry.recording ?? null;
 }
 
-test('a recording made with a slow clock is gibberish as is and clear at the right speed', async ({
+test('a recording made with a fast clock is gibberish as is and clear at the right speed', async ({
   page,
 }) => {
   test.setTimeout(180_000);
@@ -30,8 +31,8 @@ test('a recording made with a slow clock is gibberish as is and clear at the rig
   await expect(page.locator('.recorder-title')).toHaveText('La grabación del escéptico');
   await expect(page.locator('.recorder-speed')).toHaveText('×1,0');
   await expect(page.locator('.recorder-status')).toHaveText('No se entiende nada.');
-  // A ×1 la primera palabra sale arrastrada.
-  await expect(page.locator('.recorder-line').first()).toHaveText(/ii|ee|aa|oo|uu/, {
+  // A ×1 suena acelerada: las vocales se tragan.
+  await expect(page.locator('.recorder-line').first()).toHaveText(/^[^aeiouáéíóúü]+$/i, {
     timeout: 15_000,
   });
   // El sonido de la voz suena mientras la grabación está abierta.
@@ -40,9 +41,9 @@ test('a recording made with a slow clock is gibberish as is and clear at the rig
     .toContain('grabacion');
 
   // La rueda tiene el foco: las flechas la giran.
-  for (let i = 0; i < STEPS_TO_FIVE; i++) await page.keyboard.press('ArrowRight');
+  for (let i = 0; i < STEPS_TO_A_FIFTH; i++) await page.keyboard.press('ArrowLeft');
 
-  await expect(page.locator('.recorder-speed')).toHaveText('×4,9');
+  await expect(page.locator('.recorder-speed')).toHaveText('×0,2');
   await expect(page.locator('.recorder-status')).toHaveText('Se entiende. Escúchala entera.');
   await expect.poll(() => recording(page)).toMatchObject({ understood: false });
 
@@ -81,7 +82,7 @@ test('a recording understood before starts at the speed that worked', async ({ p
   await startPlaying(page);
   await openRecording(page);
 
-  await expect(page.locator('.recorder-speed')).toHaveText('×5,0');
+  await expect(page.locator('.recorder-speed')).toHaveText('×0,2');
   await expect(page.locator('.recorder-status')).toHaveText('Se entiende. Escúchala entera.');
 
   await page.evaluate(() => {

@@ -98,9 +98,9 @@ export function consoleReadings(
   return clocks.map((clock) => ({ id: clock.id, minutes: umbralMinutes * clock.rate }));
 }
 
-/** El reloj que se queda atrás más deprisa: el del sitio lento. */
-export function slowestClock(clocks: readonly ConsoleClock[]): string | undefined {
-  return [...clocks].sort((a, b) => a.rate - b.rate)[0]?.id;
+/** El reloj que se adelanta más deprisa: el del Laboratorio, dentro de la burbuja del Contrapeso (E2). */
+export function fastestClock(clocks: readonly ConsoleClock[]): string | undefined {
+  return [...clocks].sort((a, b) => b.rate - a.rate)[0]?.id;
 }
 
 export interface RouteDrift {
@@ -112,11 +112,14 @@ export interface RouteDrift {
   step: ChoiceStep;
 }
 
-/** La cuenta de la pizarra: cada tramo suma la diferencia entre el reloj del sitio y el de la máquina. */
+/**
+ * La cuenta de la pizarra: cada tramo suma la diferencia entre el reloj del Contrapeso (el del sitio dentro de su
+ * burbuja) y el de la máquina.
+ */
 export function routeDrift(legs: readonly RouteLeg[], machineRate: number): RouteDrift {
   const rows = legs.map((leg) => ({
     place: leg.place,
-    counterweight: leg.minutes * leg.rate,
+    counterweight: leg.minutes * leg.rate * leg.bubble,
     machine: leg.minutes * machineRate,
   }));
   const drift = round2(rows.reduce((sum, row) => sum + row.counterweight - row.machine, 0));

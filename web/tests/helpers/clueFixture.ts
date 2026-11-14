@@ -90,7 +90,10 @@ export function raw() {
   });
 }
 
-/** Una grabación hecha con un reloj cinco veces más lento (como la del escéptico). */
+/**
+ * Una grabación hecha con un reloj cinco veces más lento (un sitio lento cualquiera; la del escéptico, desde E2, se
+ * grabó con uno cinco veces más rápido: ver tests/registry/realClues.test.ts).
+ */
 export function recordingSource() {
   return {
     id: 'cicatriz.grabacion',

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { BUBBLE } from '../../src/data/bubble';
 import { loadClues } from '../../src/data/pistas';
+import { MAX_SPEED, MIN_SPEED } from '../../src/reading/recording';
 
 describe('the real clue data', () => {
   const clues = loadClues();
@@ -109,6 +111,19 @@ describe('the real clue data', () => {
 
     expect(recordings.length).toBeGreaterThan(0);
     for (const recording of recordings) expect(recording.recordedRate).toBeGreaterThan(0);
+  });
+
+  it('every recording can be understood with the speed wheel', () => {
+    for (const recording of clues.sources.filter((s) => s.kind === 'grabacion')) {
+      const speed = 1 / (recording.recordedRate ?? 1);
+      expect(speed, recording.id).toBeGreaterThanOrEqual(MIN_SPEED);
+      expect(speed, recording.id).toBeLessThanOrEqual(MAX_SPEED);
+    }
+  });
+
+  it('the skeptic recorded inside the bubble of the Counterweight: it sounds fast (E2)', () => {
+    // Antes 0,20 (el Sitio Lento): se oía arrastrada y se entendía a ×5; ahora se entiende a ×0,2.
+    expect(clues.sourceById.get('cicatriz.grabacion_esceptico')?.recordedRate).toBe(BUBBLE.bench);
   });
 
   it('explains every conclusion: what I now know, what to do and the question while it is missing', () => {

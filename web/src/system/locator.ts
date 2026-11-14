@@ -1,6 +1,6 @@
 // Dónde está el jugador para el reloj del ciclo: en qué mundo, con qué ritmo de tiempo y si la absorción
-// lo ha alcanzado en el espacio abierto. Junta las órbitas, la influencia y la cronología; el director del
-// ciclo solo ve el resultado (`Locale`).
+// lo ha alcanzado en el espacio abierto. Junta las órbitas, la influencia, la cronología y la burbuja del
+// Contrapeso (E2); el director del ciclo solo ve el resultado (`Locale`).
 import { Vector3 } from 'three';
 import { rateAt } from '../core/clockRates';
 import type { Locale } from '../core/loopDirector';
@@ -27,6 +27,17 @@ export interface WorldBody {
   clockRate: number;
 }
 
+/**
+ * La burbuja del Contrapeso (E2, game/counterweight.ts): cerca de él el tiempo corre deprisa. Se lee en cada
+ * llamada, porque cambia al cogerlo, llevarlo o instalarlo.
+ */
+export interface ClockBubble {
+  /** Cuánto acelera el ritmo de un mundo (el Laboratorio con el Contrapeso en su Banco: ×5); 1 = nada. */
+  worldFactor(world: string): number;
+  /** Cuánto acelera tu reloj si lo llevas, estés donde estés (×2,5); 1 = nada. */
+  readonly carrierFactor: number;
+}
+
 export interface Locator {
   /**
    * @param t Reloj de Umbral.
@@ -41,6 +52,8 @@ export function createLocator(
   system: SystemSpec,
   worlds: readonly WorldBody[],
   chronology: Chronology,
+  /** Sin Laboratorio (o sin Contrapeso) no hay burbuja. */
+  bubble?: ClockBubble,
 ): Locator {
   const entries = system.bodies.flatMap((spec) => {
     const info = worlds.find((w) => w.world === spec.world);
@@ -70,10 +83,11 @@ export function createLocator(
         if (!body) return;
         bodyPose(spec, t, pose);
         body.center.copy(pose.position);
-        body.rate = rateAt(info.clockRate, chronology.clocks[spec.world], t);
+        const own = rateAt(info.clockRate, chronology.clocks[spec.world], t);
+        body.rate = own * (bubble?.worldFactor(spec.world) ?? 1);
       });
       locale.worldId = referenceWorld;
-      locale.rate = clockRateAt(systemPosition, clockBodies);
+      locale.rate = clockRateAt(systemPosition, clockBodies) * (bubble?.carrierFactor ?? 1);
       locale.engulfed =
         referenceWorld === undefined &&
         window !== undefined &&

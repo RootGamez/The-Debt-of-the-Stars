@@ -70,11 +70,19 @@ describe('which voices play', () => {
 
 describe('the local clock shapes the sound', () => {
   it('slows the pulses and lowers the pitch where time runs slow', () => {
-    const lab = mix({ worldId: 'laboratorio', rate: 0.2 });
+    // Un sitio lento cualquiera (antes era el Laboratorio a 0,20; desde E2 allí el tiempo corre deprisa).
+    const slow = mix({ worldId: 'cicatriz', rate: 0.2 });
 
-    expect(lab.tempo).toBeCloseTo(0.2);
-    expect(lab.pitch).toBeLessThan(0.7);
-    expect(lab.pitch).toBeGreaterThan(0.4);
+    expect(slow.tempo).toBeCloseTo(0.2);
+    expect(slow.pitch).toBeLessThan(0.7);
+    expect(slow.pitch).toBeGreaterThan(0.4);
+  });
+
+  it('speeds them up where time runs fast (the Laboratorio, inside the bubble), within the limits', () => {
+    const lab = mix({ worldId: 'laboratorio', rate: 5 });
+
+    expect(lab.tempo).toBe(1.5);
+    expect(lab.pitch).toBe(1.25);
   });
 
   it('leaves the sound alone at the normal rate', () => {

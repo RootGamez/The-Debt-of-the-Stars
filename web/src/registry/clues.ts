@@ -1,6 +1,7 @@
 // Modelo del grafo de pistas (CONTEXTO_PISTAS.md) y su validación. Los datos vienen de
 // src/data/pistas/*.json con claves en español; aquí se convierten a tipos con nombres en inglés.
 // Como cualquier dato externo, se validan al cargar y se falla con un mensaje claro y el id afectado.
+import { MAX_SPEED, MIN_SPEED } from '../reading/recording';
 import { WorldDataError } from '../worlds/markers';
 
 /** `charla`: alguien que habla (Fase 9); puede no dar ningún hecho (vecinos de la aldea). */
@@ -91,8 +92,9 @@ export interface Source {
   /** Nombre del evento (`TRIG_`) que se presencia, para las fuentes de tipo "evento". */
   eventName: string | undefined;
   /**
-   * Solo las grabaciones: ritmo del reloj con que se grabaron (0,20 = donde el tiempo iba cinco veces
-   * más lento). Se entienden reproducidas a la velocidad que deshace ese reloj (reading/recording.ts).
+   * Solo las grabaciones: ritmo del reloj con que se grabaron (0,20 = donde el tiempo iba cinco veces más
+   * lento; 5 = cinco veces más deprisa, como dentro de la burbuja del Contrapeso). Se entienden reproducidas a la
+   * velocidad que deshace ese reloj (reading/recording.ts).
    */
   recordedRate: number | undefined;
   /** Lector de puzle (`lector` en los datos): lo que da la fuente se anota al resolverlo. */
@@ -312,8 +314,12 @@ function parseReading(
 }
 
 const KINDS: readonly string[] = SOURCE_KINDS;
-/** Ritmos de reloj razonables para una grabación (el más rápido del sistema anda cerca de 1,2). */
-const MAX_RECORDED_RATE = 10;
+/**
+ * Ritmos de reloj que la rueda de velocidad puede deshacer (velocidad × reloj ≈ 1): de 1/8 a 8. El más rápido del
+ * sistema es el del Laboratorio con la burbuja del Contrapeso (5).
+ */
+const MIN_RECORDED_RATE = 1 / MAX_SPEED;
+const MAX_RECORDED_RATE = 1 / MIN_SPEED;
 
 const READERS: readonly string[] = PUZZLE_READERS;
 
@@ -330,8 +336,15 @@ function parseRecordedRate(raw: unknown, id: string, kind: string): number | und
     if (raw !== undefined) fail(`${id}: solo las grabaciones llevan "reloj"`);
     return undefined;
   }
-  if (typeof raw !== 'number' || !Number.isFinite(raw) || raw <= 0 || raw > MAX_RECORDED_RATE) {
-    fail(`${id}: las grabaciones necesitan "reloj", un ritmo entre 0 y ${MAX_RECORDED_RATE}`);
+  if (
+    typeof raw !== 'number' ||
+    !Number.isFinite(raw) ||
+    raw < MIN_RECORDED_RATE ||
+    raw > MAX_RECORDED_RATE
+  ) {
+    fail(
+      `${id}: las grabaciones necesitan "reloj", un ritmo entre ${String(MIN_RECORDED_RATE)} y ${String(MAX_RECORDED_RATE)} (lo que deshace la rueda)`,
+    );
   }
   return raw;
 }

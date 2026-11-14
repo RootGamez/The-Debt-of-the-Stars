@@ -1,5 +1,8 @@
+// Los ejemplos con reloj 0,2 son de una grabación lenta (sigue valiendo para cualquier sitio lento); desde E2 la del
+// escéptico se grabó dentro de la burbuja del Contrapeso, con reloj 5: la cubre el bloque «a fast clock».
 import { describe, expect, it } from 'vitest';
 import {
+  CLEAR_TOLERANCE,
   clarity,
   garble,
   MAX_SPEED,
@@ -42,9 +45,16 @@ describe('clarity', () => {
 });
 
 describe('the speed wheel', () => {
-  it('covers from a quarter to eight times the speed', () => {
+  it('covers from an eighth to eight times the speed, with ×1 in the middle', () => {
     expect(speedFromSlider(0)).toBeCloseTo(MIN_SPEED);
     expect(speedFromSlider(1)).toBeCloseTo(MAX_SPEED);
+    expect(MIN_SPEED).toBeCloseTo(1 / 8);
+    expect(speedFromSlider(0.5)).toBeCloseTo(1);
+  });
+
+  it('reaches the speed that undoes a clock five times slower or five times faster', () => {
+    expect(MAX_SPEED).toBeGreaterThanOrEqual(5 * CLEAR_TOLERANCE);
+    expect(MIN_SPEED).toBeLessThanOrEqual(0.2 / CLEAR_TOLERANCE);
   });
 
   it('goes back and forth without losing the value', () => {
@@ -116,12 +126,50 @@ describe('garble', () => {
   });
 });
 
+function play(playback: RecordingPlayback, seconds: number, step = 0.05): void {
+  for (let t = 0; t < seconds; t += step) playback.update(step);
+}
+
+describe('a recording made with a fast clock (inside the bubble of the Counterweight, E2)', () => {
+  const lines = ['Si me entiendes, es que has girado la rueda.', 'Un día vuestro son cinco.'];
+
+  it('is lost as is, and clear when slowed down to undo its clock', () => {
+    expect(clarity(1, 5)).toBe(0);
+    expect(clarity(0.2, 5)).toBe(1);
+    expect(clarity(0.2 * 1.1, 5)).toBe(1);
+    expect(clarity(0.5, 5)).toBeLessThan(1);
+  });
+
+  it('sounds accelerated: the vowels are swallowed', () => {
+    const playback = new RecordingPlayback(lines, 5, 1);
+    play(playback, 1);
+
+    expect(playback.factor).toBe(5);
+    expect(playback.view().lines[0]?.text).not.toMatch(/[aeiouáéíóú]/i);
+  });
+
+  it('races through as is: in a few seconds it has already started again, without being understood', () => {
+    const playback = new RecordingPlayback(lines, 5, 1);
+
+    play(playback, 4);
+
+    expect(playback.understood).toBe(false);
+    expect(playback.view().lines.every((line) => !line.heard)).toBe(true);
+  });
+
+  it('is understood after hearing every line at ×0,2, a speed the wheel reaches', () => {
+    const playback = new RecordingPlayback(lines, 5, 0.2);
+
+    expect(playback.speed).toBeCloseTo(0.2); // la rueda no la recorta
+    play(playback, 12);
+
+    expect(playback.understood).toBe(true);
+    expect(playback.view().lines.map((line) => line.text)).toEqual(lines);
+  });
+});
+
 describe('RecordingPlayback', () => {
   const lines = ['Aquí dentro un día vuestro son cinco.', 'La luz sale torcida.'];
-
-  function play(playback: RecordingPlayback, seconds: number, step = 0.05): void {
-    for (let t = 0; t < seconds; t += step) playback.update(step);
-  }
 
   it('starts at the given speed, before the first word', () => {
     const playback = new RecordingPlayback(lines, 0.2, 1);

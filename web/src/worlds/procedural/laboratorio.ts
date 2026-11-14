@@ -41,11 +41,11 @@ import { buildLife } from './laboratorioLife';
 import { buildRooms } from './laboratorioRooms';
 import {
   INNER_SITES,
-  LAB_CLOCK,
   LAB_GRAVITY,
   LAB_INNER_RADIUS,
   LAB_RADIUS,
   LABORATORIO_ID,
+  NUDO_CLOCK,
   OUTER_SITES,
   PATHS,
   along,
@@ -401,7 +401,7 @@ export function buildLaboratorio(): Group {
     world_id: LABORATORIO_ID,
     radius: LAB_RADIUS,
     gravity: LAB_GRAVITY,
-    clock_rate: LAB_CLOCK,
+    clock_rate: NUDO_CLOCK,
     inner_radius: LAB_INNER_RADIUS,
     interior_light: 1.5,
     interior_light_color: '#F0DDB8',

@@ -79,7 +79,8 @@ function minutesOf(text: string | null): number {
   return (m ?? 0) + (s ?? 0) / 60;
 }
 
-test('the console of the cabin runs the clocks live, and one barely moves', async ({ page }) => {
+// E2: la ruta sin nombre (el Laboratorio, con la burbuja del Contrapeso) ya no se queda atrás: se dispara.
+test('the console of the cabin runs the clocks live, and one races ahead', async ({ page }) => {
   await startPlaying(page);
   await open(page, 'taller.cabina');
   const time = (name: string) =>
@@ -87,12 +88,12 @@ test('the console of the cabin runs the clocks live, and one barely moves', asyn
 
   await page.waitForTimeout(1500);
   const umbral = minutesOf(await time('Umbral').textContent());
-  const slow = minutesOf(await time('Ruta 7').textContent());
+  const fast = minutesOf(await time('Ruta 7').textContent());
   expect(umbral).toBeGreaterThan(1);
-  expect(slow).toBeLessThan(umbral / 3);
+  expect(fast).toBeGreaterThan(umbral * 3);
 
   await choice(page, 'Umbral').click();
-  await expect(page.locator('.puzzle-status')).toContainText('Ese corre más');
+  await expect(page.locator('.puzzle-status')).toContainText('Ese corre menos');
   await choice(page, 'Ruta 7 (sin nombre)').click();
 
   await expect(page.locator('.puzzle-noted-title')).toHaveText('Anotado en el Registro');
@@ -107,9 +108,10 @@ test('the blackboard of the Laboratorio adds up the route of the Counterweight',
   await startPlaying(page);
   await open(page, 'lab.pizarra');
 
-  await choice(page, '4:00 atrasado').click(); // solo el Laboratorio
+  // E2: con su burbuja el Contrapeso llega muy adelantado (antes, un minuto atrasado).
+  await choice(page, '44:00 adelantado').click(); // solo el Laboratorio
   await expect(page.locator('.puzzle-status')).toContainText('Cuenta todos los tramos');
-  await choice(page, '1:00 atrasado').click();
+  await choice(page, '59:36 adelantado').click();
 
   await expect(page.locator('.puzzle-noted-title')).toHaveText('Anotado en el Registro');
   expect(await facts(page)).toContain('contrapeso.cuenta_sincronia');

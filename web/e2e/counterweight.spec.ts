@@ -1,5 +1,6 @@
 // Fase 10B: el Contrapeso. Espera en su Banco del Laboratorio: primero se examina y luego se coge; en brazos su
-// reloj se suma al tablero, viaja en el relicario de la nave y vuelve a su Banco con cada ciclo.
+// reloj se suma al tablero, viaja en el relicario de la nave y vuelve a su Banco con cada ciclo. E2: su burbuja
+// acelera el Laboratorio mientras espera (×5) y tu reloj mientras lo llevas (×2,5), así que el ciclo va más despacio.
 import { expect, test, type Page } from '@playwright/test';
 import { closeReader, loopValue, startPlaying } from './helpers';
 
@@ -33,6 +34,28 @@ test('the Counterweight is examined, then picked up, and its clock joins the boa
   await expect(page.locator('.clock-hud')).toContainText('Contrapeso');
   const before = (await counterweight(page))?.clock ?? 0;
   await expect.poll(async () => (await counterweight(page))?.clock ?? 0).toBeGreaterThan(before);
+});
+
+test('its bubble makes the Laboratorio run fast, and carrying it slows the loop anywhere', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await startPlaying(page);
+  expect(await page.evaluate(() => window.__juego?.teleportTo?.('lab.contrapeso') ?? false)).toBe(
+    true,
+  );
+  // En su Banco: el Laboratorio corre ×5 (un minuto real son 12 s del ciclo).
+  await expect.poll(async () => (await loopValue(page, 'rate')) ?? 0).toBeCloseTo(5, 1);
+
+  await pickUp(page);
+  // Fuera del Banco el Laboratorio vuelve al Nudo (1), pero la burbuja va contigo: ×2,5.
+  await expect.poll(async () => (await loopValue(page, 'rate')) ?? 0).toBeCloseTo(2.5, 1);
+
+  expect(await page.evaluate(() => window.__juego?.warpTo?.('umbral') ?? false)).toBe(true);
+  await expect.poll(async () => (await loopValue(page, 'rate')) ?? 0).toBeCloseTo(2.5, 1);
+  // Su tercer reloj va por delante del de Umbral.
+  const state = await counterweight(page);
+  expect(state?.clock ?? 0).toBeGreaterThan((await loopValue(page, 'umbral')) ?? Infinity);
 });
 
 test('it travels in the ship and goes back to its bench when the loop starts again', async ({

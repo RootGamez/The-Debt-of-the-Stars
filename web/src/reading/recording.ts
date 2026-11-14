@@ -1,7 +1,8 @@
 // Las grabaciones de los Ausentes se oyen al ritmo del reloj con que se grabaron (CONTEXTO_HISTORIA.md §6):
-// una voz grabada donde el tiempo iba cinco veces más lento suena lentísima. Para entenderla hay que girar la
-// rueda de velocidad hasta deshacer ese reloj (velocidad × reloj ≈ 1). Lógica pura, sin DOM ni audio: la
-// interfaz (ui/recordingPanel.ts) y el murmullo (audio/) solo muestran lo que esto calcula.
+// una voz grabada donde el tiempo iba cinco veces más lento suena lentísima, y una grabada donde iba cinco veces
+// más deprisa (la del escéptico, dentro de la burbuja del Contrapeso, E2: reloj 5) suena aceleradísima. Para
+// entenderla hay que girar la rueda de velocidad hasta deshacer ese reloj (velocidad × reloj ≈ 1). Lógica pura, sin
+// DOM ni audio: la interfaz (ui/recordingPanel.ts) y el murmullo (audio/) solo muestran lo que esto calcula.
 
 /** Ritmo natural del habla (palabras por segundo del que habla). */
 export const WORDS_PER_SECOND = 2.5;
@@ -9,7 +10,8 @@ export const WORDS_PER_SECOND = 2.5;
 export const CLEAR_TOLERANCE = 1.15;
 /** A partir de este error (×2,5 o ÷2,5) ya no se entiende nada. */
 export const LOST_RATIO = 2.5;
-export const MIN_SPEED = 0.25;
+/** La rueda va de ×1/8 a ×8, con ×1 en el centro: deshace un reloj cinco veces más lento o más rápido. */
+export const MIN_SPEED = 1 / 8;
 export const MAX_SPEED = 8;
 /** Lo mínimo que dura una frase y el silencio entre frases y al final (segundos del que habla). */
 const MIN_LINE_SECONDS = 0.8;

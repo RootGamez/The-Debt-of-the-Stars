@@ -122,6 +122,11 @@ export interface AnimatedPart {
   object: Object3D;
   spin: number;
   event: string | undefined;
+  /**
+   * Gira al ritmo de la burbuja del Contrapeso (propiedad `bubble`, E2): deprisa mientras está cerca y se calma
+   * cuando se lo llevan (el reloj de mesa del Laboratorio).
+   */
+  bubble: boolean;
 }
 
 export interface EventProp {
@@ -354,6 +359,7 @@ export function collectMarkers(scene: Object3D): WorldMarkers {
         object,
         spin: requireSpin(object),
         event: event === undefined ? undefined : requireString(object, 'event'),
+        bubble: object.userData.bubble === true,
       });
     } else if (name.startsWith('EVT_')) {
       markers.eventProps.push({ event: requireString(object, 'event'), object });

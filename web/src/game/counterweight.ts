@@ -1,10 +1,13 @@
-// El Contrapeso (Fase 10, ✅ pasos de Anthony, CONTEXTO_HISTORIA.md §9): su reloj propio y la regla de su
-// instalación, como lógica pura. Se coge en el Banco del Laboratorio; su reloj marca al ritmo del sitio donde está
-// (en el Banco, el del Laboratorio; en brazos o en la nave, el tuyo); en la Sala del Motor de Cicatriz, antes del
-// pulso, se saca el motor viejo, se pone en la cuna y se ajusta con dos ruedas (minutos y segundos) hasta que
-// coincide con el reloj de la máquina; el pulso lo encaja si coinciden y lo rechaza si no. Todo vuelve a empezar
-// con el ciclo (los objetos no persisten).
+// El Contrapeso (Fase 10, ✅ pasos de Anthony, CONTEXTO_HISTORIA.md §9): su reloj propio, su burbuja y la regla de
+// su instalación, como lógica pura. Se coge en el Banco del Laboratorio; su reloj marca al ritmo del sitio donde está
+// (en el Banco, el del Laboratorio dentro de su burbuja; en brazos o en la nave, el tuyo, que también lleva la
+// burbuja; en la cuna, el de la máquina); en la Sala del Motor de Cicatriz, antes del pulso, se saca el motor viejo,
+// se pone en la cuna y se ajusta con dos ruedas (minutos y segundos) hasta que coincide con el reloj de la máquina;
+// el pulso lo encaja si coinciden y lo rechaza si no. Todo vuelve a empezar con el ciclo (los objetos no persisten).
+// La burbuja (E2, data/bubble.ts): cerca de él el tiempo corre deprisa. En su Banco acelera el Laboratorio; llevado,
+// acelera tu reloj; en la cuna, rechazado o instalado ya no acelera nada (instalado, todo sigue como antes de E2).
 import { rateAt, type RateCurve } from '../core/clockRates';
+import { BUBBLE } from '../data/bubble';
 
 export const COUNTERWEIGHT = {
   /** Dónde espera: el Banco del Contrapeso. */
@@ -39,6 +42,19 @@ export const COUNTERWEIGHT_START: CounterweightState = {
   adjust: 0,
   motorOut: false,
 };
+
+/**
+ * Cuánto acelera su burbuja el reloj de un mundo: el del Laboratorio, mientras espera en su Banco (×5); fuera de él,
+ * el Laboratorio vuelve al ritmo del Nudo.
+ */
+export function worldBubble(place: CounterweightPlace, world: string): number {
+  return place === 'bench' && world === COUNTERWEIGHT.world ? BUBBLE.bench : 1;
+}
+
+/** Cuánto acelera su burbuja el reloj de quien lo lleva, en brazos o en la nave (×2,5). */
+export function carrierBubble(place: CounterweightPlace): number {
+  return place === 'carried' ? BUBBLE.carried : 1;
+}
 
 /** Lo que enseña su esfera: su reloj más el ajuste de las ruedas (s). */
 export function shownTime(state: CounterweightState): number {

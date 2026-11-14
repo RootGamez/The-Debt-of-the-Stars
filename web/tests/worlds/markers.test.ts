@@ -388,8 +388,19 @@ describe('animated parts (ANIM_)', () => {
     const markers = collectMarkers(scene);
 
     expect(markers.animated).toEqual([
-      { object: arm, spin: 0.4, event: undefined },
-      { object: core, spin: 2, event: 'secuencia_fabrica' },
+      { object: arm, spin: 0.4, event: undefined, bubble: false },
+      { object: core, spin: 2, event: 'secuencia_fabrica', bubble: false },
+    ]);
+  });
+
+  it('marks the parts that turn at the pace of the bubble of the Counterweight (E2)', () => {
+    const scene = umbralScene();
+    const clock = mesh('ANIM_reloj_mesa');
+    clock.userData = { spin: 0.05, bubble: true };
+    scene.add(clock);
+
+    expect(collectMarkers(scene).animated).toEqual([
+      { object: clock, spin: 0.05, event: undefined, bubble: true },
     ]);
   });
 

@@ -26,9 +26,9 @@ function specOf(world: string): BodySpec {
   return spec;
 }
 
-function feetOn(world: string, t: number): Vector3 {
+function feetOn(world: string, t: number, list: readonly WorldBody[] = worlds): Vector3 {
   const spec = specOf(world);
-  const radius = worlds.find((w) => w.world === world)?.radius ?? 0;
+  const radius = list.find((w) => w.world === world)?.radius ?? 0;
   return toSystemPosition(bodyPose(spec, t), new Vector3(0, radius, 0), new Vector3());
 }
 
@@ -63,6 +63,57 @@ describe('rate of the clock', () => {
 
     expect(rate).toBeGreaterThan(0.8);
     expect(rate).toBeLessThan(1);
+  });
+});
+
+describe('the bubble of the Counterweight (E2)', () => {
+  /** El Nudo marca 1: el ritmo del Laboratorio lo pone la burbuja, no el mundo. */
+  const withLab: WorldBody[] = [...worlds, { world: 'laboratorio', radius: 25, clockRate: 1 }];
+  const onBench = { worldFactor: (w: string) => (w === 'laboratorio' ? 5 : 1), carrierFactor: 1 };
+  const carried = { worldFactor: () => 1, carrierFactor: 2.5 };
+
+  it('makes the Laboratorio run at the rate of the bubble while the Counterweight waits there', () => {
+    const located = createLocator(system, withLab, chronology, onBench);
+
+    expect(
+      located.locate(100, 'laboratorio', feetOn('laboratorio', 100, withLab)).rate,
+    ).toBeCloseTo(5);
+    expect(located.locate(100, 'archivo', feetOn('archivo', 100)).rate).toBeCloseTo(0.8);
+  });
+
+  it('leaves the Laboratorio at the rate of the Nudo once the Counterweight is gone', () => {
+    const located = createLocator(system, withLab, chronology, carried);
+
+    expect(
+      located.locate(100, 'laboratorio', feetOn('laboratorio', 100, withLab)).rate,
+    ).toBeCloseTo(2.5); // la burbuja va contigo: 1 del Nudo × 2,5
+    expect(
+      createLocator(system, withLab, chronology).locate(
+        100,
+        'laboratorio',
+        feetOn('laboratorio', 100, withLab),
+      ).rate,
+    ).toBeCloseTo(1);
+  });
+
+  it('carried, it speeds up your clock wherever you are, also far from every mass', () => {
+    const located = createLocator(system, withLab, chronology, carried);
+
+    expect(located.locate(200, 'archivo', feetOn('archivo', 200)).rate).toBeCloseTo(0.8 * 2.5);
+    expect(located.locate(300, undefined, farAway).rate).toBeCloseTo(2.5);
+  });
+
+  it('reads the bubble on every call: it changes as the Counterweight moves', () => {
+    let factor = 5;
+    const located = createLocator(system, withLab, chronology, {
+      worldFactor: (w) => (w === 'laboratorio' ? factor : 1),
+      carrierFactor: 1,
+    });
+    const feet = feetOn('laboratorio', 50, withLab);
+
+    expect(located.locate(50, 'laboratorio', feet).rate).toBeCloseTo(5);
+    factor = 1;
+    expect(located.locate(50, 'laboratorio', feet).rate).toBeCloseTo(1);
   });
 });
 
