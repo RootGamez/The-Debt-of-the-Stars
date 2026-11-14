@@ -27,5 +27,14 @@
       "Quien te encuentra no sabe qué decirte. Tú lo sabes todo, y ya no sirve de nada.",
       "Esta boca no te dejó a tiempo. Vuelve al Archivo y cuenta de nuevo: los relojes no mienten, solo hay que leerlos con calma."
     ]
+  },
+  "sinVuelta": {
+    "titulo": "Sin vuelta",
+    "borrador": true,
+    "texto": [
+      "La fuente ya no está en su sitio, y nada lo repite. Lo que ocurre, ocurre de verdad.",
+      "El sistema cae sin un solo ciclo de reserva. Nadie volverá a las siete de la mañana.",
+      "Despiertas en Umbral con el cuaderno en las manos: lo que anotaste sigue ahí, y es lo único que te queda."
+    ]
   }
 }

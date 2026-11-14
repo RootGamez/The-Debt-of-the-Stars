@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { loadEndingCards, readEndingCards } from '../../src/data/endings';
+import {
+  loadEndingCards,
+  loadNoReturnCard,
+  readEndingCards,
+  readNoReturnCard,
+} from '../../src/data/endings';
 import { EN } from '../../src/i18n/en';
 import { WorldDataError } from '../../src/worlds/markers';
 
@@ -42,5 +47,21 @@ describe('the ending cards', () => {
     ['something that is not an object', 'finales'],
   ])('rejects %s', (_name, data) => {
     expect(() => readEndingCards(data)).toThrow(WorldDataError);
+  });
+});
+
+describe('the "no return" card (E5)', () => {
+  it('is a written draft with its English and is not one of the endings', () => {
+    const card = loadNoReturnCard();
+
+    expect(card.title).toBe('Sin vuelta');
+    expect(card.draft).toBe(true);
+    expect(card.text.length).toBeGreaterThan(1);
+    for (const line of [card.title, ...card.text]) expect(EN[line], line).toBeTruthy();
+    expect(Object.keys(loadEndingCards())).not.toContain('sinVuelta');
+  });
+
+  it('fails when the card is missing', () => {
+    expect(() => readNoReturnCard({ A: {}, B: {}, tarde: {} })).toThrow(WorldDataError);
   });
 });

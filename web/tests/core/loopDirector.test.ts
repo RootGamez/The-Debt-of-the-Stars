@@ -525,3 +525,123 @@ describe('crossing the stable horizon (Phase 10)', () => {
     expect(saved).toEqual([]);
   });
 });
+
+describe('with the loop cut (E5: Cortar el bucle)', () => {
+  /** Avanza hasta que el director avisa del `noReturn` (o se acaba el tiempo) y devuelve cuántas veces avisó. */
+  function runToFade(d: LoopDirector, seconds: number) {
+    let noReturn = 0;
+    let restarts = 0;
+    for (let i = 0; i < Math.round(seconds * 10); i++) {
+      const update = d.update(0.1, QUIET);
+      if (update.noReturn) noReturn++;
+      if (update.restart) restarts++;
+    }
+    return { noReturn, restarts };
+  }
+
+  it('is not cut by default and says so', () => {
+    const { d } = director();
+
+    expect(d.loopCut).toBe(false);
+  });
+
+  it('never marks the update as "no return" when the loop is not cut', () => {
+    const { d } = director();
+    d.update(0.1, QUIET);
+    run(d, 100.1);
+    const updates = Array.from({ length: Math.round((FADE_OUT_SECONDS + 1) * 10) }, () =>
+      d.update(0.1, QUIET),
+    );
+
+    expect(updates.some((u) => 'noReturn' in u)).toBe(false);
+    expect(updates.filter((u) => u.restart)).toHaveLength(1);
+  });
+
+  it('does not restart at 15:00: the fade ends in "no return" once and the screen stays covered', () => {
+    const { d, saved } = director();
+    d.cutLoop();
+    run(d, 100.1);
+    expect(d.deathCause).toBe('fin');
+
+    const { noReturn, restarts } = runToFade(d, FADE_OUT_SECONDS + 3);
+
+    expect(noReturn).toBe(1);
+    expect(restarts).toBe(0);
+    expect(d.phase).toBe('dying');
+    expect(d.fade.amount).toBe(1);
+    expect(d.loopsCompleted).toBe(0);
+    expect(saved).toEqual([]);
+  });
+
+  it('also fails when the world is swallowed, after a fall or from a forced cause', () => {
+    const swallowed = director({ worldId: 'umbral' });
+    swallowed.d.cutLoop();
+    swallowed.d.skip(89);
+    run(swallowed.d, 2);
+    expect(swallowed.d.deathCause).toBe('absorcion');
+    expect(runToFade(swallowed.d, FADE_OUT_SECONDS + 0.5).noReturn).toBe(1);
+
+    const forced = director();
+    forced.d.cutLoop();
+    forced.d.update(0.1, QUIET, 'marea');
+    expect(runToFade(forced.d, FADE_OUT_SECONDS + 0.5).noReturn).toBe(1);
+  });
+
+  it('keeps the crossings as they are: a crossing is not a failure', () => {
+    const { d } = director({ looping: true });
+    d.cutLoop();
+    d.update(0.1, QUIET, 'horizonte');
+    let crossings = 0;
+    let noReturn = 0;
+    for (let i = 0; i < Math.round((FADE_OUT_SECONDS + 1) * 10); i++) {
+      const update = d.update(0.1, QUIET);
+      if (update.crossed) crossings++;
+      if (update.noReturn) noReturn++;
+    }
+
+    expect(crossings).toBe(1);
+    expect(noReturn).toBe(0);
+  });
+
+  it('continues in Umbral when the card is dismissed: a fresh cycle, loop running again, no ending saved', () => {
+    const { d, saved } = director({ save: { ...freshSave(), facts: ['umbral.placa'] } });
+    d.cutLoop();
+    d.stabilize();
+    run(d, 100.1);
+    runToFade(d, FADE_OUT_SECONDS + 0.5);
+
+    const update = d.resolveNoReturn();
+
+    expect(update.restart).toBe(true);
+    expect(update.noReturn).toBeUndefined();
+    expect(d.phase).toBe('waking');
+    expect(d.clock.t).toBe(0);
+    expect(d.loopCut).toBe(false);
+    expect(d.stable).toBe(false);
+    expect(d.deathCause).toBeUndefined();
+    expect(saved.at(-1)?.loopsCompleted).toBe(1);
+    expect(saved.at(-1)?.endings).toEqual([]);
+    expect(saved.at(-1)?.facts).toEqual(['umbral.placa']);
+    // y el ciclo nuevo vuelve a morir con normalidad (reinicia)
+    run(d, FADE_IN_SECONDS + 0.2);
+    run(d, 100.1);
+    expect(runToFade(d, FADE_OUT_SECONDS + 0.5).restarts).toBe(1);
+  });
+
+  it('ignores resolving a failure that has not happened', () => {
+    const { d } = director();
+    d.cutLoop();
+
+    expect(d.resolveNoReturn()).toEqual({ changes: [], restart: false, crossed: false });
+    expect(d.phase).toBe('playing');
+  });
+
+  it('does not touch the rescue at home', () => {
+    const { d } = director({ looping: false });
+    d.cutLoop();
+    const update = d.update(0.1, QUIET, 'caida');
+
+    expect(update.restart).toBe(true);
+    expect(update.noReturn).toBeUndefined();
+  });
+});

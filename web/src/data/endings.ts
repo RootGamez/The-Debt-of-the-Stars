@@ -41,6 +41,21 @@ export function readEndingCards(data: unknown): Readonly<Record<Ending, EndingCa
   };
 }
 
+/**
+ * La tarjeta corta «Sin vuelta» (E5): no es un final (no está en `Ending` ni se guarda como visto); sale al fallar
+ * tras cortar el bucle y la partida sigue en Umbral. Vive en el mismo archivo de datos.
+ */
+export function readNoReturnCard(data: unknown): EndingCard {
+  if (typeof data !== 'object' || data === null) {
+    throw new WorldDataError('finales.json: no es un objeto');
+  }
+  return readCard('sinVuelta' as Ending, (data as Record<string, unknown>).sinVuelta);
+}
+
+export function loadNoReturnCard(): EndingCard {
+  return readNoReturnCard(raw);
+}
+
 export function loadEndingCards(): Readonly<Record<Ending, EndingCard>> {
   return readEndingCards(raw);
 }

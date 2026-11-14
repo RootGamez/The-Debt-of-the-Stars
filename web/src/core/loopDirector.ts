@@ -4,6 +4,8 @@
 // sin morir y el gusano (con el mismo fundido a blanco) lleva al sistema ajeno. Con el Contrapeso instalado
 // (Fase 10) nada se traga ningún mundo, y cruzar el horizonte estable (fundido a negro) lleva al epílogo; en el
 // Archivo de las Puertas tampoco hay ciclo, y una boca de casa lleva de vuelta a Hogar.
+// Con el bucle cortado (E5, `cutLoop`) un fallo no reinicia: avisa con `noReturn` («Sin vuelta») y espera a
+// `resolveNoReturn()`. Sin cortar, todo funciona como siempre.
 // Lógica pura: main.ts aplica los efectos (fundidos, reaparecer al jugador, cielo).
 import { FADE_IN_SECONDS, FADE_OUT_SECONDS, FALL_DEATH_SPEED } from '../data/loop';
 import { absorptionProgress } from '../system/absorption';
@@ -93,12 +95,24 @@ export interface DirectorUpdate {
    * la pantalla: toca ir al sistema ajeno, al Archivo de las Puertas o de vuelta a casa.
    */
   crossed: boolean;
+  /**
+   * true una sola vez (E5), cuando con el bucle cortado (`cutLoop`) se falla y la pantalla ya está cubierta: nada
+   * reinicia ni se guarda como final. Quien llama enseña la tarjeta «Sin vuelta» y después llama a
+   * `resolveNoReturn()`, que sigue en Umbral con el Registro. Ausente (no `false`) cuando no ocurre.
+   */
+  noReturn?: true;
 }
 
 const NOTHING: DirectorUpdate = Object.freeze({ changes: [], restart: false, crossed: false });
 /** En casa, tras un accidente: de vuelta a un sitio seguro, sin muerte ni ciclo nuevo. */
 const RESCUED: DirectorUpdate = Object.freeze({ changes: [], restart: true, crossed: false });
 const CROSSED: DirectorUpdate = Object.freeze({ changes: [], restart: false, crossed: true });
+const NO_RETURN: DirectorUpdate = Object.freeze({
+  changes: [],
+  restart: false,
+  crossed: false,
+  noReturn: true,
+});
 /** Cuántos eventos recientes se recuerdan (panel F3 y pruebas). */
 const RECENT_EVENTS = 10;
 
@@ -115,9 +129,15 @@ export class LoopDirector {
    * las 15:00. Dura hasta el ciclo siguiente.
    */
   stable = false;
+  /**
+   * El bucle está cortado (E5: la fuente de poder salió de su sitio, `game/loopCore.ts`): las 15:00 ya no reinician y
+   * un fallo es «Sin vuelta». No se guarda: al recargar o tras un «Sin vuelta» vuelve a girar.
+   */
+  loopCut = false;
   private phaseTime = 0;
   private seenLandings = 0;
   private hasCrossed = false;
+  private hasSignalledNoReturn = false;
   private progress: SaveData;
   private readonly events: readonly TimelineEvent[];
 
@@ -139,6 +159,11 @@ export class LoopDirector {
   /** El Contrapeso encajó: desde ahora y hasta el ciclo siguiente nada cae al agujero. */
   stabilize(): void {
     this.stable = true;
+  }
+
+  /** La fuente de poder salió de su sitio: desde ahora y hasta un «Sin vuelta», ningún ciclo reinicia. */
+  cutLoop(): void {
+    this.loopCut = true;
   }
 
   /** Avance de la absorción del mundo (0 antes de empezar, 1 al terminar). */
@@ -265,12 +290,34 @@ export class LoopDirector {
       this.hasCrossed = true;
       return CROSSED;
     }
+    if (this.loopCut) {
+      // Sin bucle no hay reinicio: la pantalla se queda cubierta hasta que se enseñe la tarjeta (solo se avisa una vez).
+      if (this.hasSignalledNoReturn) return NOTHING;
+      this.hasSignalledNoReturn = true;
+      return NO_RETURN;
+    }
+    return this.restartLoop();
+  }
+
+  /**
+   * Tras la tarjeta «Sin vuelta»: la partida sigue en Umbral con el Registro. Es un ciclo nuevo (cuenta como uno, y
+   * se guarda como siempre: ciclos y hechos, nunca un final) con el bucle girando otra vez y la fuente en su sitio.
+   * Si no hay un fallo pendiente no hace nada.
+   */
+  resolveNoReturn(): DirectorUpdate {
+    if (this.phase !== 'dying' || !this.hasSignalledNoReturn) return NOTHING;
+    return this.restartLoop();
+  }
+
+  private restartLoop(): DirectorUpdate {
     this.progress = { ...this.progress, loopsCompleted: this.progress.loopsCompleted + 1 };
     this.saveFailed = !this.options.persist(this.progress);
     this.clock = createLoopClock(this.options.chronology.duration);
     this.seenLandings = 0;
     this.deathCause = undefined;
     this.stable = false;
+    this.loopCut = false;
+    this.hasSignalledNoReturn = false;
     this.enter('waking');
     return { changes: [], restart: true, crossed: false };
   }

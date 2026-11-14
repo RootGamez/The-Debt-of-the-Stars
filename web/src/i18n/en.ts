@@ -372,6 +372,13 @@ export const EN: Readonly<Record<string, string>> = {
   'Final A': 'Ending A',
   'Final B': 'Ending B',
   'Llegas tarde': 'You arrive too late',
+  'Sin vuelta': 'No way back',
+  'La fuente ya no está en su sitio, y nada lo repite. Lo que ocurre, ocurre de verdad.':
+    'The source is no longer in its place, and nothing repeats it. What happens, happens for real.',
+  'El sistema cae sin un solo ciclo de reserva. Nadie volverá a las siete de la mañana.':
+    'The system falls without a single cycle to spare. Nobody will go back to seven in the morning.',
+  'Despiertas en Umbral con el cuaderno en las manos: lo que anotaste sigue ahí, y es lo único que te queda.':
+    'You wake in Threshold with the notebook in your hands: what you wrote is still there, and it is all you have left.',
   'Antes de la prueba': 'Before the test',
   'Llegas a casa con el aire de las islas todavía en el pelo y el cuaderno lleno. La Directora lo lee de pie, despacio, sin interrumpir.':
     'You arrive home with the air of the islands still in your hair and your notebook full. The Director reads it standing, slowly, without interrupting.',
