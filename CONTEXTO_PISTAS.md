@@ -1,7 +1,7 @@
 # CONTEXTO DE PISTAS — El grafo del conocimiento
 
-**Versión:** v0.15
-**Última actualización:** 2026-11-10 · Lecturas del Cerco
+**Versión:** v0.16
+**Última actualización:** 2026-11-13 · Ellos dos y los finales (plan: `docs/plan-finales.md`)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la verdad y las reglas; léelo primero) y `CONTEXTO_PLANETAS.md` (los lugares)
 
 > Este documento dice **qué se puede aprender, dónde y en qué orden**. Es el puente entre la historia y el
@@ -11,6 +11,44 @@
 > **Leyenda:** ✅ decidido por Anthony · 🟡 propuesta de Claude, por confirmar · ❓ abierto.
 > Todo lo que no lleva marca es 🟡. Los textos completos se escriben más adelante; aquí solo va qué dice cada
 > pieza y para qué sirve.
+
+---
+
+## 0. Cambios del 2026-11-13: ellos dos y los finales (se aplican en el hito E6)
+
+Anthony aprueba `docs/plan-finales.md`. Lo marcado ✅ ya manda sobre las tablas de abajo, que conservan cómo están hoy
+los datos hasta que el hito E6 los reescriba (textos en español e inglés, `"borrador": true`).
+
+**Lo que decide Anthony (✅) y toca el grafo:**
+
+- **La Cámara está en el centro del Taller**, la construyó el escéptico y la sostiene **la fuente de poder**; sacarla corta
+  el bucle (cambia la decisión 3 de §9 y `lab.camara`).
+- **El Laboratorio es un sitio donde el tiempo corre deprisa**, por el Contrapeso, contrario a la gravedad (H5 se
+  invierte: ya no es el Sitio Lento).
+- **Se quedaron dos, y viven**: la científica, congelada en el Laboratorio, y el escéptico, en el centro del Taller, que
+  recuerda cada ciclo. Se retiran o cambian `lab.dormitorio` («los tres murieron aquí»), `taller.dormitorios` («no
+  volvieron a escribir») y los hechos `silencio.uno_se_quedo` y `silencio.no_cruzaron`.
+- **La huida apagó portales** que solo se encienden desde fuera: la entrada al centro del Taller y el portal del
+  Laboratorio.
+- **Se quita el final B** y con él `puertas.planos` y el hecho `contrapeso.planos`.
+- **La investigadora pasa a ser «la científica»** en los textos (los `id` como `lab.notas_investigadora` se revisan en E6).
+- **Muchos registros pasan a ser personales**, de ella o de él, para que se entienda que se amaron, se separaron y querían
+  lo mismo.
+
+**Lo que propone el plan (🟡, pendiente de Anthony):**
+
+| Cambio | Qué |
+|---|---|
+| **K1 cambia de sentido** | «Existe un sitio donde el tiempo corre deprisa». Sus seis fuentes se leen al revés: acuses de recibo con fechas por delante, el reloj sin nombre de la Sala de Relojes 5 veces más rápido, la cabina del Taller con ×5, la carta de Umbral («para ti han pasado meses; aquí, una semana»), las fichas del escritorio fechadas en días que aún no han pasado y la grabación del escéptico acelerada (se entiende a ×0,2) |
+| **H1 se vuelve esencial** | K9 · Dónde está el bucle y cómo se corta: el centro del Taller, `archivo.fondo_canon` (la orden), `umbral.boca` (la grieta que cosen), cartas de ella |
+| **K10 · Los portales caídos** | Se encienden desde fuera poniendo en hora su reloj: `taller.pista`, `cicatriz.bitacora`, `cicatriz.partidas`, una carta de él |
+| **H6 crece** | El Contrapeso necesita la fuente de poder: las notas de ella, las páginas que guardó él |
+| **H8 · Ellos dos** (no esencial) | Quiénes eran: las cartas, los dos signos (ella, un rombo con un punto; él, dos triángulos que se tocan), el comedor para dos, las rayas de las paredes |
+| **H3 crece** | Las fluctuaciones de la huida apagaron portales y dejaron a los dos encerrados |
+| Hechos nuevos | `bucle.horizonte_tarde`, `bocas.arrastre`, `casa.motor_energia`, `contrapeso.contra_gravedad`, `contrapeso.necesita_bucle`, `partida.portales_caidos` y los de H8 |
+| Personales | Lo técnico y lo oficial se queda impersonal; lo escrito a mano pasa a ser de ella o de él. Primero, su biblia en `docs/biblia-textos.md` |
+
+Reglas: K9 y K10 con fuentes en dos mundos o más, y K10 se aprende fuera del Laboratorio (regla 7).
 
 ---
 
@@ -35,15 +73,16 @@ Tres piezas (🟡):
 
 El Registro se organiza por **hilos** (preguntas), no por mundos. Cada hilo termina en una respuesta.
 
-| Hilo | Pregunta del jugador | Respuesta final (lo que se entiende al cerrarlo) | ¿Esencial para el final A? |
+| Hilo | Pregunta del jugador | Respuesta final (lo que se entiende al cerrarlo) | ¿Esencial para el final bueno? |
 |---|---|---|---|
-| **H1 · El bucle** | ¿Por qué vuelvo a despertar frente a La Boca? | La Cámara de los Ausentes sostiene los últimos 15 minutos usando el instante del colapso; sigue sola desde que ellos se fueron | No (da sentido) |
+| **H1 · El bucle** | ¿Por qué vuelvo a despertar frente a La Boca? | La Cámara sostiene los últimos 15 minutos usando el instante del colapso. ✅ La construyó el escéptico en el centro del Taller; sacar su fuente de poder lo corta (2026-11-13) | Hoy no; 🟡 sí desde E6 (K9) |
 | **H2 · La deuda** | ¿Qué causa el agujero negro? | Cada uso de una Puerta separa sus dos relojes; al pasar el Límite colapsa. La red contagia el colapso a todas | Sí (para entender el Contrapeso) |
 | **H3 · La Gran Partida** | ¿Qué les pasó a los Ausentes? | Murieron huyendo por las mismas Puertas que los condenaban; la evacuación aceleró la cascada | No (núcleo emocional) |
-| **H4 · El silencio** | ¿Por qué nadie lo detuvo? | El Consejo ocultó el peligro; la investigadora y el escéptico trabajaron en secreto | No (núcleo moral) |
-| **H5 · El Laboratorio** | ¿Dónde investigaban de verdad? | En el Sitio Lento, escondido tras la lente del Nudo: lo que se ve en el cielo está desplazado | **Sí** |
+| **H4 · El silencio** | ¿Por qué nadie lo detuvo? | El Consejo ocultó el peligro; la científica y el escéptico trabajaron en secreto | No (núcleo moral) |
+| **H5 · El Laboratorio** | ¿Dónde investigaban de verdad? | En un sitio donde el tiempo corre deprisa (✅ 2026-11-13; antes, el Sitio Lento), escondido tras la lente del Nudo: lo que se ve en el cielo está desplazado | **Sí** |
 | **H6 · El Contrapeso** | ¿Cómo se detiene? | Sustituir el motor de la máquina de Cicatriz por el Contrapeso, con su reloj sincronizado, durante el pulso | **Sí** |
-| **H7 · Volver a casa** | ¿Cómo y cuándo vuelvo? | Las bocas tienen relojes distintos; hay que salir por la que llega antes de la prueba mayor del Instituto | **Sí** (epílogo) |
+| **H7 · Volver a casa** | ¿Cómo y cuándo vuelvo? | Las bocas tienen relojes distintos; hay que salir por la que llega antes de la prueba mayor del Instituto (✅ días después de despegar, nunca antes) | **Sí** (epílogo) |
+| **H8 · Ellos dos** 🟡 | ¿Quiénes eran los dos que se quedaron? | Se amaban, discutieron, se separaron y querían lo mismo; aislados, el jugador es la pieza que falta | No (núcleo emocional) |
 
 ---
 
@@ -62,6 +101,8 @@ compacta** cerca del Laboratorio. Antes del minuto 13:30 todavía no hay agujero
 - ✅ (Anthony, 2026-10-28) **El Laboratorio está dentro del Nudo**, con la gravedad invertida (ver
   `CONTEXTO_PLANETAS.md` §8). 🟡 Por eso su tiempo va tan lento y por eso no se ve donde está: la luz que escapa
   del Nudo sale curvada y su imagen aparece desplazada hacia la Brasa (la regla de la lente, Fase 7).
+- ✅ (Anthony, 2026-11-13) **El tiempo del Laboratorio ya no va lento: corre deprisa**, por el Contrapeso, contrario a
+  la gravedad. El Nudo sigue siendo la masa de la lente y la semilla del agujero negro.
 
 
 ---
@@ -113,6 +154,9 @@ flowchart LR
 
 **El Observatorio** (✅ existe, opcional): K2 tiene dos fuentes sin él (Archivo y Cicatriz). El grafo no depende
 de él.
+
+**Desde el 2026-11-13** (ver §0): K1 cambia de sentido, se proponen K9 (el bucle) y K10 (los portales caídos) y el
+«final A» pasa a llamarse **el final bueno**. La tabla sigue mostrando los datos de hoy hasta E6.
 
 ---
 
@@ -183,7 +227,7 @@ final se entiende como aviso.
 | `taller.secuencia` | Evento | 7:00, 2 min | Toda la fábrica se pone en marcha | Una simulación automática de cómo se instalaba el Contrapeso: abrir el núcleo durante el pulso, sacar el motor, encajar el Contrapeso (K4, K6) | `contrapeso.que_es`, `contrapeso.ventana_pulso` · H6 |
 | `taller.pista` 🟡 | Observación (puzzle) | Siempre | El reloj de la Pista de Pruebas, desajustado, con dos ruedas | Ajustarlo a la hora del Taller enseña a comparar relojes de sitios distintos; con él en hora, el anillo de la Pista se abre a las 7:00 (Fase 11F) | `contrapeso.medir_desfase` · H6 |
 | `taller.paginas` 🟡 | Texto | Sala del Centro (por el anillo de la Pista) | Las páginas de sincronización que faltan en el manual | La cuenta para corregir el reloj del Contrapeso según la ruta (K5); segunda fuente de la cuenta, con `lab.pizarra` (✅ opción B, Fase 11F) | `contrapeso.cuenta_sincronia` · H6 |
-| `taller.dormitorios` | Texto | Siempre | Literas y objetos personales | El técnico nombra a la investigadora y al escéptico: "se fueron al sitio lento y no volvieron a escribir" | `silencio.dos_investigadores` · H4, H5 |
+| `taller.dormitorios` | Texto | Siempre | Literas y objetos personales | El técnico nombra a la investigadora y al escéptico: "se fueron al sitio lento y no volvieron a escribir". **Cambia en E6** (✅ 2026-11-13: los dos viven) | `silencio.dos_investigadores` · H4, H5 |
 
 ### 5.5 Cicatriz — el origen (reloj 0,60 y bajando)
 
@@ -219,10 +263,12 @@ Además hay cinco fuentes de ambiente (fuera del grafo, sin hechos) que cuentan 
 `observatorio.relojes` («Umbral» y «Aquí», que se separan), `observatorio.carta` (el Consejo ordena no enviar las
 mediciones) y `observatorio.relevo` (el registro del hangar; el último relevo «no trae papel»). Textos en borrador.
 
-### 5.7 Laboratorio Oculto — el Sitio Lento (reloj 0,20)
+### 5.7 Laboratorio Oculto — el sitio rápido (✅ 2026-11-13; los datos aún dicen reloj 0,20)
 
-Llegar aquí cuesta casi un ciclo entero (modo B ✅): cada minuto real son cinco de fuera. Lo que se lee aquí
-**cierra** hilos, no los abre.
+Hoy en los datos, llegar aquí cuesta casi un ciclo entero (modo B ✅): cada minuto real son cinco de fuera. ✅ Desde el
+2026-11-13 es al revés: dentro el tiempo corre deprisa y el ciclo casi no avanza; además su portal lo apagó la huida y
+se enciende desde fuera, y en el lugar de la Cámara está la científica, congelada. Lo que se lee aquí **cierra** hilos,
+no los abre.
 
 | id | Tipo | Superficial | Profunda | Hechos · Hilos |
 |---|---|---|---|---|
@@ -230,9 +276,9 @@ Llegar aquí cuesta casi un ciclo entero (modo B ✅): cada minuto real son cinc
 | `lab.notas_investigadora` | Texto | Últimas notas de la investigadora | El Contrapeso está terminado pero sin probar; "un sistema joven ha empezado a llamar" (K4, K8) | `contrapeso.terminado`, `casa.prueba_llama` · H6, H7 |
 | `lab.notas_esceptico` | Texto | Notas del escéptico | Su advertencia completa y por qué nadie lo escuchó | `silencio.advertencia` · H4 |
 | `lab.orden_silencio` | Texto | La orden de callar | Firmada por el Consejo de Tránsito (❓ quién firma) | `silencio.orden` · H4 |
-| `lab.dormitorio` | Objeto | Dos camas, una sola usada | ✅ Los tres murieron aquí, trabajando en tiempo lento hasta el final (CONTEXTO_HISTORIA §4) | `silencio.uno_se_quedo` · H3, H4 |
+| `lab.dormitorio` | Objeto | Dos camas, una sola usada | Los tres murieron aquí, trabajando en tiempo lento hasta el final (✅ 2026-10-29, **sustituido** el 2026-11-13: se quedaron dos y viven; se retira o se reescribe en E6) | `silencio.uno_se_quedo` · H3, H4 |
 | `lab.contrapeso` | Objeto (se coge) | El Contrapeso | Se lleva a Cicatriz **en el mismo ciclo** (los objetos no persisten) | — · H6 |
-| `lab.camara` | Objeto + texto | La Cámara (✅ está aquí) | Notas de quien la construyó, con su culpa (H1) | `bucle.camara`, `bucle.culpa` · H1 |
+| `lab.camara` | Objeto + texto | La Cámara (✅ 2026-10-25, **sustituido** el 2026-11-13: pasa al centro del Taller; aquí queda la cámara de frío de ella) | Notas de quien la construyó, con su culpa (H1) | `bucle.camara`, `bucle.culpa` · H1 |
 
 🟡 **Propuesta de la Fase 11 (Laboratorio por código):** las siete fuentes llevan **borradores** (`"borrador": true`) con
 los mismos hechos; la firma de la orden sigue sin decidirse (está emborronada, ❓). Además, cinco fuentes de
@@ -252,9 +298,9 @@ los necesita. Textos `[texto pendiente]` para Anthony.
 
 | Fuente | Tipo | Superficial | Profunda | Hecho(s) · hilo |
 |---|---|---|---|---|
-| `puertas.rastros` 🟡 | Texto | El muro curvo con filas de signos de quienes llegaron antes, cada fila en otra escritura; la última, en blanco | (con `silencio.dos_investigadores`) Los nombres de los tres del Laboratorio no están: no llegaron a cruzar | `puertas.otros_viajeros` · H3; `silencio.no_cruzaron` · H5 |
+| `puertas.rastros` 🟡 | Texto | El muro curvo con filas de signos de quienes llegaron antes, cada fila en otra escritura; la última, en blanco | (con `silencio.dos_investigadores`) Los nombres de los tres del Laboratorio no están: no llegaron a cruzar. 🟡 Desde el 2026-11-13: los de ellos dos no están porque no se fueron | `puertas.otros_viajeros` · H3; `silencio.no_cruzaron` · H5 |
 | `puertas.bocas` 🟡 | Objeto (lector `bocas`) | Las cuatro bocas de casa y lo que se ve al otro lado (una cerrada: "pronto"); con K7, su desfase; con K8, el día de la prueba | (con `bocas.relojes_distintos`) Se anota al cruzar por la que deja antes de la prueba | `bocas.vuelta_antes` · H7 |
-| `puertas.planos` 🟡 | Objeto ("E · coger" / "E · dejar") | Los planos del Contrapeso en el Banco; llevarlos o no es la decisión última | — | `contrapeso.planos` · H6 |
+| `puertas.planos` 🟡 | Objeto ("E · coger" / "E · dejar") | Los planos del Contrapeso en el Banco; llevarlos o no es la decisión última. **Se quita** (✅ 2026-11-13, sin final B) | — | `contrapeso.planos` · H6 |
 
 🟡 **Propuesta de la Fase 11 (Puertas por código):** las tres fuentes tienen ya **borradores** con los mismos hechos, y
 hay tres de **ambiente** (fuera del grafo, sin hechos): `puertas.ofrendas` (lo que dejaron otros viajeros),
@@ -317,11 +363,12 @@ textos de ambiente sin peso en el grafo.
 |---|---|---|---|
 | 1 | ¿Qué masa dobla la luz y frena el tiempo del Laboratorio? | **El Nudo**: la garganta de la primera Puerta, semilla del agujero negro (sección 3) | ✅ Anthony |
 | 2 | ¿Cuándo se puede instalar el Contrapeso? (pregunta 7 de la historia) | Solo durante el **pulso de las 9:00**, cuando el núcleo se abre; antes hay que sacar el motor viejo | ✅ Anthony (durante el pulso) · 🟡 sacar el motor viejo |
-| 3 | ¿Dónde está la Cámara? (H1) | En el Laboratorio, con las notas de quien la construyó | ✅ Anthony |
+| 3 | ¿Dónde está la Cámara? (H1) | En el centro del Taller; la construyó el escéptico y la sostiene su fuente de poder (antes: en el Laboratorio) | ✅ Anthony (2026-11-13) |
 | 4 | ¿Quién firma la orden de silencio? (pregunta 18) | "El Consejo de Tránsito, en pleno": siete signos, uno tachado (quien votó en contra) | ✅ Anthony (2026-11-06) · ❓ quién votó en contra |
 | 5 | ¿Las grabaciones suenan al ritmo del reloj donde se grabaron? | Sí, es la mecánica de lectura de `cicatriz.grabacion_esceptico` (ya propuesta en la historia §6) | ✅ Anthony (plan de la Fase 7, 2026-10-28) |
 | 6 | ¿Existe el Observatorio? | Sí, como extra opcional; el grafo no depende de él | ✅ Anthony |
 | 7 | El hueco con el símbolo de casa en `cicatriz.lista_mundos` | La red ya incluye el sistema del protagonista | 🟡 |
+| 8 | ¿Cómo entran ellos dos en el Registro? | H1 esencial (K9), K10 (los portales caídos), H8 · Ellos dos (no esencial), K1 al revés (§0) | 🟡 |
 
 ## 10. Cómo se lee (✅ Anthony, 2026-10-25)
 
@@ -346,7 +393,7 @@ textos de ambiente sin peso en el grafo.
 
 ### Lecturas del Cerco (🟡, 2026-11-10)
 
-Cinco fuentes **de ambiente** (`"ambiente": true`, sin hechos ni lectura profunda; no cuentan para el grafo) en los dos anclajes de la estructura que rodea la Brasa (`data/pistas/anclajes.json`, inglés en `i18n/clues/anclajes.en.json`): `cerco.placa_obra`, `cerco.mando` y `cerco.receptor` (Anclaje Norte) y `cerco.diario_obra` y `cerco.acta` (Anclaje Sur). Cuentan la apuesta del Consejo por la energía de la estrella (H4, el silencio, visto desde otro lado) y enlazan con la petición rechazada de la Sala Cerrada. Si Anthony las quiere en el Registro, pasarían a un hilo H8 con hechos propios (decisión abierta).
+Cinco fuentes **de ambiente** (`"ambiente": true`, sin hechos ni lectura profunda; no cuentan para el grafo) en los dos anclajes de la estructura que rodea la Brasa (`data/pistas/anclajes.json`, inglés en `i18n/clues/anclajes.en.json`): `cerco.placa_obra`, `cerco.mando` y `cerco.receptor` (Anclaje Norte) y `cerco.diario_obra` y `cerco.acta` (Anclaje Sur). Cuentan la apuesta del Consejo por la energía de la estrella (H4, el silencio, visto desde otro lado) y enlazan con la petición rechazada de la Sala Cerrada. Si Anthony las quiere en el Registro, pasarían a un hilo con hechos propios (decisión abierta; 🟡 desde el 2026-11-13 el H8 se propone para «Ellos dos», así que el del Cerco sería el H9).
 
 ## 12. Bitácora
 
@@ -374,3 +421,4 @@ Cinco fuentes **de ambiente** (`"ambiente": true`, sin hechos ni lectura profund
 - **2026-11-10 · T8 del plan de historia (🟡).** P6, la Balanza del Contrapeso del Taller (Arquímedes y la palanca): pesas de 1, 2 y 3 en seis muescas hasta equilibrar la maqueta del motor viejo (seis medidas a dos del eje); equilibrada, `taller.nota_cuna` se puede leer y da además `contrapeso.equilibrio`. Su pista es la placa del motor viejo de Cicatriz (`cicatriz.placa_motor`, `contrapeso.motor_medidas`). P7, la placa que canta de la Fundición de Cicatriz (Chladni): tres pinzas en los agujeros 1, 3 y 5 forman el símbolo (`cicatriz.placa`, lector `placa`; da `cicatriz.firma` y `deuda.resonancia`, ya dada por `archivo.viga`). Fuentes de ambiente nuevas: `taller.pesa_1`-`3` y `taller.balanza`. Total: 75 fuentes en el grafo y 86 hechos. El Nudo muestra un brillo tenue de su Puerta a menos de 300 m.
 - **2026-11-07 · T7 del plan de historia (🟡).** P4, la Cisterna del Fondo del Cañón: siete partes de piedra (la madera flota) llenan la pila y dejan alcanzar `archivo.fondo_canon`; su pista es la hoja de carga de los silos de Umbral (`umbral.hoja_carga`, hecho `archivo.cisterna_lastre`). P3, los péndulos: cinco péndulos de una viga de cobre en la Sala Cerrada (una cámara sellada del pasillo de los cajones, a la que se entra por la trampilla del Índice) que solo se desacoplan con los largos 1, 3, 2, 5, 4 (la escalera del Contrapeso, que se lee en `taller.cuna` y `cicatriz.sala_motor`, hecho `contrapeso.escalera`). La viga (`archivo.viga`, lector `pendulos`) da `deuda.resonancia` y `contrapeso.desafina`; dentro: `archivo.informe_original` (`deuda.es_de_tiempo`, `deuda.limite`), `archivo.peticion` (`partida.aviso_ignorado`) y `archivo.modelo_red` (`casa.en_la_red`); más fuentes de ambiente `archivo.cisterna`, `bloques_1`-`3`, `tablones` y `pendulos`. Total: 73 fuentes en el grafo y 83 hechos.
 - **2026-11-06 · T6 del plan de historia (🟡).** P2, el Planetario de la Gran Nave del Archivo: cinco esferas (rueda dentada, mordida, gota, anillo y cúpula) a sus rieles, el quinto vacío; la manivela se para a las 6:30. Fuente `archivo.planetario` (lector `planetario`) con los hechos `observatorio.alineacion` y `lab.riel_vacio`, más cinco fuentes de ambiente `archivo.esfera_*`. P5, el prisma: `archivo.prisma` y `archivo.soporte` (ambiente); la tablilla `archivo.ranura_luz` no se alcanza hasta encajar el prisma. Total: 68 fuentes en el grafo y 77 hechos. La hora de las 6:30 ya solo se aprende aquí (el telescopio del Observatorio no la da).
+- **2026-11-13 · Ellos dos y los finales.** Anthony aprueba `docs/plan-finales.md` (✅): la Cámara pasa al centro del Taller (decisión 3) y la sostiene la fuente de poder; el Laboratorio corre deprisa (H5 se invierte); se quedaron dos y viven, así que `lab.dormitorio`, `taller.dormitorios`, `silencio.uno_se_quedo` y `silencio.no_cruzaron` cambian; la huida apagó portales; se quita el final B (`puertas.planos`, `contrapeso.planos`); los registros pasan a ser personales. Se proponen (🟡) K1 al revés, H1 esencial con K9, K10, H8 · Ellos dos y seis hechos nuevos (§0). Los datos cambian en el hito E6.

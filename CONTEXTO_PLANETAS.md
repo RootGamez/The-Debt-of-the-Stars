@@ -1,7 +1,7 @@
 # CONTEXTO DE PLANETAS — La deuda de las estrellas
 
-**Versión:** v0.19
-**Última actualización:** 2026-11-10 · Soles modelados, el Cerco y la luz real
+**Versión:** v0.20
+**Última actualización:** 2026-11-13 · Ellos dos y los finales (plan: `docs/plan-finales.md`)
 **Documentos hermanos:** `CONTEXTO_HISTORIA.md` (la historia; léelo primero) · `CONTEXTO_PISTAS.md` (qué se aprende en cada lugar)
 
 > Cada mundo está pensado a la vez como **lugar jugable**, **pieza narrativa** y **lección de relatividad**. Todo lo de este documento es propuesta (🟡) para reaccionar, salvo lo marcado ✅, que viene de las decisiones ya tomadas en `CONTEXTO_HISTORIA.md`.
@@ -36,13 +36,13 @@
 | **Taller** | 45 m | 0.6 | 0.85 | Órbita rapidísima | Dilatación por velocidad y gemelos | 13:45 a 14:00 |
 | **Cicatriz** | 80 m | 1.2 | 0.60 y bajando | Cerca de la maquinaria | Todo junto: marea, desfase, lente | 13:30 a 13:45 |
 | **Observatorio** | 30 m | 0.2 | 1.15 | Lejos de la masa | Luz finita y lente gravitacional | 14:45 a 15:00 (el último) |
-| **Laboratorio Oculto** | 25 m | 0.3 | 0.20 | Muy cerca de la masa | Dilatación extrema | No llega a absorberse (❓) |
+| **Laboratorio Oculto** | 25 m | 0.3 | 🟡 5.00 (hoy 0.20 en los datos) | ✅ La burbuja del Contrapeso, contrario a la gravedad (2026-11-13; antes, cerca de la masa) | Tiempo que corre deprisa | No llega a absorberse (❓) |
 
 ### El Cerco y sus anclajes (✅ la idea, Anthony 2026-11-10; 🟡 el detalle)
 
 Alrededor de la Brasa, dentro de la órbita del Taller, los Ausentes empezaron a levantar una estructura para **sacar energía de su estrella**: dos anillos (radios de 260 y 280 m) que **giran en sentidos opuestos** alrededor del eje de los polos y **solo se unen en dos puntos**, los polos, donde hay dos estaciones lo bastante grandes para desembarcar: **Anclaje Norte** y **Anclaje Sur** (esferas de 40 m; nombres ❓). El Consejo, en lugar de buscar una solución al problema de las Puertas, apostó por esta obra; al darse cuenta de que el tiempo no alcanzaba (cuarenta años de obra contra nueve de margen), la dejó **a medias** y no pudo concretar el plan. Los anillos, terminados un 70 % y un 45 %, tienen tramos de captadores, de armazón, de andamio con grúa y huecos con dovelas a la deriva.
 
-- 🟡 **Para qué quería la energía:** el Consejo creía en el modelo del «préstamo de energía» (el que se descartó como mecanismo real): pagar la deuda a base de energía. La investigadora sabía que la deuda es **de tiempo**. Es el porqué de la petición rechazada de la Sala Cerrada del Archivo.
+- 🟡 **Para qué quería la energía:** el Consejo creía en el modelo del «préstamo de energía» (el que se descartó como mecanismo real): pagar la deuda a base de energía. La científica sabía que la deuda es **de tiempo**. Es el porqué de la petición rechazada de la Sala Cerrada del Archivo.
 - 🟡 **Cada anclaje:** casquete exterior (lejos de la estrella, a oscuras: pista de atraque, casa y placa) y casquete interior (cara al sol: el receptor en el Norte, el almacén de captadores con tragaluz en el Sur), unidos por una Puerta plegada (`PASO_Eje` ↔ `PASO_Sol`). Un tambor alrededor del ecuador (el cojinete donde giran los brazos de los anillos) no se pisa. El tiempo va algo más lento que en Umbral (0,92).
 - 🟡 **Lecturas** (cinco, de ambiente, sin hechos; borradores): la placa de la obra, la pizarra del mando y el receptor en el Norte; el diario del capataz y el acta de la elección en el Sur.
 - Opcionales: no entran en las reglas del grafo (como el Observatorio).
@@ -75,11 +75,11 @@ Alrededor de la Brasa, dentro de la órbita del Taller, los Ausentes empezaron a
 **Lugares clave:**
 1. **La Boca.** Un anillo de piedra y metal en una meseta baja. El protagonista aparece frente a él en cada ciclo. No es un portal brillante: es un anillo apagado con una grieta de luz que se cierra a su espalda.
 2. **El Muelle de Envíos.** Plataforma donde preparaban cargas. Aquí está el registro de envíos con un destino que no figura en ningún mapa (pista de *dónde*).
-3. **El Mirador del Ocaso.** Un banco de piedra frente a la estrella, con dos tazas talladas. Alguien esperaba a alguien. Pura melancolía. (🟡 Está en el terminador: como Umbral siempre muestra la misma cara a la Brasa, desde el Mirador la estrella toca el horizonte en un ocaso que no termina.)
+3. **El Mirador del Ocaso.** Un banco de piedra frente a la estrella, con dos tazas talladas. Alguien esperaba a alguien. Pura melancolía. (✅ Anthony, 2026-11-13: la cinemática del final bueno los muestra a ellos dos sentados juntos en Umbral; 🟡 aquí, en este banco.) (🟡 Está en el terminador: como Umbral siempre muestra la misma cara a la Brasa, desde el Mirador la estrella toca el horizonte en un ocaso que no termina.)
 4. **El Aula.** Una sala con inscripciones infantiles que refuerzan lo aprendido de la lengua.
 5. **Las Casas.** Seis casas con las mesas servidas, abandonadas sin señal de violencia.
 
-**Evento del ciclo.** Hacia el minuto 5, anillos de luz se curvan en el cielo (primeras señales). Hacia el 10, La Boca vuelve a abrirse un instante: su destello se ve desde otros mundos.
+**Evento del ciclo.** Hacia el minuto 5, anillos de luz se curvan en el cielo (primeras señales). Hacia el 10, La Boca vuelve a abrirse un instante: su destello se ve desde otros mundos. 🟡 (plan de finales) La apertura dura unos 20 s y deja ver el cielo de Hogar: contesta la llamada de casa, y cruzarla es el camino fácil, el final malo.
 
 **Puzzle principal.** *El cuaderno del turno.* Un Ausente anotaba la hora de Umbral y, al lado, la del Archivo. Las columnas se separan poco a poco. Enseña el desfase sin explicarlo.
 
@@ -137,12 +137,12 @@ Alrededor de la Brasa, dentro de la órbita del Taller, los Ausentes empezaron a
 
 **Evento del ciclo.** Hacia el minuto 4, la luz de la Brasa entra por una ranura y dura unos 90 segundos sobre una tablilla concreta. Solo se lee si estás allí en ese momento.
 
-**Puzzle principal.** *Las respuestas que llegan antes.* Hay cartas que contestan antes de haber sido enviadas. La Sala de Relojes explica que fueron escritas en relojes distintos. Al reordenarlas se descubre que el informe de la investigadora fue archivado tres veces, con tres fechas, y que algo se borró cada vez.
+**Puzzle principal.** *Las respuestas que llegan antes.* Hay cartas que contestan antes de haber sido enviadas. La Sala de Relojes explica que fueron escritas en relojes distintos. Al reordenarlas se descubre que el informe de la científica fue archivado tres veces, con tres fechas, y que algo se borró cada vez.
 
 **Textos clave:**
 - El informe oficial (versión tranquilizadora).
 - El hueco censurado del Índice.
-- Una nota del archivista: "faltan cuarenta días que no recuerdo haber archivado" (primera señal de que existe un lugar con un tiempo mucho más lento).
+- Una nota del archivista: "faltan cuarenta días que no recuerdo haber archivado" (primera señal de que existe un lugar con otro tiempo; ✅ desde 2026-11-13 ese lugar corre deprisa, y la nota se reescribe en E6).
 
 **Atmósfera.** Azul acero, gris perla, marfil, oro apagado. Luz fría por rendijas, eco de pasos, música casi inexistente.
 
@@ -160,8 +160,9 @@ Alrededor de la Brasa, dentro de la órbita del Taller, los Ausentes empezaron a
 - **Las islas quedan fijas sobre el gigante, que gira (🟡; distinto de lo propuesto).** No orbitan cada una por su cuenta. Vistas desde fuera barren el cielo a unos 7 m/s, así que aterrizar sigue exigiendo seguir al gigante. Así sus colisiones son estáticas.
 - **Caer es morir (✅).** Bajo 74 m de radio, las nubes matan (causa nueva `gas`), tanto a pie como con la nave. Las islas no tienen gravedad propia.
 - **Los puentes de luz (🟡).** A las 7:00, con la secuencia de la fábrica, se encienden puentes de luz que unen las cinco islas en cadena, de Montaje a la Pista. Solo se pueden pisar mientras dura la secuencia (2 min); fuera de ella, se pasa de isla en isla con la nave. Se encienden también las luces de cada isla.
-- **El teletransportador (✅ la condición).** Un anillo en la Pista. Se abre (un velo de luz cian) **solo durante la secuencia de las 7:00** y **con el reloj de la Pista en hora**. Ese reloj empieza cada ciclo **3 min 17 s adelantado** (🟡). Se ajusta con dos ruedas, minutos y segundos, hasta que marque lo mismo que el reloj del Taller. Al ajustarlo se anota `contrapeso.medir_desfase`.
+- **El teletransportador (✅ la condición).** Un anillo en la Pista. Se abre (un velo de luz cian) **solo durante la secuencia de las 7:00** y **con el reloj de la Pista en hora**. Ese reloj empieza cada ciclo **3 min 17 s adelantado** (🟡; desde 2026-11-13, ese desfase es la fluctuación de la huida, ver la Sala del Centro). Se ajusta con dos ruedas, minutos y segundos, hasta que marque lo mismo que el reloj del Taller. Al ajustarlo se anota `contrapeso.medir_desfase`.
 - **La Sala del Centro (🟡).** Un núcleo de roca de 8 m de radio, en el centro del gigante. Se camina por encima y la gravedad tira hacia el centro. Lo rodea una cáscara oscura de 20 m, con anillos e **indicaciones talladas** que brillan en violeta. En un atril están **las páginas de sincronización** (✅ opción B: lo que falta para instalar el Contrapeso). Otro anillo, siempre abierto, devuelve a la Pista.
+- **La casa del escéptico (✅ Anthony, 2026-11-13; plan `docs/plan-finales.md`).** En el centro del Taller vive **el escéptico**, profundamente deprimido, junto a **la Cámara**, la máquina del bucle que construyó, y **su fuente de poder**: sacarla corta el bucle. **Recuerda cada ciclo.** El portal de la Pista **lo apagó la huida** y solo se enciende desde fuera: su salida está rota, así que el anillo de vuelta siempre abierto se quita. Se le convence **enseñándole el Contrapeso**; entonces entrega la fuente y **lo saca el jugador** por ese portal. Menciona que desde su taller abre portales cortos sin nave. 🟡 La Sala se rehace como su casa: la Cámara (dos anillos cruzados alrededor de la fuente), su catre, las páginas que guardó de ella, cartas sin enviar y las paredes llenas de rayas, una por vuelta; el portal de la Pista es obra suya y el desfase de su reloj, la fluctuación de la huida.
 
 **Idea.** Un diminuto planeta de talleres que gira tan rápido que amanece cada tres minutos, donde las máquinas siguen trabajando para nadie. Lo más inquietantemente vivo del sistema.
 
@@ -264,23 +265,25 @@ Sustituye a la "plataforma exterior para mirar" (fuera no hay aire).
 **Idea.** Un laboratorio pequeño, íntimo, abandonado con prisa, donde se hacía la investigación que nadie debía ver.
 
 > ✅ Decidido (Anthony, 2026-10-28): **el Laboratorio está dentro del Nudo**, en un sitio con la **gravedad invertida**: se camina por la cara interior de una esfera hueca.
+>
+> ✅ Decidido (Anthony, 2026-11-13; plan `docs/plan-finales.md`): **cerca del Contrapeso el tiempo corre deprisa** (es contrario a la gravedad) y dentro el ciclo casi no avanza. **La científica está aquí, congelada**: su portal lo apagó la huida y solo se enciende desde fuera; hay que encenderlo, llegar y despertarla. Recién despertada dice que, cuando se sienta mejor, irá a ver si él está bien. **La Cámara ya no está aquí**: pasa al centro del Taller.
 
 **Forma.** El Nudo y el Laboratorio son un solo sitio (🟡 cómo):
 - **El Nudo** es la garganta de la primera Puerta, que se cerró mal y quedó plegada sobre sí misma. Por fuera, una **cáscara negra** de 25 m de radio (negro sobre negro: casi no se ve), con una Puerta de anillos de los Ausentes y un pequeño muelle donde posarse.
 - **Por dentro**, una cavidad de 21 m de radio donde **la gravedad empuja hacia fuera**: el suelo se curva hacia arriba a tu alrededor y, en el centro, cuelga la **semilla** del Nudo (lo que despierta a las 13:30), negra, con un halo frío y tres anillos que giran muy despacio. Franjas oscuras cada 30° de latitud (los estratos) ayudan a orientarse.
-- **Se entra por una Puerta plegada**: el anillo de la cáscara y su gemelo de la cara interior comparten el paso; al cruzar uno se aparece delante del otro. Dentro no llega la Brasa: luce la semilla.
-- Gravedad 0.3. Tan cerca de la masa que su tiempo corre unas **cinco veces más lento** que fuera.
+- **Se entra por una Puerta plegada** (✅ apagada por la huida; 🟡 se enciende poniendo en hora un reloj en el muelle de la cáscara): el anillo de la cáscara y su gemelo de la cara interior comparten el paso; al cruzar uno se aparece delante del otro. Dentro no llega la Brasa: luce la semilla.
+- Gravedad 0.3. ✅ Su tiempo corre deprisa por el Contrapeso (🟡 unas cinco veces más rápido que fuera; antes era cinco veces más lento).
 - Inspiración general: un lugar escondido dentro de otro cuerpo. La forma, la historia y el lenguaje visual son propios.
 
-**Lo que el jugador siente.** Al entrar, todo se mueve más despacio: la llama de una vela, un reloj de pared, el polvo. El HUD lo confirma. Quienes trabajaron aquí vivieron *meses* mientras fuera pasaban *años*.
+**Lo que el jugador siente.** ✅ Al revés desde 2026-11-13: dentro, el tiempo corre deprisa. 🟡 La llama de una vela, el reloj de pared y el polvo van acelerados, y se calman cuando se llevan el Contrapeso. El HUD lo confirma: el ciclo casi no avanza. Ella vivió *años* mientras fuera pasaban *meses*, y por eso se congeló. (Antes: todo se movía más despacio.)
 
 **Lugares clave** (repartidos por la cara interior y unidos por senderos con farolas):
 1. **La Sala de Trabajo.** Una pizarra con una ecuación a medias y el armario con la orden de silencio (sobre sellado).
 2. **El Dormitorio compartido.** Un cuarto sin techo con dos camas, una sola con huellas de uso.
-3. **El Banco del Contrapeso.** Donde estaba el artilugio, o lo que queda de él.
-4. **El Escritorio de la Investigadora.** Sus últimas notas y el reloj de mesa de aguja casi quieta.
+3. **El Banco del Contrapeso.** Donde estaba el artilugio, o lo que queda de él. 🟡 Rehecho para contar a los dos: una mesa partida en dos lados, el de ella vivo y el de él vacío (el hueco de sus herramientas, su signo rayado en la madera).
+4. **El Escritorio de la Científica.** Sus últimas notas y el reloj de mesa de aguja casi quieta.
 5. **El Escritorio del Escéptico.** La silla tumbada, la funda vacía de su grabadora y una carta del cielo con una flecha a lápiz.
-6. **La Cámara.** Dos anillos cruzados, un asiento y un dial de 24 marcas con el último cuarto encendido.
+6. **La cámara de frío** (✅ ella, congelada; antes, la Cámara del bucle, que pasa al Taller). 🟡 Dos anillos cruzados alrededor de un lecho de escarcha, con ella dentro y su signo en el pecho.
 7. **El Recibidor.** La Puerta gemela por donde se entra.
 
 🟡 **Propuesta de la Fase 11 (por código):** la cara interior es un **tablero de ajedrez en espiral** que se enrosca de
@@ -290,11 +293,11 @@ las cosas que el Laboratorio perdió por la gravedad invertida (papeles, libros,
 más, unidas por senderos: el **Archivo de Mediciones**, el **Cuarto de la Radio**, el **Comedor** (con el calendario de
 rayas) y el **Invernadero**.
 
-**Textos clave:** las últimas notas de la investigadora; las del escéptico; el documento que ordena callar (y quién lo firma ❓).
+**Textos clave:** las últimas notas de la científica; las del escéptico; el documento que ordena callar (y quién lo firma ❓).
 
-**Atmósfera.** Verde grisáceo clínico, blanco roto, luz de lámpara cálida. Un tictac lentísimo. Es el lugar más triste y humano del juego.
+**Atmósfera.** Verde grisáceo clínico, blanco roto, luz de lámpara cálida. 🟡 Un tictac acelerado. Es el lugar más triste y humano del juego.
 
-**Cómo se llega.** Solo con las pistas de todos los mundos: ver la imagen en el Observatorio, corregir su posición con lo aprendido en Archivo y Taller, y usar la grabación del escéptico de Cicatriz como confirmación.
+**Cómo se llega.** Solo con las pistas de todos los mundos: ver la imagen en el Observatorio, corregir su posición con lo aprendido en Archivo y Taller, y usar la grabación del escéptico de Cicatriz como confirmación. ✅ Además, su portal hay que encenderlo desde fuera (2026-11-13).
 
 ---
 
@@ -320,11 +323,13 @@ rayas) y el **Invernadero**.
 5. **El vuelo.** Tutorial de la nave en un trayecto corto y seguro.
 6. **La Luna.** El fragmento grande; el jugador se acerca; el espacio se pliega y se abre el gusano.
 
-**Al volver (final):** el mismo Instituto en otro estado: antes de la prueba mayor, con la Sala de Fragmentos más vacía y la gente más joven.
+**Al volver (final):** ✅ (Anthony, 2026-11-13) en el final bueno se llega **días después de despegar** (nunca antes: sería una paradoja) y se advierte a la Maestra; en el malo, **años después**, y el agujero nace también en casa. 🟡 Tres días después: el nido con la Maestra, una mordida nueva en la Luna y Ool mirando al cielo. Diez años después: la ciudad con luz del Motor, anillos por la costa, la Puerta Mayor terminada y un recuerdo al explorador perdido. (Antes: el Instituto antes de la prueba, con la gente más joven; se quita.)
 
-🟡 **Cómo quedó (Fase 10, hito 10E).** Es el mismo Hogar con piezas sueltas que se quitan al cargar: las piedras de las vitrinas (`hogar_FragmentosVitrinas`; la vitrina de los bordes, que es una pista, se queda) y el fragmento de la Luna con sus esquirlas, su hilo de luz y su colisión (`luna_Fragmento`, `luna_Fragmento_Luz`, `COL_luna_Fragmento`). Los Ool, al 85 %. A esa hora la Luna está a unos 42° sobre el horizonte, hacia el suroeste del Instituto: desde dentro queda detrás del techo, y desde la plaza de entrada se ve bien.
+🟡 **Cómo quedó (Fase 10, hito 10E; cambia en el bloque 2 del plan de finales).** Es el mismo Hogar con piezas sueltas que se quitan al cargar: las piedras de las vitrinas (`hogar_FragmentosVitrinas`; la vitrina de los bordes, que es una pista, se queda) y el fragmento de la Luna con sus esquirlas, su hilo de luz y su colisión (`luna_Fragmento`, `luna_Fragmento_Luz`, `COL_luna_Fragmento`). Los Ool, al 85 %. A esa hora la Luna está a unos 42° sobre el horizonte, hacia el suroeste del Instituto: desde dentro queda detrás del techo, y desde la plaza de entrada se ve bien.
 
 🟡 **Cómo quedó (Fase 11G; ✅ la idea, Anthony 2026-11-03: rehacer Hogar con el cielo y el agua del Archivo, recompensar la curiosidad, el Motor con la Directora, una estructura única para la Maestra y el taller con el hangar; los Ool del color de la lámina, claros de jóvenes y más oscuros y apagados de mayores).** Hogar se hace por código (`procedural/hogar*.ts`): mar con olas como el del Archivo y cielo azul con nubes. En la cara de día, un continente con el Instituto en su colina (la Sala de Fragmentos, la Torre de Lectura de la Maestra —tambores apilados como libros, aula al aire libre y rampa en espiral hasta el balcón— y el taller de la Puerta pequeña con el nido abierto del Albatros II), la aldea, la ciudad con su mercado, los huertos con su noria, las terrazas, el embarcadero y, junto al mar, el **Motor**: la Puerta Mayor a medio hacer, con su andamio y su generador, donde espera la Directora. En la cara de noche, islas para quien se aleja: el pecio del primer Albatros, el hoyo de la primera piedra, la casa de la astrónoma y un prado de plantas de luz; y una campana hundida frente al embarcadero. Los Ool (`procedural/ool.ts`): musgo verde agua claro y muy luminoso en las crías, que se oscurece y se apaga con la edad; la Maestra y la astrónoma, las más oscuras.
+
+🟡 **El Motor (plan de finales, D11).** Saca energía de la garganta de la Puerta Mayor: es la máquina de Cicatriz reconstruida a trozos, el mismo error del Consejo con el Cerco. En el final malo, el agujero nace aquí.
 
 ---
 
@@ -335,12 +340,12 @@ y fuera del tiempo**: sin ciclo, sin reloj doble y sin nave.
 
 | Aspecto | Propuesta |
 |---|---|
-| **Cómo se llega** | Con el Contrapeso instalado, el agujero negro nace en el núcleo de la máquina de Cicatriz y se queda en 6 m. Solo se llega con la nave: a menos de 4 radios tira de ella hacia el centro (suave: se puede escapar), la marea se nota pero no mata y el tiempo del sitio cae (el reloj de Umbral se acelera en el tablero). Al cruzar el horizonte, fundido a **negro** (no cuenta ciclo) y se despierta en el Archivo |
+| **Cómo se llega** | Con el Contrapeso instalado, el agujero negro nace en el núcleo de la máquina de Cicatriz y se queda en 6 m. Solo se llega con la nave: a menos de 4 radios tira de ella hacia el centro (suave: se puede escapar), la marea se nota pero no mata y el tiempo del sitio cae (el reloj de Umbral se acelera en el tablero). Al cruzar el horizonte, fundido a **negro** (no cuenta ciclo) y se despierta en el Archivo. ✅ Desde 2026-11-13, con el bucle cortado (la fuente de poder en el Contrapeso) |
 | **Forma** | Planetoide oscuro y casi liso de 30 m, gravedad 0,5, cielo negro con estrellas |
 | **Las bocas** | Anillos de pie por todo el planetoide y otros flotando en el cielo, cada uno con una vista encendida de su lado: cientos, dice la historia; aquí unas cuarenta dan la idea |
 | **El muro de los rastros** | Un muro curvo con filas de signos de quienes llegaron antes, cada fila en otra escritura (puntos, rayas, cuñas, aros, ganchos, rombos); la última fila, lisa y más clara: en blanco, esperando |
 | **Las bocas de casa** | En una terraza frente a la llegada, cuatro bocas en arco, cada una con su reloj tallado en una estela: la Sala de Fragmentos llena, el Instituto más joven, Hogar al anochecer y una tapada con una losa ("pronto"). Delante, un atril para leerlas |
-| **El Banco** | Como el del Laboratorio, con los planos del Contrapeso enrollados encima: se cogen y se dejan |
+| **El Banco** | Como el del Laboratorio, con los planos del Contrapeso enrollados encima: se cogen y se dejan. **Se quita** (✅ 2026-11-13, sin final B) |
 | **Arte** | Unos 22.500 triángulos; cada vista de las bocas de casa tiene su propio brillo (el resto de luces del mundo, uno solo) |
 
 🟡 **Propuesta de la Fase 11 (por código):** el suelo **enseña el tiempo**: desde las bocas de casa salen anillos de luz
@@ -350,6 +355,8 @@ de luz unen los sitios. Dos sitios nuevos: **lo que dejaron** otros viajeros (un
 herramienta, piedras apiladas, un cuaderno, velas) y **la primera Puerta** de los Ausentes, partida en dos, con su fecha
 tallada. El Contrapeso también es ya por código, con el mismo aspecto.
 
+🟡 **Plan de finales (2026-11-13):** la boca buena llega a casa el día 3; las que caerían después de la prueba las arrastra la llamada de casa y caen en el colapso, años después. Una boca cerrada deja ver el Laboratorio con luz y dos figuras: semilla del final secreto.
+
 ---
 
 ## 11. Orden sugerido de exploración (🟡, no obligatorio)
@@ -358,9 +365,10 @@ tallada. El Contrapeso también es ya por código, con el mismo aspecto.
 2. **Archivo y Taller**, en cualquier orden: dónde y por qué.
 3. **Observatorio:** ver la imagen desplazada.
 4. **Cicatriz:** ver la maquinaria y escuchar la grabación del escéptico.
-5. **Laboratorio Oculto:** con todo lo anterior.
-6. **Cicatriz de nuevo:** instalar el Contrapeso con el reloj sincronizado.
-7. **Epílogo:** dentro del agujero negro.
+5. **Laboratorio Oculto:** con todo lo anterior; encender su portal desde fuera y despertarla (✅ 2026-11-13).
+6. **Taller a las 7:00:** enseñarle el Contrapeso al escéptico, que da la fuente de poder y corta el bucle; sacarlo (✅ 2026-11-13).
+7. **Cicatriz de nuevo:** instalar el Contrapeso con el reloj sincronizado.
+8. **Epílogo:** dentro del agujero negro, y la boca que llega a casa días después de despegar.
 
 Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el juego llega a 3 o 5 horas.
 
@@ -375,6 +383,7 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 5. ✅ **Prólogo:** el Instituto **y la aldea**, entera y visitable (Anthony, 2026-10-29).
 6. ✅ **Cuerpos que se mueven:** los mundos orbitan **en rieles y en tiempo real** (Anthony, 2026-10-25): su posición es una fórmula del reloj del ciclo, sin simular gravedad entre ellos. Un periodo `0` en los datos deja un mundo quieto. Valores de partida 🟡 en `web/src/data/sistema.json`.
 7. ✅ Laboratorio Oculto: sitio aparte, lente gravitacional y ocultado por el Consejo (resuelto).
+8. 🟡 Las zonas nuevas del plan de finales esperan diseño (§6 de `docs/plan-finales.md`): la cámara de frío y el Banco partido, el reloj del muelle del Nudo, la casa del escéptico, La Boca abierta, el Mirador con los dos, Hogar a los tres días y a los diez años, y el colapso de casa.
 
 ---
 
@@ -408,3 +417,4 @@ Un ciclo de 15 minutos permite visitar 2 o 3 mundos. Con 12 a 25 ciclos, el jueg
 - **2026-11-06 · T5 del plan de historia (🟡).** El tubo de la Galería del Archivo se corta con ocho mamparos de piedra (cada uno con su puerta de oro al ras del suelo) en ocho salas: el Vestíbulo de la Esclusa (78°–92°), la Sala de la Ranura (92°–110°), el Pasillo de los Cajones (110° a −115°, estrecho, con paredes de cajones), el Fondo del Cañón, la Sala de Relojes, la Gran Nave, el Índice y la Sala del Archivista. Cada una con su luz, su suelo y su mobiliario (`web/src/worlds/procedural/archivoRooms.ts`). Las fuentes siguen donde estaban. Falta la Sala Cerrada, que llega con P3.
 - **2026-11-10 · Estructuras de los puzzles físicos (T4 a T8, 🟡).** Umbral: el canal inclinado de las campanas, su estante y el atril en el Anfiteatro; la cuenta de la bola en el Aula; la hoja de carga en los silos. Archivo: el Planetario (seis rieles) y cinco pedestales de esferas en la Gran Nave; el prisma y su soporte en la Sala de la Ranura; la cisterna y sus cuatro montones en el Fondo del Cañón; la Sala Cerrada (cámara sellada del pasillo de los cajones, con la viga de los péndulos y tres fuentes) y el anillo de su trampilla junto al Índice. Taller: la Balanza del Contrapeso y tres pesas en la isla de la Cuna. Cicatriz: la placa que canta en la Fundición y la placa del motor viejo junto a la palanca. Nudo: brillo tenue de su Puerta a menos de 300 m. Detalle en `docs/plan-historia-y-puzzles-fisicos.md`.
 - **2026-11-10 · Soles y luz real (🟡, plan `docs/plan-soles-y-luz-dinamica.md`).** Anthony pide estrellas modeladas (un Sol en casa y una enana roja en el sistema ajeno), una estructura inconclusa del Consejo alrededor de la enana roja (dos anillos que giran en sentidos opuestos, unidos en dos puntos con estaciones donde desembarcar y leer) y luz dinámica real. Se hace el Cerco con sus dos anclajes, las sombras de la estrella (ventanas, edificios, eclipses y la sombra de los anillos) y la caída de la luz con la distancia.
+- **2026-11-13 · Ellos dos y los finales (✅ el plan `docs/plan-finales.md`).** El Laboratorio pasa a ser un sitio donde el tiempo corre deprisa (el Contrapeso, contrario a la gravedad) y guarda a la científica, congelada; su portal lo apagó la huida y se enciende desde fuera. La Cámara pasa al centro del Taller, que es la casa del escéptico (con la fuente de poder; su salida está rota, sin anillo de vuelta). Al volver a Hogar se llega días después de despegar (bueno) o años después (malo); se quitan el Hogar de antes y los planos del Archivo de las Puertas. Se proponen (🟡) el reloj del muelle del Nudo, La Boca abierta de 20 s, el Mirador para la cinemática final, el Motor que saca energía de la garganta y Hogar a los tres días y a los diez años.
