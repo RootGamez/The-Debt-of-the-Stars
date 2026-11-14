@@ -648,6 +648,79 @@ body {
 .reader-portrait.is-talking .tip {
   animation: talkGlow 0.45s ease-in-out infinite alternate;
 }
+/* Los dos Ausentes vivos (ui/absentPortraits.ts): piel cerámica, cobre, la cabeza de vidrio oscuro sin rostro y la
+   luz de sus dibujos y de su signo, que laten (más despacio que los filamentos) mientras hablan. */
+.portrait-absent {
+  --absent-glass: #1a2130;
+  --absent-glow: #8fe3e8;
+  --absent-copper: #a8643a;
+  --absent-sign: #b4f6ff;
+}
+.portrait-esceptico {
+  --absent-glass: #1e1f26;
+  --absent-sign: #ffd9a0;
+}
+.portrait-absent .skin {
+  fill: rgb(255 250 238 / 55%);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.portrait-absent .neck {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+.portrait-absent .head {
+  fill: var(--absent-glass);
+  stroke: var(--ink);
+  stroke-width: 2.2;
+}
+.portrait-absent .shine {
+  fill: none;
+  stroke: rgb(255 255 255 / 45%);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.portrait-absent .pattern {
+  fill: var(--absent-glow);
+  filter: drop-shadow(0 0 2px var(--absent-glow));
+}
+/* La placa de vidrio del pecho donde brilla el signo (como en el modelo): sin ella, la luz no destaca sobre el papel. */
+.portrait-absent .plate {
+  fill: var(--absent-glass);
+  stroke: var(--ink);
+  stroke-width: 1.4;
+}
+.portrait-absent .copper {
+  fill: none;
+  stroke: var(--absent-copper);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+}
+.portrait-absent .node {
+  fill: var(--absent-copper);
+}
+.portrait-absent .hatch {
+  stroke: var(--pencil);
+  stroke-width: 0.9;
+  opacity: 0.6;
+}
+.portrait-absent .sign {
+  fill: var(--absent-sign);
+  stroke: var(--absent-sign);
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px var(--absent-sign));
+}
+.portrait-cientifica polygon.sign {
+  fill: none;
+  stroke: var(--absent-sign);
+  stroke-width: 2.4;
+}
+.reader-portrait.is-talking .pattern,
+.reader-portrait.is-talking .sign {
+  animation: talkGlow 0.9s ease-in-out infinite alternate;
+}
 
 /* ---------- Grabadora y puzles: también hojas ---------- */
 .recorder,
@@ -1515,6 +1588,8 @@ body {
   .hud-book.is-pulse,
   .reader-portrait.is-talking .fil,
   .reader-portrait.is-talking .tip,
+  .reader-portrait.is-talking .pattern,
+  .reader-portrait.is-talking .sign,
   .reader.is-ready .reader-next {
     animation: none;
   }
@@ -1541,7 +1616,9 @@ body {
 .calidad-baja .ink-c.on,
 .calidad-baja .prompt-key,
 .calidad-baja .reader-portrait.is-talking .fil,
-.calidad-baja .reader-portrait.is-talking .tip {
+.calidad-baja .reader-portrait.is-talking .tip,
+.calidad-baja .reader-portrait.is-talking .pattern,
+.calidad-baja .reader-portrait.is-talking .sign {
   animation: none;
 }
 .calidad-baja .clock-rings,
@@ -1549,7 +1626,9 @@ body {
 .calidad-baja .reader-portrait svg,
 .calidad-baja .registry-doodle,
 .calidad-baja .hud-book svg,
-.calidad-baja .portrait-ool .tip {
+.calidad-baja .portrait-ool .tip,
+.calidad-baja .portrait-absent .pattern,
+.calidad-baja .portrait-absent .sign {
   filter: none;
 }
 

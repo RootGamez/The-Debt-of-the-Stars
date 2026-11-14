@@ -1,13 +1,20 @@
 // Retratos de las charlas (plan del HUD, C.2 y decisión 5): un dibujo a tinta por personaje, como en la maqueta.
 // La Directora lleva tres filamentos; la Maestra, gafas y bufanda; los demás Ool, dos filamentos. Mientras hablan,
-// los filamentos laten (CSS). Los dibujos son constantes del juego: nunca llevan texto de fuera.
+// los filamentos laten (CSS). Los dos Ausentes vivos (plan de finales, E3) están en absentPortraits.ts: óvalo de
+// vidrio oscuro sin rostro y su signo en el pecho, que laten al hablar. Los dibujos son constantes del juego: nunca
+// llevan texto de fuera.
 import type { PortraitKind } from '../typewriter/speech';
+import { ABSENT_PORTRAITS } from './absentPortraits';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
-type Shape = readonly [tag: string, className: string, attributes: Record<string, number | string>];
+export type PortraitShape = readonly [
+  tag: string,
+  className: string,
+  attributes: Record<string, number | string>,
+];
 
-const BODY: readonly Shape[] = [
+const BODY: readonly PortraitShape[] = [
   [
     'path',
     'body',
@@ -23,14 +30,14 @@ const BODY: readonly Shape[] = [
   ['circle', 'shine', { cx: 64, cy: 51, r: 2.2 }],
 ];
 
-const TWO_FILAMENTS: readonly Shape[] = [
+const TWO_FILAMENTS: readonly PortraitShape[] = [
   ['path', 'fil', { d: 'M44 26 C40 18 36 16 32 14' }],
   ['path', 'fil', { d: 'M56 26 C60 18 64 16 68 14' }],
   ['circle', 'tip', { cx: 32, cy: 14, r: 3.2 }],
   ['circle', 'tip', { cx: 68, cy: 14, r: 3.2 }],
 ];
 
-const THREE_FILAMENTS: readonly Shape[] = [
+const THREE_FILAMENTS: readonly PortraitShape[] = [
   ['path', 'fil', { d: 'M42 26 C38 14 34 10 30 6' }],
   ['path', 'fil', { d: 'M50 24 C50 12 51 8 52 2' }],
   ['path', 'fil', { d: 'M58 26 C64 16 68 12 74 8' }],
@@ -39,16 +46,20 @@ const THREE_FILAMENTS: readonly Shape[] = [
   ['circle', 'tip', { cx: 74, cy: 8, r: 3.2 }],
 ];
 
-const MAESTRA: readonly Shape[] = [
+const MAESTRA: readonly PortraitShape[] = [
   ['circle', 'acc', { cx: 38, cy: 54, r: 10 }],
   ['circle', 'acc', { cx: 62, cy: 54, r: 10 }],
   ['path', 'acc', { d: 'M48 54 H52' }],
   ['path', 'acc scarf', { d: 'M24 78 C38 86 62 86 76 78 L74 86 C60 93 40 93 26 86 Z' }],
 ];
 
-const COLLAR: readonly Shape[] = [['path', 'acc', { d: 'M30 84 C42 88 58 88 70 84' }]];
+const COLLAR: readonly PortraitShape[] = [['path', 'acc', { d: 'M30 84 C42 88 58 88 70 84' }]];
 
-function shapesOf(kind: PortraitKind): readonly Shape[] {
+const isAbsent = (kind: PortraitKind): kind is 'cientifica' | 'esceptico' =>
+  kind === 'cientifica' || kind === 'esceptico';
+
+function shapesOf(kind: PortraitKind): readonly PortraitShape[] {
+  if (isAbsent(kind)) return ABSENT_PORTRAITS[kind];
   const filaments = kind === 'directora' ? THREE_FILAMENTS : TWO_FILAMENTS;
   return [...filaments, ...BODY, ...(kind === 'maestra' ? MAESTRA : COLLAR)];
 }
@@ -57,7 +68,7 @@ function shapesOf(kind: PortraitKind): readonly Shape[] {
 export function portraitSvg(kind: PortraitKind): SVGSVGElement {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('viewBox', '0 0 100 100');
-  svg.setAttribute('class', 'portrait-ool');
+  svg.setAttribute('class', isAbsent(kind) ? `portrait-absent portrait-${kind}` : 'portrait-ool');
   svg.setAttribute('aria-hidden', 'true');
   for (const [tag, className, attributes] of shapesOf(kind)) {
     const shape = document.createElementNS(SVG_NS, tag);

@@ -15,12 +15,17 @@ export function speechLines(paragraphs: readonly string[], speaker: string): Spe
   });
 }
 
-/** Los retratos dibujados: la Directora (tres filamentos), la Maestra (gafas y bufanda) y cualquier otro Ool. */
-export type PortraitKind = 'directora' | 'maestra' | 'ool';
+/**
+ * Los retratos dibujados: la Directora (tres filamentos), la Maestra (gafas y bufanda), cualquier otro Ool y los
+ * dos Ausentes vivos (plan de finales, E3): la científica y el escéptico.
+ */
+export type PortraitKind = 'directora' | 'maestra' | 'ool' | 'cientifica' | 'esceptico';
 
 export function portraitOf(sourceId: string): PortraitKind {
   if (sourceId.endsWith('.directora')) return 'directora';
   if (sourceId.endsWith('.maestra')) return 'maestra';
+  if (sourceId.endsWith('.cientifica')) return 'cientifica';
+  if (sourceId.endsWith('.esceptico')) return 'esceptico';
   return 'ool';
 }
 
