@@ -1,15 +1,9 @@
 // Pasar de una pose a otra sin saltos (plan de finales, E3; lógica pura): quién está en qué pose y, a medio cambio,
 // desde dónde. Despertar del hielo es lento; sentarse o levantarse, pausado. Cada paso da un estado nuevo.
-import {
-  absentPose,
-  legChain,
-  type AbsentArmPose,
-  type AbsentPose,
-  type AbsentPoseName,
-  type PoseOptions,
-} from './absentPoses';
+import { absentPose, type AbsentPoseName, type PoseOptions } from './absentPoses';
+import { legChain, type AbsentArmPose, type AbsentPose } from './absentChains';
 import { finite } from './absentPlanar';
-import { ABSENT_JOINTS, type AbsentWho } from './absentSkeleton';
+import { ABSENT_SKELETONS, type AbsentWho } from './absentSkeleton';
 import type { LegPose } from './gait';
 
 /** Transiciones (s). */
@@ -135,7 +129,10 @@ export function currentAbsentPose(poser: AbsentPoser): AbsentPose {
   const target = absentPose(poser.who, poser.name, poser.time, poser.options);
   if (!poser.from) return target;
   const pose = mixAbsentPose(poser.from, target, smooth(poser.blend));
-  const lowest = Math.min(legChain(pose, 0).ankle.z, legChain(pose, 1).ankle.z);
-  const lift = Math.max(0, ABSENT_JOINTS.ankle[2] - lowest);
+  const lowest = Math.min(
+    legChain(poser.who, pose, 0).ankle.z,
+    legChain(poser.who, pose, 1).ankle.z,
+  );
+  const lift = Math.max(0, ABSENT_SKELETONS[poser.who].joints.ankle[2] - lowest);
   return lift > 0 ? { ...pose, bob: pose.bob + lift } : pose;
 }

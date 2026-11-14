@@ -717,6 +717,45 @@ body {
   stroke: var(--absent-sign);
   stroke-width: 2.4;
 }
+/* Su ropa y sus aros de oro (🟡): el manto ocre de ella, el chaleco de lona y la bandolera de él. */
+.portrait-absent {
+  --absent-gold: #c9a44f;
+  --absent-drape: rgb(176 133 82 / 62%);
+}
+.portrait-esceptico {
+  --absent-gold: #b59140;
+  --absent-drape: rgb(111 100 70 / 66%);
+}
+.portrait-absent .drape {
+  fill: var(--absent-drape);
+  stroke: var(--ink);
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.portrait-absent .gold {
+  fill: none;
+  stroke: var(--absent-gold);
+  stroke-linecap: round;
+}
+.portrait-absent .gold.thin {
+  stroke-width: 0.9;
+}
+.portrait-absent .gold.thick {
+  stroke-width: 2.4;
+}
+.portrait-absent .brooch {
+  fill: var(--absent-gold);
+}
+.portrait-absent .strap {
+  fill: none;
+  stroke: #3a2a1d;
+  stroke-width: 4.2;
+}
+.portrait-absent .buckle {
+  fill: #8d918f;
+  stroke: var(--ink);
+  stroke-width: 0.9;
+}
 .reader-portrait.is-talking .pattern,
 .reader-portrait.is-talking .sign {
   animation: talkGlow 0.9s ease-in-out infinite alternate;

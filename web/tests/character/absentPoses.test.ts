@@ -18,7 +18,9 @@ import {
   mixAbsentPose,
   switchAbsentPose,
 } from '../../src/character/absentPoser';
-import { ABSENT_JOINTS, thighRadius } from '../../src/character/absentSkeleton';
+import { ABSENT_SKELETONS, lapRadius, thighRadius } from '../../src/character/absentSkeleton';
+
+const ankleZ = (who: (typeof ABSENT_WHO)[number]): number => ABSENT_SKELETONS[who].joints.ankle[2];
 
 const LIMITS = {
   hip: [-0.6, 2.2],
@@ -130,8 +132,8 @@ describe('the poses of the two living Absent', () => {
       for (const name of ['standing', 'idle', 'frozen'] as const) {
         const pose = absentPose(who, name, 5);
         for (const side of [0, 1] as const) {
-          const leg = legChain(pose, side);
-          expect(leg.ankle.z).toBeCloseTo(ABSENT_JOINTS.ankle[2], 2);
+          const leg = legChain(who, pose, side);
+          expect(leg.ankle.z).toBeCloseTo(ankleZ(who), 2);
           expect(Math.abs(leg.footPitch)).toBeLessThan(0.02);
         }
       }
@@ -149,10 +151,10 @@ describe('sitting down', () => {
       ] as const) {
         const pose = absentPose(who, name, 2, { seatHeight: seat });
         for (const side of [0, 1] as const) {
-          const leg = legChain(pose, side);
+          const leg = legChain(who, pose, side);
           // El muslo apoya en el asiento: la cadera queda a un radio de muslo por encima.
           expect(leg.hip.z - thighRadius(who)).toBeCloseTo(seat, 2);
-          expect(leg.ankle.z).toBeCloseTo(ABSENT_JOINTS.ankle[2], 2);
+          expect(leg.ankle.z).toBeCloseTo(ankleZ(who), 2);
           expect(Math.abs(leg.footPitch)).toBeLessThan(0.02);
           // Las rodillas, por delante de la cadera; los pies, bajo las rodillas o un poco más allá.
           expect(leg.knee.y - leg.hip.y).toBeGreaterThan(0.4);
@@ -167,17 +169,17 @@ describe('sitting down', () => {
     expect(DEFAULT_SEAT.slumped).toBeLessThan(DEFAULT_SEAT.seated);
   });
 
-  it('puts the hands on the thighs when seated', () => {
+  it('puts the hands on the lap when seated (the thigh and, on her, the robe over it)', () => {
     for (const who of ABSENT_WHO) {
       const pose = absentPose(who, 'seated', 1);
       for (const side of [0, 1] as const) {
-        const leg = legChain(pose, side);
-        const arm = armChain(pose, side);
+        const leg = legChain(who, pose, side);
+        const arm = armChain(who, pose, side);
         const along = (arm.wrist.y - leg.hip.y) / (leg.knee.y - leg.hip.y);
         expect(along).toBeGreaterThan(0.3);
-        expect(along).toBeLessThan(0.8);
-        // Por encima del muslo, a un palmo como mucho.
-        const thighTop = leg.hip.z + (leg.knee.z - leg.hip.z) * along + thighRadius(who);
+        expect(along).toBeLessThan(0.85);
+        // Por encima del regazo, a un palmo como mucho.
+        const thighTop = leg.hip.z + (leg.knee.z - leg.hip.z) * along + lapRadius(who);
         expect(arm.wrist.z).toBeGreaterThan(thighTop - 0.01);
         expect(arm.wrist.z).toBeLessThan(thighTop + 0.12);
       }
@@ -192,8 +194,8 @@ describe('sitting down', () => {
     expect(slumped.shrug).toBeLessThan(standing.shrug);
     expect(slumped.sign).toBeLessThan(standing.sign);
     // Las manos cuelgan entre las rodillas, más abajo que ellas.
-    const arm = armChain(slumped, 0);
-    const leg = legChain(slumped, 0);
+    const arm = armChain('esceptico', slumped, 0);
+    const leg = legChain('esceptico', slumped, 0);
     expect(arm.wrist.z).toBeLessThan(leg.knee.z + 0.05);
     expect(arm.wrist.y).toBeGreaterThan(leg.knee.y - 0.25);
   });
@@ -234,10 +236,20 @@ describe('who is who, by the way they stand', () => {
     expect(him.headPitch + lean(him)).toBeLessThan(her.headPitch + lean(her));
   });
 
+  it('keeps her legs together under the robe, and plants his apart; seated, his knees open', () => {
+    const her = absentPose('cientifica', 'standing', 0);
+    const him = absentPose('esceptico', 'standing', 0);
+    expect(Math.abs(her.legs[0].hipRoll)).toBeLessThan(0.01);
+    expect(him.legs[0].hipRoll).toBeGreaterThan(0.03);
+    expect(absentPose('esceptico', 'seated', 0).legs[0].hipRoll).toBeGreaterThan(
+      absentPose('cientifica', 'seated', 0).legs[0].hipRoll + 0.04,
+    );
+  });
+
   it('lets the arms hang from the shoulders, also from his stooped back', () => {
     for (const who of ABSENT_WHO) {
       const pose = absentPose(who, 'standing', 0);
-      const arm = armChain(pose, 1);
+      const arm = armChain(who, pose, 1);
       // La mano, bajo el hombro y un poco por delante, nunca por detrás de la cadera.
       expect(arm.wrist.z).toBeLessThan(arm.shoulder.z - 0.8);
       expect(arm.wrist.y).toBeGreaterThan(-0.05);

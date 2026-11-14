@@ -1,21 +1,44 @@
-// Las piezas de los dos Ausentes vivos (plan de finales, E3; aspecto ✅ Anthony 2026-11-06): piel cerámica con
-// circuitos de cobre, la cabeza sin rostro (un óvalo de vidrio mineral oscuro con dibujos de luz: rombos y
-// triángulos, nunca espirales ni hexágonos) y su signo brillando en el pecho (🟡 D13: ella, un rombo con un punto
-// dentro; él, dos triángulos punta con punta). También la escarcha, que solo se ve congelada.
-// Cada función llena el segmento de un hueso en coordenadas absolutas de diseño (Z arriba, frente +Y); el cuello y la
-// cabeza están en absentHead.ts, y los brazos y las piernas, en absentLimbs.ts.
-import { BufferAttribute, Color, Vector3, type BufferGeometry, type Matrix4 } from 'three';
-import { ball, box, cone, cylinder, pieceMatrix, type Triple } from '../worlds/procedural/kit';
+// Las piezas comunes de los dos Ausentes vivos (plan de finales, E3; aspecto ✅ Anthony 2026-11-06): piel cerámica
+// con circuitos de cobre en relieve, la cabeza sin rostro (un óvalo de vidrio mineral oscuro con dibujos de luz:
+// rombos y triángulos, nunca espirales ni hexágonos), su signo en el pecho (🟡 D13), y lo 🟡 de 2026-11-14: su ropa
+// de tela pesada y cuero y sus aros de oro viejo. También la escarcha, que solo se ve congelada.
+// Cada pieza se escribe en coordenadas absolutas de diseño (Z arriba, frente +Y). El tronco está en absentTorso.ts,
+// el cuello y la cabeza en absentHead.ts, los miembros en absentLimbs.ts y absentHands.ts, el oro en absentGold.ts y
+// la ropa en absentRobe.ts (ella) y absentWorkwear.ts (él).
+import {
+  BufferAttribute,
+  Color,
+  CylinderGeometry,
+  PlaneGeometry,
+  Vector3,
+  type BufferGeometry,
+  type Matrix4,
+} from 'three';
+import { ball, cone, pieceMatrix } from '../worlds/procedural/kit';
 import { seededRandom, type Random } from '../worlds/procedural/noise';
-import { ABSENT_BUILDS, ABSENT_JOINTS, hipSpread, type AbsentWho } from './absentSkeleton';
-import { between, onEllipsoid, type Ellipsoid } from './explorerParts';
+import {
+  ABSENT_SKELETONS,
+  type AbsentJoints,
+  type AbsentSkeleton,
+  type AbsentWho,
+} from './absentSkeleton';
+import { ABSENT_SHAPES, type AbsentBodyShape, type Section } from './absentShape';
+import { onSections } from './absentLoft';
+import {
+  between,
+  onEllipsoid,
+  surfaceMatrix,
+  type Ellipsoid,
+  type SurfacePoint,
+} from './explorerParts';
 
-/** Cerámica, cobre, el vidrio de la cabeza, los dibujos que brillan, el signo del pecho y la escarcha. */
-export type AbsentPartKind = 'ceramic' | 'copper' | 'glass' | 'glow' | 'sign' | 'frost';
+/** Cerámica, metal (cobre y oro), tela y cuero, el vidrio, los dibujos que brillan, el signo y la escarcha. */
+export type AbsentPartKind = 'ceramic' | 'metal' | 'cloth' | 'glass' | 'glow' | 'sign' | 'frost';
 
 export const ABSENT_PART_KINDS: readonly AbsentPartKind[] = [
   'ceramic',
-  'copper',
+  'metal',
+  'cloth',
   'glass',
   'glow',
   'sign',
@@ -26,7 +49,8 @@ export const ABSENT_PART_KINDS: readonly AbsentPartKind[] = [
 export class AbsentSegment {
   readonly parts: Record<AbsentPartKind, BufferGeometry[]> = {
     ceramic: [],
-    copper: [],
+    metal: [],
+    cloth: [],
     glass: [],
     glow: [],
     sign: [],
@@ -38,16 +62,16 @@ export class AbsentSegment {
     this.random = seededRandom(seed);
   }
 
-  /** Añade una copia de `geometry` (las primitivas del kit están en caché: nunca se tocan). */
+  /** Añade una copia de `geometry` de un color (las primitivas del kit están en caché: nunca se tocan). */
   add(
     kind: AbsentPartKind,
-    color: string,
+    color: string | Color,
     geometry: BufferGeometry,
     matrix: Matrix4,
     vary = 0.03,
   ): void {
     const g = geometry.clone().applyMatrix4(matrix);
-    g.deleteAttribute('uv');
+    if (g.hasAttribute('uv')) g.deleteAttribute('uv');
     const c = new Color(color);
     if (vary) c.offsetHSL(0, 0, (this.random() - 0.5) * vary);
     const count = g.getAttribute('position').count;
@@ -57,114 +81,176 @@ export class AbsentSegment {
     this.parts[kind].push(g);
   }
 
+  /** Añade una superficie ya tejida con su color por vértice (absentLoft.ts): se queda tal cual. */
+  addWoven(kind: AbsentPartKind, geometry: BufferGeometry): void {
+    this.parts[kind].push(geometry);
+  }
+
   next(): number {
     return this.random();
   }
 }
 
-/** Los colores de cada uno (🟡): ella, porcelana cálida y vidrio azul noche; él, gres gris y vidrio ahumado. */
+/** Los colores de cada uno (🟡). */
 export interface AbsentLook {
   ceramic: string;
   ceramicShade: string;
+  /** El fondo de las ranuras entre placas. */
+  seam: string;
   copper: string;
   copperDark: string;
+  /** Oro viejo, algo gastado. */
+  gold: string;
+  goldDark: string;
   glass: string;
   /** Los dibujos de la cabeza (la luz de los Ausentes, la de los murales de Umbral). */
   glow: string;
   /** Su signo. */
   sign: string;
+  /** La ropa: lo principal, su sombra, un segundo paño y el hilo o el cuero de los bordes. */
+  cloth: string;
+  clothShade: string;
+  drape: string;
+  trim: string;
 }
 
+/** Ella, porcelana cálida, túnica añil y manto ocre; él, gres gris, chaleco de lona y cuero de forja. */
 export const ABSENT_LOOKS: Record<AbsentWho, AbsentLook> = {
   cientifica: {
-    ceramic: '#e6dfd0',
-    ceramicShade: '#cfc4ae',
-    copper: '#b8733f',
+    ceramic: '#ebe4d6',
+    ceramicShade: '#cdc2ad',
+    seam: '#8f8472',
+    copper: '#bd7742',
     copperDark: '#8a4f2a',
-    glass: '#141a2c',
+    gold: '#c9a44f',
+    goldDark: '#9b7b35',
+    glass: '#121829',
     glow: '#8fe3e8',
     sign: '#b4f6ff',
+    cloth: '#2c3b60',
+    clothShade: '#1f2a46',
+    drape: '#b08552',
+    trim: '#d9c08a',
   },
   esceptico: {
-    ceramic: '#cdc5b6',
-    ceramicShade: '#aea493',
-    copper: '#a8643a',
+    ceramic: '#cbc3b4',
+    ceramicShade: '#a99f8e',
+    seam: '#7a7164',
+    copper: '#ad683c',
     copperDark: '#784425',
-    glass: '#1b1c22',
+    gold: '#b59140',
+    goldDark: '#86692c',
+    glass: '#1a1b21',
     glow: '#8fe3e8',
     sign: '#ffd9a0',
+    cloth: '#5e3d26',
+    clothShade: '#432a19',
+    drape: '#6f6446',
+    trim: '#2f2117',
   },
 };
 
-export type AbsentJointName = keyof typeof ABSENT_JOINTS;
-
-/** Lo que necesita cada pieza: quién, sus colores, su anchura y sus articulaciones. */
+/** Lo que necesita cada pieza: quién, sus colores, sus medidas y su silueta. */
 export interface AbsentContext {
   who: AbsentWho;
   look: AbsentLook;
-  /** Ancho del tronco y grosor de los miembros. */
-  width: number;
-  limb: number;
-  joints: Record<AbsentJointName, Triple>;
+  joints: AbsentJoints;
+  skeleton: AbsentSkeleton;
+  shape: AbsentBodyShape;
 }
 
-/** Las articulaciones de `who`: los hombros se separan con su anchura y las caderas, la mitad. */
 export function absentContext(who: AbsentWho): AbsentContext {
-  const { width, limb } = ABSENT_BUILDS[who];
-  const hips = hipSpread(width);
-  const spread = (t: Triple, k: number): Triple => [t[0] * k, t[1], t[2]];
-  const J = ABSENT_JOINTS;
+  const skeleton = ABSENT_SKELETONS[who];
   return {
     who,
     look: ABSENT_LOOKS[who],
-    width,
-    limb,
-    joints: {
-      pelvis: J.pelvis,
-      spine: J.spine,
-      chest: J.chest,
-      neck: J.neck,
-      head: J.head,
-      shoulder: spread(J.shoulder, width),
-      elbow: spread(J.elbow, width),
-      wrist: spread(J.wrist, width),
-      hip: spread(J.hip, hips),
-      knee: spread(J.knee, hips),
-      ankle: spread(J.ankle, hips),
-    },
+    joints: skeleton.joints,
+    skeleton,
+    shape: ABSENT_SHAPES[who],
   };
 }
 
-export const v3 = (t: Triple): Vector3 => new Vector3(...t);
+export const v3 = (t: readonly [number, number, number]): Vector3 => new Vector3(...t);
+
+/** Una superficie donde poner cosas: el punto y la normal en (acimut, z), separado `lift` metros. */
+export type Surface = (azimuth: number, z: number, lift?: number) => SurfacePoint;
+
+export const ellipsoidSurface =
+  (e: Ellipsoid): Surface =>
+  (azimuth, z, lift = 0) =>
+    onEllipsoid(e, azimuth, z, lift);
+
+export const sectionsSurface =
+  (sections: readonly Section[]): Surface =>
+  (azimuth, z, lift = 0) =>
+    onSections(sections, azimuth, z, lift);
 
 /** Lo más largo (m) de un tramo recto de circuito sobre una superficie curva. */
-const CIRCUIT_STEP = 0.13;
+const CIRCUIT_STEP = 0.12;
+/** El relieve del cobre: sobresale de la cerámica y lleva pastillas redondas en los extremos. */
+const TRACE_HEIGHT = 0.6;
 
-/** Una línea de circuito de cobre de `a` a `b` (sección casi cuadrada: da igual cómo gire sobre sí). */
+let traceGeometry: BufferGeometry | undefined;
+
+/**
+ * El tramo de un circuito: un prisma de tres caras sin tapas (con normales suaves se ve como un cordón en relieve y
+ * tiene la mitad de triángulos que una caja). Las puntas quedan dentro del tramo vecino o bajo la pastilla.
+ */
+function traceBar(): BufferGeometry {
+  if (!traceGeometry) {
+    const open = new CylinderGeometry(1, 1, 1, 3, 1, true).rotateX(Math.PI / 2);
+    traceGeometry = open.toNonIndexed();
+    traceGeometry.deleteAttribute('uv');
+    open.dispose();
+  }
+  return traceGeometry;
+}
+
+/** Una línea de circuito de cobre de `a` a `b`. */
 export function trace(
   s: AbsentSegment,
   color: string,
   a: Vector3,
   b: Vector3,
-  width = 0.016,
+  width = 0.014,
 ): void {
-  s.add('copper', color, box(), between(a, b, width, width * 0.8), 0.04);
+  s.add('metal', color, traceBar(), between(a, b, width * 0.58, width * 0.58 * TRACE_HEIGHT), 0.04);
 }
 
-/** Un circuito sobre un elipsoide: tramos rectos entre puntos (acimut, z), partidos para seguir la curva. */
+let padGeometry: BufferGeometry | undefined;
+
+/** Una pastilla de cobre: una lámina cuadrada (dos triángulos) a ras del relieve, como las de una placa de circuito. */
+export function pad(s: AbsentSegment, color: string, at: SurfacePoint, radius: number): void {
+  if (!padGeometry) {
+    const square = new PlaneGeometry(1, 1);
+    padGeometry = square.toNonIndexed();
+    padGeometry.deleteAttribute('uv');
+    square.dispose();
+  }
+  const raised = {
+    point: at.point.clone().addScaledVector(at.normal, PAD_LIFT),
+    normal: at.normal,
+  };
+  s.add('metal', color, padGeometry, surfaceMatrix(raised, [radius * 1.3, radius * 1.3, 1]), 0.04);
+}
+
+/** Lo que sobresale la pastilla de la superficie (m), a la altura del cobre. */
+const PAD_LIFT = 0.004;
+
+/** Un circuito sobre una superficie: tramos rectos entre puntos (acimut, z), partidos para seguir la curva. */
 export function circuit(
   s: AbsentSegment,
   color: string,
-  e: Ellipsoid,
+  surface: Surface,
   route: readonly (readonly [number, number])[],
-  width = 0.016,
+  width = 0.014,
 ): void {
-  const at = (az: number, z: number): Vector3 => onEllipsoid(e, az, z, 0.005).point;
+  const lift = width * 0.2;
+  const at = (az: number, z: number): Vector3 => surface(az, z, lift).point;
   for (let k = 1; k < route.length; k++) {
     const [a0, z0] = route[k - 1] ?? [0, 0];
     const [a1, z1] = route[k] ?? [0, 0];
-    const from = at(a0, z0);
-    const span = from.distanceTo(at(a1, z1));
+    const span = at(a0, z0).distanceTo(at(a1, z1));
     const steps = Math.max(1, Math.ceil(span / CIRCUIT_STEP));
     for (let j = 0; j < steps; j++) {
       const t0 = j / steps;
@@ -180,9 +266,27 @@ export function circuit(
       trace(s, color, a.sub(extra), b.add(extra), width);
     }
   }
-  const [lastAz, lastZ] = route[route.length - 1] ?? [0, 0];
-  const end = onEllipsoid(e, lastAz, lastZ, 0.008).point;
-  s.add('copper', color, ball(width * 0.9, 0), pieceMatrix([end.x, end.y, end.z]), 0.04);
+  for (const end of [route[0], route[route.length - 1]]) {
+    if (!end) continue;
+    pad(s, color, surface(end[0], end[1], 0.001), width * 1.25);
+  }
+}
+
+/** Una bolita (un remache, un punto de oro) en un punto: tan pequeña que basta con veinte caras. */
+export function stud(
+  s: AbsentSegment,
+  kind: AbsentPartKind,
+  color: string,
+  at: Vector3,
+  radius: number,
+): void {
+  s.add(
+    kind,
+    color,
+    ball(1, 0),
+    pieceMatrix([at.x, at.y, at.z], [0, 0, 0], [radius, radius, radius]),
+    0.03,
+  );
 }
 
 /** Una astilla de escarcha que sale de `at` hacia `normal`. */
@@ -191,162 +295,15 @@ export function frostShard(s: AbsentSegment, at: Vector3, normal: Vector3, size:
   s.add('frost', '#eef7ff', cone(1, 0, 4), between(at, tip, size * 0.35), 0.05);
 }
 
-/** Unas astillas de escarcha esparcidas por un elipsoide, alrededor de (acimut, z). */
+/** Unas astillas de escarcha esparcidas por una superficie, alrededor de (acimut, z). */
 export function frostOn(
   s: AbsentSegment,
-  e: Ellipsoid,
+  surface: Surface,
   spots: readonly (readonly [number, number])[],
-  size = 0.06,
+  size = 0.05,
 ): void {
   for (const [az, z] of spots) {
-    const { point, normal } = onEllipsoid(e, az + (s.next() - 0.5) * 0.3, z, -0.004);
+    const { point, normal } = surface(az + (s.next() - 0.5) * 0.3, z, -0.004);
     frostShard(s, point, normal, size * (0.65 + s.next() * 0.7));
   }
-}
-
-// ---- Cadera y tronco -------------------------------------------------------------------------------------------
-
-export function buildPelvis(s: AbsentSegment, c: AbsentContext): void {
-  const depth = (1 + c.width) / 2;
-  const hips: Ellipsoid = { center: [0, -0.01, 1.37], radii: [0.22 * c.width, 0.15 * depth, 0.13] };
-  s.add('ceramic', c.look.ceramic, ball(1, 1), pieceMatrix(hips.center, [0, 0, 0], hips.radii));
-  for (const side of [-1, 1]) {
-    const [x, y, z] = c.joints.hip;
-    s.add(
-      'copper',
-      c.look.copper,
-      ball(1, 0),
-      pieceMatrix([side * (x + 0.06 * c.limb), y, z + 0.01], [0, 0, 0], [0.03, 0.07, 0.07]),
-    );
-    circuit(s, c.look.copperDark, hips, [
-      [side * 0.75, 1.43],
-      [side * 0.35, 1.36],
-      [0, 1.3],
-    ]);
-  }
-}
-
-/** La cintura: un cono de cerámica con su junta y el cobre que baja por delante y por los lados. */
-export function buildSpine(s: AbsentSegment, c: AbsentContext): void {
-  const depth = (1 + c.width) / 2;
-  const from = new Vector3(0, 0, 1.43);
-  const to = new Vector3(0, 0, 1.8);
-  s.add('ceramic', c.look.ceramic, cone(0.15, 0.205, 8), between(from, to, c.width, 0.75 * depth));
-  s.add(
-    'ceramic',
-    c.look.ceramicShade,
-    cylinder(1, 8),
-    pieceMatrix([0, 0, 1.6], [0, 0, 0], [0.183 * c.width, 0.137 * depth, 0.02]),
-  );
-  const waist: Ellipsoid = { center: [0, 0, 1.6], radii: [0.18 * c.width, 0.135 * depth, 0.4] };
-  circuit(s, c.look.copper, waist, [
-    [0, 1.47],
-    [0, 1.76],
-  ]);
-  for (const side of [-1, 1]) {
-    circuit(s, c.look.copperDark, waist, [
-      [side * 1.4, 1.48],
-      [side * 1.4, 1.66],
-      [side * 1.0, 1.74],
-    ]);
-  }
-}
-
-/** El pecho: el tronco ancho arriba, los hombros, la placa oscura con el signo y los circuitos. */
-export function buildChest(s: AbsentSegment, c: AbsentContext): void {
-  const depth = (1 + c.width) / 2;
-  const chest: Ellipsoid = { center: [0, 0, 1.95], radii: [0.3 * c.width, 0.2 * depth, 0.24] };
-  s.add('ceramic', c.look.ceramic, ball(1, 1), pieceMatrix(chest.center, [0, 0, 0], chest.radii));
-  s.add(
-    'ceramic',
-    c.look.ceramicShade,
-    ball(1, 1),
-    pieceMatrix([0, -0.01, 2.09], [0, 0, 0], [0.38 * c.width, 0.14 * depth, 0.075]),
-  );
-  // La placa de vidrio donde brilla el signo: un óvalo (un disco de doce lados; nunca un hexágono).
-  const plate = onEllipsoid(chest, 0, 1.96, 0.004).point;
-  s.add(
-    'glass',
-    c.look.glass,
-    cylinder(1, 12),
-    pieceMatrix([0, plate.y - 0.004, plate.z], [Math.PI / 2, 0, 0], [0.095, 0.11, 0.03]),
-    0,
-  );
-  const front = plate.y + 0.016;
-  if (c.who === 'cientifica') diamondWithDot(s, c.look.sign, [0, front, plate.z], 0.075);
-  else hourglass(s, c.look.sign, [0, front, plate.z], 0.05);
-  for (const side of [-1, 1]) {
-    circuit(s, c.look.copper, chest, [
-      [0, 2.06],
-      [0, 2.12],
-      [side * 0.5, 2.12],
-      [side * 0.95, 2.06],
-    ]);
-    circuit(s, c.look.copper, chest, [
-      [0, 1.86],
-      [0, 1.8],
-      [side * 0.42, 1.8],
-      [side * 0.42, 1.74],
-    ]);
-    if (c.who === 'esceptico') {
-      // Él, que forjaba las Puertas, lleva más cobre: dos ramas más a los costados.
-      circuit(s, c.look.copperDark, chest, [
-        [side * 0.3, 1.98],
-        [side * 0.62, 1.98],
-        [side * 0.62, 1.86],
-      ]);
-    }
-  }
-  circuit(s, c.look.copperDark, chest, [
-    [Math.PI, 1.76],
-    [Math.PI, 2.12],
-  ]);
-  frostOn(s, chest, [
-    [-0.9, 2.12],
-    [0.85, 2.13],
-    [0.3, 2.15],
-    [Math.PI - 0.4, 2.14],
-  ]);
-}
-
-/** Su signo (🟡 D13): un rombo de luz, hueco, con un punto en medio. */
-function diamondWithDot(s: AbsentSegment, color: string, at: Triple, size: number): void {
-  const [x, y, z] = at;
-  const half = size / 2;
-  // Cuatro lados de largo `size`, girados 45°.
-  for (const [dx, dz, turn] of [
-    [half / 2, half / 2, -Math.PI / 4],
-    [-half / 2, half / 2, Math.PI / 4],
-    [half / 2, -half / 2, Math.PI / 4],
-    [-half / 2, -half / 2, -Math.PI / 4],
-  ] as const) {
-    s.add(
-      'sign',
-      color,
-      box(),
-      pieceMatrix([x + dx * Math.SQRT2, y, z + dz * Math.SQRT2], [0, turn, 0], [0.016, 0.01, size]),
-      0,
-    );
-  }
-  s.add('sign', color, ball(0.016, 0), pieceMatrix([x, y + 0.004, z]), 0);
-}
-
-/** Su signo (🟡 D13, D19): dos triángulos llenos que se tocan por la punta, como un reloj de arena. */
-function hourglass(s: AbsentSegment, color: string, at: Triple, radius: number): void {
-  const [x, y, z] = at;
-  // Un prisma de tres lados de frente: con el giro π/2 su vértice mira abajo; con −π/2, arriba.
-  s.add(
-    'sign',
-    color,
-    cylinder(1, 3),
-    pieceMatrix([x, y, z + radius], [Math.PI / 2, 0, 0], [radius, radius, 0.012]),
-    0,
-  );
-  s.add(
-    'sign',
-    color,
-    cylinder(1, 3),
-    pieceMatrix([x, y, z - radius], [-Math.PI / 2, 0, 0], [radius, radius, 0.012]),
-    0,
-  );
 }

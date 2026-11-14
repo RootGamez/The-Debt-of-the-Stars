@@ -1,151 +1,177 @@
-// Brazos y piernas de los Ausentes vivos (plan de finales, E3): largos y finos, de cerámica, con las articulaciones
-// de cobre, una línea de circuito por miembro, manos de tres dedos largos y pies estrechos (como en los murales).
+// Brazos y piernas de los Ausentes vivos (plan de finales, E3): placas de cerámica suaves que encajan en el codo y en
+// la rodilla sobre una bola de cobre, el hombro redondo, una línea de circuito por fuera de cada miembro y, en él, la
+// rótula. Ella, brazos largos y finos (las piernas las tapa la túnica: solo se ve el tobillo); él, brazos de forjador.
 // Coordenadas absolutas de diseño (Z arriba, frente +Y); `side` +1 es la derecha y −1 la izquierda.
 import { Vector3 } from 'three';
-import { ball, cone, cylinder, pieceMatrix, type Triple } from '../worlds/procedural/kit';
-import { HAND_LENGTH, THIGH_TOP_RADIUS } from './absentSkeleton';
-import { frostShard, trace, v3, type AbsentContext, type AbsentSegment } from './absentParts';
-import { between } from './explorerParts';
+import { ball, pieceMatrix } from '../worlds/procedural/kit';
+import { ceramicPlate } from './absentCeramic';
+import { sectionAt } from './absentLoft';
+import { limbSections, type LimbSection, type Section } from './absentShape';
+import type { AbsentJointName } from './absentSkeleton';
+import {
+  circuit,
+  frostShard,
+  sectionsSurface,
+  type AbsentContext,
+  type AbsentSegment,
+} from './absentParts';
 
-const sided = (t: Triple, side: number): Vector3 => v3([t[0] * side, t[1], t[2]]);
-const offset = (p: Vector3, x: number, y: number, z: number): Vector3 =>
-  p.clone().add(new Vector3(x, y, z));
+/** Columnas alrededor de un miembro y separación entre filas (m): con sombreado suave, bastan. */
+const limbColumns = (c: AbsentContext): number => (c.who === 'esceptico' ? 12 : 10);
+const LIMB_STEP = 0.1;
 
-/** Del hombro al codo: la bola del hombro, el brazo y el cobre por fuera. */
+/** Las secciones de un miembro en su lado (el izquierdo es el espejo del derecho). */
+export function sidedSections(
+  c: AbsentContext,
+  from: AbsentJointName,
+  to: AbsentJointName,
+  profile: readonly LimbSection[],
+  side: number,
+): Section[] {
+  return limbSections(c.who, from, to, profile).map((p) => ({ ...p, x: (p.x ?? 0) * side }));
+}
+
+/** La altura de un punto `t` del hueso de `from` a `to`. */
+const heightAt = (
+  c: AbsentContext,
+  from: AbsentJointName,
+  to: AbsentJointName,
+  t: number,
+): number => c.joints[from][2] + (c.joints[to][2] - c.joints[from][2]) * t;
+
+const sided = (c: AbsentContext, joint: AbsentJointName, side: number): Vector3 => {
+  const [x, y, z] = c.joints[joint];
+  return new Vector3(x * side, y, z);
+};
+
+/** Una bola de cobre en la articulación: se ve en el hueco entre placas al doblar. */
+function jointBall(s: AbsentSegment, c: AbsentContext, at: Vector3, radius: number): void {
+  s.add(
+    'metal',
+    c.look.copperDark,
+    ball(1, 1),
+    pieceMatrix([at.x, at.y, at.z], [0, 0, 0], [radius, radius, radius]),
+    0.03,
+  );
+}
+
+/** Del hombro al codo: el hombro redondo, el brazo y el cobre por fuera. */
 export function buildUpperArm(s: AbsentSegment, c: AbsentContext, side: number): void {
-  const l = c.limb;
-  const shoulder = sided(c.joints.shoulder, side);
-  const elbow = sided(c.joints.elbow, side);
+  const { center, radii } = c.shape.shoulder;
   s.add(
     'ceramic',
     c.look.ceramic,
-    ball(1, 1),
-    pieceMatrix(
-      [shoulder.x + side * 0.015, shoulder.y, shoulder.z + 0.01],
-      [0, 0, 0],
-      [0.11 * l, 0.105 * l, 0.1 * l],
-    ),
+    ball(1, 2),
+    pieceMatrix([center[0] * side, center[1], center[2]], [0, 0, 0], radii),
+    0.02,
   );
-  s.add('ceramic', c.look.ceramic, cone(0.075 * l, 0.06 * l, 8), between(shoulder, elbow, 1, 1));
-  trace(
-    s,
-    c.look.copper,
-    offset(shoulder, side * 0.074 * l, 0, -0.09),
-    offset(elbow, side * 0.06 * l, 0, 0.05),
-  );
-  frostShard(
-    s,
-    offset(shoulder, side * 0.05, 0, 0.08),
-    new Vector3(side * 0.4, 0.1, 1).normalize(),
-    0.05,
-  );
+  const sections = sidedSections(c, 'shoulder', 'elbow', c.shape.upperArm, side);
+  const elbow = heightAt(c, 'shoulder', 'elbow', 0.97);
+  const top = heightAt(c, 'shoulder', 'elbow', 0.08);
+  ceramicPlate(s, c, sections, elbow, top, {
+    lip: 0.02,
+    seams: [heightAt(c, 'shoulder', 'elbow', 0.42)],
+    columns: limbColumns(c),
+    step: LIMB_STEP,
+  });
+  const surface = sectionsSurface(sections);
+  circuit(s, c.look.copper, surface, [
+    [side * 1.5, heightAt(c, 'shoulder', 'elbow', 0.12)],
+    [side * 1.55, heightAt(c, 'shoulder', 'elbow', 0.9)],
+  ]);
+  const at = surface(side * 1.2, heightAt(c, 'shoulder', 'elbow', 0.2), 0);
+  frostShard(s, at.point, at.normal, 0.045);
 }
 
-/** Del codo a la muñeca: el codo de cobre, el antebrazo, su brazalete y el circuito de delante. */
+/** Del codo a la muñeca: la bola del codo, el antebrazo y su circuito de delante. */
 export function buildForearm(s: AbsentSegment, c: AbsentContext, side: number): void {
-  const l = c.limb;
-  const elbow = sided(c.joints.elbow, side);
-  const wrist = sided(c.joints.wrist, side);
-  s.add('copper', c.look.copper, ball(0.064 * l, 0), pieceMatrix([elbow.x, elbow.y, elbow.z]));
-  s.add('ceramic', c.look.ceramic, cone(0.06 * l, 0.045 * l, 8), between(elbow, wrist, 1, 1));
-  s.add(
-    'copper',
-    c.look.copperDark,
-    cylinder(0.053 * l, 8),
-    between(elbow.clone().lerp(wrist, 0.8), elbow.clone().lerp(wrist, 0.86), 1, 1),
-  );
-  trace(s, c.look.copper, offset(elbow, 0, 0.056 * l, -0.06), offset(wrist, 0, 0.045 * l, 0.1));
-  frostShard(
-    s,
-    offset(elbow.clone().lerp(wrist, 0.45), side * 0.05 * l, 0, 0),
-    new Vector3(side, 0.2, 0.1).normalize(),
-    0.04,
-  );
+  const sections = sidedSections(c, 'elbow', 'wrist', c.shape.forearm, side);
+  const elbow = sided(c, 'elbow', side);
+  jointBall(s, c, elbow, sectionAt(sections, elbow.z).rx * 0.9);
+  const wrist = heightAt(c, 'elbow', 'wrist', 1.0);
+  const top = heightAt(c, 'elbow', 'wrist', 0.03);
+  ceramicPlate(s, c, sections, wrist, top, {
+    lip: 0.016,
+    tuck: 0.05,
+    seams: [heightAt(c, 'elbow', 'wrist', 0.55)],
+    columns: limbColumns(c),
+    step: LIMB_STEP,
+  });
+  const surface = sectionsSurface(sections);
+  circuit(s, c.look.copper, surface, [
+    [side * 0.35, heightAt(c, 'elbow', 'wrist', 0.08)],
+    [side * 0.2, heightAt(c, 'elbow', 'wrist', 0.5)],
+    [side * 0.2, heightAt(c, 'elbow', 'wrist', 0.82)],
+  ]);
+  circuit(s, c.look.copperDark, surface, [
+    [side * 1.6, heightAt(c, 'elbow', 'wrist', 0.1)],
+    [side * 1.6, heightAt(c, 'elbow', 'wrist', 0.8)],
+  ]);
+  const at = surface(side * 1.0, heightAt(c, 'elbow', 'wrist', 0.45), 0);
+  frostShard(s, at.point, at.normal, 0.04);
 }
 
-/** La mano: palma estrecha y tres dedos largos, un poco curvados hacia delante. */
-export function buildHand(s: AbsentSegment, c: AbsentContext, side: number): void {
-  const l = c.limb;
-  const wrist = sided(c.joints.wrist, side);
-  s.add(
-    'ceramic',
-    c.look.ceramic,
-    ball(1, 0),
-    pieceMatrix(
-      [wrist.x, wrist.y + 0.005, wrist.z - 0.07],
-      [0, 0, 0],
-      [0.045 * l, 0.028 * l, 0.075],
-    ),
-  );
-  for (const finger of [-1, 0, 1]) {
-    const base = offset(wrist, side * finger * 0.022 * l, 0.006, -0.125);
-    const tip = offset(wrist, side * (finger * 0.032 * l + 0.004), 0.03, -HAND_LENGTH);
-    s.add('ceramic', c.look.ceramicShade, cone(0.015 * l, 0.008 * l, 5), between(base, tip, 1, 1));
-  }
-  s.add(
-    'copper',
-    c.look.copper,
-    ball(0.012, 0),
-    pieceMatrix([wrist.x, wrist.y - 0.028, wrist.z - 0.06]),
-  );
-}
-
-/** Muslo (cadera a rodilla). Su radio junto a la cadera es lo que apoya al sentarse (thighRadius). */
+/** Muslo (cadera a rodilla). Su espalda junto a la cadera es lo que apoya al sentarse (thighRadius). */
 export function buildThigh(s: AbsentSegment, c: AbsentContext, side: number): void {
-  const l = c.limb;
-  const hip = sided(c.joints.hip, side);
-  const knee = sided(c.joints.knee, side);
-  s.add(
-    'ceramic',
-    c.look.ceramic,
-    cone(THIGH_TOP_RADIUS * l, 0.085 * l, 8),
-    between(hip, knee, 1, 1),
-  );
-  trace(
+  if (c.shape.thigh.length === 0) return;
+  const sections = sidedSections(c, 'hip', 'knee', c.shape.thigh, side);
+  const knee = heightAt(c, 'hip', 'knee', 0.97);
+  const top = sections[sections.length - 1]?.z ?? c.joints.hip[2];
+  ceramicPlate(s, c, sections, knee, top, {
+    lip: 0.022,
+    seams: [heightAt(c, 'hip', 'knee', 0.5)],
+    columns: limbColumns(c),
+    step: LIMB_STEP,
+  });
+  // Por fuera, donde no llega el delantal.
+  circuit(
     s,
     c.look.copper,
-    offset(hip, side * 0.12 * l, 0, -0.08),
-    offset(knee, side * 0.084 * l, 0, 0.06),
+    sectionsSurface(sections),
+    [
+      [side * 1.45, heightAt(c, 'hip', 'knee', 0.12)],
+      [side * 1.5, heightAt(c, 'hip', 'knee', 0.9)],
+    ],
+    0.016,
   );
 }
 
-/** Espinilla (rodilla a tobillo): la rodilla de cobre y el circuito que baja por delante. */
+/** Espinilla (rodilla a tobillo): la bola de la rodilla, la rótula (él) y el circuito que baja por delante. */
 export function buildShin(s: AbsentSegment, c: AbsentContext, side: number): void {
-  const l = c.limb;
-  const knee = sided(c.joints.knee, side);
-  const ankle = sided(c.joints.ankle, side);
-  s.add('copper', c.look.copper, ball(0.072 * l, 0), pieceMatrix([knee.x, knee.y, knee.z]));
-  s.add(
-    'ceramic',
-    c.look.ceramic,
-    cone(0.08 * l, 0.05 * l, 8),
-    between(knee, offset(ankle, 0, 0, 0.03), 1, 1),
+  const sections = sidedSections(c, 'knee', 'ankle', c.shape.shin, side);
+  const ankle = heightAt(c, 'knee', 'ankle', 1.0);
+  const top = sections[sections.length - 1]?.z ?? c.joints.knee[2];
+  const hidden = c.shape.thigh.length === 0;
+  if (!hidden) {
+    const knee = sided(c, 'knee', side);
+    jointBall(s, c, knee, sectionAt(sections, knee.z).rx * 0.92);
+    // La rótula: una placa ovalada por delante de la rodilla.
+    s.add(
+      'ceramic',
+      c.look.ceramicShade,
+      ball(1, 1),
+      pieceMatrix([knee.x, knee.y + 0.06, knee.z - 0.01], [0, 0, 0], [0.06, 0.035, 0.07]),
+      0.02,
+    );
+  }
+  ceramicPlate(s, c, sections, ankle, top, {
+    lip: 0.016,
+    tuck: hidden ? 0 : 0.05,
+    columns: hidden ? 10 : limbColumns(c),
+    step: LIMB_STEP,
+  });
+  if (hidden) return;
+  const surface = sectionsSurface(sections);
+  circuit(
+    s,
+    c.look.copper,
+    surface,
+    [
+      [side * 0.25, heightAt(c, 'knee', 'ankle', 0.12)],
+      [side * 0.12, heightAt(c, 'knee', 'ankle', 0.85)],
+    ],
+    0.015,
   );
-  trace(s, c.look.copper, offset(knee, 0, 0.074 * l, -0.08), offset(ankle, 0, 0.05 * l, 0.09));
-  frostShard(s, offset(knee, 0, 0.06, 0.02), new Vector3(0, 1, 0.5).normalize(), 0.045);
-}
-
-/** El pie: largo y estrecho, con el tobillo de cobre y la punta un poco más oscura. */
-export function buildFoot(s: AbsentSegment, c: AbsentContext, side: number): void {
-  const l = c.limb;
-  const ankle = sided(c.joints.ankle, side);
-  s.add(
-    'copper',
-    c.look.copperDark,
-    cylinder(0.055 * l, 8),
-    pieceMatrix([ankle.x, ankle.y, ankle.z], [0, 0, 0], [1, 1, 0.035]),
-  );
-  s.add(
-    'ceramic',
-    c.look.ceramic,
-    ball(1, 1),
-    pieceMatrix([ankle.x, 0.06, 0.055], [0, 0, 0], [0.08 * l, 0.2, 0.055]),
-  );
-  s.add(
-    'ceramic',
-    c.look.ceramicShade,
-    ball(1, 0),
-    pieceMatrix([ankle.x, 0.235, 0.04], [0, 0, 0], [0.05 * l, 0.045, 0.03]),
-  );
-  frostShard(s, v3([ankle.x, 0.12, 0.09]), new Vector3(side * 0.2, 0.3, 1).normalize(), 0.035);
+  const at = surface(side * 0.2, heightAt(c, 'knee', 'ankle', 0.2), 0);
+  frostShard(s, at.point, at.normal, 0.045);
 }

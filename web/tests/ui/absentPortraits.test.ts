@@ -71,6 +71,53 @@ describe('the portraits of the two living Absent', () => {
     expect(his.filter(([tag]) => tag === 'circle')).toHaveLength(0);
   });
 
+  const classed = (who: 'cientifica' | 'esceptico', className: string) =>
+    ABSENT_PORTRAITS[who].filter(([, c]) => c.split(' ').includes(className));
+
+  it('gives her more and thinner gold rings than him (🟡)', () => {
+    const hers = classed('cientifica', 'gold');
+    const his = classed('esceptico', 'gold');
+    expect(hers.length).toBeGreaterThan(his.length);
+    expect(his.length).toBeGreaterThanOrEqual(2);
+    for (const [, c] of hers) expect(c.split(' ')).toContain('thin');
+    for (const [, c] of his) expect(c.split(' ')).toContain('thick');
+  });
+
+  it('draws the head rings behind the glass, so they never cover its lights', () => {
+    for (const who of ['cientifica', 'esceptico'] as const) {
+      const shapes = ABSENT_PORTRAITS[who];
+      const head = shapes.findIndex(([, c]) => c.split(' ').includes('head'));
+      const rings = shapes.flatMap(([, c], k) => (c.split(' ').includes('head-ring') ? [k] : []));
+      expect(rings.length).toBeGreaterThan(0);
+      for (const k of rings) expect(k).toBeLessThan(head);
+    }
+  });
+
+  it('tells them apart by the silhouette: her narrow shoulders and long neck, his broad ones', () => {
+    const shoulders = (who: 'cientifica' | 'esceptico'): number => {
+      const xs = classed(who, 'skin')
+        .flatMap(([, , a]) => String(a.d).match(/-?\d+(\.\d+)?/g) ?? [])
+        .map(Number)
+        .filter((_, k) => k % 2 === 0);
+      return Math.max(...xs) - Math.min(...xs);
+    };
+    expect(shoulders('esceptico')).toBeGreaterThan(shoulders('cientifica') * 1.3);
+    const neckLength = (who: 'cientifica' | 'esceptico'): number => {
+      const ys = classed(who, 'neck')
+        .flatMap(([, , a]) => String(a.d).match(/-?\d+(\.\d+)?/g) ?? [])
+        .map(Number)
+        .filter((_, k) => k % 2 === 1);
+      return Math.max(...ys) - Math.min(...ys);
+    };
+    expect(neckLength('cientifica')).toBeGreaterThan(neckLength('esceptico') * 1.3);
+  });
+
+  it('dresses her in a mantle and him in a vest with the bandolier (🟡)', () => {
+    expect(classed('cientifica', 'mantle').length).toBeGreaterThan(0);
+    expect(classed('esceptico', 'vest').length).toBeGreaterThan(0);
+    expect(classed('esceptico', 'strap').length).toBeGreaterThan(0);
+  });
+
   it('is chosen for the talks whose source ends in .cientifica or .esceptico', () => {
     expect(portraitOf('lab.cientifica')).toBe('cientifica');
     expect(portraitOf('taller.esceptico')).toBe('esceptico');
