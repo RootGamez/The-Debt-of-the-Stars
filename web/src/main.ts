@@ -843,9 +843,9 @@ async function start(): Promise<void> {
           overlay.setInert(true);
           lockGameKeys();
         },
-        stepOutside: () => {
         known: () => reading.known,
           enterWorld(startWorld);
+        stepOutside: () => {
           createArrivalLayer('negro').clear();
         },
         turnToMoon: (share) => {
