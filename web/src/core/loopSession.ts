@@ -41,8 +41,13 @@ export interface LoopSessionOptions {
   player: Player;
   /** Dónde se ve el agujero negro en el cielo (provisional). */
   skyDirection: Vector3;
-  /** Al empezar un ciclo nuevo (o, en casa, tras un accidente): reaparecer y reiniciar lo que haga falta. */
-  onRestart: () => void;
+  /**
+   * Al empezar un ciclo nuevo (o, en casa, tras un accidente): reaparecer y reiniciar lo que haga falta. Recibe la
+   * causa del ciclo que acaba (undefined tras «Sin vuelta» o si no la hubo).
+   */
+  onRestart: (cause?: DeathCause) => void;
+  /** Con el bucle cortado, un fallo cubre la pantalla y espera aquí a la tarjeta «Sin vuelta» (E5). */
+  onNoReturn?: () => void;
   /** Si corre el ciclo (sí por defecto); en casa, en el prólogo, no. */
   looping?: boolean;
   /** El guardado ya leído (si no, se lee aquí). */
@@ -60,6 +65,8 @@ export interface LoopSession {
   /** Temblor de cámara de los eventos (se suma a la posición de los ojos). */
   readonly shake: Vector3;
   update(dt: number, playing: boolean, forcedCause?: DeathCause): void;
+  /** Tras la tarjeta «Sin vuelta»: un ciclo nuevo en Umbral (avisa a `onRestart`). */
+  resolveNoReturn(): void;
   snapshot(): LoopSnapshot;
   /** Hechos guardados (sin filtrar: la sesión de lectura descarta los que ya no existen). */
   readonly savedFacts: readonly string[];
@@ -140,9 +147,11 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
     shake: effects.shake,
     update(dt, playing, forcedCause) {
       if (playing) {
+        const ending = director.deathCause; // restartLoop() la borra al reiniciar
         const result = director.update(dt, player.state, forcedCause);
-        if (result.restart) onRestart();
+        if (result.restart) onRestart(ending);
         if (result.crossed) options.onCross?.(finishPrologue());
+        if (result.noReturn) options.onNoReturn?.();
       } else {
         director.observe(player.state); // la física sigue en pausa: no juzgar esos aterrizajes
       }
@@ -157,6 +166,9 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
         looping && playing && director.phase !== 'dying',
         options.counterweightClock?.(),
       );
+    },
+    resolveNoReturn() {
+      if (director.resolveNoReturn().restart) onRestart();
     },
     snapshot() {
       return {

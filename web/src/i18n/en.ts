@@ -304,6 +304,28 @@ export const EN: Readonly<Record<string, string>> = {
   'El Taller': 'The Workshop',
   'La Pista': 'The Track',
   'Los dos relojes marcan lo mismo.': 'Both clocks read the same.',
+  // E4: el portal caído del Nudo y el lecho de escarcha (borradores).
+  'La Puerta no se enciende con su reloj fuera de hora. Gira las ruedas hasta que marque la hora de dentro.':
+    'The Gate will not light with its clock out of time. Turn the wheels until it shows the time inside.',
+  'Fuera (el Nudo)': 'Outside (the Knot)',
+  'La Puerta (dentro)': 'The Gate (inside)',
+  Segundos: 'Seconds',
+  atrasar: 'back',
+  adelantar: 'forward',
+  'La Puerta está encendida.': 'The Gate is lit.',
+  'El reloj está en hora. La Puerta se enciende.': 'The clock is on time. The Gate lights up.',
+  'La Puerta del Nudo se enciende.': 'The Knot’s Gate lights up.',
+  'Las ruedas del reloj no giran.': 'The clock wheels do not turn.',
+  'La rueda del lecho no gira.': 'The bed’s wheel does not turn.',
+  'Una vuelta de rueda, y esperar a que la escarcha ceda. Sin prisa.':
+    'One turn of the wheel, then wait for the frost to give. No hurry.',
+  'Calor del lecho': 'Warmth of the bed',
+  'Girar la rueda': 'Turn the wheel',
+  'La escarcha cede un poco. Espera a que se asiente.':
+    'The frost gives a little. Wait for it to settle.',
+  'Demasiado deprisa: la escarcha se cierra otra vez.': 'Too fast: the frost closes again.',
+  'La escarcha se abre. Se mueve.': 'The frost opens. She moves.',
+  'Ya no queda escarcha que fundir.': 'There is no frost left to melt.',
   'Gira las ruedas hasta que los dos relojes marquen lo mismo. El pulso de las 9:00 hará el resto.':
     'Turn the wheels until both clocks read the same. The 9:00 pulse will do the rest.',
   'El Contrapeso ya está en el núcleo.': 'The Counterweight is already in the core.',
@@ -317,7 +339,6 @@ export const EN: Readonly<Record<string, string>> = {
   'El Contrapeso': 'The Counterweight',
   Cruzar: 'Cross',
   'Todavía no': 'Not yet',
-  'Llevas los planos del Contrapeso.': 'You are carrying the Counterweight plans.',
   'Tres meses: la hermana va por el día {day}. ¿Por qué día va el técnico?':
     'Three months: the sister is on day {day}. What day is the technician on?',
   'Día {day}': 'Day {day}',
@@ -341,6 +362,8 @@ export const EN: Readonly<Record<string, string>> = {
   hablar: 'talk',
   dejar: 'drop',
   coger: 'take',
+  // E5: enseñarle el Contrapeso al escéptico.
+  enseñar: 'show',
   'Cerrada.': 'Closed.',
   Elegir: 'Choose',
   Preguntas: 'Questions',
@@ -369,40 +392,36 @@ export const EN: Readonly<Record<string, string>> = {
   'La Brasa y sus mundos, dibujados de memoria.': 'The Brasa and its worlds, drawn from memory.',
   'Vista del juego': 'Game view',
   'La deuda de las estrellas': 'The Debt of the Stars',
-  'Final A': 'Ending A',
-  'Final B': 'Ending B',
   'Llegas tarde': 'You arrive too late',
   'Sin vuelta': 'No way back',
+  'Las 15:00 llegaron antes que tú: junto al horizonte, el reloj de fuera corre demasiado.':
+    'Three o’clock got there before you: near the horizon, the clock outside runs too fast.',
   'La fuente ya no está en su sitio, y nada lo repite. Lo que ocurre, ocurre de verdad.':
     'The source is no longer in its place, and nothing repeats it. What happens, happens for real.',
   'El sistema cae sin un solo ciclo de reserva. Nadie volverá a las siete de la mañana.':
     'The system falls without a single cycle to spare. Nobody will go back to seven in the morning.',
   'Despiertas en Umbral con el cuaderno en las manos: lo que anotaste sigue ahí, y es lo único que te queda.':
     'You wake in Threshold with the notebook in your hands: what you wrote is still there, and it is all you have left.',
-  'Antes de la prueba': 'Before the test',
-  'Llegas a casa con el aire de las islas todavía en el pelo y el cuaderno lleno. La Directora lo lee de pie, despacio, sin interrumpir.':
-    'You arrive home with the air of the islands still in your hair and your notebook full. The Director reads it standing, slowly, without interrupting.',
-  'No hace falta que lo entienda todo. Le basta ver dos relojes que no coinciden y una línea que se dispara.':
-    'She does not need to understand all of it. It is enough for her to see two clocks that do not agree and a line that shoots up.',
-  'La prueba no se hace. En el Instituto nadie sabrá de qué se salvaron, y tú no podrás explicarlo: ese viaje no ocurrió para ellos.':
-    'The test is not carried out. At the Institute nobody will know what they were spared, and you will not be able to explain it: that journey never happened for them.',
-  'Allá arriba, la Luna sigue limpia. Lejos de aquí, un sistema vacío conserva su última cuenta, y nadie la paga.':
-    'Up there, the Moon is still clean. Far from here, an empty system keeps its last count, and nobody pays it.',
-  'La cuenta empieza hoy': 'The count starts today',
-  'Llegas a tiempo. Dejas los planos sobre la mesa, con las manos todavía temblando, para que vean que es verdad.':
-    'You arrive in time. You lay the plans on the table, your hands still trembling, so they can see it is true.',
-  'La Directora los abre y sonríe: «Esto es justo lo que nos faltaba.»':
-    'The Director opens them and smiles: “This is exactly what we were missing.”',
-  'Esa noche, en el Motor, la Puerta Mayor se enciende por fin con la pieza que nunca llegó. Funciona. Todo funciona.':
-    'That night, at the Engine, the Great Gate lights up at last with the piece that never arrived. It works. Everything works.',
-  'En otro sistema, tiempo atrás, alguien graba una placa en la boca de un anillo: «La cuenta empieza hoy».':
-    'In another system, long ago, someone carves a plate on the mouth of a ring: “The count starts today.”',
-  'La plaza del Instituto está en silencio. La Puerta Mayor ya se abrió: en el Motor queda un anillo apagado y, junto al mar, un corte liso y curvo en la tierra.':
-    'The Institute plaza is silent. The Great Gate has already opened: at the Engine there is a dead ring and, by the sea, a smooth curved cut in the ground.',
-  'Quien te encuentra no sabe qué decirte. Tú lo sabes todo, y ya no sirve de nada.':
-    'Whoever finds you does not know what to say. You know everything, and it no longer helps.',
-  'Esta boca no te dejó a tiempo. Vuelve al Archivo y cuenta de nuevo: los relojes no mienten, solo hay que leerlos con calma.':
-    'This mouth did not leave you in time. Go back to the Archive and count again: the clocks do not lie, they only have to be read calmly.',
+  'Tres días después': 'Three days later',
+  'Hace tres días que perdieron la nave. Cuando te posas en el nido, la Maestra te espera, y lee tu cuaderno de pie, despacio, sin interrumpir.':
+    'They lost the ship three days ago. When you land at the nest, the Teacher is waiting, and she reads your notebook standing, slowly, without interrupting.',
+  'Le adviertes que sacar energía de la garganta de una Puerta es pedir tiempo prestado. Te cree. Irá contigo a la Directora, y la prueba no se hace.':
+    'You warn her that drawing energy from the throat of a Gate is borrowing time. She believes you. She will go with you to the Director, and the test is not carried out.',
+  'Muy lejos de aquí, en un sistema vacío pero salvado, dos que ya no esperan a nadie se sientan juntos frente a la Brasa.':
+    'Far from here, in an empty but saved system, two who no longer wait for anyone sit together facing the Ember.',
+  'En el cielo, un punto quieto guarda la última cuenta, y nadie la paga.':
+    'In the sky, a still point holds the last count, and nobody pays it.',
+  'Hace años que la Puerta Mayor está abierta. El Motor da luz a toda la ciudad, y los cables llegan hasta el Instituto.':
+    'The Great Gate has been open for years. The Engine lights the whole city, and cables run all the way to the Institute.',
+  'Cruzaste una boca que contestaba a una llamada, y la llamada era el colapso. Sales cuando la luz se curva y el cielo se pone rojo.':
+    'You crossed a mouth that was answering a call, and the call was the collapse. You step out as the light bends and the sky turns red.',
+  'Lo sabes todo, y ya no sirve de nada. En el Motor nace el agujero, y Hogar y la Luna caen sin un solo ciclo de reserva.':
+    'You know everything, and it no longer helps. The hole is born at the Engine, and Home and the Moon fall without a single cycle to spare.',
+  'Un sistema que no era el tuyo': 'A system that was not yours',
+  'Salvaste un sistema que no era el tuyo y llegaste tarde al tuyo.':
+    'You saved a system that was not yours and arrived too late for your own.',
+  'Hace años que la Puerta Mayor está abierta, y el Motor da luz a toda la ciudad. Sales justo cuando la luz se curva y el cielo se pone rojo.':
+    'The Great Gate has been open for years, and the Engine lights the whole city. You step out just as the light bends and the sky turns red.',
   '[texto pendiente]': '[text pending]',
   Continuar: 'Continue',
   'Quince minutos antes del final de un mundo.': 'Fifteen minutes before a world ends.',

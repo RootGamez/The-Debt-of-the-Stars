@@ -19,6 +19,9 @@ import { buildWorld } from '../../../src/worlds/loadWorld';
 import { direction, frameAt, type Frame, type Triple } from '../../../src/worlds/procedural/kit';
 import { followSun } from '../../../src/worlds/procedural/sun';
 import { buildTaller } from '../../../src/worlds/procedural/taller';
+import { SKEPTIC_ANCHORS } from '../../../src/worlds/procedural/tallerCentro';
+import { CAMARA_NAMES } from '../../../src/worlds/procedural/tallerCentroCamara';
+import { CAMARA_SOURCE, SKEPTIC_TALK_IDS } from '../../../src/game/skeptic';
 import {
   BRIDGE_EVENT,
   CORE_RADIUS,
@@ -219,9 +222,9 @@ describe('the teleporter of the Test Track and the Centre Room', () => {
   const ring = runtime.gates.find((g) => g.name === 'PASO_Pista');
   const back = runtime.gates.find((g) => g.name === 'PASO_Centro');
 
-  it('locks the ring of the track and leaves the way back open', () => {
+  it('locks both rings with the clock of the track: the escape switched off the way back too (E5)', () => {
     expect(ring).toMatchObject({ target: 'PASO_Centro', lock: 'pista' });
-    expect(back).toMatchObject({ target: 'PASO_Pista', lock: undefined });
+    expect(back).toMatchObject({ target: 'PASO_Pista', lock: 'pista' });
   });
 
   it('lets you through only when the game opens it', () => {
@@ -254,6 +257,52 @@ describe('the teleporter of the Test Track and the Centre Room', () => {
     expect(feet.distanceTo(onIsland('pista', [0, 0, 0]))).toBeLessThan(islandOf('pista').size - 2);
   });
 });
+
+describe('the house of the skeptic in the Centre Room (E5)', () => {
+  const scene = buildTaller({ sky: false });
+  const named = (name: string): Object3D | undefined => scene.getObjectByName(name);
+
+  it('has the Chamber with its source and two crossed rings that spin opposite ways', () => {
+    expect(named(CAMARA_NAMES.source)).toBeDefined();
+    expect(named(CAMARA_NAMES.halo)).toBeDefined();
+    const spins = [0, 1].map((k) => named(CAMARA_NAMES.ring(k))?.userData.spin as number);
+    expect(spins[0]).toBeGreaterThan(0);
+    expect(spins[1]).toBeLessThan(0);
+  });
+
+  it('marks where he sits at home and where he waits on the track', () => {
+    const home = named(SKEPTIC_ANCHORS.home);
+    const track = named(SKEPTIC_ANCHORS.track);
+    expect(home?.position.length()).toBeCloseTo(CORE_RADIUS, 0);
+    expect(track?.position.length()).toBeCloseTo(islandOf('pista').top, 0);
+  });
+
+  it('offers every moment of his talk at his seat, and the things of the house', () => {
+    const ids = world.markers.interactions.map((i) => i.clueId);
+    for (const id of [...SKEPTIC_TALK_IDS, CAMARA_SOURCE, 'taller.rayas', 'taller.catre']) {
+      expect(ids).toContain(id);
+    }
+    expect(ids).toContain('taller.cartas_sin_enviar');
+  });
+
+  it('lands whoever comes through the ring facing the Chamber', () => {
+    const back = runtime.gates.find((g) => g.name === 'PASO_Centro');
+    const source = named(CAMARA_NAMES.source);
+    if (!back || !source) throw new Error('falta el anillo o la fuente del Centro');
+    const { feet, forward } = gateArrival(back);
+    const toSource = toGltf(source.position.clone()).sub(feet).normalize();
+    expect(forward.dot(toSource)).toBeGreaterThan(0.5);
+  });
+
+  it('keeps the house out of reach of the clouds', () => {
+    const { feet } = gateArrival(runtime.gates.find((g) => g.name === 'PASO_Centro') ?? fail());
+    expect(sunkInGas(feet, runtime.well.center, gas)).toBe(false);
+  });
+});
+
+function fail(): never {
+  throw new Error('falta una pieza del Centro');
+}
 
 describe('the light of a spinning world', () => {
   it('follows the star around the frame of the world before drawing', () => {

@@ -261,3 +261,26 @@ describe('what the session knows', () => {
     expect(heard).toEqual([['deuda.palabra']]);
   });
 });
+
+describe('noting a fact the game itself saw (E5: las 15:00 llegan antes que tú)', () => {
+  it('learns a known fact once, saves it and tells the listeners', () => {
+    const { s, saved } = session();
+    const heard: string[][] = [];
+    s.onLearn((facts) => heard.push(facts));
+
+    expect(s.note('deuda.palabra')).toEqual(['deuda.palabra']);
+    expect(s.note('deuda.palabra')).toEqual([]);
+
+    expect(s.known.has('deuda.palabra')).toBe(true);
+    expect(saved).toEqual([['deuda.palabra']]);
+    expect(heard).toEqual([['deuda.palabra']]);
+  });
+
+  it('ignores a fact that does not exist in the clues', () => {
+    const { s, saved } = session();
+
+    expect(s.note('bucle.no_existe')).toEqual([]);
+    expect(s.known.has('bucle.no_existe')).toBe(false);
+    expect(saved).toEqual([]);
+  });
+});

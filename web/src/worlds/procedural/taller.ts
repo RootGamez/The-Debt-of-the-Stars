@@ -5,7 +5,6 @@
 // puentes de luz las unen (EVT_ y COL_ con `event`). El anillo de la Pista (PASO_ con `cerradura`) lleva a la Sala
 // del Centro, en el núcleo del gigante; ver game/teleporter.ts. Las medidas están en tallerShape.ts.
 import {
-  BackSide,
   Color,
   DoubleSide,
   Group,
@@ -15,7 +14,6 @@ import {
   MeshStandardMaterial,
   Object3D,
   Quaternion,
-  SphereGeometry,
   Vector3,
   type Material,
   type ShaderMaterial,
@@ -47,6 +45,7 @@ import {
 } from './kit';
 import { seededRandom, type Random } from './noise';
 import { buildBalance } from './benchBuilders';
+import { anchor, buildCentro, SKEPTIC_ANCHORS } from './tallerCentro';
 import { followSun, sunInWorld } from './sun';
 import {
   BRIDGE_EVENT,
@@ -473,6 +472,8 @@ class TallerBuilder {
     });
     this.extras.push(portal(TELEPORTER.portal, f.at([0, -4, 1.75]), false));
     this.mark('PASO_Pista', f, [0, -4, 0], { destino: 'PASO_Centro', cerradura: TELEPORTER.lock });
+    // Donde espera el escéptico cuando sale contigo por el anillo (E5), a un lado, mirando la vía.
+    this.extras.push(anchor(SKEPTIC_ANCHORS.track, f, [-3.4, -1.6, 0]));
     // El reloj de la Pista: un poste con su esfera.
     v.add(P.metal, cylinder(0.12, 6), f.at([3.6, -6.5, 0.6], [0, 0, 0], [1, 1, 1.2]), 'metal');
     v.add(
@@ -499,37 +500,16 @@ class TallerBuilder {
     this.mark('SPAWN_Prueba', f, [-4, 4, 0.3]);
   }
 
-  /** La Sala del Centro: el núcleo de roca, la cáscara oscura con las indicaciones y el anillo de vuelta. */
+  /**
+   * La Sala del Centro, casa del escéptico (E5, tallerCentro.ts): el núcleo de roca (su colisión), la Cámara, los
+   * muebles, los muros con la cuenta y el anillo de vuelta, que ya no está siempre abierto: lo enciende la Pista.
+   */
   centro(): void {
-    const v = this.pieces;
-    v.add(P.core, ball(CORE_RADIUS, 3), new Matrix4());
-    const core = { radius: CORE_RADIUS, groundRadius: () => CORE_RADIUS };
-    const gate = frameAt(core, 70, 0, { heading: 180 });
-    for (const x of [-2.1, 2.1])
-      v.add(P.dark, box(), gate.at([x, 0, 1.7], [0, 0, 0], [0.5, 0.5, 3.6]), 'metal');
-    v.add(P.metal, torus(1.6, 0.18, 28, 6), gate.at([0, 0, 1.75]), 'metal', { solid: false });
-    this.extras.push(portal('Taller_Portal_Centro', gate.at([0, 0, 1.75]), true));
-    this.mark('PASO_Centro', gate, [0, 0, 0], { destino: 'PASO_Pista' });
-    // Las páginas que faltan, en un atril al otro lado del anillo.
-    const lectern = frameAt(core, 35, 0, { heading: 0 });
-    v.add(P.metal, cylinder(0.12, 6), lectern.at([0, 0, 0.5], [0, 0, 0], [1, 1, 1.2]), 'metal');
-    v.add(P.wall, box(), lectern.at([0, 0, 1.12], [0.5, 0, 0], [0.8, 0.55, 0.06]), 'stone', {
-      solid: false,
-    });
-    v.add(P.carve, ball(0.12, 1), lectern.at([0, 0, 1.5]), 'light', { glow: 1.4 });
-    this.mark('INT_paginas', lectern, [0, 0, 1.2], { clue_id: 'taller.paginas', kind: 'texto' });
-    for (let k = 0; k < 9; k++) {
-      const crystal = frameAt(core, -40 + k * 13, k * 47, { heading: k * 40 });
-      v.add(
-        P.carve,
-        cone(0.25, 0, 5),
-        crystal.at([0, 0, 0.5], [0.2, 0.1, 0], [1, 1, 1.2]),
-        'light',
-        {
-          glow: 0.9,
-        },
-      );
-    }
+    this.pieces.addCollider(ball(CORE_RADIUS, 3));
+    const centro = buildCentro();
+    for (const collider of centro.colliders) this.pieces.addCollider(collider);
+    this.extras.push(...centro.objects);
+    this.markers.push(...centro.markers);
   }
 }
 
@@ -553,15 +533,10 @@ function portal(name: string, matrix: Matrix4, visible: boolean): Mesh {
   return mesh;
 }
 
-/** La cáscara oscura de la Sala del Centro, por dentro, con las indicaciones talladas que brillan. */
+/** Las indicaciones talladas que brillan en la cáscara de la Sala del Centro (la cáscara va en tallerCentro.ts). */
 function shell(): Group {
   const group = new Group();
   group.name = 'Taller_Sala';
-  const wall = new Mesh(
-    new SphereGeometry(SHELL_RADIUS, 32, 16),
-    new MeshStandardMaterial({ color: P.shell, roughness: 1, side: BackSide, flatShading: true }),
-  );
-  wall.name = 'Taller_Sala_Cascara';
   const carvings = new PieceSet(35);
   const random = seededRandom(36);
   for (const [x, y] of [
@@ -604,7 +579,7 @@ function shell(): Group {
     new MeshBasicMaterial({ vertexColors: true }),
   );
   lines.name = 'Taller_Sala_Indicaciones';
-  group.add(wall, lines);
+  group.add(lines);
   return group;
 }
 

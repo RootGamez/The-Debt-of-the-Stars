@@ -607,7 +607,7 @@ describe('with the loop cut (E5: Cortar el bucle)', () => {
     const { d, saved } = director({ save: { ...freshSave(), facts: ['umbral.placa'] } });
     d.cutLoop();
     d.stabilize();
-    run(d, 100.1);
+    d.update(0.1, QUIET, 'marea');
     runToFade(d, FADE_OUT_SECONDS + 0.5);
 
     const update = d.resolveNoReturn();
@@ -626,6 +626,27 @@ describe('with the loop cut (E5: Cortar el bucle)', () => {
     run(d, FADE_IN_SECONDS + 0.2);
     run(d, 100.1);
     expect(runToFade(d, FADE_OUT_SECONDS + 0.5).restarts).toBe(1);
+  });
+
+  it('lets 15:00 pass when the loop is cut and the system is saved (the Counterweight installed)', () => {
+    const { d, saved } = director({ worldId: 'umbral' });
+    d.cutLoop();
+    d.stabilize();
+    run(d, 130);
+
+    expect(d.clock.t).toBeGreaterThan(100);
+    expect(d.deathCause).toBeUndefined();
+    expect(d.phase).toBe('playing');
+    expect(d.loopsCompleted).toBe(0);
+    expect(saved).toEqual([]);
+  });
+
+  it('still ends the cycle at 15:00 with the Counterweight installed but the loop running', () => {
+    const { d } = director();
+    d.stabilize();
+    run(d, 100.1);
+
+    expect(d.deathCause).toBe('fin');
   });
 
   it('ignores resolving a failure that has not happened', () => {

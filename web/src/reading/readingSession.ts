@@ -192,6 +192,16 @@ export class ReadingSession {
     return newFacts;
   }
 
+  /**
+   * Anota un hecho que el juego mismo ha visto, sin fuente que leer (p. ej. que las 15:00 llegaron antes que tú al
+   * horizonte). Solo si existe en las pistas y aún no se sabe; devuelve lo aprendido.
+   */
+  note(factId: string): string[] {
+    if (!this.clues.facts.has(factId) || this.facts.has(factId)) return [];
+    this.learn([factId]);
+    return [factId];
+  }
+
   rumors(): string[] {
     return rumorsOf(this.clues, this.facts);
   }

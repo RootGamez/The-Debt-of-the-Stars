@@ -81,6 +81,14 @@ export function horizonArrivesLate(descent: HorizonDescent): boolean {
   return false;
 }
 
+/**
+ * Qué pasa al llegar al horizonte estable: con el bucle cortado se cruza (el epílogo); sin cortar, las 15:00 llegan
+ * antes que tú (el ciclo acaba y despiertas en Umbral) por deprisa que bajes.
+ */
+export function horizonCrossing(loopCut: boolean): 'cross' | 'late' {
+  return loopCut ? 'cross' : 'late';
+}
+
 export interface HorizonLateCheck {
   cause: DeathCause | undefined;
   loopCut: boolean;

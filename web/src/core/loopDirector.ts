@@ -269,7 +269,8 @@ export class LoopDirector {
     if (hardLanding) return 'caida';
     if (!this.looping) return undefined; // en casa no hay fin del ciclo ni absorción
     if (!this.stable && this.swallowed()) return 'absorcion';
-    if (this.clock.ended) return 'fin';
+    // Con el bucle cortado y el sistema salvado (el Contrapeso puesto), las 15:00 pasan sin más: nada se repite ni cae.
+    if (this.clock.ended && !(this.loopCut && this.stable)) return 'fin';
     return undefined;
   }
 

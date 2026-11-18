@@ -27,7 +27,10 @@ describe('the real clue data', () => {
     const chats = clues.sources.filter((s) => s.kind === 'charla');
 
     expect(chats.map((s) => s.id)).toContain('instituto.directora');
-    expect(chats.every((s) => s.world === 'hogar')).toBe(true);
+    // Fuera de casa solo hablan ellos dos, los Ausentes vivos (plan de finales, E4 y E5): sus ids llevan su retrato.
+    expect(chats.every((s) => s.world === 'hogar' || /\.(cientifica|esceptico)$/.test(s.id))).toBe(
+      true,
+    );
     // Solo la Directora da hechos.
     expect(chats.filter((s) => s.surface.facts.length > 0 || s.deep).map((s) => s.id)).toEqual([
       'instituto.directora',

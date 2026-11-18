@@ -106,5 +106,89 @@
       "A bronze beam on a post. On one side hangs the model of the old motor; on the other, six notches marked with lines, each farther from the axis than the last.",
       "Everything weighs less here than anywhere else, but a balance evens out all the same: what counts is the weight and how far out it hangs."
     ]
+  },
+  "taller.camara": {
+    "titulo": "The Chamber",
+    "superficial": [
+      "In the middle of the house, on a stone base, a sphere of light set in its socket. Two rings circle it and turn, each its own way, never touching.",
+      "It makes no sound. If you bring your hand close, the air pulls it towards the light, like water towards a drain. Every turn of the rings stitches the same day once more.",
+      "Carved into the base, two triangles tip to tip. Below them, tally marks."
+    ]
+  },
+  "taller.rayas": {
+    "titulo": "The walls",
+    "superficial": [
+      "Tally marks. Groups of four strokes and one across them, row after row, from the top of the wall down to where a long arm reaches.",
+      "Every so often, a long stroke runs through the row. Not one word, not one number: only the count, wall after wall, inside and out.",
+      "The wall behind the cot is half full. The last mark is new: the stone still has dust on it."
+    ]
+  },
+  "taller.catre": {
+    "titulo": "The cot",
+    "superficial": [
+      "A canvas cot made to his size, longer than any bed at the Institute. The blanket is half folded, as if someone had just got up.",
+      "On the crate beside it, two cups. One dark, its handle worn from use. The other, ochre, with a thin gold ring, is clean and dry: nobody has drunk from it here."
+    ]
+  },
+  "taller.cartas_sin_enviar": {
+    "titulo": "The unsent letters",
+    "superficial": [
+      "A bundle of folded sheets, tied with string. None has an envelope or a signature, and all of them begin the same way.",
+      "“Dear: the clock on the Track still keeps its own time. Are you sleeping? It should be easier for you there.”",
+      "“Dear: nothing to tell today. I am counting it anyway.”",
+      "The top one stops at “Dear:”. Below there is room for a great deal, and there is nothing."
+    ]
+  },
+  "taller.saludo.esceptico": {
+    "titulo": "The skeptic",
+    "superficial": [
+      "He is sitting on the edge of the cot, elbows on his knees. He does not get up. When you come in, the sign on his chest brightens a little.",
+      "“Ah. The one with the little ship. You had never come in here, but out there I have seen you many times.”",
+      "“That light is the Chamber. Every turn it sets everything back to seven in the morning. You too, even if you remember.”"
+    ]
+  },
+  "taller.vuelta.esceptico": {
+    "titulo": "The skeptic",
+    "superficial": [
+      "He raises his head for a moment. He has recognised you before you say a word.",
+      "“You again. You always look at the light before you look at me.”",
+      "“Up on the Track I can open short portals, no ship needed. Not from here: that thing eats everything there is.” He points at the Chamber with his chin.",
+      "“I keep the count on the walls. They are full. I carry on.”"
+    ]
+  },
+  "taller.ella.esceptico": {
+    "titulo": "The skeptic",
+    "superficial": [
+      "You tell him what you know about the researcher and the slow place. He does not answer straight away. He looks at the ochre cup on the crate.",
+      "“And the clock there? Still running ahead?”",
+      "“For every day here, five there. That is what she said. If the cold holds, she needs nothing from me.”",
+      "“The pages on the table are hers. I kept them. I do not know whether to give them back or to have something to read.”"
+    ]
+  },
+  "taller.contrapeso.esceptico": {
+    "titulo": "The skeptic",
+    "superficial": [
+      "You show it to him. At the sight of the Counterweight he gets up, slowly, like someone whose knees are cold. He says nothing.",
+      "He reaches between the rings of the Chamber and lifts the source out of its socket. The rings keep turning a little, less and less, until they stop.",
+      "He fits it into the hollow of the Counterweight with a short twist. It goes in as if it had been made for it.",
+      "“There. Now whatever happens, happens.”"
+    ]
+  },
+  "taller.cuenta.esceptico": {
+    "titulo": "The skeptic",
+    "superficial": [
+      "You show it to him. At the sight of the Counterweight he gets up, slowly, like someone whose knees are cold. He says nothing.",
+      "He reaches between the rings of the Chamber and lifts the source out of its socket. The rings keep turning a little, less and less, until they stop.",
+      "He fits it into the hollow of the Counterweight with a short twist, and stays a moment with both hands on it, not letting go.",
+      "“The fit is hers. You can tell.” And then: “There. Now whatever happens, happens.”"
+    ]
+  },
+  "taller.adios.esceptico": {
+    "titulo": "The skeptic",
+    "superficial": [
+      "He has put on his bandolier. He looks at the walls once, end to end, and adds no mark.",
+      "“Let us go by the Track. Up there I have what I need to open my own way.”",
+      "“Later I will go and see her. No hurry: now there is time.”"
+    ]
   }
 }

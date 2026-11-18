@@ -224,5 +224,163 @@
       ],
       "hechos": []
     }
+  },
+  {
+    "id": "taller.camara",
+    "mundo": "taller",
+    "tipo": "observacion",
+    "titulo": "La Cámara",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "En el centro de la casa, sobre un pie de piedra, una esfera de luz encajada en su zócalo. Dos anillos la rodean y giran, cada uno hacia su lado, sin rozarse nunca.",
+        "No hace ruido. Si acercas la mano, el aire tira de ella hacia la luz, como el agua hacia un desagüe. Cada vuelta de los anillos cose otra vez el mismo día.",
+        "Grabados en el pie, dos triángulos punta con punta. Debajo, rayas."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.rayas",
+    "mundo": "taller",
+    "tipo": "observacion",
+    "titulo": "Las paredes",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Rayas. Grupos de cuatro palos y uno que los cruza, fila tras fila, desde lo alto del muro hasta donde llega un brazo largo.",
+        "De vez en cuando, un trazo largo atraviesa la fila. No hay ni una palabra ni un número: solo la cuenta, muro tras muro, por dentro y por fuera.",
+        "El muro de detrás del catre está a medias. La última raya es nueva: la piedra aún tiene polvo."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.catre",
+    "mundo": "taller",
+    "tipo": "objeto",
+    "titulo": "El catre",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un catre de lona hecho a su medida, más largo que cualquier cama del Instituto. La manta está doblada a medias, como si alguien se acabara de levantar.",
+        "En la caja de al lado, dos tazas. Una oscura, con el asa gastada de tanto cogerla. La otra, ocre, con un aro fino de oro, está limpia y seca: nadie ha bebido de ella aquí."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.cartas_sin_enviar",
+    "mundo": "taller",
+    "tipo": "texto",
+    "titulo": "Las cartas sin enviar",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un fajo de hojas dobladas, atado con cordel. Ninguna lleva sobre ni firma, y todas empiezan igual.",
+        "«Querida: el reloj de la Pista sigue a su aire. ¿Duermes? Allí debería costarte menos.»",
+        "«Querida: hoy no hay nada que contar. Lo cuento igual.»",
+        "La de arriba se queda en «Querida:». Debajo hay sitio para mucho, y no hay nada."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.saludo.esceptico",
+    "mundo": "taller",
+    "tipo": "charla",
+    "titulo": "El escéptico",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Está sentado en el borde del catre, con los codos en las rodillas. No se levanta. Cuando entras, el signo de su pecho se enciende un poco.",
+        "«Ah. El de la nave pequeña. Aquí no habías entrado nunca, pero ahí fuera te he visto muchas veces.»",
+        "«Eso de la luz es la Cámara. Cada vuelta lo pone todo otra vez a las siete. A ti también, aunque tú te acuerdes.»"
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.vuelta.esceptico",
+    "mundo": "taller",
+    "tipo": "charla",
+    "titulo": "El escéptico",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Levanta la cabeza un momento. Te ha reconocido antes de que digas nada.",
+        "«Tú otra vez. Siempre entras mirando la luz antes que a mí.»",
+        "«Arriba, en la Pista, sé abrir portales cortos, sin nave. Desde aquí no: todo lo que hay se lo come eso.» Señala la Cámara con la barbilla.",
+        "«Llevo la cuenta en las paredes. Ya no caben. Sigo igual.»"
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.ella.esceptico",
+    "mundo": "taller",
+    "tipo": "charla",
+    "titulo": "El escéptico",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Le cuentas lo que sabes de la investigadora y del sitio lento. No contesta enseguida. Mira la taza ocre de la caja.",
+        "«¿Y el reloj de allí? ¿Sigue adelantado?»",
+        "«Por cada día de aquí, cinco allí. Eso decía ella. Si el frío aguanta, no le hace falta nada de mí.»",
+        "«Las páginas de la mesa son suyas. Me las quedé. No sé si para devolvérselas o para tener algo que leer.»"
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.contrapeso.esceptico",
+    "mundo": "taller",
+    "tipo": "charla",
+    "titulo": "El escéptico",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Se lo enseñas. Al ver el Contrapeso se levanta, despacio, como quien tiene frío en las rodillas. No dice nada.",
+        "Mete las manos entre los anillos de la Cámara y saca la fuente de su zócalo. Los anillos siguen girando un poco, cada vez menos, hasta pararse.",
+        "La encaja en el hueco del Contrapeso con un giro corto. Entra como si se hubiera hecho para ella.",
+        "«Ya está. Ahora lo que pase, pasa.»"
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.cuenta.esceptico",
+    "mundo": "taller",
+    "tipo": "charla",
+    "titulo": "El escéptico",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Se lo enseñas. Al ver el Contrapeso se levanta, despacio, como quien tiene frío en las rodillas. No dice nada.",
+        "Mete las manos entre los anillos de la Cámara y saca la fuente de su zócalo. Los anillos siguen girando un poco, cada vez menos, hasta pararse.",
+        "La encaja en el hueco del Contrapeso con un giro corto, y se queda un momento con las dos manos encima, sin soltarlo.",
+        "«El ajuste es suyo. Se nota.» Y luego: «Ya está. Ahora lo que pase, pasa.»"
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "taller.adios.esceptico",
+    "mundo": "taller",
+    "tipo": "charla",
+    "titulo": "El escéptico",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Se ha puesto la bandolera. Mira las paredes una vez, de punta a punta, y no añade ninguna raya.",
+        "«Vamos por la Pista. Arriba tengo con qué abrir lo mío.»",
+        "«Después iré a verla. Sin prisa: ahora hay tiempo.»"
+      ],
+      "hechos": []
+    }
   }
 ]

@@ -3,6 +3,7 @@ import {
   HORIZON_LATE_FACT,
   createLoopCore,
   horizonArrivesLate,
+  horizonCrossing,
   horizonLateFact,
   isLoopCut,
   moveSource,
@@ -104,5 +105,12 @@ describe('the note of the notebook', () => {
     expect(horizonLateFact({ cause: 'fin', loopCut: true, closeness: 0.4 })).toBeUndefined();
     expect(horizonLateFact({ cause: 'caida', loopCut: false, closeness: 0.4 })).toBeUndefined();
     expect(horizonLateFact({ cause: undefined, loopCut: false, closeness: 0.4 })).toBeUndefined();
+  });
+});
+
+describe('reaching the stable horizon', () => {
+  it('crosses it only with the loop cut; otherwise 15:00 gets there first', () => {
+    expect(horizonCrossing(true)).toBe('cross');
+    expect(horizonCrossing(false)).toBe('late');
   });
 });
