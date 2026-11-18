@@ -844,8 +844,8 @@ async function start(): Promise<void> {
           lockGameKeys();
         },
         known: () => reading.known,
-          enterWorld(startWorld);
         stepOutside: () => {
+          enterWorld(startWorld);
           createArrivalLayer('negro').clear();
         },
         turnToMoon: (share) => {
