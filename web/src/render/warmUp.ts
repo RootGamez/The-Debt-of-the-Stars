@@ -2,6 +2,7 @@
 // el explorador): si no, cada material se compila la primera vez que se ve y el juego da un tirón al llegar a un
 // mundo. Se hace bajo la pantalla de carga, por partes (los subárboles sin luces) para que la barra avance; con
 // KHR_parallel_shader_compile no bloquea mientras tanto.
+import { HalfFloatType, WebGLRenderTarget } from 'three';
 import type { Camera, Object3D, Scene, WebGLRenderer } from 'three';
 import { nextFrame } from '../core/nextFrame';
 
@@ -28,6 +29,33 @@ function partsOf(root: Object3D): Object3D[] {
   return root.children.flatMap((child) => (hasLight(child) ? partsOf(child) : [child]));
 }
 
+/**
+ * Los mismos sombreadores, pero en su variante para dibujar en una textura. Three compila un programa distinto según
+ * se pinte en pantalla o en un `WebGLRenderTarget` (sin conversión de color a sRGB ni mapa de tonos), y el pase de
+ * fondo de las esferas de gusano (`renderWithWormholes`) pinta toda la escena en una textura: sin esto, la primera vez
+ * que una esfera entra en cuadro al girar la cámara se compilan de golpe todos los materiales a la vista (decenas de
+ * programas, un tirón de cientos de milisegundos) y lo mismo con cada material nuevo que entra después en cuadro.
+ */
+async function compileForTexture(
+  renderer: WebGLRenderer,
+  scene: Scene,
+  camera: Camera,
+): Promise<void> {
+  const previous = renderer.getRenderTarget();
+  const probe = new WebGLRenderTarget(1, 1, { type: HalfFloatType });
+  try {
+    // `compileAsync` prepara los programas al llamarse (la variante la fija el destino puesto en ese instante); lo
+    // que se espera después es solo a que terminen de enlazarse.
+    renderer.setRenderTarget(probe);
+    const pending = renderer.compileAsync(scene, camera);
+    renderer.setRenderTarget(previous);
+    await pending;
+  } finally {
+    renderer.setRenderTarget(previous);
+    probe.dispose();
+  }
+}
+
 async function compileAll(
   renderer: WebGLRenderer,
   scene: Scene,
@@ -35,7 +63,7 @@ async function compileAll(
   onProgress: (done: number, total: number) => void,
 ): Promise<void> {
   const parts = partsOf(scene);
-  const total = parts.length + 1;
+  const total = parts.length + 2;
   onProgress(0, total);
   let lastYield = performance.now();
   for (const [k, part] of parts.entries()) {
@@ -50,6 +78,8 @@ async function compileAll(
   }
   onProgress(parts.length, total);
   await renderer.compileAsync(scene, camera);
+  onProgress(parts.length + 1, total);
+  await compileForTexture(renderer, scene, camera);
   onProgress(total, total);
 }
 
