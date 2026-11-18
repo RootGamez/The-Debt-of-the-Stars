@@ -1,7 +1,7 @@
 // Fase 10E: la vuelta a casa. Por una boca del Archivo de las Puertas o de La Boca se llega a
 // `?mundo=hogar&final=A|tarde[&via=boca|archivo]`. Con A, el Hogar de antes (sin los fragmentos que aún no han
-// llegado); hablar con la Directora cierra el viaje con la tarjeta del final, que se guarda como visto. Llegar tarde
-// es el final malo: su tarjeta (según `via`) también se guarda y ofrece volver al Archivo.
+// llegado); hablar con la Maestra (F4, D14) abre la escena del cuaderno y, con «Seguir», el giro a la Luna y la tarjeta
+// del final, que se guarda como visto. Llegar tarde es el final malo (cierra la Directora): su tarjeta (según `via`) también se guarda y ofrece volver al Archivo.
 import { expect, test, type Page } from '@playwright/test';
 import { standAt } from './counterweightSteps';
 import { ready, snapshot, startPlaying } from './helpers';
@@ -55,11 +55,13 @@ async function landAtHome(page: Page): Promise<void> {
     .toBe(false);
 }
 
-async function talkToTheDirector(page: Page): Promise<void> {
-  await standAt(page, 'instituto.directora');
+async function talkTo(page: Page, source: string): Promise<void> {
+  await standAt(page, source);
   await expect(page.locator('.prompt')).toHaveText('E · hablar');
   await page.keyboard.press('KeyE');
 }
+
+const talkToTheDirector = (page: Page) => talkTo(page, 'instituto.directora');
 
 test.afterEach(async ({ page }) => {
   await page.evaluate((key) => {
@@ -67,7 +69,7 @@ test.afterEach(async ({ page }) => {
   }, SAVE_KEY);
 });
 
-test('ending A: the earlier home, the view turns to the Moon and the card offers to play again', async ({
+test('ending A: the Teacher reads the notebook, the view turns to the Moon and the card offers to play again', async ({
   page,
 }) => {
   test.setTimeout(240_000);
@@ -83,7 +85,18 @@ test('ending A: the earlier home, the view turns to the Moon and the card offers
   await standAt(page, 'instituto.fragmento_luna');
   await expect(page.locator('.prompt')).toBeHidden();
 
-  await talkToTheDirector(page);
+  // La Directora ya no cierra el bueno: no ofrece nada.
+  await standAt(page, 'instituto.directora');
+  await expect(page.locator('.prompt')).toBeHidden();
+
+  await talkTo(page, 'instituto.maestra');
+  await expect.poll(async () => (await homecoming(page))?.phase).toBe('talking');
+  const scene = page.getByRole('dialog', { name: 'La Maestra' });
+  await expect(scene).toBeVisible();
+  await expect(scene).toContainText('Vuelve a contármelo todo');
+  await expect(scene).toContainText('tiempo prestado');
+  await scene.getByRole('button', { name: 'Seguir' }).click();
+  await expect(scene).toBeHidden();
   await expect
     .poll(async () => (await homecoming(page))?.phase, { timeout: 60_000 })
     .toBe('turning');

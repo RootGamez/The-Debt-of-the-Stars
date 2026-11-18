@@ -905,12 +905,17 @@ async function start(): Promise<void> {
           bocaTrigger.object.position,
         )
       : undefined;
-  const bocaCenter = new Vector3();
+  const bocaEye = new Vector3();
+  const bocaUp = new Vector3();
   let bocaConfirmed = false;
   /** Qué toca con La Boca ahora: cerrada, visible, preguntar o cruzar (solo a pie, en Umbral). */
   function bocaStep(): BocaCallStep {
-    if (!bocaView || currentWorld.id !== 'umbral' || flight?.piloting) return 'closed';
-    const distance = bocaView.worldCenter(bocaCenter).distanceTo(camera.position);
+    if (!bocaView || !bocaTrigger || currentWorld.id !== 'umbral' || flight?.piloting)
+      return 'closed';
+    // Desde los ojos del explorador (en tercera persona la cámara va detrás) hasta el centro del anillo.
+    upOf(player.state.body, bocaUp);
+    bocaEye.copy(player.state.position).addScaledVector(bocaUp, EYE_HEIGHT);
+    const distance = bocaEye.distanceTo(bocaTrigger.object.position);
     return bocaCallStep(session.director.clock.t, distance, bocaConfirmed);
   }
   const bocaActions: SourceActions = {
