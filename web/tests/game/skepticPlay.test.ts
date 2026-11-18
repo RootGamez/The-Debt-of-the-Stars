@@ -110,3 +110,32 @@ describe('debugging the hand-over', () => {
     expect(world.read).toEqual([]);
   });
 });
+
+describe('restoring a saved loop', () => {
+  it('goes on with the loop cut and him outside, showing his goodbye', () => {
+    const { play, world } = setup({ opened: [SKEPTIC_TALK.saludo] });
+
+    play.restore({ source: 'inContrapeso', left: true });
+
+    expect(play.loopCut).toBe(true);
+    expect(play.state.left).toBe(true);
+    expect(play.stage).toBe('adios');
+    expect(play.loopState()).toEqual({ source: 'inContrapeso', left: true });
+    expect(play.snapshot()).toMatchObject({ source: 'inContrapeso', left: true, metBefore: true });
+    // Restaurar no vuelve a avisar del corte: el director se restaura aparte.
+    expect(world.handOvers).toBe(0);
+  });
+
+  it('can still be handed over after restoring an intact loop, and restarts clean', () => {
+    const { play, world } = setup({ carrying: true });
+    play.restore({ source: 'inPlace', left: false });
+    expect(play.loopState()).toEqual({ source: 'inPlace', left: false });
+
+    play.forceHandOver();
+    expect(world.handOvers).toBe(1);
+    expect(play.loopState()).toEqual({ source: 'inContrapeso', left: false });
+
+    play.restart();
+    expect(play.loopState()).toEqual({ source: 'inPlace', left: false });
+  });
+});

@@ -2,6 +2,7 @@
 // que dice depende de si ya os visteis en otro, de lo que sabes de ella y de si entras con el Contrapeso en brazos.
 // Cada momento de la charla es una fuente `charla` propia (ids acabados en `.esceptico`, que les da su retrato); solo
 // se ve la del momento. Enseñarle el Contrapeso hace que te dé la fuente de poder y la encaje: el bucle se corta.
+import { INTACT_LOOP, type LoopState } from '../core/save';
 import { createLoopCore, isLoopCut, moveSource, type LoopCore } from './loopCore';
 
 /** Los momentos de su charla. */
@@ -96,4 +97,20 @@ export function handOverSource(state: SkepticState): SkepticState {
 export function leaveWithYou(state: SkepticState): SkepticState {
   if (state.left || !isLoopCut(state.core)) return state;
   return Object.freeze({ ...state, left: true });
+}
+
+/** Lo que se guarda de él: dónde está la fuente y si salió contigo (core/save.ts, versión 7). */
+export function skepticLoopState(state: SkepticState): LoopState {
+  return { source: state.core.source, left: state.left };
+}
+
+/**
+ * Lo que se guardó, de vuelta: la fuente donde estaba y él fuera si ya salió. Un estado que no cuadra (haber salido sin
+ * que el bucle esté cortado) se queda en casa. `met`: si os visteis antes (sale de las fuentes abiertas, no se guarda aquí).
+ */
+export function restoreSkepticState(saved: LoopState, met: boolean): SkepticState {
+  const fresh = createSkepticState(met);
+  if (saved.source === INTACT_LOOP.source) return fresh;
+  const cut = moveSource(moveSource(fresh.core, 'inContrapeso'), saved.source);
+  return Object.freeze({ core: cut, metBefore: met, left: saved.left });
 }

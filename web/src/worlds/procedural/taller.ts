@@ -3,7 +3,7 @@
 // la capa de gas que mata; mallas COL_; marcas SPAWN_, INT_, ANIM_ y EVT_): un gigante de nubes sin suelo y cinco
 // islas de roca que flotan sobre él con los lugares de siempre. A las 7:00, con la secuencia de la fábrica, unos
 // puentes de luz las unen (EVT_ y COL_ con `event`). El anillo de la Pista (PASO_ con `cerradura`) lleva a la Sala
-// del Centro, en el núcleo del gigante; ver game/teleporter.ts. Las medidas están en tallerShape.ts.
+// del Centro, en el núcleo del gigante; ver game/teleporter.ts y game/trackGateRig.ts. Las medidas están en tallerShape.ts.
 import {
   Color,
   DoubleSide,
@@ -471,6 +471,7 @@ class TallerBuilder {
       glow: 1.8,
     });
     this.extras.push(portal(TELEPORTER.portal, f.at([0, -4, 1.75]), false));
+    this.extras.push(blinkLamp('Taller_Portal_Hora', f.at([0, -4, 3.75])));
     this.mark('PASO_Pista', f, [0, -4, 0], { destino: 'PASO_Centro', cerradura: TELEPORTER.lock });
     // Donde espera el escéptico cuando sale contigo por el anillo (E5), a un lado, mirando la vía.
     this.extras.push(anchor(SKEPTIC_ANCHORS.track, f, [-3.4, -1.6, 0]));
@@ -530,6 +531,20 @@ function portal(name: string, matrix: Matrix4, visible: boolean): Mesh {
   mesh.name = name;
   mesh.applyMatrix4(matrix);
   mesh.visible = visible;
+  // Portal caído (E4): el juego lo abre poco a poco al encenderse el anillo (render/fallenGateView.ts).
+  mesh.userData = { fallen_lock: TELEPORTER.lock, fallen_part: 'membrane' };
+  return mesh;
+}
+
+/** La luz de la hora del anillo apagado: parpadea hasta que el reloj de la Pista se enciende (fallenGateView.ts). */
+function blinkLamp(name: string, matrix: Matrix4): Mesh {
+  const mesh = new Mesh(
+    ball(0.16, 2),
+    new MeshBasicMaterial({ color: new Color(P.bridge).multiplyScalar(1.4) }),
+  );
+  mesh.name = name;
+  mesh.applyMatrix4(matrix);
+  mesh.userData = { fallen_lock: TELEPORTER.lock, fallen_part: 'blink' };
   return mesh;
 }
 

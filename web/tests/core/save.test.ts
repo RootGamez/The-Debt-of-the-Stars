@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   clearSave,
   freshSave,
+  INTACT_LOOP,
   isSaveErased,
   loadSave,
   markEndingSeen,
+  markLoopState,
   markPrologueDone,
   markTasksDone,
   markWorldNamed,
@@ -62,6 +64,7 @@ describe('loadSave', () => {
       worlds: { umbral: { name: 'Primera luz', loop: 2 } },
       tasks: [],
       opened: [],
+      loop: { source: 'inContrapeso', left: true },
     });
 
     expect(loadSave(store).data).toEqual({
@@ -73,6 +76,7 @@ describe('loadSave', () => {
       worlds: { umbral: { name: 'Primera luz', loop: 2 } },
       tasks: [],
       opened: [],
+      loop: { source: 'inContrapeso', left: true },
     });
   });
 
@@ -94,6 +98,7 @@ describe('loadSave', () => {
         worlds: {},
         tasks: [],
         opened: [],
+        loop: INTACT_LOOP,
       },
       readOnly: false,
     });
@@ -111,6 +116,7 @@ describe('loadSave', () => {
       worlds: {},
       tasks: [],
       opened: [],
+      loop: INTACT_LOOP,
     });
   });
 
@@ -238,6 +244,7 @@ describe('saveProgress (two tabs never lose facts)', () => {
     worlds: {},
     tasks: [],
     opened: [],
+    loop: { ...INTACT_LOOP },
   });
 
   it('never forgets that the prologue was played, whichever tab saves last', () => {
@@ -406,6 +413,7 @@ describe('the named worlds (version 4)', () => {
       worlds: {},
       tasks: [],
       opened: [],
+      loop: INTACT_LOOP,
     });
   });
 
@@ -554,8 +562,13 @@ describe('the endings in the save (version 6: the bad ending is a seen ending)',
     const { data, warning } = migrate(v5(['A']));
 
     expect(warning).toBeUndefined();
-    expect(data).toEqual({ ...v5(['A']), version: SAVE_VERSION, endings: ['A'] });
-    expect(SAVE_VERSION).toBe(6);
+    expect(data).toEqual({
+      ...v5(['A']),
+      version: SAVE_VERSION,
+      endings: ['A'],
+      loop: INTACT_LOOP,
+    });
+    expect(SAVE_VERSION).toBe(7);
   });
 
   it('migrates the ending B that no longer exists into the good ending, once', () => {
@@ -577,5 +590,97 @@ describe('the endings in the save (version 6: the bad ending is a seen ending)',
   it('migrates versions 3 and 4 endings the same way', () => {
     const v3 = { version: 3, loopsCompleted: 1, facts: [], prologueDone: true, endings: ['B'] };
     expect(migrate(v3).data.endings).toEqual(['A']);
+  });
+});
+
+describe('the state of the loop in the save (version 7, milestone E5)', () => {
+  const v6 = () => ({
+    version: 6,
+    loopsCompleted: 4,
+    facts: ['a.b'],
+    prologueDone: true,
+    endings: ['tarde'],
+    worlds: {},
+    tasks: [],
+    opened: ['umbral.placa'],
+  });
+  const v7 = (loop: unknown) => ({ ...v6(), version: 7, loop });
+  const read = (raw: unknown) => loadSave(memoryStore({ [SAVE_KEY]: JSON.stringify(raw) }));
+
+  it('starts a new game with the loop turning', () => {
+    expect(freshSave().loop).toEqual({ source: 'inPlace', left: false });
+  });
+
+  it('migrates a version 6 save keeping everything and with the loop uncut', () => {
+    const { data, warning } = read(v6());
+    expect(warning).toBeUndefined();
+    expect(data).toEqual({ ...v6(), version: SAVE_VERSION, loop: INTACT_LOOP });
+  });
+
+  it('migrates older versions the same way', () => {
+    expect(read({ version: 1, loopsCompleted: 2, facts: [] }).data.loop).toEqual(INTACT_LOOP);
+    const v5 = { ...v6(), version: 5, endings: ['A'] };
+    expect(read(v5).data.loop).toEqual(INTACT_LOOP);
+  });
+
+  it.each([
+    ['the source fitted in the Counterweight', { source: 'inContrapeso', left: false }],
+    ['the source lost', { source: 'lost', left: false }],
+    ['him out with you', { source: 'inContrapeso', left: true }],
+    ['the loop still turning', { source: 'inPlace', left: false }],
+  ])('keeps %s', (_name, loop) => {
+    expect(read(v7(loop)).data.loop).toEqual(loop);
+  });
+
+  it.each([
+    ['nothing', undefined],
+    ['text', 'cortado'],
+    ['a list', []],
+    ['an unknown source', { source: 'nowhere', left: false }],
+    ['a source that is not text', { source: 3, left: false }],
+    ['a `left` that is not a flag', { source: 'lost', left: 'yes' }],
+    ['no `left`', { source: 'lost' }],
+    ['him outside with the loop still turning', { source: 'inPlace', left: true }],
+  ])('throws away a version 7 save with %s as the loop', (_name, loop) => {
+    const result = read(v7(loop));
+    expect(result.warning).toBeDefined();
+    expect(result.data).toEqual(freshSave());
+  });
+
+  it('writes the loop state only on purpose: other saves keep what is stored', () => {
+    const store = memoryStore();
+    const loaded = loadSave(store);
+    expect(markLoopState(store, loaded, { source: 'inContrapeso', left: false })).toBe(true);
+    // Otra pestaña, con el estado viejo en memoria, guarda hechos y ciclos: no deshace el corte.
+    saveProgress(store, { ...freshSave(), facts: ['a.b'], loopsCompleted: 3 });
+    expect(loadSave(store).data.loop).toEqual({ source: 'inContrapeso', left: false });
+    expect(loadSave(store).data.facts).toEqual(['a.b']);
+  });
+
+  it('can set it back to turning, and keeps everything else', () => {
+    const store = memoryStore();
+    writeSave(store, { ...freshSave(), loopsCompleted: 5, facts: ['a.b'] });
+    markLoopState(store, loadSave(store), { source: 'lost', left: true });
+    markLoopState(store, loadSave(store), INTACT_LOOP);
+    expect(loadSave(store).data).toMatchObject({
+      loopsCompleted: 5,
+      facts: ['a.b'],
+      loop: { source: 'inPlace', left: false },
+    });
+  });
+
+  it('forgets the cut loop once an ending has been seen (play again starts turning)', () => {
+    const store = memoryStore();
+    markLoopState(store, loadSave(store), { source: 'inContrapeso', left: true });
+    expect(markEndingSeen(store, loadSave(store), 'A')).toBe(true);
+    expect(loadSave(store).data).toMatchObject({ endings: ['A'], loop: INTACT_LOOP });
+  });
+
+  it('cannot save without storage, and leaves a save from a newer version alone', () => {
+    expect(markLoopState(null, loadSave(null), INTACT_LOOP)).toBe(false);
+    const newer = JSON.stringify({ version: SAVE_VERSION + 1, loopsCompleted: 3, facts: [] });
+    const store = memoryStore({ [SAVE_KEY]: newer });
+    expect(markLoopState(store, loadSave(store), { source: 'lost', left: false })).toBe(false);
+    expect(store.data.get(SAVE_KEY)).toBe(newer);
   });
 });

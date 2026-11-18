@@ -12,14 +12,17 @@ import type { Player } from './player';
 import {
   browserStore,
   clearSave,
+  isLoopCutState,
   isSaveErased,
   loadSave,
+  markLoopState,
   markPrologueDone,
   markSourcesOpened,
   markWorldNamed,
   saveProgress,
   SAVE_VERSION,
   type LoadResult,
+  type LoopState,
   type SaveData,
 } from './save';
 import type { Chronology, TimelineEvent } from './timeline';
@@ -79,6 +82,10 @@ export interface LoopSession {
   /** Las fuentes abiertas en otras partidas, y guardar las de ahora (fusionadas); false si no se pudo. */
   readonly savedOpened: readonly string[];
   saveOpened(opened: readonly string[]): boolean;
+  /** El estado del bucle al cargar la partida (E5): si ya estaba cortado, el director ya lo sabe. */
+  readonly savedLoop: LoopState;
+  /** Guarda el estado del bucle si cambió desde la última vez (barato de llamar cada fotograma); false si no se pudo. */
+  saveLoop(loop: LoopState): boolean;
   /** Ids de los eventos en curso, recalculados una vez por fotograma. */
   readonly activeEventIds: readonly string[];
   /** El progreso se está guardando (falso en modo privado o con una partida más nueva). */
@@ -105,6 +112,9 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
     // Partida de una versión más nueva: se juega sin guardar para no estropearla.
     persist: (data) => !loaded.readOnly && saveProgress(store, data),
   });
+  // E5: lo que ya se cortó no se deshace al recargar la página (cruzar al Archivo de las Puertas, volver a casa…).
+  if (isLoopCutState(loaded.data.loop)) director.cutLoop();
+  let lastLoop = loaded.data.loop;
   let factsFailed = false;
   let activeEventIds: readonly string[] = [];
   const savingWorks = (): boolean =>
@@ -199,6 +209,7 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
           worlds: {},
           tasks: [],
           opened: [],
+          loop: loaded.data.loop,
         });
       factsFailed = !ok;
       return ok;
@@ -206,6 +217,12 @@ export function createLoopSession(options: LoopSessionOptions): LoopSession {
     savedOpened: loaded.data.opened,
     saveOpened(opened) {
       return markSourcesOpened(store, loaded, opened);
+    },
+    savedLoop: loaded.data.loop,
+    saveLoop(loop) {
+      if (loop.source === lastLoop.source && loop.left === lastLoop.left) return true;
+      lastLoop = loop; // también si falla: no se reintenta cada fotograma
+      return markLoopState(store, loaded, loop);
     },
     savedWorlds: loaded.data.worlds,
     saveWorld(world, name) {

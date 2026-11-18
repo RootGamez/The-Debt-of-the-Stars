@@ -1,6 +1,6 @@
 // El reloj de un portal caído (hito E4 de docs/plan-finales.md §3.2): la hora de fuera y la del portal, una al lado de
 // la otra, y dos ruedas (minutos y segundos) para ponerlo en hora. Genérico: lo usa el reloj del muelle del Nudo y
-// puede usarlo el del Taller. Las reglas están en game/fallenGate.ts y game/fallenGatePlay.ts (con tests). Mientras se
+// lo usa también el de la Pista del Taller. Las reglas están en game/fallenGate.ts y game/fallenGatePlay.ts (con tests). Mientras se
 // lee el ciclo no corre, así que basta con pintar al abrir y con cada vuelta de rueda.
 import { formatClock } from '../core/loopClock';
 import type { FallenWheel } from '../game/fallenGate';
@@ -15,6 +15,9 @@ export interface FallenGateClockLabels {
   /** El nombre del reloj de fuera y el del portal. */
   outside: string;
   gate: string;
+  /** Lo que dice el estado con el reloj en hora y con el portal encendido (por defecto, los del portal del Nudo). */
+  matched?: string;
+  lit?: string;
 }
 
 const WHEELS: readonly FallenWheel[] = ['minutes', 'seconds'];
@@ -46,6 +49,8 @@ export function fallenGateClockBody(
   id: string,
   labels: FallenGateClockLabels,
   status: HTMLElement,
+  /** Se llama cada vez que el reloj queda en hora (la fuente se da por entendida). */
+  solve?: () => void,
 ): PuzzleBody {
   const rate = play.gate(id)?.spec.rate ?? 1;
   const { list, outside, own } = readouts(labels);
@@ -56,11 +61,12 @@ export function fallenGateClockBody(
     if (!reading) return;
     outside.textContent = formatClock(reading.target / rate);
     own.textContent = formatClock(reading.shown);
-    if (play.lit(id)) status.textContent = t('La Puerta está encendida.');
+    if (play.lit(id)) status.textContent = labels.lit ?? t('La Puerta está encendida.');
     else
       status.textContent = reading.matched
-        ? t('El reloj está en hora. La Puerta se enciende.')
+        ? (labels.matched ?? t('El reloj está en hora. La Puerta se enciende.'))
         : '';
+    if (reading.matched) solve?.();
   }
 
   for (const wheel of WHEELS) {

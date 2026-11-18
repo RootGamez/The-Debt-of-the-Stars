@@ -256,6 +256,19 @@ describe('the teleporter of the Test Track and the Centre Room', () => {
     const { feet } = gateArrival(ring);
     expect(feet.distanceTo(onIsland('pista', [0, 0, 0]))).toBeLessThan(islandOf('pista').size - 2);
   });
+
+  it('marks the veil and the hour lamp of the Track ring as parts of a fallen gate (E4)', () => {
+    const marked: Record<string, number> = {};
+    world.scene.traverse((o) => {
+      if (o.userData['fallen_lock'] !== 'pista') return;
+      const part = String(o.userData['fallen_part']);
+      marked[part] = (marked[part] ?? 0) + 1;
+    });
+    expect(marked).toEqual({ membrane: 1, blink: 1 });
+    const veil = world.scene.getObjectByName('Taller_Portal');
+    expect(veil?.userData['fallen_part']).toBe('membrane');
+    expect(veil?.visible).toBe(false);
+  });
 });
 
 describe('the house of the skeptic in the Centre Room (E5)', () => {

@@ -1,6 +1,7 @@
 // El escéptico en juego (plan de finales, E5): qué charla se ve, enseñarle el Contrapeso (te da la fuente y la encaja:
 // el bucle se corta) y salir con él por el anillo. Sin Three: lo que se ve lo pinta render/skepticView.ts y quien
-// avisa al director del corte es quien lo crea (main.ts, `onHandOver`). Nada de esto se guarda (ver el informe de E5).
+// avisa al director del corte es quien lo crea (main.ts, `onHandOver`). Lo que queda (fuente fuera de su sitio, él fuera) se guarda con `loopState()` y vuelve con `restore()`.
+import type { LoopState } from '../core/save';
 import type { SourceActions } from '../reading/readingUi';
 import { isLoopCut } from './loopCore';
 import {
@@ -9,7 +10,9 @@ import {
   knowsHer,
   leaveWithYou,
   metBefore,
+  restoreSkepticState,
   skepticGone,
+  skepticLoopState,
   skepticStage,
   skepticVerb,
   SHOW_VERB,
@@ -40,6 +43,10 @@ export interface SkepticPlay {
   leave(): void;
   /** Un ciclo nuevo: la fuente en su sitio y él en casa. */
   restart(): void;
+  /** Lo guardado de una partida anterior (core/save.ts): el bucle cortado y si salió contigo no se deshacen. */
+  restore(saved: LoopState): void;
+  /** Lo que hay que guardar ahora. */
+  loopState(): LoopState;
   snapshot(): { stage: SkepticStage; source: string; left: boolean; metBefore: boolean };
 }
 
@@ -84,6 +91,10 @@ export function createSkepticPlay(options: SkepticPlayOptions): SkepticPlay {
     restart() {
       state = createSkepticState(metBefore(options.opened()));
     },
+    restore(saved) {
+      state = restoreSkepticState(saved, metBefore(options.opened()));
+    },
+    loopState: () => skepticLoopState(state),
     snapshot() {
       return {
         stage: stage(),

@@ -6,10 +6,12 @@ import {
   knowsHer,
   leaveWithYou,
   metBefore,
+  restoreSkepticState,
   SHOW_VERB,
   SKEPTIC_TALK,
   SKEPTIC_TALK_IDS,
   skepticGone,
+  skepticLoopState,
   skepticStage,
   skepticVerb,
   CAMARA_SOURCE,
@@ -125,5 +127,32 @@ describe('the hand-over and the way out', () => {
     const out = leaveWithYou(handOverSource(home));
     expect(out.left).toBe(true);
     expect(leaveWithYou(out)).toBe(out);
+  });
+});
+
+describe('what survives a reload (the loop state in the save)', () => {
+  it('reads out where the source is and whether he left with you', () => {
+    const cut = handOverSource(createSkepticState(true));
+    expect(skepticLoopState(createSkepticState(false))).toEqual({ source: 'inPlace', left: false });
+    expect(skepticLoopState(cut)).toEqual({ source: 'inContrapeso', left: false });
+    expect(skepticLoopState(leaveWithYou(cut))).toEqual({ source: 'inContrapeso', left: true });
+  });
+
+  it('puts back the cut loop and him outside, whatever was saved before the reload', () => {
+    const back = restoreSkepticState({ source: 'inContrapeso', left: true }, true);
+    expect(isLoopCut(back.core)).toBe(true);
+    expect(back).toMatchObject({ left: true, metBefore: true });
+    expect(restoreSkepticState({ source: 'lost', left: false }, false).core.source).toBe('lost');
+  });
+
+  it('gives a loop that was never cut a fresh house, and ignores a stray `left`', () => {
+    const intact = restoreSkepticState({ source: 'inPlace', left: false }, false);
+    expect(intact).toEqual(createSkepticState(false));
+    expect(restoreSkepticState({ source: 'inPlace', left: true }, false).left).toBe(false);
+  });
+
+  it('round-trips through the save format', () => {
+    const left = leaveWithYou(handOverSource(createSkepticState(true)));
+    expect(restoreSkepticState(skepticLoopState(left), true)).toEqual(left);
   });
 });

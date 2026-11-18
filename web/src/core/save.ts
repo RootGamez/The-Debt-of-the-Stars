@@ -4,12 +4,14 @@
 // tareas del bucle ya hechas y las fuentes abiertas (plan de la llegada, hitos B y C, versión 5). La versión 6 (plan de
 // los finales, F1) cambia los finales vistos: desaparece el B y el final malo («tarde») pasa a guardarse. Una partida
 // de la versión 5 o anterior se migra: lo visto como B pasa a ser el final bueno (A), el más cercano (llegar antes de la
-// prueba mayor).
+// prueba mayor). La versión 7 (plan de los finales, E5) guarda el estado del bucle: si está cortado (la fuente de poder
+// fuera de su sitio) y si el escéptico salió contigo; lo que pasa, pasa de verdad y sobrevive a recargar la página
+// (cruzar al Archivo de las Puertas, volver a casa…). Una partida de la versión 6 o anterior lo tiene sin cortar.
 // Lo leído de localStorage se trata como dato externo: se valida y, si está dañado o manipulado,
 // se descarta y se empieza de cero con un aviso. Sin almacenamiento (modo privado) se juega igual.
 
 export const SAVE_KEY = 'bucle-tiempo:partida';
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 export const MAX_LOOPS = 1_000_000;
 export const MAX_FACTS = 5000;
 /** Ids de hechos: "mundo.nombre" con letras, números, guiones y puntos. */
@@ -33,6 +35,23 @@ export const MAX_WORLDS = 32;
 export const SEEN_ENDINGS = ['A', 'tarde'] as const;
 export type SeenEnding = (typeof SEEN_ENDINGS)[number];
 
+/** Dónde está la fuente de poder de la Cámara del Taller: en su sitio, encajada en el Contrapeso o perdida. */
+export const LOOP_SOURCES = ['inPlace', 'inContrapeso', 'lost'] as const;
+export type LoopSource = (typeof LOOP_SOURCES)[number];
+
+/** El bucle: con la fuente fuera de su sitio está cortado; `left`: el escéptico salió contigo del centro del Taller. */
+export interface LoopState {
+  source: LoopSource;
+  left: boolean;
+}
+
+/** El bucle girando, con la fuente en su sitio (lo de una partida nueva o de antes de la versión 7). */
+export const INTACT_LOOP: LoopState = Object.freeze({ source: 'inPlace', left: false });
+
+export function isLoopCutState(loop: LoopState): boolean {
+  return loop.source !== 'inPlace';
+}
+
 export interface SaveData {
   version: typeof SAVE_VERSION;
   loopsCompleted: number;
@@ -47,6 +66,8 @@ export interface SaveData {
   tasks: readonly string[];
   /** Las fuentes abiertas alguna vez (lo que queda por leer en cada mundo). */
   opened: readonly string[];
+  /** El estado del bucle (E5): lo que ya se cortó no se deshace al recargar. */
+  loop: LoopState;
 }
 
 export interface NamedWorld {
@@ -78,6 +99,7 @@ export function freshSave(): SaveData {
     worlds: {},
     tasks: [],
     opened: [],
+    loop: { ...INTACT_LOOP },
   };
 }
 
@@ -166,9 +188,24 @@ function openedOf(version: number, opened: unknown): string[] | null {
   return [...new Set(opened)];
 }
 
+function isLoopSource(value: unknown): value is LoopSource {
+  return (LOOP_SOURCES as readonly unknown[]).includes(value);
+}
+
+/** Antes de la versión 7: el bucle sin cortar. Desde ella: la fuente y si salió contigo, y que cuadre. */
+function loopOf(version: number, loop: unknown): LoopState | null {
+  if (version < 7) return { ...INTACT_LOOP };
+  if (typeof loop !== 'object' || loop === null || Array.isArray(loop)) return null;
+  const { source, left } = loop as Record<string, unknown>;
+  if (!isLoopSource(source) || typeof left !== 'boolean') return null;
+  // Con la fuente en su sitio no ha salido nadie: un `left` suelto es un guardado manipulado.
+  if (source === 'inPlace' && left) return null;
+  return { source, left };
+}
+
 function validate(raw: unknown): SaveData | null {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
-  const { version, loopsCompleted, facts, prologueDone, endings, worlds, tasks, opened } =
+  const { version, loopsCompleted, facts, prologueDone, endings, worlds, tasks, opened, loop } =
     raw as Record<string, unknown>;
   if (!isReadable(version)) return null;
   const prologue = prologueOf(version, prologueDone);
@@ -176,8 +213,9 @@ function validate(raw: unknown): SaveData | null {
   const named = worldsOf(version, worlds);
   const done = tasksOf(version, tasks);
   const read = openedOf(version, opened);
-  if (prologue === null || seen === null || named === null || done === null || read === null)
-    return null;
+  const looped = loopOf(version, loop);
+  if (prologue === null || seen === null || named === null || done === null) return null;
+  if (read === null || looped === null) return null;
   if (!Number.isInteger(loopsCompleted)) return null;
   const loops = loopsCompleted as number;
   if (loops < 0 || loops > MAX_LOOPS) return null;
@@ -192,6 +230,7 @@ function validate(raw: unknown): SaveData | null {
     worlds: named,
     tasks: done,
     opened: read,
+    loop: looped,
   };
 }
 
@@ -258,7 +297,11 @@ export function clearSave(store: KeyValueStore | null): boolean {
  * número de ciclos y el prólogo hecho si lo estaba en cualquiera de los dos. Así dos pestañas abiertas a la vez no se pisan, y el director del ciclo (que solo conoce los
  * ciclos) no borra los hechos que escribió la lectura. Una partida de una versión más nueva no se toca.
  */
-export function saveProgress(store: KeyValueStore | null, data: SaveData): boolean {
+export function saveProgress(
+  store: KeyValueStore | null,
+  data: SaveData,
+  loop?: LoopState,
+): boolean {
   if (!store) return false;
   const stored = loadSave(store);
   if (stored.readOnly) return false;
@@ -271,6 +314,8 @@ export function saveProgress(store: KeyValueStore | null, data: SaveData): boole
   const worlds = { ...stored.data.worlds, ...data.worlds };
   const tasks = [...new Set([...stored.data.tasks, ...data.tasks])].slice(0, MAX_TASKS);
   const opened = [...new Set([...data.opened, ...stored.data.opened])].slice(0, MAX_OPENED);
+  // El estado del bucle no se fusiona (no crece, cambia): lo guardado manda salvo que quien guarda lo diga a propósito.
+  const looped = { ...(loop ?? stored.data.loop) };
   return writeSave(store, {
     ...data,
     loopsCompleted,
@@ -280,6 +325,7 @@ export function saveProgress(store: KeyValueStore | null, data: SaveData): boole
     worlds,
     tasks,
     opened,
+    loop: looped,
   });
 }
 
@@ -303,7 +349,8 @@ export function markEndingSeen(
   ending: SeenEnding,
 ): boolean {
   if (loaded.readOnly) return false;
-  return saveProgress(store, { ...loaded.data, endings: [ending] });
+  // Un final cierra la historia: «Volver a jugar» empieza con el bucle girando otra vez.
+  return saveProgress(store, { ...loaded.data, endings: [ending] }, INTACT_LOOP);
 }
 
 /** Al encontrar un mundo nuevo: lo pega en la bitácora guardada, con lo demás que ya había. false si no se pudo. */
@@ -336,6 +383,16 @@ export function markSourcesOpened(
 ): boolean {
   if (loaded.readOnly) return false;
   return saveProgress(store, { ...loaded.data, opened });
+}
+
+/** Al cortar el bucle (o al salir el escéptico contigo, o al volver a girar): lo apunta. false si no se pudo. */
+export function markLoopState(
+  store: KeyValueStore | null,
+  loaded: LoadResult,
+  loop: LoopState,
+): boolean {
+  if (loaded.readOnly) return false;
+  return saveProgress(store, loaded.data, loop);
 }
 
 /**

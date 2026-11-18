@@ -304,6 +304,8 @@ export const EN: Readonly<Record<string, string>> = {
   'El Taller': 'The Workshop',
   'La Pista': 'The Track',
   'Los dos relojes marcan lo mismo.': 'Both clocks read the same.',
+  'El anillo está encendido.': 'The ring is lit.',
+  'El anillo de la Pista se enciende.': 'The Track ring lights up.',
   // E4: el portal caído del Nudo y el lecho de escarcha (borradores).
   'La Puerta no se enciende con su reloj fuera de hora. Gira las ruedas hasta que marque la hora de dentro.':
     'The Gate will not light with its clock out of time. Turn the wheels until it shows the time inside.',
