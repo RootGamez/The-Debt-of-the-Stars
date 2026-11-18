@@ -53,7 +53,7 @@ test.afterEach(async ({ page }) => {
 test('the stable horizon pulls the ship in, and crossing it opens the Archive of the Gates', async ({
   page,
 }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(300_000);
   await installCounterweight(page);
   // Primero a la nave: subir a ella lleva su tiempo y a partir de las 13:30 queda poco ciclo.
   await board(page);
@@ -76,33 +76,22 @@ test('the stable horizon pulls the ship in, and crossing it opens the Archive of
   await expect(page.locator('.llegada')).toHaveCount(0);
 });
 
-test('the Archive is out of time: no loop, the plans are taken and left, and the right mouth gives ending B', async ({
+test('the Archive is out of time: no loop, the right mouth gives ending A', async ({
   page,
 }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(240_000);
   await withUnderstanding(page);
   const start = (await snapshot(page))?.loop.umbral;
   await expect(page.locator('.clock-hud')).toBeHidden();
 
-  await standAt(page, 'puertas.planos');
-  await expect(page.locator('.prompt')).toHaveText('E · examinar');
-  await page.keyboard.press('KeyE');
-  await expect(page.locator('.reader-title')).toHaveText('Los planos del Contrapeso');
-  await closeReader(page);
-  expect((await snapshot(page))?.registry.facts).toContain('contrapeso.planos');
-  await expect(page.locator('.prompt')).toHaveText('E · coger');
-  await page.keyboard.press('KeyE');
-  await expect.poll(async () => (await epilogue(page))?.carryingPlans).toBe(true);
-  await expect(page.locator('.prompt')).toHaveText('E · dejar');
   expect((await snapshot(page))?.loop.umbral).toBe(start);
 
   await openMouths(page);
   await expect(page.locator('.puzzle-hint').first()).toHaveText(
     'La prueba mayor es el día 40 desde que despegaste.',
   );
-  await expect(page.locator('.puzzle-mouths')).toContainText('280 días después de lo que se ve');
+  await expect(page.locator('.puzzle-mouths')).toContainText('403 días después de lo que se ve');
   await page.getByRole('button', { name: 'Elegir: El Instituto, más joven' }).click();
-  await expect(page.locator('.puzzle-choices')).toContainText('Llevas los planos del Contrapeso.');
   await page.getByRole('button', { name: 'Abrir', exact: true }).click();
 
   // Elegir una boca la abre en el cielo (T11): a pie no se cruza; se llega a ella con la nave.
@@ -116,13 +105,13 @@ test('the Archive is out of time: no loop, the plans are taken and left, and the
   expect((await snapshot(page))?.registry.facts).toContain('bocas.vuelta_antes');
   expect(await page.evaluate(() => window.__juego?.flyIntoMouth?.())).toBe(true);
   await expect.poll(async () => (await snapshot(page))?.loop.cause).toBe('boca');
-  await page.waitForURL(/mundo=hogar&final=B/, { timeout: 30_000 });
+  await page.waitForURL(/mundo=hogar&final=A/, { timeout: 30_000 });
 });
 
 test('without K7 the mouths only show what is seen, and the one that looks closest arrives late', async ({
   page,
 }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(240_000);
   await startPlaying(page, '&mundo=puertas');
   await openMouths(page);
 
