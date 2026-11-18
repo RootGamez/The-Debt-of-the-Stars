@@ -20,11 +20,13 @@ export function replay(saved: boolean): void {
 /**
  * Cruzado el gusano, el sistema ajeno (`wasSaved`: si se guardó el prólogo); cruzado el horizonte estable, el
  * Archivo; cruzada una boca de casa, Hogar con su final (sin final, que no debería pasar, de vuelta al Archivo).
+ * `via` es `boca` si se cruzó La Boca de Umbral a las 10:00 (y no una boca del Archivo).
  */
 export function followCrossing(
   cause: DeathCause | undefined,
   ending: Ending | undefined,
   wasSaved: boolean,
+  via?: 'boca',
 ): void {
   switch (cause) {
     case 'horizonte':
@@ -36,7 +38,7 @@ export function followCrossing(
         return;
       }
       markCrossing(sessionStore());
-      window.location.replace(homecomingHref(window.location.href, ending));
+      window.location.replace(homecomingHref(window.location.href, ending, via));
       return;
     case 'gusano':
       markCrossing(sessionStore());

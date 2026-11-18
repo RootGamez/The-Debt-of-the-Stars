@@ -3,6 +3,8 @@ import {
   createHomecomingPlay,
   DIRECTOR,
   endingFromQuery,
+  MAESTRA,
+  speakerFor,
   homeLook,
   endingCardKey,
   isFinal,
@@ -57,13 +59,13 @@ describe('how the bad ending was reached', () => {
 describe('closing the journey with the Director', () => {
   it('offers to talk to her, and talking ends the journey once', () => {
     let ends = 0;
-    const play = createHomecomingPlay('A', () => {
+    const play = createHomecomingPlay('tarde', () => {
       ends += 1;
     });
 
     expect(play.actions.verb(DIRECTOR, true)).toBe('hablar');
-    expect(play.actions.verb('instituto.maestra', false)).toBeUndefined();
-    play.actions.run('instituto.maestra');
+    expect(play.actions.verb(MAESTRA, false)).toBeUndefined();
+    play.actions.run(MAESTRA);
     expect(play.ended).toBe(false);
     play.actions.run(DIRECTOR);
     play.actions.run(DIRECTOR);
@@ -73,12 +75,28 @@ describe('closing the journey with the Director', () => {
     expect(play.actions.verb(DIRECTOR, false)).toBeUndefined();
   });
 
+  it('is the Teacher, not the Director, who closes the good ending (D14)', () => {
+    let ends = 0;
+    const play = createHomecomingPlay('A', () => {
+      ends += 1;
+    });
+
+    expect(speakerFor('A')).toBe(MAESTRA);
+    expect(speakerFor('tarde')).toBe(DIRECTOR);
+    expect(play.actions.verb(MAESTRA, true)).toBe('hablar');
+    expect(play.actions.verb(DIRECTOR, false)).toBeUndefined();
+    play.actions.run(DIRECTOR);
+    expect(ends).toBe(0);
+    play.actions.run(MAESTRA);
+    expect(ends).toBe(1);
+  });
+
   it('has no Moon fragment to examine in the earlier home, but it is there when arriving late', () => {
     const early = createHomecomingPlay('A', () => undefined);
     const late = createHomecomingPlay('tarde', () => undefined);
 
     expect(early.actions.gone(WORMHOLE.source)).toBe(true);
-    expect(early.actions.gone(DIRECTOR)).toBe(false);
+    expect(early.actions.gone(MAESTRA)).toBe(false);
     expect(late.actions.gone(WORMHOLE.source)).toBe(false);
   });
 });

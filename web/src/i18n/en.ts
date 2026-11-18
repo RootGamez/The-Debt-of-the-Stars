@@ -362,6 +362,24 @@ export const EN: Readonly<Record<string, string>> = {
   examinar: 'examine',
   observar: 'watch',
   hablar: 'talk',
+  'La Maestra': 'The Teacher',
+  '«Aquí dices que la deuda no es de energía, sino de tiempo: cada paso por una Puerta separa un poco más sus dos relojes».':
+    '"Here you say the debt is not one of energy but of time: every step through a Gate pulls its two clocks a little further apart."',
+  '«Y esto: alguien esperaba a una investigadora que nunca volvió, y un Consejo que prefirió callarlo».':
+    '"And this: someone was waiting for a researcher who never came back, and a Council that preferred to keep quiet."',
+  '«La Gran Partida. Huyeron todos a la vez, y su huida aceleró el colapso».':
+    '"The Great Departure. They all fled at once, and their flight sped up the collapse."',
+  '«Dos de ellos se quedaron atrás. No son dos nombres en una piedra: eran dos personas, y siguen ahí».':
+    '"Two of them stayed behind. They are not two names on a stone: they were two people, and they are still there."',
+  '«Y la energía. Su máquina la sacaba de una garganta, como pensamos sacarla nosotros del Motor».':
+    '"And the energy. Their machine drew it from a throat, just as we plan to draw ours from the Engine."',
+  '«“Vuelve a contármelo todo”, te dije. Anda, dame el cuaderno».':
+    '"Tell me everything again", I said. Come on, give me the notebook.',
+  'Le adviertes: sacar energía de la garganta de una Puerta es pedir tiempo prestado, y esa deuda se paga con intereses.':
+    'You warn her: drawing energy from the throat of a Gate is borrowing time, and that debt is paid with interest.',
+  '«Te creo. Iré contigo a ver a la Directora: la prueba mayor no se hará».':
+    '"I believe you. I will go with you to see the Director: the great test will not be held."',
+  'cruzar La Boca': 'cross the Mouth',
   dejar: 'drop',
   coger: 'take',
   // E5: enseñarle el Contrapeso al escéptico.

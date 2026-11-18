@@ -7,13 +7,20 @@
 import { SEEN_ENDINGS, type SeenEnding } from '../core/save';
 import type { SourceActions } from '../reading/readingUi';
 import type { EndingCardKey } from '../data/endings';
-import { ENDING_PARAM, PROLOGUE_WORLD } from '../worlds/worldSelection';
+import { ENDING_PARAM, PROLOGUE_WORLD, VIA_PARAM } from '../worlds/worldSelection';
 import type { Ending } from './epilogue';
 import { WORMHOLE } from './prologue';
 
 export const ENDINGS: readonly Ending[] = ['A', 'tarde'];
-/** Con quien se cierra el viaje. */
+/** Con quien se cierra el viaje malo. */
 export const DIRECTOR = 'instituto.directora';
+/** Con quien se cierra el bueno (🟡 D14): la Maestra lee tu cuaderno; la Directora no sale. */
+export const MAESTRA = 'instituto.maestra';
+
+/** Con quien se habla para cerrar el viaje de este final. */
+export function speakerFor(ending: Ending): string {
+  return ending === 'A' ? MAESTRA : DIRECTOR;
+}
 /** Lo que en el Hogar de antes aún no ha llegado: las piedras de las vitrinas y el fragmento de la Luna. */
 export const NOT_YET_ARRIVED: readonly string[] = [
   'hogar_FragmentosVitrinas',
@@ -38,7 +45,6 @@ export function isFinal(ending: Ending): ending is SeenEnding {
 
 /** Cómo se llegó al final malo: por La Boca de Umbral o por una boca equivocada del Archivo de las Puertas. */
 export type HomeVia = 'boca' | 'archivo';
-export const VIA_PARAM = 'via';
 
 /** El camino de la dirección (`?via=`), solo en Hogar; sin él, o con algo raro, el del Archivo. */
 export function viaFromQuery(search: string): HomeVia {
@@ -76,19 +82,20 @@ export interface HomecomingPlay {
   readonly actions: SourceActions;
 }
 
-/** La Directora ofrece "hablar", que cierra el viaje (una vez); en el Hogar de antes, el fragmento no está. */
+/** Quien cierra el viaje ofrece "hablar" (una vez); en el Hogar de antes, el fragmento no está. */
 export function createHomecomingPlay(ending: Ending, onEnd: () => void): HomecomingPlay {
   let ended = false;
   const early = ending === 'A';
+  const speaker = speakerFor(ending);
   return {
     get ended() {
       return ended;
     },
     actions: {
       gone: (id) => early && id === WORMHOLE.source,
-      verb: (id) => (id === DIRECTOR && !ended ? 'hablar' : undefined),
+      verb: (id) => (id === speaker && !ended ? 'hablar' : undefined),
       run: (id) => {
-        if (id !== DIRECTOR || ended) return;
+        if (id !== speaker || ended) return;
         ended = true;
         onEnd();
       },

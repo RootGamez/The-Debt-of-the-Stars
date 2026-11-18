@@ -38,6 +38,8 @@ import { createArchivoRig } from './game/archivoRig';
 import { SKY_MOUTH, crossesMouth, createSkyMouth, skyMouthCenter } from './game/skyMouth';
 import { endingFor, mouthById } from './game/epilogue';
 import { createSkyMouthView } from './render/skyMouthView';
+import { createBocaCallView } from './render/bocaCallView';
+import { bocaCallStep, type BocaCallStep } from './game/bocaCall';
 import { createBenchRig } from './game/benchRig';
 import { DEPTHS } from './game/depthsPlay';
 import { createDepthsRig } from './game/depthsRig';
@@ -513,6 +515,8 @@ async function start(): Promise<void> {
   let mouthCross: DeathCause | undefined;
   let ending: Ending | undefined;
   const hiddenWorld = spec?.bodies.find((body) => body.hidden)?.world;
+  // La llamada de las 10:00: se llega por La Boca de Umbral (`via=boca`) en vez de por una boca del Archivo.
+  let crossVia: 'boca' | undefined;
 
   const walking = new Map<string, MotorEnvironment>(
     [...runtimes].map(([id, runtime]) => [
@@ -608,7 +612,7 @@ async function start(): Promise<void> {
     // Cruzado el gusano, el sistema ajeno se carga de nuevo con la página, detrás del fundido a blanco; cruzado el
     // horizonte estable, el Archivo de las Puertas, detrás del negro; cruzada una boca de casa, Hogar.
     onCross: (wasSaved) => {
-      followCrossing(session.director.deathCause, ending, wasSaved);
+      followCrossing(session.director.deathCause, ending, wasSaved, crossVia);
     },
     skyDirection: arrivalSkyDirection(player),
     counterweightClock: () => counterweight?.play.clock,
@@ -840,6 +844,7 @@ async function start(): Promise<void> {
           lockGameKeys();
         },
         stepOutside: () => {
+        known: () => reading.known,
           enterWorld(startWorld);
           createArrivalLayer('negro').clear();
         },
@@ -887,6 +892,38 @@ async function start(): Promise<void> {
     ),
   );
   const aimUp = new Vector3();
+  // La llamada de La Boca a las 10:00: una esfera de gusano en el anillo de Umbral; cruzarla, a pie y con E, es el
+  // camino fácil al final malo.
+  const umbralWorld = runtimes.get('umbral')?.world;
+  const bocaTrigger = umbralWorld?.markers.triggers.find(
+    (trigger) => trigger.event === 'boca_destello',
+  );
+  const bocaView =
+    umbralWorld && bocaTrigger
+      ? createBocaCallView(
+          bocaTrigger.object.parent ?? umbralWorld.scene,
+          bocaTrigger.object.position,
+        )
+      : undefined;
+  const bocaCenter = new Vector3();
+  let bocaConfirmed = false;
+  /** Qué toca con La Boca ahora: cerrada, visible, preguntar o cruzar (solo a pie, en Umbral). */
+  function bocaStep(): BocaCallStep {
+    if (!bocaView || currentWorld.id !== 'umbral' || flight?.piloting) return 'closed';
+    const distance = bocaView.worldCenter(bocaCenter).distanceTo(camera.position);
+    return bocaCallStep(session.director.clock.t, distance, bocaConfirmed);
+  }
+  const bocaActions: SourceActions = {
+    gone: () => false,
+    verb: () => undefined,
+    run: () => undefined,
+    ambient: {
+      verb: () => (bocaStep() === 'ask' ? 'cruzar La Boca' : undefined),
+      run: () => {
+        if (bocaStep() === 'ask') bocaConfirmed = true;
+      },
+    },
+  };
   const aimEye = new Vector3();
   const aimDirection = new Vector3();
   /** Adónde mira el jugador: desde sus ojos (también en tercera persona) hacia donde apunta la cámara. */
@@ -940,6 +977,7 @@ async function start(): Promise<void> {
         skeptic?.play.actions,
         homecoming?.play.actions,
         looseActions,
+        bocaActions,
       ],
       (verb) => {
         const sound = carrySoundOf(verb);
@@ -1488,6 +1526,20 @@ async function start(): Promise<void> {
         dt,
         timeRuns,
         mouthCross ?? horizonCross ?? wormhole ?? shipDeath ?? tideDeath ?? drowned ?? gassed,
+      );
+      // Confirmada la pregunta frente a La Boca abierta, se cruza: sales a Hogar años después (final malo, `via=boca`).
+      if (bocaConfirmed) {
+        if (bocaStep() === 'cross' && session.acceptsInput) {
+          ending = 'tarde';
+          crossVia = 'boca';
+          mouthCross = 'boca';
+        }
+        bocaConfirmed = false;
+      }
+      bocaView?.update(
+        currentWorld.id === 'umbral' && session.activeEventIds.includes('boca_destello'),
+        performance.now() / 1000,
+        dt,
       );
       // si el ciclo no corrió, espera; la boca elegida no se olvida (cruzar no tiene vuelta y la página se recarga)
       if (timeRuns) {

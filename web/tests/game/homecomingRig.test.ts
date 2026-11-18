@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DIRECTOR, type HomeVia } from '../../src/game/homecoming';
+import { DIRECTOR, MAESTRA, type HomeVia } from '../../src/game/homecoming';
 import { createHomecomingRig, TURN_SECONDS } from '../../src/game/homecomingRig';
 import type { Ending } from '../../src/game/epilogue';
 import { showEndingCard } from '../../src/ui/endingCard';
@@ -7,6 +7,7 @@ import { showEndingCard } from '../../src/ui/endingCard';
 // La tarjeta es DOM: aquí solo importa qué se enseña y cuándo.
 vi.mock('../../src/ui/endingCard', () => ({ showEndingCard: vi.fn() }));
 const shown = vi.mocked(showEndingCard);
+let removed = 0;
 
 interface RigOptions {
   reducedMotion?: boolean;
@@ -26,6 +27,7 @@ function rig(ending: Ending, { reducedMotion = false, canSave = true, via }: Rig
   const homecoming = createHomecomingRig({
     ending,
     via,
+    known: () => new Set(['deuda.es_de_tiempo']),
     freeze: () => {
       calls.freeze += 1;
     },
@@ -50,6 +52,12 @@ function rig(ending: Ending, { reducedMotion = false, canSave = true, via }: Rig
   return { homecoming, calls };
 }
 
+/** El final A: la Maestra lee el cuaderno y se pulsa «Seguir». */
+function talkThrough(homecoming: ReturnType<typeof rig>['homecoming']) {
+  homecoming.play.actions.run(MAESTRA);
+  lastChoices()[0]?.run();
+}
+
 function lastChoices() {
   return shown.mock.calls.at(-1)?.[1] ?? [];
 }
@@ -57,6 +65,15 @@ function lastChoices() {
 describe('the end of the journey at home', () => {
   beforeEach(() => {
     shown.mockClear();
+    removed = 0;
+    shown.mockImplementation(
+      () =>
+        ({
+          remove: () => {
+            removed += 1;
+          },
+        }) as unknown as HTMLElement,
+    );
   });
 
   it('shows the bad ending at once, saves it as seen and offers to play again or go back', () => {
@@ -86,9 +103,29 @@ describe('the end of the journey at home', () => {
     expect(shown.mock.calls[0]?.[0].title).toBe('Un sistema que no era el tuyo');
   });
 
+  it('has the Teacher read the notebook first in the good ending, and only then turns toward the Moon', () => {
+    const { homecoming, calls } = rig('A');
+    homecoming.play.actions.run(MAESTRA);
+
+    expect(homecoming.phase).toBe('talking');
+    expect(homecoming.blocking).toBe(true);
+    expect(calls.freeze).toBe(1);
+    expect(calls.outside).toBe(0);
+    expect(shown).toHaveBeenCalledTimes(1);
+    const scene = shown.mock.calls[0]?.[0];
+    expect(scene?.title).toBe('La Maestra');
+    expect(scene?.text.some((line) => line.includes('de tiempo'))).toBe(true);
+    expect(lastChoices().map((c) => c.label)).toEqual(['Seguir']);
+
+    lastChoices()[0]?.run();
+    expect(removed).toBe(1);
+    expect(homecoming.phase).toBe('turning');
+    expect(calls.outside).toBe(1);
+  });
+
   it('shows the good ending after turning toward the Moon, offering to play again', () => {
     const { homecoming } = rig('A');
-    homecoming.play.actions.run(DIRECTOR);
+    talkThrough(homecoming);
     homecoming.update(TURN_SECONDS);
 
     expect(lastChoices().map((c) => c.label)).toEqual(['Volver a jugar']);
@@ -96,27 +133,27 @@ describe('the end of the journey at home', () => {
 
   it('turns the view toward the Moon before ending A', () => {
     const { homecoming, calls } = rig('A');
-    homecoming.play.actions.run(DIRECTOR);
+    talkThrough(homecoming);
 
     expect(homecoming.phase).toBe('turning');
     expect(calls.outside).toBe(1);
-    expect(shown).not.toHaveBeenCalled();
+    expect(shown).toHaveBeenCalledTimes(1); // solo la escena de la Maestra
     homecoming.update(0); // en pausa no se gira
     expect(calls.turns).toHaveLength(0);
     for (let t = 0; t < TURN_SECONDS - 0.5; t += 0.5) homecoming.update(0.5);
     expect(calls.turns.length).toBeGreaterThan(0);
     expect(calls.turns.every((share) => share > 0 && share <= 1)).toBe(true);
-    expect(shown).not.toHaveBeenCalled();
+    expect(shown).toHaveBeenCalledTimes(1);
     homecoming.update(0.5);
 
     expect(homecoming.phase).toBe('card');
     expect(calls.seen).toEqual(['A']);
-    expect(shown).toHaveBeenCalledTimes(1);
+    expect(shown).toHaveBeenCalledTimes(2);
   });
 
   it('turns at once with reduced motion', () => {
     const { homecoming, calls } = rig('A', { reducedMotion: true });
-    homecoming.play.actions.run(DIRECTOR);
+    talkThrough(homecoming);
     homecoming.update(0.5);
 
     expect(calls.turns).toEqual([1]);
@@ -124,9 +161,9 @@ describe('the end of the journey at home', () => {
 
   it('says so on the card when the ending could not be saved', () => {
     const { homecoming } = rig('A', { canSave: false });
-    homecoming.play.actions.run(DIRECTOR);
+    talkThrough(homecoming);
     homecoming.update(TURN_SECONDS);
 
-    expect(shown.mock.calls[0]?.[2]).toBe('No se ha podido guardar el final.');
+    expect(shown.mock.calls.at(-1)?.[2]).toBe('No se ha podido guardar el final.');
   });
 });

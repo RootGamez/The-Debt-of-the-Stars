@@ -41,6 +41,15 @@ describe('the way to the Archivo de las Puertas through the stable horizon (Phas
     );
   });
 
+  it('says which way the late ending came when it is through La Boca (`via=boca`)', () => {
+    expect(homecomingHref('http://localhost:5180/?mundo=umbral#x', 'tarde', 'boca')).toBe(
+      'http://localhost:5180/?mundo=hogar&final=tarde&via=boca',
+    );
+    expect(homecomingHref('http://localhost:5180/?mundo=hogar&via=boca', 'A')).toBe(
+      'http://localhost:5180/?mundo=hogar&final=A',
+    );
+  });
+
   it('plays again after an ending without world or ending, keeping the rest of the address', () => {
     expect(replayHref('http://localhost:5180/?debug&mundo=hogar&final=B#x', true)).toBe(
       'http://localhost:5180/?debug=',

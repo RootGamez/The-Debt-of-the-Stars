@@ -1,5 +1,5 @@
-// La vuelta a casa en el juego (Fase 10E): la Directora cierra el viaje. Con el final A, antes de la tarjeta, un corte
-// a negro a la plaza del Instituto (desde dentro la Luna queda detrás del techo) y, mientras se aclara, la vista sube
+// La vuelta a casa en el juego (Fase 10E): la Directora cierra el viaje malo y la Maestra el bueno. Con el final A, la
+// Maestra lee tu cuaderno (game/endingTalk.ts, F4) y, antes de la tarjeta, un corte a negro a la plaza del Instituto (desde dentro la Luna queda detrás del techo) y, mientras se aclara, la vista sube
 // despacio hacia la Luna, aún sin su fragmento. La tarjeta guarda el final visto (A o tarde) y ofrece volver a jugar y, si
 // se llegó tarde, también volver al Archivo. Lo que no toca la escena está en homecoming.ts (con tests).
 import type { SeenEnding } from '../core/save';
@@ -12,13 +12,14 @@ import {
   type HomecomingPlay,
   type HomeVia,
 } from './homecoming';
+import { talkLines } from './endingTalk';
 import { t } from '../i18n';
 
 /** Lo que dura el giro hacia la Luna en el final A (s) y qué parte de lo que falta se gira por segundo. */
 export const TURN_SECONDS = 3.5;
 const TURN_RATE = 1.6;
 
-export type HomecomingPhase = 'playing' | 'turning' | 'card';
+export type HomecomingPhase = 'playing' | 'talking' | 'turning' | 'card';
 
 export interface HomecomingRigOptions {
   ending: Ending;
@@ -26,6 +27,8 @@ export interface HomecomingRigOptions {
   via?: HomeVia;
   /** Al cerrar el viaje: fuera la lectura, el ratón suelto y la pausa inhabilitada (no hay vuelta al juego). */
   freeze(): void;
+  /** Los hechos que sabes (el Registro): la Maestra lee solo los temas que has aprendido. */
+  known(): ReadonlySet<string>;
   /** Final A: corte a negro a la plaza, que se aclara despacio. */
   stepOutside(): void;
   /** Gira la vista hacia la Luna una parte (0–1) de lo que falta. */
@@ -72,8 +75,20 @@ export function createHomecomingRig(options: HomecomingRigOptions): HomecomingRi
       show();
       return;
     }
-    phase = 'turning';
-    options.stepOutside();
+    phase = 'talking';
+    const scene = showEndingCard(
+      { title: t('La Maestra'), text: talkLines(options.known()), draft: true },
+      [
+        {
+          label: t('Seguir'),
+          run: () => {
+            scene.remove();
+            phase = 'turning';
+            options.stepOutside();
+          },
+        },
+      ],
+    );
   });
 
   return {

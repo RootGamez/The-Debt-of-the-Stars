@@ -67,12 +67,20 @@ export function epilogueHref(href: string): string {
 /** El final con el que se vuelve a casa por una boca del Archivo (`?final=`, Fase 10). */
 export const ENDING_PARAM = 'final';
 
-/** Adónde ir al cruzar una boca de casa: a Hogar, con el final que salió de la boca y de los planos. */
-export function homecomingHref(href: string, ending: string): string {
+/** Con `?via=boca` se llegó al final malo por La Boca de Umbral (y no por una boca equivocada del Archivo). */
+export const VIA_PARAM = 'via';
+
+/**
+ * Adónde ir al cruzar una boca de casa: a Hogar, con el final que salió de la boca. `via` solo se pone si se cruzó
+ * La Boca de Umbral.
+ */
+export function homecomingHref(href: string, ending: string, via?: 'boca'): string {
   const url = new URL(href);
   url.hash = '';
   url.searchParams.set('mundo', PROLOGUE_WORLD);
   url.searchParams.set(ENDING_PARAM, ending);
+  url.searchParams.delete(VIA_PARAM);
+  if (via) url.searchParams.set(VIA_PARAM, via);
   return url.toString();
 }
 

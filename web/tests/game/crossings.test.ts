@@ -40,6 +40,12 @@ describe('where each crossing leads', () => {
     expect(session.get(ARRIVAL_KEY)).toBe('blanco');
   });
 
+  it('goes home through La Boca of Umbral saying so (`via=boca`)', () => {
+    followCrossing('boca', 'tarde', true, 'boca');
+
+    expect(replaced).toEqual(['http://localhost:5180/?debug=&mundo=hogar&final=tarde&via=boca']);
+  });
+
   it('goes to the Archive through the horizon, or through a mouth without an ending, arriving in black', () => {
     followCrossing('horizonte', undefined, true);
     followCrossing('boca', undefined, true);

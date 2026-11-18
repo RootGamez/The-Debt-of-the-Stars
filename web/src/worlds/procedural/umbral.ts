@@ -6,7 +6,7 @@
 // Gramática de los Ausentes: anillos y estratos, arenisca clara, metal pizarra, luz ámbar.
 import {
   BufferGeometry,
-  CircleGeometry,
+  RingGeometry,
   Color,
   CylinderGeometry,
   DodecahedronGeometry,
@@ -20,6 +20,7 @@ import {
   OctahedronGeometry,
   Vector3,
 } from 'three';
+import { BOCA_CALL_DURATION, BOCA_CALL_START } from '../../game/bocaCall';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { isMesh } from '../markers';
 import {
@@ -524,10 +525,11 @@ class UmbralBuilder {
       );
       z += length;
     }
-    // El destello del minuto 10: un disco que llena el anillo (EVT_, solo durante boca_destello).
+    // El destello del minuto 10: un aro de luz en el borde del anillo (EVT_, solo durante boca_destello); dentro, el
+    // juego abre la esfera de gusano (render/bocaCallView.ts).
     this.flash.add(
       P.light,
-      new CircleGeometry(2.95, 48).rotateX(Math.PI / 2),
+      new RingGeometry(2.7, 2.95, 48).rotateX(Math.PI / 2),
       f.at(ring),
       'light',
       { glow: 6, vary: 0 },
@@ -575,8 +577,8 @@ class UmbralBuilder {
     });
     this.mark('TRIG_LaBoca_Destello', f, ring, {
       event: 'boca_destello',
-      loop_time: 600,
-      duration: 3,
+      loop_time: BOCA_CALL_START,
+      duration: BOCA_CALL_DURATION,
       radius: 12,
     });
   }
