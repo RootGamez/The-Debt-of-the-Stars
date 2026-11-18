@@ -4,16 +4,12 @@
 // planos deciden el final (`?final=`).
 import { expect, test, type Page } from '@playwright/test';
 import { installCounterweight, standAt } from './counterweightSteps';
-import { closeReader, ready, snapshot, startPlaying } from './helpers';
+import { ready, snapshot, startPlaying } from './helpers';
 
 const SAVE_KEY = 'bucle-tiempo:partida';
 
 async function horizon(page: Page) {
   return page.evaluate(() => window.__juego?.horizon?.() ?? null);
-}
-
-async function epilogue(page: Page) {
-  return page.evaluate(() => window.__juego?.epilogue?.() ?? null);
 }
 
 async function board(page: Page): Promise<void> {
@@ -76,9 +72,7 @@ test('the stable horizon pulls the ship in, and crossing it opens the Archive of
   await expect(page.locator('.llegada')).toHaveCount(0);
 });
 
-test('the Archive is out of time: no loop, the right mouth gives ending A', async ({
-  page,
-}) => {
+test('the Archive is out of time: no loop, the right mouth gives ending A', async ({ page }) => {
   test.setTimeout(240_000);
   await withUnderstanding(page);
   const start = (await snapshot(page))?.loop.umbral;
