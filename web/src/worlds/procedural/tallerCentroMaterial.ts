@@ -6,7 +6,8 @@
 import {
   BufferAttribute,
   Color,
-  MeshBasicMaterial,
+  MeshLambertMaterial,
+  ShaderChunk,
   Vector3,
   type BufferGeometry,
   type IUniform,
@@ -189,20 +190,42 @@ float centroTally(vec4 t) {
 `;
 
 const FRAGMENT_COLOR = /* glsl */ `
+vec3 centroEmit;
 vec3 centroLight = vColor.rgb + vGlow * uGlow;
 float centroGrain = 0.9 + 0.14 * centroNoise(vStone * 2.7) + 0.06 * centroNoise(vStone * 13.0);
 centroLight *= centroGrain;
 float centroMark = centroTally(vTally);
 // La raya deja ver la piedra clara de debajo y su fondo recoge algo de polvo.
 centroLight = mix(centroLight, centroLight * 2.1 + vec3(0.012, 0.01, 0.008), centroMark);
-diffuseColor.rgb = centroLight;
+// La luz cocida entra como emisiva (apagada la luz del cuerpo se ve igual que antes); el albedo, neutro, es para la
+// luz dinámica que sí cuenta: la del cuerpo del explorador.
+centroEmit = centroLight;
+diffuseColor.rgb = vec3(0.42) * centroGrain;
 `;
+
+const POINT_LIGHT_INFO = 'getPointLightInfo( pointLight, geometryPosition, directLight );';
+
+/** El recorrido de luces puntuales de three sin la luz 0 (la estrella: no entra en la sala). */
+const NO_STAR_LIGHTS_BEGIN = (() => {
+  const chunk = ShaderChunk.lights_fragment_begin;
+  if (!chunk.includes(POINT_LIGHT_INFO))
+    throw new Error(
+      'tallerCentroMaterial: three cambió lights_fragment_begin; hay que revisar el parche',
+    );
+  return chunk.replace(
+    POINT_LIGHT_INFO,
+    `${POINT_LIGHT_INFO}
+    #if UNROLLED_LOOP_INDEX == 0
+      directLight.color = vec3( 0.0 );
+    #endif`,
+  );
+})();
 
 /** Dónde guarda el material su `uGlow` (en `material.userData`), para que el juego lo baje. */
 export const CENTRO_GLOW_KEY = 'centroGlow';
 
 export interface CentroMaterial {
-  material: MeshBasicMaterial;
+  material: MeshLambertMaterial;
   /** Cuánto alumbra la fuente de poder (1 en su sitio, 0 fuera). */
   glow: IUniform<number>;
 }
@@ -210,7 +233,7 @@ export interface CentroMaterial {
 /** El material de la casa: luz cocida, grano de piedra y rayas. Se comparte entre la casa y los anillos. */
 export function createCentroMaterial(): CentroMaterial {
   const glowUniform: IUniform<number> = { value: 1 };
-  const material = new MeshBasicMaterial({ vertexColors: true });
+  const material = new MeshLambertMaterial({ vertexColors: true });
   material.name = 'taller_Centro';
   material.userData[CENTRO_GLOW_KEY] = glowUniform;
   material.onBeforeCompile = (shader) => {
@@ -220,7 +243,16 @@ export function createCentroMaterial(): CentroMaterial {
       .replace('#include <begin_vertex>', `#include <begin_vertex>\n${VERTEX_BODY}`);
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\n${FRAGMENT_HEAD}`)
-      .replace('#include <color_fragment>', `#include <color_fragment>\n${FRAGMENT_COLOR}`);
+      .replace('#include <color_fragment>', `#include <color_fragment>\n${FRAGMENT_COLOR}`)
+      .replace('#include <lights_fragment_begin>', NO_STAR_LIGHTS_BEGIN)
+      .replace(
+        '#include <lights_fragment_end>',
+        '#include <lights_fragment_end>\nreflectedLight.indirectDiffuse = vec3( 0.0 );',
+      )
+      .replace(
+        '#include <emissivemap_fragment>',
+        '#include <emissivemap_fragment>\ntotalEmissiveRadiance += centroEmit;',
+      );
   };
   material.customProgramCacheKey = () => 'taller-centro';
   return { material, glow: glowUniform };
