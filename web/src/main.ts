@@ -1411,7 +1411,7 @@ async function start(): Promise<void> {
   const airCenter = new Vector3();
   const diveUp = new Vector3();
   const body = new Quaternion();
-  const frameLoop = runFrameLoop(
+  runFrameLoop(
     renderer,
     () => {
       // Dentro del Nudo la estrella no ilumina (su luz está apagada): sin sombra.
