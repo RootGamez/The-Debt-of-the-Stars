@@ -1,14 +1,12 @@
-// El epílogo (Fase 10D): en el Archivo de las Puertas, las bocas de casa y los planos del Contrapeso. Al otro lado
-// de cada boca se ve un día de Hogar (contado desde que despegaste), pero se llega a ese día corrido por el desfase
-// de la boca (K7: sus relojes no marcan lo mismo); la prueba mayor es el día 40 (K8). Solo una deja antes. La boca
-// y llevar o no los planos deciden el final (CONTEXTO_HISTORIA.md, Finales). Los números son 🟡.
-import type { SourceActions } from '../reading/readingUi';
+// El epílogo (Fase 10D; plan de los finales, F1): en el Archivo de las Puertas, las bocas de casa. Al otro lado de cada
+// boca se ve un día de Hogar (contado desde que despegaste), pero se llega a ese día corrido por el desfase de la boca
+// (K7: sus relojes no marcan lo mismo); la prueba mayor es el día 40 (K8). Las que caerían después de la prueba las
+// arrastra la llamada del Límite y caen en el colapso (final malo); solo la del Instituto más joven llega antes
+// (final bueno). Ya no hay planos ni final B (D12). Los números son 🟡.
 import { plural, t } from '../i18n';
 
 /** El día de la prueba mayor, contado desde que despegaste. */
 export const GREAT_TEST_DAY = 40;
-/** La fuente de los planos, en el Banco del Archivo. */
-export const PLANS = 'puertas.planos';
 /** La fuente de las bocas de casa (su lector es `bocas`). */
 export const MOUTHS = 'puertas.bocas';
 /** Lo que hay que haber entendido para ver el desfase de cada boca y el día de la prueba. */
@@ -29,17 +27,18 @@ export interface HomeMouth {
 
 /**
  * La trampa: las tres abiertas se ven antes de la prueba, y la que se ve más cerca de cuando despegaste llega
- * tarde. Solo el Instituto más joven, corregido por su desfase, deja antes.
+ * tarde. Solo el Instituto más joven, corregido por su desfase (día 3), deja antes; la Sala de Fragmentos (día 46) y
+ * Hogar al anochecer (día 50) quedan arrastradas al colapso.
  */
 export const HOME_MOUTHS: readonly HomeMouth[] = [
   { id: 'fragmentos', view: t('La Sala de Fragmentos, llena'), seen: 2, offset: 44 },
-  { id: 'instituto', view: t('El Instituto, más joven'), seen: -400, offset: 280 },
+  { id: 'instituto', view: t('El Instituto, más joven'), seen: -400, offset: 403 },
   { id: 'anochecer', view: t('Hogar al anochecer'), seen: 38, offset: 12 },
   { id: 'pronto', view: t('Tapada con una losa. Una marca: «pronto».') },
 ];
 
-/** A: llega antes y sin los planos; B: llega antes con los planos (la profecía autocumplida); tarde: después. */
-export type Ending = 'A' | 'B' | 'tarde';
+/** A: el bueno (llegas tres días después de despegar, antes de la prueba); tarde: el malo (llegas años después). */
+export type Ending = 'A' | 'tarde';
 
 export function mouthById(id: MouthId): HomeMouth | undefined {
   return HOME_MOUTHS.find((m) => m.id === id);
@@ -57,11 +56,15 @@ export function arrivesBefore(mouth: HomeMouth): boolean {
   return day !== undefined && day < GREAT_TEST_DAY;
 }
 
-/** El final de cruzar por `mouth` llevando o no los planos (undefined: está cerrada). */
-export function endingFor(mouth: HomeMouth, carryingPlans: boolean): Ending | undefined {
+/** El final de cruzar por `mouth` (undefined: está cerrada). */
+export function endingFor(mouth: HomeMouth): Ending | undefined {
   if (arrivalDay(mouth) === undefined) return undefined;
-  if (!arrivesBefore(mouth)) return 'tarde';
-  return carryingPlans ? 'B' : 'A';
+  return arrivesBefore(mouth) ? 'A' : 'tarde';
+}
+
+/** Si la llamada arrastra la boca al colapso (abierta y llega después de la prueba mayor). */
+export function isDragged(mouth: HomeMouth): boolean {
+  return arrivalDay(mouth) !== undefined && !arrivesBefore(mouth);
 }
 
 /** Un día de Hogar contado desde que despegaste, en palabras. */
@@ -119,30 +122,4 @@ export function testDayLine(knowledge: MouthKnowledge): string | undefined {
   return knowledge.testDay
     ? t('La prueba mayor es {day}.', { day: formatHomeDay(GREAT_TEST_DAY) })
     : undefined;
-}
-
-export interface EpiloguePlay {
-  /** Lleva los planos del Contrapeso. */
-  readonly carryingPlans: boolean;
-  /** Los planos: primero se examinan; luego se cogen y se pueden dejar otra vez en el Banco. */
-  readonly actions: SourceActions;
-}
-
-export function createEpiloguePlay(): EpiloguePlay {
-  let carrying = false;
-  return {
-    get carryingPlans() {
-      return carrying;
-    },
-    actions: {
-      gone: () => false,
-      verb: (id, unread) => {
-        if (id !== PLANS || unread) return undefined;
-        return carrying ? 'dejar' : 'coger';
-      },
-      run: (id) => {
-        if (id === PLANS) carrying = !carrying;
-      },
-    },
-  };
 }

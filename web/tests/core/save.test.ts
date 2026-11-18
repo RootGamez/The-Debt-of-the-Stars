@@ -58,7 +58,7 @@ describe('loadSave', () => {
       loopsCompleted: 7,
       facts: ['umbral.placa'],
       prologueDone: true,
-      endings: ['B'],
+      endings: ['tarde'],
       worlds: { umbral: { name: 'Primera luz', loop: 2 } },
       tasks: [],
       opened: [],
@@ -69,7 +69,7 @@ describe('loadSave', () => {
       loopsCompleted: 7,
       facts: ['umbral.placa'],
       prologueDone: true,
-      endings: ['B'],
+      endings: ['tarde'],
       worlds: { umbral: { name: 'Primera luz', loop: 2 } },
       tasks: [],
       opened: [],
@@ -116,7 +116,7 @@ describe('loadSave', () => {
 
   it.each([
     ['without endings', undefined],
-    ['with something that is not an ending', ['tarde']],
+    ['with something that is not an ending', ['Z']],
     ['with endings that are not a list', 'A'],
   ])('rejects a version 3 save %s', (_name, endings) => {
     const store = memoryStore();
@@ -368,13 +368,13 @@ describe('markEndingSeen (reaching an ending)', () => {
     const store = memoryStore();
     writeSave(store, { ...freshSave(), loopsCompleted: 5, facts: ['a.b'], endings: ['A'] });
 
-    expect(markEndingSeen(store, loadSave(store), 'B')).toBe(true);
-    expect(markEndingSeen(store, loadSave(store), 'B')).toBe(true);
+    expect(markEndingSeen(store, loadSave(store), 'tarde')).toBe(true);
+    expect(markEndingSeen(store, loadSave(store), 'tarde')).toBe(true);
 
     expect(loadSave(store).data).toMatchObject({
       loopsCompleted: 5,
       facts: ['a.b'],
-      endings: ['A', 'B'],
+      endings: ['A', 'tarde'],
     });
   });
 
@@ -534,5 +534,48 @@ describe('the opened sources in the save (version 5, milestone C)', () => {
       [SAVE_KEY]: JSON.stringify({ ...freshSave(), opened: ['<b>'] }),
     });
     expect(loadSave(store).warning).toBeDefined();
+  });
+});
+
+describe('the endings in the save (version 6: the bad ending is a seen ending)', () => {
+  const v5 = (endings: unknown) => ({
+    version: 5,
+    loopsCompleted: 9,
+    facts: ['a.b'],
+    prologueDone: true,
+    endings,
+    worlds: { umbral: { name: 'Primera luz', loop: 2 } },
+    tasks: ['explorar'],
+    opened: ['umbral.placa'],
+  });
+  const migrate = (raw: unknown) => loadSave(memoryStore({ [SAVE_KEY]: JSON.stringify(raw) }));
+
+  it('migrates a version 5 save with the endings seen, losing nothing', () => {
+    const { data, warning } = migrate(v5(['A']));
+
+    expect(warning).toBeUndefined();
+    expect(data).toEqual({ ...v5(['A']), version: SAVE_VERSION, endings: ['A'] });
+    expect(SAVE_VERSION).toBe(6);
+  });
+
+  it('migrates the ending B that no longer exists into the good ending, once', () => {
+    expect(migrate(v5(['B'])).data.endings).toEqual(['A']);
+    expect(migrate(v5(['A', 'B'])).data.endings).toEqual(['A']);
+  });
+
+  it('does not accept B in a version 6 save, nor anything that is not an ending', () => {
+    expect(migrate({ ...v5(['B']), version: 6 }).warning).toBeDefined();
+    expect(migrate({ ...v5(['A', 'tarde']), version: 6 }).data.endings).toEqual(['A', 'tarde']);
+    expect(migrate(v5(['tarde'])).warning).toBeDefined();
+  });
+
+  it('does not trust what a version 5 save says about the endings', () => {
+    expect(migrate(v5('A')).warning).toBeDefined();
+    expect(migrate(v5([3])).warning).toBeDefined();
+  });
+
+  it('migrates versions 3 and 4 endings the same way', () => {
+    const v3 = { version: 3, loopsCompleted: 1, facts: [], prologueDone: true, endings: ['B'] };
+    expect(migrate(v3).data.endings).toEqual(['A']);
   });
 });

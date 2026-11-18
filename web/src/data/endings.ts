@@ -1,9 +1,12 @@
 // Los textos de las tarjetas de final (Fase 10E), en finales.json. Son de Anthony: hasta que los escriba, borradores
-// con "[texto pendiente]". Se validan al cargar, como el resto de los datos.
+// de Claude (`"borrador": true`). Se validan al cargar, como el resto de los datos.
 import raw from './finales.json';
 import type { Ending } from '../game/epilogue';
 import { WorldDataError } from '../worlds/markers';
 import { t } from '../i18n';
+
+/** Las tarjetas: una por final y la variante del malo si se llegó por una boca equivocada con el sistema salvado. */
+export type EndingCardKey = Ending | 'tardeSalvado';
 
 export interface EndingCard {
   title: string;
@@ -16,7 +19,7 @@ function isTextList(value: unknown): value is string[] {
   return Array.isArray(value) && value.length > 0 && value.every((t) => typeof t === 'string');
 }
 
-function readCard(ending: Ending, value: unknown): EndingCard {
+function readCard(ending: string, value: unknown): EndingCard {
   if (typeof value !== 'object' || value === null) {
     throw new WorldDataError(`finales.json: falta el final "${ending}"`);
   }
@@ -28,16 +31,16 @@ function readCard(ending: Ending, value: unknown): EndingCard {
   return { title: t(titulo), text: texto.map((p) => t(p)), draft: borrador === true };
 }
 
-/** Una tarjeta por final; lanza si falta alguno o está mal formado. */
-export function readEndingCards(data: unknown): Readonly<Record<Ending, EndingCard>> {
+/** Una tarjeta por final y variante; lanza si falta alguna o está mal formada. */
+export function readEndingCards(data: unknown): Readonly<Record<EndingCardKey, EndingCard>> {
   if (typeof data !== 'object' || data === null) {
     throw new WorldDataError('finales.json: no es un objeto');
   }
   const cards = data as Record<string, unknown>;
   return {
     A: readCard('A', cards.A),
-    B: readCard('B', cards.B),
     tarde: readCard('tarde', cards.tarde),
+    tardeSalvado: readCard('tardeSalvado', cards.tardeSalvado),
   };
 }
 
@@ -49,13 +52,13 @@ export function readNoReturnCard(data: unknown): EndingCard {
   if (typeof data !== 'object' || data === null) {
     throw new WorldDataError('finales.json: no es un objeto');
   }
-  return readCard('sinVuelta' as Ending, (data as Record<string, unknown>).sinVuelta);
+  return readCard('sinVuelta', (data as Record<string, unknown>).sinVuelta);
 }
 
 export function loadNoReturnCard(): EndingCard {
   return readNoReturnCard(raw);
 }
 
-export function loadEndingCards(): Readonly<Record<Ending, EndingCard>> {
+export function loadEndingCards(): Readonly<Record<EndingCardKey, EndingCard>> {
   return readEndingCards(raw);
 }

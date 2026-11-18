@@ -1,19 +1,9 @@
 // Las cuatro bocas de casa (Archivo de las Puertas, Fase 11 por código): en arco, mirando a la llegada, cada una con
 // su reloj tallado en una estela y la vista de un día de Hogar (una tapada: "pronto"). Delante, el atril donde se leen
-// sus horas (INT_bocas, lector `bocas`), y a un lado el Banco con los planos del Contrapeso (puertas_Planos, suelto:
-// el juego lo esconde al cogerlo; INT_planos). Bajo todo, un mosaico de losas en anillos. 🟡 (plan de la Fase 10D).
+// sus horas (INT_bocas, lector `bocas`), y a un lado el Banco (INT_planos; los planos sueltos del
+// Contrapeso se quitaron en F1 del plan de los finales, D12). Bajo todo, un mosaico de losas en anillos. 🟡 (plan de la Fase 10D).
 import { Color, Mesh, MeshBasicMaterial } from 'three';
-import {
-  box,
-  cylinder,
-  Frame,
-  pieceMatrix,
-  piecesToMeshes,
-  PieceSet,
-  torus,
-  torusArc,
-  type Triple,
-} from './kit';
+import { box, cylinder, Frame, torus, torusArc } from './kit';
 import { PALETTE as P, groundFrame, siteFrame, type PuertasBuilder } from './puertasKit';
 import { SITES } from './puertasShape';
 
@@ -156,45 +146,6 @@ function lectern(b: PuertasBuilder, f: Frame): void {
   b.mark('INT_bocas', g, [0, -0.5, 1.3], { clue_id: 'puertas.bocas', kind: 'objeto' });
 }
 
-/** Los planos enrollados, aparte (en coordenadas de su origen, el tablero del Banco `top`). */
-function plans(b: PuertasBuilder, top: Frame): void {
-  const set = new PieceSet(17);
-  const opts = { solid: false } as const;
-  const rolls: readonly Triple[] = [
-    [-0.35, 0.05, 0.08],
-    [0, -0.1, 0.08],
-    [0.35, 0.08, 0.08],
-  ];
-  rolls.forEach((at, n) => {
-    set.add(
-      P.paper,
-      cylinder(0.07 + 0.01 * n, 8),
-      pieceMatrix(at, [0, Math.PI / 2, 0.2 * n], [1, 1, 0.75]),
-      'stone',
-      opts,
-    );
-  });
-  set.add(
-    P.paper,
-    box(),
-    pieceMatrix([0.1, -0.2, 0.01], [0, 0, -0.15], [0.6, 0.42, 0.01]),
-    'stone',
-    opts,
-  );
-  set.add(
-    P.slate,
-    torus(0.12, 0.012, 12, 3),
-    pieceMatrix([0.1, -0.2, 0.02], [Math.PI / 2, 0, 0]),
-    'stone',
-    opts,
-  );
-  const [mesh] = piecesToMeshes(set, b.materials, 'puertas_Planos');
-  if (!mesh) return;
-  mesh.name = 'puertas_Planos';
-  mesh.applyMatrix4(top.base);
-  b.extras.push(mesh);
-}
-
 function bench(b: PuertasBuilder, f: Frame): void {
   const g = groundFrame(f, 5.2, -3.4, 0.5 / DEG);
   b.solid(P.obsidian, box(), g.at([0, 0, 0.85], undefined, [2.2, 0.8, 0.12]));
@@ -209,7 +160,6 @@ function bench(b: PuertasBuilder, f: Frame): void {
       0.9,
     );
   }
-  plans(b, new Frame(g.at([0, 0, 0.91])));
   b.mark('INT_planos', g, [0, -0.15, 1.1], { clue_id: 'puertas.planos', kind: 'objeto' });
 }
 

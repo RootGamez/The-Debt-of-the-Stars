@@ -1,12 +1,17 @@
 // La vuelta a casa en el juego (Fase 10E): la Directora cierra el viaje. Con el final A, antes de la tarjeta, un corte
 // a negro a la plaza del Instituto (desde dentro la Luna queda detrás del techo) y, mientras se aclara, la vista sube
-// despacio hacia la Luna, aún sin su fragmento. La tarjeta guarda el final visto (A, B) y ofrece volver a jugar o, si
-// se llegó tarde, volver al Archivo. Lo que no toca la escena está en homecoming.ts (con tests).
+// despacio hacia la Luna, aún sin su fragmento. La tarjeta guarda el final visto (A o tarde) y ofrece volver a jugar y, si
+// se llegó tarde, también volver al Archivo. Lo que no toca la escena está en homecoming.ts (con tests).
 import type { SeenEnding } from '../core/save';
 import { loadEndingCards } from '../data/endings';
 import { showEndingCard } from '../ui/endingCard';
 import type { Ending } from './epilogue';
-import { createHomecomingPlay, isFinal, type HomecomingPlay } from './homecoming';
+import {
+  createHomecomingPlay,
+  endingCardKey,
+  type HomecomingPlay,
+  type HomeVia,
+} from './homecoming';
 import { t } from '../i18n';
 
 /** Lo que dura el giro hacia la Luna en el final A (s) y qué parte de lo que falta se gira por segundo. */
@@ -17,6 +22,8 @@ export type HomecomingPhase = 'playing' | 'turning' | 'card';
 
 export interface HomecomingRigOptions {
   ending: Ending;
+  /** Cómo se llegó (solo cambia la tarjeta del final malo); por defecto, por el Archivo. */
+  via?: HomeVia;
   /** Al cerrar el viaje: fuera la lectura, el ratón suelto y la pausa inhabilitada (no hay vuelta al juego). */
   freeze(): void;
   /** Final A: corte a negro a la plaza, que se aclara despacio. */
@@ -42,18 +49,19 @@ export interface HomecomingRig {
 
 export function createHomecomingRig(options: HomecomingRigOptions): HomecomingRig {
   const { ending } = options;
-  const card = loadEndingCards()[ending];
+  const card = loadEndingCards()[endingCardKey(ending, options.via ?? 'archivo')];
   let phase: HomecomingPhase = 'playing';
   let turned = 0;
 
   function show(): void {
     phase = 'card';
-    const saved = !isFinal(ending) || options.markSeen(ending);
+    const saved = options.markSeen(ending);
+    const replayChoice = { label: t('Volver a jugar'), run: options.replay };
     showEndingCard(
       card,
-      isFinal(ending)
-        ? [{ label: t('Volver a jugar'), run: options.replay }]
-        : [{ label: t('Volver al Archivo'), run: options.backToArchive }],
+      ending === 'A'
+        ? [replayChoice]
+        : [replayChoice, { label: t('Volver al Archivo'), run: options.backToArchive }],
       saved ? undefined : t('No se ha podido guardar el final.'),
     );
   }

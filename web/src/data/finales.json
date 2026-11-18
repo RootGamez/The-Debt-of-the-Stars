@@ -1,31 +1,30 @@
 {
   "A": {
-    "titulo": "Antes de la prueba",
+    "titulo": "Tres días después",
     "borrador": true,
     "texto": [
-      "Llegas a casa con el aire de las islas todavía en el pelo y el cuaderno lleno. La Directora lo lee de pie, despacio, sin interrumpir.",
-      "No hace falta que lo entienda todo. Le basta ver dos relojes que no coinciden y una línea que se dispara.",
-      "La prueba no se hace. En el Instituto nadie sabrá de qué se salvaron, y tú no podrás explicarlo: ese viaje no ocurrió para ellos.",
-      "Allá arriba, la Luna sigue limpia. Lejos de aquí, un sistema vacío conserva su última cuenta, y nadie la paga."
-    ]
-  },
-  "B": {
-    "titulo": "La cuenta empieza hoy",
-    "borrador": true,
-    "texto": [
-      "Llegas a tiempo. Dejas los planos sobre la mesa, con las manos todavía temblando, para que vean que es verdad.",
-      "La Directora los abre y sonríe: «Esto es justo lo que nos faltaba.»",
-      "Esa noche, en el Motor, la Puerta Mayor se enciende por fin con la pieza que nunca llegó. Funciona. Todo funciona.",
-      "En otro sistema, tiempo atrás, alguien graba una placa en la boca de un anillo: «La cuenta empieza hoy»."
+      "Hace tres días que perdieron la nave. Cuando te posas en el nido, la Maestra te espera, y lee tu cuaderno de pie, despacio, sin interrumpir.",
+      "Le adviertes que sacar energía de la garganta de una Puerta es pedir tiempo prestado. Te cree. Irá contigo a la Directora, y la prueba no se hace.",
+      "Muy lejos de aquí, en un sistema vacío pero salvado, dos que ya no esperan a nadie se sientan juntos frente a la Brasa.",
+      "En el cielo, un punto quieto guarda la última cuenta, y nadie la paga."
     ]
   },
   "tarde": {
     "titulo": "Llegas tarde",
     "borrador": true,
     "texto": [
-      "La plaza del Instituto está en silencio. La Puerta Mayor ya se abrió: en el Motor queda un anillo apagado y, junto al mar, un corte liso y curvo en la tierra.",
-      "Quien te encuentra no sabe qué decirte. Tú lo sabes todo, y ya no sirve de nada.",
-      "Esta boca no te dejó a tiempo. Vuelve al Archivo y cuenta de nuevo: los relojes no mienten, solo hay que leerlos con calma."
+      "Hace años que la Puerta Mayor está abierta. El Motor da luz a toda la ciudad, y los cables llegan hasta el Instituto.",
+      "Cruzaste una boca que contestaba a una llamada, y la llamada era el colapso. Sales cuando la luz se curva y el cielo se pone rojo.",
+      "Lo sabes todo, y ya no sirve de nada. En el Motor nace el agujero, y Hogar y la Luna caen sin un solo ciclo de reserva."
+    ]
+  },
+  "tardeSalvado": {
+    "titulo": "Un sistema que no era el tuyo",
+    "borrador": true,
+    "texto": [
+      "Salvaste un sistema que no era el tuyo y llegaste tarde al tuyo.",
+      "Hace años que la Puerta Mayor está abierta, y el Motor da luz a toda la ciudad. Sales justo cuando la luz se curva y el cielo se pone rojo.",
+      "Lo sabes todo, y ya no sirve de nada. En el Motor nace el agujero, y Hogar y la Luna caen sin un solo ciclo de reserva."
     ]
   },
   "sinVuelta": {

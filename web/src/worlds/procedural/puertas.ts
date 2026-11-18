@@ -5,7 +5,7 @@
 // encendidas unen la llegada, las bocas de casa (puertasHome.ts), el muro de los rastros, las ofrendas y la primera
 // Puerta de los Ausentes (puertasLore.ts). Sustituye a puertas.glb con el mismo contrato (raíz con radio, gravedad y
 // reloj; COL_puertas_Terreno y COL_puertas_Lugares; INT_rastros, INT_bocas e INT_planos; SPAWN_Puertas;
-// puertas_Planos suelto y puertas_VistaCasa_0..2).
+// puertas_VistaCasa_0..2).
 import {
   Color,
   Euler,

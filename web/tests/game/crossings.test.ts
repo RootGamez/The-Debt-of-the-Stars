@@ -34,9 +34,9 @@ afterEach(() => {
 
 describe('where each crossing leads', () => {
   it('goes home through a mouth with its ending, arriving in white', () => {
-    followCrossing('boca', 'B', true);
+    followCrossing('boca', 'tarde', true);
 
-    expect(replaced).toEqual(['http://localhost:5180/?debug=&mundo=hogar&final=B']);
+    expect(replaced).toEqual(['http://localhost:5180/?debug=&mundo=hogar&final=tarde']);
     expect(session.get(ARRIVAL_KEY)).toBe('blanco');
   });
 

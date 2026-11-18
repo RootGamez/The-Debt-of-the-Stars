@@ -82,12 +82,8 @@ describe('Puertas world contract', () => {
     ]);
   });
 
-  it('keeps the plans loose on the Bench, by the plans source, so the game can hide them', () => {
-    const plans = find('puertas_Planos');
-    expect(plans).toBeDefined();
-    if (!plans) return;
-    expect(isMesh(plans)).toBe(true);
-    expect(positionOf(plans).distanceTo(source('puertas.planos'))).toBeLessThan(2);
+  it('no longer has loose plans on the Bench (D12)', () => {
+    expect(find('puertas_Planos')).toBeUndefined();
   });
 
   it('gives the three open mouths of home their own view, each in its own colour', () => {

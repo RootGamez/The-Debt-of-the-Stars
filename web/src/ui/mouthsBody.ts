@@ -17,7 +17,6 @@ import { t } from '../i18n';
 export interface MouthsReader {
   /** Lo que se ha entendido ahora (K7, K8). */
   knowledge(): MouthKnowledge;
-  carryingPlans(): boolean;
   /** Cruza por la boca: el juego cierra la lectura y funde. */
   cross(id: MouthId): void;
 }
@@ -50,10 +49,6 @@ export function mouthsBody(
       ),
     );
     question.id = 'puzzle-mouth-question';
-    const lines = [question];
-    if (reader.carryingPlans()) {
-      lines.push(element('p', 'puzzle-hint', t('Llevas los planos del Contrapeso.')));
-    }
     go.addEventListener('click', () => {
       const mouth = mouthById(id);
       if (mouth && arrivesBefore(mouth)) solve();
@@ -64,7 +59,7 @@ export function mouthsBody(
       confirm.replaceChildren();
       pick.focus({ preventScroll: true });
     });
-    confirm.replaceChildren(...lines, go, wait);
+    confirm.replaceChildren(question, go, wait);
     confirm.hidden = false;
     wait.focus({ preventScroll: true });
   }

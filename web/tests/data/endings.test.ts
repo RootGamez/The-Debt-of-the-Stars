@@ -14,7 +14,7 @@ describe('the ending cards', () => {
   it('has one written card per ending in the game data, still drafts for Anthony', () => {
     const cards = loadEndingCards();
 
-    for (const ending of ['A', 'B', 'tarde'] as const) {
+    for (const ending of ['A', 'tarde', 'tardeSalvado'] as const) {
       expect(cards[ending].title).not.toBe('');
       expect(cards[ending].draft).toBe(true);
       expect(cards[ending].text.length).toBeGreaterThan(2);
@@ -25,25 +25,42 @@ describe('the ending cards', () => {
   it('has the English of every title and every line of every card', () => {
     const cards = loadEndingCards();
 
-    for (const ending of ['A', 'B', 'tarde'] as const) {
+    for (const ending of ['A', 'tarde', 'tardeSalvado'] as const) {
       for (const line of [cards[ending].title, ...cards[ending].text]) {
         expect(EN[line], line).toBeTruthy();
       }
     }
   });
 
+  it('no longer has an ending B', () => {
+    expect(Object.keys(loadEndingCards())).not.toContain('B');
+  });
+
+  it('says in the saved-system card that the system was not theirs', () => {
+    expect(loadEndingCards().tardeSalvado.text.join(' ')).toContain(
+      'Salvaste un sistema que no era el tuyo y llegaste tarde al tuyo',
+    );
+  });
+
   it('reads title, text and the draft mark', () => {
-    const cards = readEndingCards({ A: { ...card, borrador: true }, B: card, tarde: card });
+    const cards = readEndingCards({
+      A: { ...card, borrador: true },
+      tarde: card,
+      tardeSalvado: card,
+    });
 
     expect(cards.A).toEqual({ title: 'Final', text: ['Una línea.'], draft: true });
-    expect(cards.B.draft).toBe(false);
+    expect(cards.tarde.draft).toBe(false);
   });
 
   it.each([
-    ['a missing ending', { A: card, B: card }],
-    ['an empty title', { A: { ...card, titulo: '' }, B: card, tarde: card }],
-    ['no text', { A: { titulo: 'Final', texto: [] }, B: card, tarde: card }],
-    ['text that is not text', { A: { titulo: 'Final', texto: [3] }, B: card, tarde: card }],
+    ['a missing ending', { A: card, tarde: card }],
+    ['an empty title', { A: { ...card, titulo: '' }, tarde: card, tardeSalvado: card }],
+    ['no text', { A: { titulo: 'Final', texto: [] }, tarde: card, tardeSalvado: card }],
+    [
+      'text that is not text',
+      { A: { titulo: 'Final', texto: [3] }, tarde: card, tardeSalvado: card },
+    ],
     ['something that is not an object', 'finales'],
   ])('rejects %s', (_name, data) => {
     expect(() => readEndingCards(data)).toThrow(WorldDataError);
@@ -62,6 +79,6 @@ describe('the "no return" card (E5)', () => {
   });
 
   it('fails when the card is missing', () => {
-    expect(() => readNoReturnCard({ A: {}, B: {}, tarde: {} })).toThrow(WorldDataError);
+    expect(() => readNoReturnCard({ A: {}, tarde: {}, tardeSalvado: {} })).toThrow(WorldDataError);
   });
 });

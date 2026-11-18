@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DIRECTOR } from '../../src/game/homecoming';
+import { DIRECTOR, type HomeVia } from '../../src/game/homecoming';
 import { createHomecomingRig, TURN_SECONDS } from '../../src/game/homecomingRig';
 import type { Ending } from '../../src/game/epilogue';
 import { showEndingCard } from '../../src/ui/endingCard';
@@ -8,7 +8,13 @@ import { showEndingCard } from '../../src/ui/endingCard';
 vi.mock('../../src/ui/endingCard', () => ({ showEndingCard: vi.fn() }));
 const shown = vi.mocked(showEndingCard);
 
-function rig(ending: Ending, { reducedMotion = false, canSave = true } = {}) {
+interface RigOptions {
+  reducedMotion?: boolean;
+  canSave?: boolean;
+  via?: HomeVia;
+}
+
+function rig(ending: Ending, { reducedMotion = false, canSave = true, via }: RigOptions = {}) {
   const calls = {
     freeze: 0,
     outside: 0,
@@ -19,6 +25,7 @@ function rig(ending: Ending, { reducedMotion = false, canSave = true } = {}) {
   };
   const homecoming = createHomecomingRig({
     ending,
+    via,
     freeze: () => {
       calls.freeze += 1;
     },
@@ -52,8 +59,8 @@ describe('the end of the journey at home', () => {
     shown.mockClear();
   });
 
-  it('shows ending B at once, saves it as seen and offers to play again', () => {
-    const { homecoming, calls } = rig('B');
+  it('shows the bad ending at once, saves it as seen and offers to play again or go back', () => {
+    const { homecoming, calls } = rig('tarde', { via: 'boca' });
 
     expect(homecoming.blocking).toBe(false);
     homecoming.play.actions.run(DIRECTOR);
@@ -61,13 +68,30 @@ describe('the end of the journey at home', () => {
     expect(calls.freeze).toBe(1);
     expect(homecoming.phase).toBe('card');
     expect(homecoming.blocking).toBe(true);
-    expect(calls.seen).toEqual(['B']);
+    expect(calls.seen).toEqual(['tarde']);
     expect(calls.outside).toBe(0);
-    expect(shown.mock.calls[0]?.[0].title).toBe('La cuenta empieza hoy');
+    expect(shown.mock.calls[0]?.[0].title).toBe('Llegas tarde');
     expect(shown.mock.calls[0]?.[2]).toBeUndefined();
-    expect(lastChoices().map((c) => c.label)).toEqual(['Volver a jugar']);
+    expect(lastChoices().map((c) => c.label)).toEqual(['Volver a jugar', 'Volver al Archivo']);
     lastChoices()[0]?.run();
+    lastChoices()[1]?.run();
     expect(calls.replay).toBe(1);
+    expect(calls.archive).toBe(1);
+  });
+
+  it('shows the saved-system card when a wrong mouth of the Archive led here', () => {
+    const { homecoming } = rig('tarde');
+    homecoming.play.actions.run(DIRECTOR);
+
+    expect(shown.mock.calls[0]?.[0].title).toBe('Un sistema que no era el tuyo');
+  });
+
+  it('shows the good ending after turning toward the Moon, offering to play again', () => {
+    const { homecoming } = rig('A');
+    homecoming.play.actions.run(DIRECTOR);
+    homecoming.update(TURN_SECONDS);
+
+    expect(lastChoices().map((c) => c.label)).toEqual(['Volver a jugar']);
   });
 
   it('turns the view toward the Moon before ending A', () => {
@@ -99,19 +123,10 @@ describe('the end of the journey at home', () => {
   });
 
   it('says so on the card when the ending could not be saved', () => {
-    const { homecoming } = rig('B', { canSave: false });
+    const { homecoming } = rig('A', { canSave: false });
     homecoming.play.actions.run(DIRECTOR);
+    homecoming.update(TURN_SECONDS);
 
     expect(shown.mock.calls[0]?.[2]).toBe('No se ha podido guardar el final.');
-  });
-
-  it('arriving late is not an ending: nothing is saved and the card leads back to the Archive', () => {
-    const { homecoming, calls } = rig('tarde');
-    homecoming.play.actions.run(DIRECTOR);
-
-    expect(calls.seen).toEqual([]);
-    expect(lastChoices().map((c) => c.label)).toEqual(['Volver al Archivo']);
-    lastChoices()[0]?.run();
-    expect(calls.archive).toBe(1);
   });
 });

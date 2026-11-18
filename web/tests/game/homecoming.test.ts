@@ -4,41 +4,60 @@ import {
   DIRECTOR,
   endingFromQuery,
   homeLook,
+  endingCardKey,
   isFinal,
   NOT_YET_ARRIVED,
+  viaFromQuery,
   YOUNGER_OOL,
 } from '../../src/game/homecoming';
 import { WORMHOLE } from '../../src/game/prologue';
 
 describe('the way home from the Archive of the Gates', () => {
-  it('reads the ending from the address, only at home and only if it is one of the three', () => {
+  it('reads the ending from the address, only at home and only if it is one of the two', () => {
     expect(endingFromQuery('?mundo=hogar&final=A')).toBe('A');
     expect(endingFromQuery('?debug&mundo=hogar&final=tarde')).toBe('tarde');
-    expect(endingFromQuery('?mundo=umbral&final=B')).toBeUndefined();
+    expect(endingFromQuery('?mundo=umbral&final=A')).toBeUndefined();
+    expect(endingFromQuery('?mundo=hogar&final=B')).toBeUndefined();
     expect(endingFromQuery('?mundo=hogar&final=C')).toBeUndefined();
     expect(endingFromQuery('?mundo=hogar&final=a')).toBeUndefined();
     expect(endingFromQuery('?mundo=hogar')).toBeUndefined();
-    expect(endingFromQuery('?mundo=Hogar&final=B')).toBe('B');
+    expect(endingFromQuery('?mundo=Hogar&final=tarde')).toBe('tarde');
   });
 
-  it('counts A and B as endings, and arriving late as not one', () => {
+  it('counts the good ending and arriving late as endings (both are saved)', () => {
     expect(isFinal('A')).toBe(true);
-    expect(isFinal('B')).toBe(true);
-    expect(isFinal('tarde')).toBe(false);
+    expect(isFinal('tarde')).toBe(true);
   });
 
-  it('is the earlier home with A and B: no fragments yet and younger Ool', () => {
+  it('is the earlier home with the good ending: no fragments yet and younger Ool', () => {
     expect(homeLook('A')).toEqual({ without: NOT_YET_ARRIVED, oolScale: YOUNGER_OOL });
-    expect(homeLook('B').without).toContain('luna_Fragmento');
+    expect(homeLook('A').without).toContain('luna_Fragmento');
     expect(homeLook('tarde')).toEqual({ without: [], oolScale: 1 });
     expect(YOUNGER_OOL).toBeLessThan(1);
+  });
+});
+
+describe('how the bad ending was reached', () => {
+  it('reads the way from the address, only at home', () => {
+    expect(viaFromQuery('?mundo=hogar&final=tarde&via=boca')).toBe('boca');
+    expect(viaFromQuery('?mundo=hogar&final=tarde&via=archivo')).toBe('archivo');
+    expect(viaFromQuery('?mundo=hogar&final=tarde')).toBe('archivo');
+    expect(viaFromQuery('?mundo=hogar&final=tarde&via=otra')).toBe('archivo');
+    expect(viaFromQuery('?mundo=umbral&via=boca')).toBe('archivo');
+  });
+
+  it('picks the card: the Mouth, or a wrong mouth of the Archive with the system saved', () => {
+    expect(endingCardKey('A', 'boca')).toBe('A');
+    expect(endingCardKey('A', 'archivo')).toBe('A');
+    expect(endingCardKey('tarde', 'boca')).toBe('tarde');
+    expect(endingCardKey('tarde', 'archivo')).toBe('tardeSalvado');
   });
 });
 
 describe('closing the journey with the Director', () => {
   it('offers to talk to her, and talking ends the journey once', () => {
     let ends = 0;
-    const play = createHomecomingPlay('B', () => {
+    const play = createHomecomingPlay('A', () => {
       ends += 1;
     });
 

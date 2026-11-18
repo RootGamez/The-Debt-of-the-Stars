@@ -1,12 +1,15 @@
 // Guardado entre ciclos. Lo único que persiste es el conocimiento (CONTEXTO_HISTORIA.md §8): el número de
 // ciclos, la lista de hechos descubiertos (Fase 4), si ya se jugó el prólogo en casa (Fase 9, versión 2) y los
 // finales vistos (Fase 10, versión 3), los nombres que el jugador puso a cada mundo de su bitácora (versión 4) y las
-// tareas del bucle ya hechas y las fuentes abiertas (plan de la llegada, hitos B y C, versión 5).
+// tareas del bucle ya hechas y las fuentes abiertas (plan de la llegada, hitos B y C, versión 5). La versión 6 (plan de
+// los finales, F1) cambia los finales vistos: desaparece el B y el final malo («tarde») pasa a guardarse. Una partida
+// de la versión 5 o anterior se migra: lo visto como B pasa a ser el final bueno (A), el más cercano (llegar antes de la
+// prueba mayor).
 // Lo leído de localStorage se trata como dato externo: se valida y, si está dañado o manipulado,
 // se descarta y se empieza de cero con un aviso. Sin almacenamiento (modo privado) se juega igual.
 
 export const SAVE_KEY = 'bucle-tiempo:partida';
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 export const MAX_LOOPS = 1_000_000;
 export const MAX_FACTS = 5000;
 /** Ids de hechos: "mundo.nombre" con letras, números, guiones y puntos. */
@@ -26,8 +29,8 @@ export function isControlChar(char: string): boolean {
 /** Lo más largo que puede ser el nombre de un mundo (en letras). */
 export const MAX_WORLD_NAME = 24;
 export const MAX_WORLDS = 32;
-/** Los finales que cuentan como vistos (la boca equivocada no es un final). */
-export const SEEN_ENDINGS = ['A', 'B'] as const;
+/** Los finales que cuentan como vistos: el bueno (A) y el malo (llegar tarde). «Sin vuelta» no es un final. */
+export const SEEN_ENDINGS = ['A', 'tarde'] as const;
 export type SeenEnding = (typeof SEEN_ENDINGS)[number];
 
 export interface SaveData {
@@ -87,14 +90,20 @@ export function browserStore(): KeyValueStore | null {
   }
 }
 
+/** Hasta la versión 5 el guardado tenía un final B (los planos), que ya no existe. */
+const LEGACY_ENDINGS_VERSION = 5;
+
+/** ¿Es una versión que el juego sabe leer (1 a la actual)? */
+function isReadable(version: unknown): version is number {
+  return (
+    Number.isInteger(version) && (version as number) >= 1 && (version as number) <= SAVE_VERSION
+  );
+}
+
 /** Versión 1 (antes del prólogo): esas partidas empezaban ya en Umbral, así que lo dan por hecho. */
 function prologueOf(version: unknown, prologueDone: unknown): boolean | null {
   if (version === 1) return true;
-  if (
-    (version !== 2 && version !== 3 && version !== 4 && version !== SAVE_VERSION) ||
-    typeof prologueDone !== 'boolean'
-  )
-    return null;
+  if (!isReadable(version) || typeof prologueDone !== 'boolean') return null;
   return prologueDone;
 }
 
@@ -102,11 +111,20 @@ function isSeenEnding(value: unknown): value is SeenEnding {
   return (SEEN_ENDINGS as readonly unknown[]).includes(value);
 }
 
-/** Versiones 1 y 2 (antes de los finales): ninguno visto. */
-function endingsOf(version: unknown, endings: unknown): SeenEnding[] | null {
-  if (version !== 3 && version !== 4 && version !== SAVE_VERSION) return [];
-  if (!Array.isArray(endings) || !endings.every(isSeenEnding)) return null;
-  return [...new Set(endings)];
+/** Antes de la versión 6 solo había A y B: el B no existe ya y se cuenta como el bueno. */
+function isLegacyEnding(value: unknown): value is 'A' | 'B' {
+  return value === 'A' || value === 'B';
+}
+
+/** Versiones 1 y 2 (antes de los finales): ninguno visto. Hasta la 5, A y B (el B se migra a A). */
+function endingsOf(version: number, endings: unknown): SeenEnding[] | null {
+  if (version < 3) return [];
+  if (!Array.isArray(endings)) return null;
+  if (version > LEGACY_ENDINGS_VERSION) {
+    return endings.every(isSeenEnding) ? [...new Set(endings)] : null;
+  }
+  if (!endings.every(isLegacyEnding)) return null;
+  return endings.length > 0 ? ['A'] : [];
 }
 
 function isNamedWorld(value: unknown): value is NamedWorld {
@@ -119,8 +137,8 @@ function isNamedWorld(value: unknown): value is NamedWorld {
 }
 
 /** Versiones 1 a 3 (antes de la bitácora): ningún mundo nombrado. */
-function worldsOf(version: unknown, worlds: unknown): Record<string, NamedWorld> | null {
-  if (version !== 4 && version !== SAVE_VERSION) return {};
+function worldsOf(version: number, worlds: unknown): Record<string, NamedWorld> | null {
+  if (version < 4) return {};
   if (typeof worlds !== 'object' || worlds === null || Array.isArray(worlds)) return null;
   const entries = Object.entries(worlds);
   if (entries.length > MAX_WORLDS) return null;
@@ -133,16 +151,16 @@ function worldsOf(version: unknown, worlds: unknown): Record<string, NamedWorld>
 }
 
 /** Versiones 1 a 4 (antes de las tareas del bucle): ninguna hecha. */
-function tasksOf(version: unknown, tasks: unknown): string[] | null {
-  if (version !== SAVE_VERSION) return [];
+function tasksOf(version: number, tasks: unknown): string[] | null {
+  if (version < 5) return [];
   if (!Array.isArray(tasks) || tasks.length > MAX_TASKS) return null;
   if (!tasks.every((id): id is string => typeof id === 'string' && TASK_ID.test(id))) return null;
   return [...new Set(tasks)];
 }
 
 /** Antes de la versión 5, o una 5 de antes del hito C: nada abierto. */
-function openedOf(version: unknown, opened: unknown): string[] | null {
-  if (version !== SAVE_VERSION || opened === undefined) return [];
+function openedOf(version: number, opened: unknown): string[] | null {
+  if (version < 5 || opened === undefined) return [];
   if (!Array.isArray(opened) || opened.length > MAX_OPENED) return null;
   if (!opened.every((id): id is string => typeof id === 'string' && FACT_ID.test(id))) return null;
   return [...new Set(opened)];
@@ -152,6 +170,7 @@ function validate(raw: unknown): SaveData | null {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
   const { version, loopsCompleted, facts, prologueDone, endings, worlds, tasks, opened } =
     raw as Record<string, unknown>;
+  if (!isReadable(version)) return null;
   const prologue = prologueOf(version, prologueDone);
   const seen = endingsOf(version, endings);
   const named = worldsOf(version, worlds);
