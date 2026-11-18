@@ -41,6 +41,10 @@ import { createSkyMouthView } from './render/skyMouthView';
 import { createBenchRig } from './game/benchRig';
 import { DEPTHS } from './game/depthsPlay';
 import { createDepthsRig } from './game/depthsRig';
+import { createLaboratoryRig } from './game/laboratoryRig';
+import { createSkepticRig } from './game/skepticRig';
+import { horizonCrossing, horizonLateFact } from './game/loopCore';
+import { loadNoReturnCard } from './data/endings';
 import { createBellsRig } from './game/bellsRig';
 import { createCounterweightRig } from './game/counterweightRig';
 import { composeActions } from './reading/composeActions';
@@ -143,7 +147,7 @@ import { installLandscapeLock } from './ui/touch/orientationLock';
 import { createRotateGuard } from './ui/touch/rotateGuard';
 import { installTouchGuards } from './ui/touch/touchGuards';
 import { createArrivalLayer, endArrivingPaint, sessionStore, takeCrossing } from './ui/arrival';
-import { lockGameKeys } from './ui/endingCard';
+import { lockGameKeys, showEndingCard } from './ui/endingCard';
 import { createPlaceCard } from './ui/placeCard';
 import { createWorldDiscovery } from './ui/worldDiscovery';
 import type { Gate } from './worlds/gates';
@@ -201,21 +205,41 @@ function watchGraphicsContext(canvas: HTMLCanvasElement, status: HTMLElement): v
 const MAX_FRAME_SECONDS = 0.1;
 
 function runFrameLoop(
+/** El bucle de fotogramas; el tráiler lo detiene y lo avanza a paso fijo. */
+interface FrameLoop {
+  pause(): void;
+  resume(): void;
+  step(dt: number): void;
+}
+
   renderer: WebGLRenderer,
   render: () => void,
   frame: (dt: number) => void,
   /** Cada fotograma real (segundos): lo usa el modo automático para saber si el dispositivo llega. */
   onFrameTime?: (seconds: number) => void,
-): void {
+): FrameLoop {
   const timer = new Timer();
   timer.connect(document); // pausa el tiempo cuando la pestaña está oculta
-  renderer.setAnimationLoop((time: number) => {
+  const tick = (time: number): void => {
     timer.update(time);
     const seconds = timer.getDelta();
     onFrameTime?.(seconds);
     frame(Math.min(seconds, MAX_FRAME_SECONDS));
     render();
-  });
+  };
+  renderer.setAnimationLoop(tick);
+  return {
+    pause: () => {
+      renderer.setAnimationLoop(null);
+    },
+    resume: () => {
+      renderer.setAnimationLoop(tick);
+    },
+    step: (dt) => {
+      frame(dt);
+      render();
+    },
+  };
 }
 
 function runtimeOf(runtimes: ReadonlyMap<string, WorldRuntime>, id: string): WorldRuntime {
@@ -440,6 +464,8 @@ async function start(): Promise<void> {
   const gateOpen = (gate: Gate): boolean =>
     gate.lock === undefined ||
     (gate.lock === DEPTHS.lock && depths?.play.hatchOpen === true) ||
+    // E4: el portal caído del Nudo (sus dos anillos), encendido desde fuera.
+    laboratory?.gateOpen(gate) === true ||
     (track !== undefined && teleporterOpen(gate.lock, session.activeEventIds, track));
   const birthplace =
     counterweight?.core ??
@@ -479,6 +505,8 @@ async function start(): Promise<void> {
   let liveEvents: readonly string[] = [];
   let horizonCross: DeathCause | undefined;
   // Por una boca de casa del Archivo, con el final que sale de ella y de los planos.
+  /** Se llegó al horizonte estable sin cortar el bucle: el ciclo acaba antes (E5). */
+  let lateAtHorizon = false;
   let mouthCross: DeathCause | undefined;
   let ending: Ending | undefined;
   const hiddenWorld = spec?.bodies.find((body) => body.hidden)?.world;
@@ -582,7 +610,15 @@ async function start(): Promise<void> {
     skyDirection: arrivalSkyDirection(player),
     counterweightClock: () => counterweight?.play.clock,
     // Cada ciclo empieza en el mundo de llegada, a pie, con la nave esperando (y sin tensión de marea).
-    onRestart: () => {
+    onRestart: (cause) => {
+      // E5: sin cortar el bucle, junto al horizonte estable las 15:00 llegan antes que tú (y el cuaderno lo anota).
+      const { frame: at, position: near } = viewer();
+      const late = horizonLateFact({
+        cause,
+        loopCut: false,
+        closeness: lateAtHorizon ? 1 : horizon.closeness(at, near),
+      });
+      lateAtHorizon = false;
       soundtrack.play('loop.reset');
       game.flight?.reset();
       shipSound.reset();
@@ -596,8 +632,32 @@ async function start(): Promise<void> {
       depths?.play.reset();
       bench?.play.reset();
       track?.reset();
+      laboratory?.reset();
+      skeptic?.restart();
       arrive(startWorld);
     },
+      if (late) {
+        reading.note(late);
+        game.ui?.notify(
+          t(
+            'Las 15:00 llegaron antes que tú: junto al horizonte, el reloj de fuera corre demasiado.',
+          ),
+        );
+      }
+    },
+    // E5: con el bucle cortado, un fallo no reinicia: la tarjeta «Sin vuelta» y la partida sigue en Umbral.
+    onNoReturn: () => {
+      overlay.releasePointer();
+      const card = showEndingCard(loadNoReturnCard(), [
+        {
+          label: t('Seguir'),
+          run: () => {
+            card.remove();
+            session.resolveNoReturn();
+            overlay.recapturePointer();
+          },
+        },
+      ]);
   });
   const reading = new ReadingSession(clues, session.savedFacts, (facts) =>
     session.saveFacts(facts),
@@ -654,6 +714,40 @@ async function start(): Promise<void> {
   // La Balanza del Contrapeso del Taller y la placa que canta de Cicatriz (T8).
   const bench = createBenchRig({ scene, runtimes });
   // Las campanas del Anfiteatro de Umbral (P1): coger, poner en el canal y oír a la bola pasar.
+  // E4: el portal caído del Nudo (su reloj en el muelle), la científica en su lecho de escarcha y la burbuja.
+  const laboratory = createLaboratoryRig({
+    runtimes,
+    reference: () => {
+      const lab = runtimes.get('laboratorio');
+      const clock = session.director.clock.t;
+      return lab
+        ? machineTime(clock, lab.world.info.clockRate, chronology.clocks['laboratorio'])
+        : 0;
+    },
+    opened: () => reading.opened,
+    carrying: () => counterweight?.play.place === 'carried',
+    onBench: () => (counterweight?.play.place ?? 'bench') === 'bench',
+    notify: (message) => game.ui?.notify(message),
+  });
+  // E5: el escéptico en su casa del Centro del Taller. Enseñarle el Contrapeso corta el bucle.
+  const skeptic = createSkepticRig({
+    runtimes,
+    opened: () => reading.opened,
+    known: () => reading.known,
+    carrying: () => counterweight?.play.place === 'carried',
+    onHandOver: () => {
+      session.director.cutLoop();
+    },
+    read: (id) => game.ui?.readSource(id),
+  });
+  if (new URLSearchParams(window.location.search).has('debug') && skeptic) {
+    window.__esceptico = {
+      snapshot: () => skeptic.snapshot(),
+      cut: () => {
+        skeptic.play.forceHandOver();
+      },
+    };
+  }
   const bells = createBellsRig({
     scene,
     runtimes,
@@ -832,7 +926,8 @@ async function start(): Promise<void> {
         archivoPuzzles?.play.actions,
         depths?.play.actions,
         bench?.play.actions,
-        epilogue?.play.actions,
+        laboratory?.actions,
+        skeptic?.play.actions,
         homecoming?.play.actions,
         looseActions,
       ],
@@ -848,6 +943,7 @@ async function start(): Promise<void> {
       ...depths?.readers,
       ...bench?.readers,
       ...epilogue?.readers,
+      ...laboratory?.readers,
       ...(track && { pista: (status, _solved, solve) => trackClockBody(track, status, solve) }),
       ocular: (status, solved, solve) => ocularBody(ocularSource, status, solved, solve),
     },
@@ -1081,6 +1177,12 @@ async function start(): Promise<void> {
     };
     window.__juego.depths = () => depths?.play.snapshot() ?? null;
     window.__juego.depthsPendulum = (pendulum) => {
+    // E4 (sin tipo en debugOverlay.ts): el Laboratorio, encender su Puerta y despertarla.
+    Object.assign(window.__juego, {
+      laboratory: () => laboratory?.snapshot() ?? null,
+      lightNudoGate: () => laboratory?.lightGate() ?? false,
+      wakeScientist: () => laboratory?.wake(),
+    });
       depths?.forcePendulum(pendulum);
     };
     window.__juego.archivo = () => archivoPuzzles?.play.snapshot() ?? null;
@@ -1108,8 +1210,6 @@ async function start(): Promise<void> {
       const at = approachPoint(birthplace, front, radii * horizon.radius);
       return flight.placeAt(BLACK_HOLE.world, at, birthplace);
     };
-    window.__juego.epilogue = () =>
-      epilogue ? { carryingPlans: epilogue.play.carryingPlans } : null;
     window.__juego.aimAt = (target) => {
       const where =
         target === 'agujero'
@@ -1301,7 +1401,7 @@ async function start(): Promise<void> {
   const airCenter = new Vector3();
   const diveUp = new Vector3();
   const body = new Quaternion();
-  runFrameLoop(
+  const frameLoop = runFrameLoop(
     renderer,
     () => {
       // Dentro del Nudo la estrella no ilumina (su luz está apagada): sin sombra.
@@ -1457,7 +1557,12 @@ async function start(): Promise<void> {
         waterEffects.update(dt, water);
       }
       if (horizon.crossed(here.frame, here.position) && session.acceptsInput) {
-        horizonCross = 'horizonte';
+        // E5: solo con el bucle cortado se cruza; si no, las 15:00 llegan antes (se acaba el ciclo ya).
+        if (horizonCrossing(session.director.loopCut) === 'cross') horizonCross = 'horizonte';
+        else {
+          lateAtHorizon = true;
+          session.director.skip(chronology.duration - session.director.clock.t);
+        }
       }
       // La nave entra en la boca del cielo: el final sale de la boca elegida y de los planos.
       if (
@@ -1468,7 +1573,7 @@ async function start(): Promise<void> {
       ) {
         const id = skyMouth.cross();
         const mouth = id ? mouthById(id) : undefined;
-        const chosen = mouth ? endingFor(mouth, epilogue?.play.carryingPlans ?? false) : undefined;
+        const chosen = mouth ? endingFor(mouth) : undefined;
         if (chosen) {
           ending = chosen;
           mouthCross = 'boca';
@@ -1595,6 +1700,7 @@ async function start(): Promise<void> {
             : undefined),
       });
       soundtrack.update({
+        doorLit: laboratory?.lit ?? true,
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,
         rate: session.director.rate,
         events: wormholeView?.active
@@ -1623,8 +1729,9 @@ async function start(): Promise<void> {
         session.activeEventIds.includes('ranura_luz'),
       );
       if (counterweight?.play.place === 'installed' && !stable) session.director.stabilize();
-      epilogue?.update();
       homecoming?.update(dt);
+      laboratory?.update(dt, performance.now() / 1000, session.activeEventIds);
+      skeptic?.update(dt, currentWorld.id, player.state.position);
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       if (flight) {
         // Con el tiempo parado (pausa, lectura, Registro) los rugidos callan en vez de quedarse con el último empuje.
