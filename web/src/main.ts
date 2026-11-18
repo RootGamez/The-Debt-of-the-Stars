@@ -56,7 +56,8 @@ import { endingFromQuery, homeLook } from './game/homecoming';
 import { createHomecomingRig } from './game/homecomingRig';
 import { createFoldedPassage } from './game/foldedPassage';
 import { createDiving } from './game/diving';
-import { createTrackClock, TELEPORTER, teleporterOpen } from './game/teleporter';
+import { TELEPORTER } from './game/teleporter';
+import { createTrackGateRig } from './game/trackGateRig';
 import { createWaterPlay } from './game/waterPlay';
 import { createWaterEffects } from './render/waterEffects';
 import { createTideEffects } from './game/tideEffects';
@@ -68,7 +69,6 @@ import { createLensView } from './render/lensView';
 import { createAtmosphereView } from './render/atmosphereView';
 import { createOolView } from './render/oolView';
 import { createFilaments } from './ui/filaments';
-import { trackClockBody } from './ui/trackClockBody';
 import { createOcularSource } from './game/ocularSky';
 import { ocularBody } from './ui/ocularBody';
 import { ATMOSPHERES } from './data/atmospheres';
@@ -204,7 +204,6 @@ function watchGraphicsContext(canvas: HTMLCanvasElement, status: HTMLElement): v
 /** Un fotograma largo (móvil flojo, tirón) no avanza el juego más que esto: la física no da pasos enormes. */
 const MAX_FRAME_SECONDS = 0.1;
 
-function runFrameLoop(
 /** El bucle de fotogramas; el tráiler lo detiene y lo avanza a paso fijo. */
 interface FrameLoop {
   pause(): void;
@@ -212,6 +211,7 @@ interface FrameLoop {
   step(dt: number): void;
 }
 
+function runFrameLoop(
   renderer: WebGLRenderer,
   render: () => void,
   frame: (dt: number) => void,
@@ -449,24 +449,27 @@ async function start(): Promise<void> {
     },
     stowage: shipModel?.parts.cargo,
   });
-  // El reloj de la Pista del Taller: con él en hora, el anillo lleva a la Sala del Centro durante las 7:00.
+  // E4: el portal caído de la Pista del Taller. Su reloj empieza cada ciclo fuera de hora; en hora y con la secuencia
+  // de las 7:00 se enciende el anillo de la Pista y el de dentro del Centro, en los dos sentidos hasta el fin del ciclo.
   const taller = runtimes.get(TELEPORTER.world);
   const track =
     taller &&
-    createTrackClock(() =>
-      machineTime(
-        session.director.clock.t,
-        taller.world.info.clockRate,
-        chronology.clocks[TELEPORTER.world],
-      ),
-    );
-  const portal = taller?.world.scene.getObjectByName(TELEPORTER.portal);
+    createTrackGateRig({
+      scene: taller.world.scene,
+      reference: () =>
+        machineTime(
+          session.director.clock.t,
+          taller.world.info.clockRate,
+          chronology.clocks[TELEPORTER.world],
+        ),
+      notify: (message) => game.ui?.notify(message),
+    });
   const gateOpen = (gate: Gate): boolean =>
     gate.lock === undefined ||
-    (gate.lock === DEPTHS.lock && depths?.play.hatchOpen === true) ||
-    // E4: el portal caído del Nudo (sus dos anillos), encendido desde fuera.
+    // E4: los portales caídos (el del Nudo y el de la Pista), encendidos desde fuera.
     laboratory?.gateOpen(gate) === true ||
-    (track !== undefined && teleporterOpen(gate.lock, session.activeEventIds, track));
+    track?.gateOpen(gate) === true ||
+    (gate.lock === DEPTHS.lock && depths?.play.hatchOpen === true);
   const birthplace =
     counterweight?.core ??
     sources.get(BLACK_HOLE.world)?.interactables.find((i) => i.id === BLACK_HOLE.source)?.position;
@@ -504,9 +507,9 @@ async function start(): Promise<void> {
   // Los eventos que ocurren ahora (los puentes de luz del Taller solo se pisan durante el suyo).
   let liveEvents: readonly string[] = [];
   let horizonCross: DeathCause | undefined;
-  // Por una boca de casa del Archivo, con el final que sale de ella y de los planos.
   /** Se llegó al horizonte estable sin cortar el bucle: el ciclo acaba antes (E5). */
   let lateAtHorizon = false;
+  // Por una boca de casa del Archivo, con el final que sale de ella y de los planos.
   let mouthCross: DeathCause | undefined;
   let ending: Ending | undefined;
   const hiddenWorld = spec?.bodies.find((body) => body.hidden)?.world;
@@ -631,11 +634,11 @@ async function start(): Promise<void> {
       archivoPuzzles?.play.reset();
       depths?.play.reset();
       bench?.play.reset();
-      track?.reset();
       laboratory?.reset();
       skeptic?.restart();
+      syncLoopSave();
+      track?.reset();
       arrive(startWorld);
-    },
       if (late) {
         reading.note(late);
         game.ui?.notify(
@@ -658,6 +661,7 @@ async function start(): Promise<void> {
           },
         },
       ]);
+    },
   });
   const reading = new ReadingSession(clues, session.savedFacts, (facts) =>
     session.saveFacts(facts),
@@ -713,7 +717,6 @@ async function start(): Promise<void> {
   const depths = createDepthsRig({ scene, runtimes });
   // La Balanza del Contrapeso del Taller y la placa que canta de Cicatriz (T8).
   const bench = createBenchRig({ scene, runtimes });
-  // Las campanas del Anfiteatro de Umbral (P1): coger, poner en el canal y oír a la bola pasar.
   // E4: el portal caído del Nudo (su reloj en el muelle), la científica en su lecho de escarcha y la burbuja.
   const laboratory = createLaboratoryRig({
     runtimes,
@@ -740,6 +743,12 @@ async function start(): Promise<void> {
     },
     read: (id) => game.ui?.readSource(id),
   });
+  // El bucle cortado, la fuente en el Contrapeso y que él salió contigo sobreviven a recargar (core/save.ts, v7); el
+  // director ya volvió a cortar el bucle al leer la partida.
+  skeptic?.play.restore(session.savedLoop);
+  const syncLoopSave = (): void => {
+    if (skeptic) session.saveLoop(skeptic.play.loopState());
+  };
   if (new URLSearchParams(window.location.search).has('debug') && skeptic) {
     window.__esceptico = {
       snapshot: () => skeptic.snapshot(),
@@ -748,6 +757,7 @@ async function start(): Promise<void> {
       },
     };
   }
+  // Las campanas del Anfiteatro de Umbral (P1): coger, poner en el canal y oír a la bola pasar.
   const bells = createBellsRig({
     scene,
     runtimes,
@@ -942,9 +952,9 @@ async function start(): Promise<void> {
       ...archivoPuzzles?.readers,
       ...depths?.readers,
       ...bench?.readers,
-      ...epilogue?.readers,
       ...laboratory?.readers,
-      ...(track && { pista: (status, _solved, solve) => trackClockBody(track, status, solve) }),
+      ...epilogue?.readers,
+      ...track?.readers,
       ocular: (status, solved, solve) => ocularBody(ocularSource, status, solved, solve),
     },
     settings: textSettings,
@@ -1176,13 +1186,13 @@ async function start(): Promise<void> {
       bench?.forceHole(hole);
     };
     window.__juego.depths = () => depths?.play.snapshot() ?? null;
-    window.__juego.depthsPendulum = (pendulum) => {
     // E4 (sin tipo en debugOverlay.ts): el Laboratorio, encender su Puerta y despertarla.
     Object.assign(window.__juego, {
       laboratory: () => laboratory?.snapshot() ?? null,
       lightNudoGate: () => laboratory?.lightGate() ?? false,
       wakeScientist: () => laboratory?.wake(),
     });
+    window.__juego.depthsPendulum = (pendulum) => {
       depths?.forcePendulum(pendulum);
     };
     window.__juego.archivo = () => archivoPuzzles?.play.snapshot() ?? null;
@@ -1226,7 +1236,7 @@ async function start(): Promise<void> {
         ? { ending: homecomingEnding, phase: homecoming.phase, without: home?.without ?? [] }
         : null;
     window.__juego.teleporter = () =>
-      track ? { matched: track.matched, open: portal?.visible ?? false } : null;
+      track ? { matched: track.snapshot().matched, open: track.lit } : null;
     window.__juego.skipTo = (seconds) => {
       session.director.skip(seconds - session.director.clock.t);
       return session.director.clock.t;
@@ -1487,9 +1497,6 @@ async function start(): Promise<void> {
       for (const prop of eventProps) {
         prop.object.visible = liveEvents.includes(prop.event);
       }
-      if (portal) {
-        portal.visible = track !== undefined && teleporterOpen(TELEPORTER.lock, liveEvents, track);
-      }
       if (timeRuns) {
         // Un mundo que el agujero se está tragando se ve casi quieto desde fuera; lo que sigue a la burbuja del
         // Contrapeso (el reloj de mesa del Laboratorio) corre mientras está cerca y se calma cuando se lo llevan.
@@ -1692,6 +1699,7 @@ async function start(): Promise<void> {
         aligned: session.activeEventIds.includes(ALIGNMENT_EVENT),
         inObservatory: systemScene.referenceWorld === OBSERVATORY,
         time: performance.now() / 1000,
+        doorLit: laboratory?.lit ?? true,
         hole:
           hole ??
           wormholeView?.lens() ??
@@ -1700,7 +1708,6 @@ async function start(): Promise<void> {
             : undefined),
       });
       soundtrack.update({
-        doorLit: laboratory?.lit ?? true,
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,
         rate: session.director.rate,
         events: wormholeView?.active
@@ -1723,6 +1730,10 @@ async function start(): Promise<void> {
       bells?.update(camera, t, timeRuns ? dt : 0);
       depths?.update(camera, t);
       bench?.update(camera);
+      laboratory?.update(dt, performance.now() / 1000, session.activeEventIds);
+      track?.update(dt, performance.now() / 1000, session.activeEventIds);
+      skeptic?.update(dt, currentWorld.id, player.state.position);
+      syncLoopSave();
       archivoPuzzles?.update(
         camera,
         timeRuns ? dt : 0,
@@ -1730,8 +1741,6 @@ async function start(): Promise<void> {
       );
       if (counterweight?.play.place === 'installed' && !stable) session.director.stabilize();
       homecoming?.update(dt);
-      laboratory?.update(dt, performance.now() / 1000, session.activeEventIds);
-      skeptic?.update(dt, currentWorld.id, player.state.position);
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       if (flight) {
         // Con el tiempo parado (pausa, lectura, Registro) los rugidos callan en vez de quedarse con el último empuje.
