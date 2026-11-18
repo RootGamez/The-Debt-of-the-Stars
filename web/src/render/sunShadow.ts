@@ -266,7 +266,7 @@ const GLSL_COMMON = /* glsl */ `
       float wy = j == -1 ? 1.0 - f.y : (j == 2 ? f.y : 1.0);
       for (int i = -1; i <= 2; i++) {
         float wx = i == -1 ? 1.0 - f.x : (i == 2 ? f.x : 1.0);
-        float seen = unpackDist(texture2D(map, center + vec2(float(i), float(j)) * texel));
+        float seen = unpackDist(textureLod(map, center + vec2(float(i), float(j)) * texel, 0.0));
         sum += wx * wy * step(mine, seen);
       }
     }
@@ -301,7 +301,7 @@ const GLSL_COMMON = /* glsl */ `
     for (int i = 0; i < 12; i++) {
       float a = float(i) * 2.39996;
       vec2 o = vec2(cos(a), sin(a)) * sqrt((float(i) + 0.5) / 12.0) * 36.0;
-      float seen = unpackDist(texture2D(uSunFarMap, uv + o * uSunFarTexel));
+      float seen = unpackDist(textureLod(uSunFarMap, uv + o * uSunFarTexel, 0.0));
       if (seen < 0.999 && mine - bias > seen) { blocked += 1.0; depthSum += seen; }
     }
     if (blocked < 0.5) return 1.0;
@@ -311,7 +311,7 @@ const GLSL_COMMON = /* glsl */ `
     for (int i = 0; i < 16; i++) {
       float a = float(i) * 2.39996;
       vec2 o = vec2(cos(a), sin(a)) * sqrt((float(i) + 0.5) / 16.0) * radius;
-      float seen = unpackDist(texture2D(uSunFarMap, uv + o * uSunFarTexel));
+      float seen = unpackDist(textureLod(uSunFarMap, uv + o * uSunFarTexel, 0.0));
       lit += (seen < 0.999 && mine - bias > seen) ? 0.0 : 1.0;
     }
     return lit / 16.0;

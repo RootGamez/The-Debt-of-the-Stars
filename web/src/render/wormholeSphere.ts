@@ -248,6 +248,9 @@ export function renderWithWormholes(renderer: WebGLRenderer, scene: Scene, camer
     sphere.visible = false;
     hidden.push(sphere);
   }
+  // Durante el pase de fondo la textura se está escribiendo: si alguna esfera se dibujase igualmente (sin culling,
+  // fuera de la lista de a la vista), la leería a la vez y daría «Feedback loop formed between Framebuffer and Texture».
+  shared.backdrop.value = null;
   renderer.setRenderTarget(target);
   renderer.render(scene, camera);
   renderer.setRenderTarget(null);
