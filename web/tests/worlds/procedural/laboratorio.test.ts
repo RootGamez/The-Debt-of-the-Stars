@@ -23,6 +23,9 @@ import {
   type InnerSiteId,
 } from '../../../src/worlds/procedural/laboratorioShape';
 import { direction } from '../../../src/worlds/procedural/kit';
+import { BUBBLE_MESH } from '../../../src/worlds/procedural/laboratorioBubble';
+import { BED_STEP_LIGHTS, SCIENTIST_ANCHOR } from '../../../src/worlds/procedural/laboratorioCold';
+import { LABORATORY_GATE } from '../../../src/game/fallenGate';
 import { createWorldRuntime } from '../../../src/worlds/worldRuntime';
 
 const world = buildWorld('laboratorio');
@@ -87,20 +90,25 @@ describe('Laboratorio world contract', () => {
     expect(find('COL_laboratorio_Lugares')).toBeDefined();
   });
 
-  it('offers the seven sources of the clue graph and the five records that tell the place', () => {
+  it('offers the seven sources of the clue graph, the records that tell the place and her (E4)', () => {
     expect(world.markers.interactions.map((i) => i.clueId).sort()).toEqual([
       'lab.calendario',
       'lab.camara',
+      'lab.cientifica',
       'lab.comedor',
       'lab.contrapeso',
       'lab.dormitorio',
+      'lab.encargo.cientifica',
       'lab.invernadero',
+      'lab.lecho',
       'lab.mediciones',
       'lab.notas_esceptico',
       'lab.notas_investigadora',
+      'lab.noticias.cientifica',
       'lab.orden_silencio',
       'lab.pizarra',
       'lab.radio',
+      'lab.reloj_puerta',
     ]);
   });
 
@@ -112,6 +120,44 @@ describe('Laboratorio world contract', () => {
     if (!boca || !dentro) return;
     expect(positionOf(boca).length()).toBeGreaterThan(24);
     expect(positionOf(dentro).length()).toBeLessThan(LAB_INNER_RADIUS);
+  });
+
+  it('locks both rings with the fallen gate of the Knot, set from the dock clock outside (E4)', () => {
+    expect(find('PASO_Boca')?.userData.cerradura).toBe(LABORATORY_GATE.lock);
+    expect(find('PASO_Dentro')?.userData.cerradura).toBe(LABORATORY_GATE.lock);
+    const clock = world.markers.interactions.find((i) => i.clueId === 'lab.reloj_puerta');
+    const boca = find('PASO_Boca');
+    if (!clock || !boca) throw new Error('sin reloj o sin anillo');
+    // En la cáscara, junto al anillo de fuera.
+    expect(positionOf(clock.object).length()).toBeGreaterThan(24);
+    expect(positionOf(clock.object).distanceTo(positionOf(boca))).toBeLessThan(8);
+    // La membrana y la luz de la hora de cada anillo van sueltas, para apagarlas mientras está caído.
+    const parts: string[] = [];
+    world.scene.traverse((o) => {
+      if (o.userData.fallen_lock === LABORATORY_GATE.lock)
+        parts.push(String(o.userData.fallen_part));
+    });
+    expect(parts.filter((p) => p === 'membrane')).toHaveLength(2);
+    expect(parts.filter((p) => p === 'blink')).toHaveLength(3);
+  });
+
+  it('keeps her anchor, the four step lights and the bubble around the Counterweight (E4)', () => {
+    const anchor = find(SCIENTIST_ANCHOR);
+    const bed = world.markers.interactions.find((i) => i.clueId === 'lab.lecho');
+    expect(anchor).toBeDefined();
+    expect(bed).toBeDefined();
+    if (!anchor || !bed) return;
+    expect(positionOf(anchor).length()).toBeLessThan(LAB_INNER_RADIUS);
+    expect(positionOf(anchor).distanceTo(positionOf(bed.object))).toBeLessThan(3);
+    let steps = 0;
+    world.scene.traverse((o) => {
+      if (typeof o.userData.lab_bed_step === 'number') steps++;
+    });
+    expect(steps).toBe(BED_STEP_LIGHTS);
+    const bubble = find(BUBBLE_MESH);
+    const counterweight = world.markers.interactions.find((i) => i.clueId === 'lab.contrapeso');
+    if (!bubble || !counterweight) throw new Error('sin burbuja o sin Contrapeso');
+    expect(positionOf(bubble).distanceTo(positionOf(counterweight.object))).toBeLessThan(0.05);
   });
 
   it('puts the player inside the cavity, in front of the inner gate', () => {

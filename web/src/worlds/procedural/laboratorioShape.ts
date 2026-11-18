@@ -16,6 +16,11 @@ export const LAB_GRAVITY = 0.3;
  * burbuja del Contrapeso mientras espera en su Banco (game/counterweight.ts); si se lo llevan, queda este.
  */
 export const NUDO_CLOCK = 1;
+/**
+ * La `cerradura` de los dos anillos de la Puerta del Nudo (E4): la apagó la huida y solo se enciende poniendo en hora
+ * el reloj del muelle (game/fallenGate.ts, `LABORATORY_GATE`).
+ */
+export const NUDO_LOCK = 'nudo';
 const OUTER_RELIEF = 0.05;
 const OUTER_FREQUENCY = 1.9;
 const INNER_RELIEF = 0.02;

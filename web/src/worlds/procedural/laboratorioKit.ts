@@ -3,7 +3,10 @@
 // brilla frío) y las piezas que se repiten: la plataforma de una zona, el farol, la Puerta plegada, camas, mesas,
 // papeles y muros de estratos. Pasado de blender/scripts/arte_laboratorio.py.
 import {
+  Color,
   Group,
+  Mesh,
+  MeshBasicMaterial,
   Quaternion,
   Vector3,
   type BufferGeometry,
@@ -47,7 +50,17 @@ export const PALETTE = {
   amber: '#FFC070',
   fold: '#CFE6DA',
   seed: '#9FD0C0',
+  // La cámara de frío y la mesa partida (E4, 🟡).
+  frost: '#DCEAF0',
+  ice: '#A9C8D6',
+  iceDeep: '#6F97AA',
+  woodPale: '#A78A68',
+  woodDark: '#5E4630',
+  dust: '#B6A893',
 } as const;
+
+/** Lo que el juego enciende o apaga de un portal caído (render/fallenGateView.ts): su membrana y la luz de su hora. */
+export type FallenPart = 'membrane' | 'blink';
 const P = PALETTE;
 
 /** El suelo de una zona sube 0,15 m sobre la cara interior: así lo dejó el Laboratorio de Blender. */
@@ -62,9 +75,46 @@ export class LabBuilder {
   /** Lo que brilla frío: la membrana de las Puertas y el halo de la semilla. */
   readonly cold: BufferGeometry[] = [];
   readonly markers: Object3D[] = [];
-  readonly extras: Group[] = [];
+  /** Lo que va suelto (lo que gira, lo que el juego enciende): solo se dibuja estando en el Nudo. */
+  readonly extras: Object3D[] = [];
+  private readonly loose = new Map<string, MeshBasicMaterial>();
 
   constructor(private readonly materials: Record<PieceKind, Material>) {}
+
+  /** Un material de luz plano para piezas sueltas, compartido por color. */
+  private glowMaterial(color: string, glow: number, transparent = false): MeshBasicMaterial {
+    const key = `${color}-${String(glow)}-${String(transparent)}`;
+    let material = this.loose.get(key);
+    if (!material) {
+      material = new MeshBasicMaterial({
+        color: new Color(color).multiplyScalar(glow),
+        transparent,
+        depthWrite: !transparent,
+      });
+      this.loose.set(key, material);
+    }
+    return material;
+  }
+
+  /**
+   * Una pieza suelta con su propia malla (no se funde con las demás) para que el juego la encienda, la apague o la
+   * mueva; `data` va en `userData`. Con `transparent`, su material es propio (el juego cambia su opacidad).
+   */
+  part(
+    name: string,
+    geometry: BufferGeometry,
+    matrix: Matrix4,
+    look: { color: string; glow?: number; transparent?: boolean },
+    data: Record<string, string | number> = {},
+  ): Mesh {
+    const shared = this.glowMaterial(look.color, look.glow ?? 1, look.transparent);
+    const mesh = new Mesh(geometry.clone(), look.transparent ? shared.clone() : shared);
+    mesh.name = name;
+    mesh.applyMatrix4(matrix);
+    Object.assign(mesh.userData, data);
+    this.extras.push(mesh);
+    return mesh;
+  }
 
   solid(set: PieceSet, color: string, geometry: BufferGeometry, matrix: Matrix4): void {
     set.add(color, geometry, matrix, 'stone', { solid: true });
@@ -149,11 +199,17 @@ export class LabBuilder {
     this.lamp(set, ball(0.1, 0), f.at([x, y + 0.45, z + height - 0.2]));
   }
 
-  /** El anillo de una Puerta plegada, de pie y mirando a +Y, con su membrana pálida y dos pilares. */
-  gate(set: PieceSet, f: Frame, z: number): void {
+  /**
+   * El anillo de una Puerta plegada, de pie y mirando a +Y, con su membrana pálida y dos pilares. Con `fallen` (un
+   * portal que apagó la huida, E4) la membrana y la hora ámbar van sueltas: el juego las apaga mientras está caído
+   * (anillo muerto, hora que parpadea) y las enciende al ponerlo en hora.
+   */
+  gate(set: PieceSet, f: Frame, z: number, fallen?: { lock: string; name: string }): void {
     const centre = z + 1.55;
     this.view(set, P.sandstone, torus(1.75, 0.2, 24, 4), f.at([0, 0, centre]));
     this.view(set, P.board, torus(1.95, 0.08, 24, 4), f.at([0, -0.05, centre]));
+    const tag = (part: FallenPart): Record<string, string> =>
+      fallen ? { fallen_lock: fallen.lock, fallen_part: part } : {};
     // Las horas de un reloj de doce en el anillo; la última, en ámbar.
     for (let k = 0; k < 12; k++) {
       const a = Math.PI / 2 - (2 * Math.PI * k) / 12;
@@ -162,10 +218,29 @@ export class LabBuilder {
         [0, Math.PI / 2 - a, 0],
         [0.08, 0.05, 0.28],
       );
-      if (k === 0) this.lamp(set, box(), m);
+      if (k === 0 && fallen) {
+        this.view(set, P.board, box(), m);
+        this.part(
+          `laboratorio_${fallen.name}_Hora`,
+          box(),
+          m,
+          { color: P.amber, glow: 1.4 },
+          tag('blink'),
+        );
+      } else if (k === 0) this.lamp(set, box(), m);
       else this.view(set, P.board, box(), m);
     }
-    this.glowCold(cylinder(1.52, 20), f.at([0, 0, centre], [Math.PI / 2, 0, 0], [1, 1, 0.02]));
+    const membrane = f.at([0, 0, centre], [Math.PI / 2, 0, 0], [1, 1, 0.02]);
+    if (fallen) {
+      const look = { color: P.fold, glow: 1.15 };
+      this.part(
+        `laboratorio_${fallen.name}_Membrana`,
+        cylinder(1.52, 20),
+        membrane,
+        look,
+        tag('membrane'),
+      );
+    } else this.glowCold(cylinder(1.52, 20), membrane);
     for (const x of [-2.05, 2.05]) {
       this.solid(set, P.sandstoneDark, box(), f.at([x, 0, z + 0.9], undefined, [0.4, 0.5, 1.8]));
       this.view(set, P.brass, box(), f.at([x, 0, z + 1.85], undefined, [0.48, 0.58, 0.1]));

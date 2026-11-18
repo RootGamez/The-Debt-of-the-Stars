@@ -1,13 +1,20 @@
 // Las zonas del Laboratorio Oculto en la cara interior del Nudo (CONTEXTO_PLANETAS.md §8; 🟡 el aspecto): el
 // Recibidor con la Puerta gemela, la Sala de Trabajo (pizarra y armario con la orden de silencio), el Banco del
-// Contrapeso, los escritorios del escéptico y de la investigadora, el Dormitorio sin techo y la Cámara. Pasado de
+// Contrapeso (la mesa partida), los escritorios del escéptico y de la investigadora, el Dormitorio sin techo y la
+// cámara de frío donde estaba la Cámara (E4). Pasado de
 // blender/scripts/arte_laboratorio.py con las mismas marcas (INT_, PASO_Dentro, SPAWN_Laboratorio, ANIM_reloj_mesa).
-import { ball, box, cone, cylinder, pieceMatrix, torus, type Frame, type Triple } from './kit';
+import { ball, box, cone, cylinder, pieceMatrix, type Frame, type Triple } from './kit';
+import { buildBench } from './laboratorioBench';
+import { buildColdChamber } from './laboratorioCold';
 import { FLOOR, LabBuilder, PALETTE as P } from './laboratorioKit';
-import { INNER_SITES, insideFrame, insideHeading, type InnerSiteId } from './laboratorioShape';
+import {
+  INNER_SITES,
+  NUDO_LOCK,
+  insideFrame,
+  insideHeading,
+  type InnerSiteId,
+} from './laboratorioShape';
 
-/** Del centro del Contrapeso (contrapeso.ts) a la base de su pie. */
-const COUNTERWEIGHT_BASE = 0.425;
 const TAU = Math.PI * 2;
 
 /** El marco de una zona, mirando hacia otra (por donde se llega). */
@@ -19,11 +26,12 @@ function zone(id: InnerSiteId, facing?: InnerSiteId): Frame {
 function recibidor(b: LabBuilder): void {
   const f = zone('recibidor');
   b.platform(f, 6.5, 6.5);
-  b.gate(b.inside, f, FLOOR);
+  // La gemela de dentro: también caída (E4). Encendida desde fuera, deja pasar en los dos sentidos.
+  b.gate(b.inside, f, FLOOR, { lock: NUDO_LOCK, name: 'Dentro' });
   b.strata(f, 0, -2.4, 5.5, 1.1);
   b.lantern(b.inside, f, -2.7, 1.2);
   b.lantern(b.inside, f, 2.7, 1.2);
-  b.mark('PASO_Dentro', f, [0, 0, FLOOR], { destino: 'PASO_Boca' });
+  b.mark('PASO_Dentro', f, [0, 0, FLOOR], { destino: 'PASO_Boca', cerradura: NUDO_LOCK });
   b.mark('SPAWN_Laboratorio', f, [0, 2.4, FLOOR + 1.0]);
 }
 
@@ -91,47 +99,9 @@ function sala(b: LabBuilder): void {
   });
 }
 
+/** El Banco del Contrapeso: la mesa partida de los dos (laboratorioBench.ts, E4). */
 function banco(b: LabBuilder): void {
-  const f = zone('banco', 'sala');
-  const s = b.inside;
-  const z = FLOOR;
-  b.platform(f, 5.5, 4.0);
-  b.table(f, 0, -0.4, 3.6, 1.1);
-  // El Contrapeso (contrapeso.ts, se coge y se lleva) va sobre su peana entre dos soportes; al lado, un prototipo
-  // tumbado del motor, piezas sueltas y cables.
-  for (const dx of [-0.6, 0.6])
-    b.view(s, P.grey, box(), f.at([dx, -0.4, z + 1.0], undefined, [0.08, 0.5, 0.34]));
-  b.view(s, P.board, cylinder(0.3, 12), f.at([0, -0.4, z + 0.83], undefined, [1, 1, 0.02]));
-  b.view(
-    s,
-    P.grey,
-    cylinder(0.28, 10),
-    f.at([-1.2, -0.4, z + 1.0], [0, Math.PI / 2, 0], [1, 1, 0.9]),
-  );
-  b.view(
-    s,
-    P.brass,
-    cylinder(0.18, 8),
-    f.at([-1.2, -0.4, z + 1.0], [0, Math.PI / 2, 0], [1, 1, 1.05]),
-  );
-  for (let k = 0; k < 4; k++) {
-    b.view(
-      s,
-      P.brass,
-      cylinder(0.06, 6),
-      f.at([0.5 + k * 0.28, -0.05, z + 0.85], undefined, [1, 1, 0.06]),
-    );
-  }
-  b.view(s, P.board, box(), f.at([-0.5, -0.1, z + 0.84], [0, 0, 0.5], [0.35, 0.2, 0.02]));
-  b.view(s, P.greyDark, torus(0.35, 0.05, 10, 4), f.at([1.8, 0.9, z + 0.05], [Math.PI / 2, 0, 0]));
-  b.view(s, P.greyDark, torus(0.25, 0.05, 10, 4), f.at([1.95, 1.0, z + 0.12], [Math.PI / 2, 0, 0]));
-  b.solid(s, P.seal, box(), f.at([-1.8, 1.0, z + 0.18], [0, 0, 0.4], [0.6, 0.3, 0.3]));
-  b.lantern(s, f, 2.3, -1.4);
-  // La marca es el propio Contrapeso: su centro, mirando hacia la Sala (por donde se llega).
-  b.mark('INT_contrapeso', f, [0, -0.4, z + 0.84 + COUNTERWEIGHT_BASE], {
-    clue_id: 'lab.contrapeso',
-    kind: 'objeto',
-  });
+  buildBench(b, zone('banco', 'sala'));
 }
 
 function esceptico(b: LabBuilder): void {
@@ -287,42 +257,9 @@ function dormitorio(b: LabBuilder): void {
   b.mark('INT_dormitorio', f, [0, 0.8, z + 1.0], { clue_id: 'lab.dormitorio', kind: 'objeto' });
 }
 
-/** La Cámara: dos anillos cruzados, un asiento y un dial de 24 marcas con el último cuarto encendido. */
+/** La cámara de frío, donde estaba la Cámara (que se fue al Taller): ella, congelada (laboratorioCold.ts, E4). */
 function camara(b: LabBuilder): void {
-  const f = zone('camara', 'cruce');
-  const s = b.inside;
-  const z = FLOOR;
-  b.platform(f, 6.5, 6.5);
-  b.solid(s, P.sandstone, cylinder(2.6, 20), f.at([0, 0, z + 0.1], undefined, [1, 1, 0.2]));
-  b.view(s, P.board, cylinder(2.2, 20), f.at([0, 0, z + 0.21], undefined, [1, 1, 0.02]));
-  const centre = z + 2.0;
-  b.view(s, P.sandstone, torus(1.8, 0.14, 28, 4), f.at([0, 0, centre]));
-  b.view(s, P.board, torus(1.5, 0.1, 24, 4), f.at([0, 0, centre], [0, 0, Math.PI / 2]));
-  for (let k = 0; k < 24; k++) {
-    const a = (TAU * k) / 24;
-    const m = f.at(
-      [Math.cos(a) * 1.8, -0.17, centre + Math.sin(a) * 1.8],
-      [0, Math.PI / 2 - a, 0],
-      [0.14, 0.06, 0.34],
-    );
-    if (k < 6) b.lamp(s, box(), m);
-    else b.view(s, P.board, box(), m);
-  }
-  b.solid(s, P.grey, box(), f.at([0, 0, z + 0.5], undefined, [0.8, 0.9, 0.5]));
-  b.view(s, P.greenLight, box(), f.at([0, 0.45, z + 1.05], [-0.3, 0, 0], [0.8, 0.12, 0.8]));
-  b.view(s, P.greenLight, box(), f.at([0, -0.2, z + 0.78], undefined, [0.7, 0.6, 0.1]));
-  b.glowCold(box(), f.at([0, 1.8, z + 0.25], undefined, [0.6, 0.04, 0.02]));
-  // Arcos de anillo alrededor, como un claustro: la Cámara es lo más cuidado del Laboratorio.
-  for (let k = 0; k < 6; k++) {
-    const a = (TAU * k) / 6 + Math.PI / 6;
-    b.view(
-      s,
-      P.sandstoneDark,
-      torus(0.8, 0.1, 8, 4),
-      f.at([Math.cos(a) * 2.9, Math.sin(a) * 2.9, z + 0.4], [0, 0, a + Math.PI / 2]),
-    );
-  }
-  b.mark('INT_camara', f, [0, 2.6, z + 1.2], { clue_id: 'lab.camara', kind: 'objeto' });
+  buildColdChamber(b, zone('camara', 'cruce'));
 }
 
 /** Las zonas de la cara interior. */

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { Vector3 } from 'three';
 import {
   apparentDirection,
+  deadDoorGlow,
   doorGlow,
   DOOR_GLOW_RANGE,
   einsteinRadius,
@@ -131,5 +132,22 @@ describe('the faint glow of the door of the Knot (D6)', () => {
     expect(doorGlow(150)).toBeGreaterThan(doorGlow(250));
     expect(doorGlow(60)).toBe(1);
     expect(doorGlow(10)).toBe(1);
+  });
+});
+
+describe('the glow of the door of the Knot while its gate is off (E4)', () => {
+  it('is a dead ring, dimmer than the lit door, only within 300 m', () => {
+    expect(deadDoorGlow(DOOR_GLOW_RANGE, 0)).toEqual({ ring: 0, clock: 0 });
+    expect(deadDoorGlow(10, 0).ring).toBeGreaterThan(0);
+    expect(deadDoorGlow(10, 0).ring).toBeLessThan(doorGlow(10));
+    expect(deadDoorGlow(150, 0).ring).toBeLessThan(deadDoorGlow(60, 0).ring);
+  });
+
+  it('carries a clock that blinks in its centre', () => {
+    const times = Array.from({ length: 40 }, (_, k) => k * 0.05);
+    const clocks = times.map((time) => deadDoorGlow(30, time).clock);
+    expect(clocks.some((c) => c > 0.9)).toBe(true);
+    expect(clocks.some((c) => c === 0)).toBe(true);
+    expect(deadDoorGlow(5000, 0).clock).toBe(0);
   });
 });

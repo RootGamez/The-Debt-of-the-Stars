@@ -222,6 +222,10 @@ export function createPuzzlePanel(
         return { body: element('p', 'puzzle-hint', t('El cerrojo no cede.')) };
       case 'placa':
         return { body: element('p', 'puzzle-hint', t('La placa no canta.')) };
+      case 'puerta_nudo':
+        return { body: element('p', 'puzzle-hint', t('Las ruedas del reloj no giran.')) };
+      case 'lecho':
+        return { body: element('p', 'puzzle-hint', t('La rueda del lecho no gira.')) };
     }
   }
 

@@ -103,3 +103,19 @@ export function doorGlow(distance: number): number {
   const k = (DOOR_GLOW_RANGE - distance) / (DOOR_GLOW_RANGE - DOOR_GLOW_NEAR);
   return k * k * (3 - 2 * k);
 }
+
+/** El anillo muerto se ve más apagado que la Puerta encendida; su reloj destella cada tanto (E4, 🟡). */
+const DEAD_RING = 0.45;
+const DEAD_BLINK = { period: 1.4, on: 0.35 } as const;
+
+/**
+ * La Puerta del Nudo apagada por la huida (E4, plan de finales §3.2): a menos de 300 m no brilla como una Puerta,
+ * sino como un anillo muerto (`ring`) con un reloj que parpadea en el centro (`clock`, 0 o la fuerza del brillo).
+ */
+export function deadDoorGlow(distance: number, time: number): { ring: number; clock: number } {
+  const glow = doorGlow(distance);
+  if (glow === 0) return { ring: 0, clock: 0 };
+  const t = Number.isFinite(time) ? Math.max(0, time) : 0;
+  const on = t % DEAD_BLINK.period < DEAD_BLINK.on;
+  return { ring: glow * DEAD_RING, clock: on ? glow : 0 };
+}

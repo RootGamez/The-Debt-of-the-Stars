@@ -97,5 +97,47 @@
       "Beds of dry soil with very long stalks, all leaning towards the centre of the cavity, towards the seed, as if it were the sun.",
       "In the growth notebook, the last entry: \"They no longer grow towards the lamps. They grow towards that. We turned the lamps off to see if they would stop. They don't.\""
     ]
+  },
+  "lab.reloj_puerta": {
+    "titulo": "The dock clock",
+    "superficial": [
+      "Beside the dark Gate, a post of black stone with a twelve-hour face. One hand runs fast; the other stands still at an hour that is not the hour.",
+      "Carved in the base: \"It keeps the time inside. Inside, five turns for every one outside.\" On its side, two brass wheels: minutes and seconds.",
+      "Above, an amber light blinks, like someone knocking at a door nobody opens."
+    ]
+  },
+  "lab.lecho": {
+    "titulo": "The frost bed",
+    "superficial": [
+      "Under the two rings, standing before a slab of ice, someone waits covered in frost. A rhombus with a dot inside is carved in the slab; the same sign glows, very faintly, on their chest.",
+      "Beside it, a brass wheel and four unlit lights. On the edge, by hand: \"Slowly. One turn, then wait for the frost to give. If you force it, it closes.\""
+    ]
+  },
+  "lab.cientifica": {
+    "titulo": "The scientist",
+    "superficial": [
+      "The frost falls from her suit in flakes. She sits on the edge of the bed, slowly, like someone who does not yet trust her knees.",
+      "\"What day is it in here? And outside?...\" She thinks about it. \"No, never mind. The two clocks would not tell me the same thing any more.\"",
+      "\"You came in through the Gate, from outside. So someone knew how to set it right. Good.\"",
+      "\"When I feel better, I will go and see if he is all right. I hope the cold kept me for something.\""
+    ]
+  },
+  "lab.noticias.cientifica": {
+    "titulo": "The scientist",
+    "superficial": [
+      "She listens with her hands together on her knees. When you tell her he is alive, the sign on her chest brightens a little.",
+      "\"Alive. Good.\" A long pause. \"Does he sleep? Does he eat anything?... Don't answer if you don't know.\"",
+      "\"Still counting, then. Counter.\"",
+      "\"When I feel better, I will go and see if he is all right. Don't warn him: he would want to tidy the table first.\""
+    ]
+  },
+  "lab.encargo.cientifica": {
+    "titulo": "The scientist",
+    "superficial": [
+      "She looks at what you carry before she looks at you. She leans on the bed so as not to stand up.",
+      "\"You are carrying it. It weighs more than it seems, and not because of the brass.\"",
+      "\"Take it to him. He will know where it fits. And don't tell him what it costs: he knows better than anyone.\"",
+      "\"When I feel better, I will go and see if he is all right. Don't you rush: the count is not paid in a hurry.\""
+    ]
   }
 }

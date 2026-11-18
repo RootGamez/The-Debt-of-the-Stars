@@ -7,6 +7,32 @@ function place(page: Page) {
   return page.evaluate(() => window.__juego?.place?.() ?? null);
 }
 
+/**
+ * E4: lo de depuración del Laboratorio (no está en el tipo de `window.__juego`, de ui/debugOverlay.ts). Va dentro de
+ * cada `evaluate`: la función se ejecuta en la página y no ve nada de este archivo.
+ */
+interface LabDebug {
+  laboratory?: () => { gate: { lit: boolean }[] } | null;
+  lightNudoGate?: () => boolean;
+}
+
+/** Pone en hora el reloj del muelle (E4): la Puerta caída del Nudo se enciende en el siguiente fotograma. */
+async function lightNudoGate(page: Page): Promise<void> {
+  const lit = await page.evaluate(
+    () => (window.__juego as unknown as LabDebug | undefined)?.lightNudoGate?.() ?? false,
+  );
+  expect(lit).toBe(true);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window.__juego as unknown as LabDebug | undefined)?.laboratory?.()?.gate[0]?.lit ??
+          false,
+      ),
+    )
+    .toBe(true);
+}
+
 async function enterNudo(page: Page): Promise<void> {
   await startPlaying(page);
   expect(await page.evaluate(() => window.__juego?.warpTo?.('laboratorio') ?? false)).toBe(true);
@@ -58,8 +84,21 @@ test('the sources of the laboratory can be read inside the Nudo', async ({ page 
   await expect(page.locator('.reader-title')).toHaveText('Las notas del escéptico');
 });
 
+test('the fallen gate of the Nudo does not let you through until its clock is set (E4)', async ({
+  page,
+}) => {
+  await enterNudo(page);
+
+  // De espaldas a la Puerta de dentro, apagada: se camina hacia atrás y no se cruza.
+  await page.keyboard.down('KeyS');
+  await page.waitForTimeout(2500);
+  await page.keyboard.up('KeyS');
+  expect(await place(page)).toMatchObject({ inside: true, crossings: 0 });
+});
+
 test('the folded gate takes you out to the shell and back in', async ({ page }) => {
   await enterNudo(page);
+  await lightNudoGate(page);
 
   // El punto de aparición está delante de la Puerta de dentro, de espaldas a ella.
   await backThroughGate(page, 1);

@@ -199,5 +199,86 @@
       ],
       "hechos": []
     }
+  },
+  {
+    "id": "lab.reloj_puerta",
+    "mundo": "laboratorio",
+    "tipo": "observacion",
+    "lector": "puerta_nudo",
+    "titulo": "El reloj del muelle",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Junto a la Puerta apagada, un poste de piedra negra con una esfera de doce horas. Una aguja corre deprisa; la otra está quieta en una hora que no es.",
+        "En la base, grabado: «Marca la hora de dentro. Dentro, cinco vueltas por cada una de fuera». Al costado, dos ruedas de latón: minutos y segundos.",
+        "Arriba, una luz ámbar parpadea, como quien llama a una puerta que nadie abre."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "lab.lecho",
+    "mundo": "laboratorio",
+    "tipo": "objeto",
+    "lector": "lecho",
+    "titulo": "El lecho de escarcha",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Bajo los dos anillos, de pie delante de una losa helada, alguien espera cubierto de escarcha. En la losa hay un rombo tallado con un punto dentro; el mismo signo le brilla, muy débil, en el pecho.",
+        "Al lado, una rueda de latón y cuatro luces apagadas. En el borde, a mano: «Despacio. Una vuelta, y esperar a que la escarcha ceda. Si se fuerza, se cierra»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "lab.cientifica",
+    "mundo": "laboratorio",
+    "tipo": "charla",
+    "titulo": "La científica",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "La escarcha se le cae del traje a trozos. Se sienta en el borde del lecho, despacio, como quien todavía no se fía de las rodillas.",
+        "«¿Qué día es aquí? ¿Y fuera?…» Lo piensa. «No, déjalo. Los dos relojes ya no me dirían lo mismo».",
+        "«Has entrado por la Puerta, desde fuera. Entonces alguien supo ponerla en hora. Bien».",
+        "«Cuando me sienta mejor, iré a ver si él está bien. Espero que el frío me haya guardado para algo»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "lab.noticias.cientifica",
+    "mundo": "laboratorio",
+    "tipo": "charla",
+    "titulo": "La científica",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Escucha con las manos juntas sobre las rodillas. Cuando le dices que vive, el signo del pecho se le enciende un poco.",
+        "«Vive. Bien». Una pausa larga. «¿Duerme? ¿Come algo?… No me contestes si no lo sabes».",
+        "«Sigue contando, entonces. Contador».",
+        "«Cuando me sienta mejor, iré a ver si está bien. No le avises: querría recoger la mesa antes»."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "lab.encargo.cientifica",
+    "mundo": "laboratorio",
+    "tipo": "charla",
+    "titulo": "La científica",
+    "borrador": true,
+    "superficial": {
+      "texto": [
+        "Mira antes lo que llevas en brazos que a ti. Se apoya en el lecho para no levantarse.",
+        "«Lo llevas tú. Pesa más de lo que parece, y no por el latón».",
+        "«Llévaselo a él. Sabrá dónde encaja. Y no le digas lo que cuesta: lo sabe mejor que nadie».",
+        "«Cuando me sienta mejor, iré a ver si está bien. Tú no corras: la cuenta no se paga con prisa»."
+      ],
+      "hechos": []
+    }
   }
 ]

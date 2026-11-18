@@ -34,6 +34,9 @@ export const PUZZLE_READERS = [
   'planetario',
   'pendulos',
   'placa',
+  // E4: el reloj del portal caído del Nudo y el lecho de escarcha de la científica.
+  'puerta_nudo',
+  'lecho',
 ] as const;
 export type PuzzleReader = (typeof PUZZLE_READERS)[number];
 

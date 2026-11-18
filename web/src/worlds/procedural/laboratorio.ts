@@ -37,6 +37,7 @@ import {
   type PieceSet,
 } from './kit';
 import { LabBuilder, PALETTE as P } from './laboratorioKit';
+import { dockClock } from './laboratorioGate';
 import { buildLife } from './laboratorioLife';
 import { buildRooms } from './laboratorioRooms';
 import {
@@ -46,6 +47,7 @@ import {
   LAB_RADIUS,
   LABORATORIO_ID,
   NUDO_CLOCK,
+  NUDO_LOCK,
   OUTER_SITES,
   PATHS,
   along,
@@ -291,10 +293,12 @@ function outside(b: LabBuilder): void {
   const gate = OUTER_SITES.puerta;
   const f = outsideFrame(gate.lat, gate.lon, 180);
   b.solid(s, P.sandstoneDark, cylinder(3.0, 16), f.at([0, 0, top - 0.5], undefined, [1, 1, 1.0]));
-  b.gate(s, f, top);
-  b.mark('PASO_Boca', f, [0, 0, top], { destino: 'PASO_Dentro' });
+  // La huida la apagó (E4): sin luz ni paso hasta que se pone en hora el reloj del muelle.
+  b.gate(s, f, top, { lock: NUDO_LOCK, name: 'Boca' });
+  b.mark('PASO_Boca', f, [0, 0, top], { destino: 'PASO_Dentro', cerradura: NUDO_LOCK });
   const dock = OUTER_SITES.muelle;
   const m = outsideFrame(dock.lat, dock.lon, 0);
+  dockClock(b, m, top);
   b.solid(s, P.sandstoneDark, cylinder(4.0, 20), m.at([0, 0, top - 0.6], undefined, [1, 1, 1.2]));
   b.view(s, P.board, cylinder(3.6, 20), m.at([0, 0, top + 0.01], undefined, [1, 1, 0.02]));
   for (let k = 0; k < 24; k++) {
