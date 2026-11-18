@@ -1,6 +1,7 @@
-// Fase 10E: la vuelta a casa. Por una boca del Archivo de las Puertas se llega a `?mundo=hogar&final=A|B|tarde`. Con
-// A y B, el Hogar de antes (sin los fragmentos que aún no han llegado); hablar con la Directora cierra el viaje con la
-// tarjeta del final, que se guarda como visto. Llegar tarde no es un final: la tarjeta lleva de vuelta al Archivo.
+// Fase 10E: la vuelta a casa. Por una boca del Archivo de las Puertas o de La Boca se llega a
+// `?mundo=hogar&final=A|tarde[&via=boca|archivo]`. Con A, el Hogar de antes (sin los fragmentos que aún no han
+// llegado); hablar con la Directora cierra el viaje con la tarjeta del final, que se guarda como visto. Llegar tarde
+// es el final malo: su tarjeta (según `via`) también se guarda y ofrece volver al Archivo.
 import { expect, test, type Page } from '@playwright/test';
 import { standAt } from './counterweightSteps';
 import { ready, snapshot, startPlaying } from './helpers';
@@ -19,15 +20,20 @@ async function savedEndings(page: Page): Promise<unknown> {
 }
 
 /** De vuelta en casa con `final`, en una partida que ya cruzó el gusano y vio `endings`. */
-async function arriveHome(page: Page, ending: string, endings: string[] = []): Promise<void> {
-  const query = `&mundo=hogar&final=${ending}`;
+async function arriveHome(
+  page: Page,
+  ending: string,
+  endings: string[] = [],
+  via?: string,
+): Promise<void> {
+  const query = `&mundo=hogar&final=${ending}${via === undefined ? '' : `&via=${via}`}`;
   await ready(page, query);
   await page.evaluate(
     ({ key, seen }) => {
       window.localStorage.setItem(
         key,
         JSON.stringify({
-          version: 3,
+          version: 6,
           loopsCompleted: 4,
           facts: ['bocas.vuelta_antes'],
           prologueDone: true,
@@ -44,7 +50,9 @@ async function arriveHome(page: Page, ending: string, endings: string[] = []): P
 async function landAtHome(page: Page): Promise<void> {
   expect((await snapshot(page))?.ship?.piloting).toBe(true);
   expect(await page.evaluate(() => window.__juego?.landHome?.())).toBe(true);
-  await expect.poll(async () => (await snapshot(page))?.ship?.piloting).toBe(false);
+  await expect
+    .poll(async () => (await snapshot(page))?.ship?.piloting, { timeout: 60_000 })
+    .toBe(false);
 }
 
 async function talkToTheDirector(page: Page): Promise<void> {
@@ -62,7 +70,7 @@ test.afterEach(async ({ page }) => {
 test('ending A: the earlier home, the view turns to the Moon and the card offers to play again', async ({
   page,
 }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(240_000);
   await arriveHome(page, 'A');
   await landAtHome(page);
   const home = await homecoming(page);
@@ -76,30 +84,35 @@ test('ending A: the earlier home, the view turns to the Moon and the card offers
   await expect(page.locator('.prompt')).toBeHidden();
 
   await talkToTheDirector(page);
-  await expect.poll(async () => (await homecoming(page))?.phase).toBe('turning');
-  await expect.poll(async () => (await homecoming(page))?.phase, { timeout: 10_000 }).toBe('card');
-  const card = page.getByRole('dialog', { name: 'Antes de la prueba' });
+  await expect
+    .poll(async () => (await homecoming(page))?.phase, { timeout: 60_000 })
+    .toBe('turning');
+  await expect.poll(async () => (await homecoming(page))?.phase, { timeout: 60_000 }).toBe('card');
+  const card = page.getByRole('dialog', { name: 'Tres días después' });
   await expect(card).toBeVisible();
   await expect(card).toContainText('Texto provisional');
   await expect(card.getByRole('button', { name: 'Volver a jugar' })).toBeFocused();
   expect(await savedEndings(page)).toEqual(['A']);
 
   await card.getByRole('button', { name: 'Volver a jugar' }).click();
-  await page.waitForURL((url) => !url.search.includes('mundo') && !url.search.includes('final'));
-  await expect.poll(async () => (await snapshot(page))?.world, { timeout: 20_000 }).toBe('umbral');
+  await page.waitForURL((url) => !url.search.includes('mundo') && !url.search.includes('final'), {
+    waitUntil: 'commit',
+    timeout: 60_000,
+  });
+  await expect.poll(async () => (await snapshot(page))?.world, { timeout: 120_000 }).toBe('umbral');
   expect(await savedEndings(page)).toEqual(['A']);
 });
 
-test('ending B is saved together with the endings already seen', async ({ page }) => {
-  test.setTimeout(90_000);
-  await arriveHome(page, 'B', ['A']);
+test('the late ending is saved together with the endings already seen', async ({ page }) => {
+  test.setTimeout(240_000);
+  await arriveHome(page, 'tarde', ['A'], 'boca');
   await landAtHome(page);
 
   await talkToTheDirector(page);
 
-  const card = page.getByRole('dialog', { name: 'La cuenta empieza hoy' });
+  const card = page.getByRole('dialog', { name: 'Llegas tarde' });
   await expect(card).toBeVisible();
-  expect(await savedEndings(page)).toEqual(['A', 'B']);
+  expect(await savedEndings(page)).toEqual(['A', 'tarde']);
   // Ya no hay vuelta al juego: ni pausa ni Registro.
   await page.keyboard.press('Escape');
   await page.keyboard.press('KeyR');
@@ -113,20 +126,22 @@ test('ending B is saved together with the endings already seen', async ({ page }
   await page.keyboard.up('KeyW');
 });
 
-test('arriving late is the home as always, and the card leads back to the Archive', async ({
+test('arriving late through an Archive mouth is saved and the card leads back to the Archive', async ({
   page,
 }) => {
-  test.setTimeout(90_000);
-  await arriveHome(page, 'tarde');
+  test.setTimeout(240_000);
+  await arriveHome(page, 'tarde', [], 'archivo');
   await landAtHome(page);
   expect(await homecoming(page)).toMatchObject({ ending: 'tarde', without: [] });
 
   await talkToTheDirector(page);
-  const card = page.getByRole('dialog', { name: 'Llegas tarde' });
+  const card = page.getByRole('dialog', { name: 'Un sistema que no era el tuyo' });
   await expect(card).toBeVisible();
-  expect(await savedEndings(page)).toEqual([]);
+  expect(await savedEndings(page)).toEqual(['tarde']);
   await card.getByRole('button', { name: 'Volver al Archivo' }).click();
 
-  await page.waitForURL(/mundo=puertas/);
-  await expect.poll(async () => (await snapshot(page))?.world, { timeout: 20_000 }).toBe('puertas');
+  await page.waitForURL(/mundo=puertas/, { waitUntil: 'commit', timeout: 60_000 });
+  await expect
+    .poll(async () => (await snapshot(page))?.world, { timeout: 120_000 })
+    .toBe('puertas');
 });

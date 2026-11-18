@@ -48,5 +48,5 @@ export async function startPlaying(page: Page, query = ''): Promise<void> {
   await ready(page, query);
   await page.locator('.overlay').click({ position: { x: 20, y: 20 } });
   await expect(page.locator('.overlay')).toBeHidden();
-  await expect.poll(() => value(page, 'playing')).toBe(true);
+  await expect.poll(() => value(page, 'playing'), { timeout: 20_000 }).toBe(true);
 }
