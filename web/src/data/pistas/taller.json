@@ -107,7 +107,7 @@
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
       "texto": [
-        "La última línea de la consola no tiene nombre, solo «Ruta 7». Su reloj anda casi parado: da una vuelta mientras el de Umbral da cinco.",
+        "La última línea de la consola no tiene nombre, solo «Ruta 7». Su reloj corre deprisa: da cinco vueltas mientras el de Umbral da una.",
         "Al lado, una nota del técnico sobre la ventana de transferencia: «Su imagen llega torcida hacia la Brasa. Para dar con ella de verdad, apartad la vista de la Brasa dieciocho grados.»"
       ],
       "hechos": ["lab.existe_lugar_lento", "lab.correccion"]

@@ -45,8 +45,8 @@
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
       "texto": [
-        "Hay un reloj sin nombre de mundo, en la pared del fondo. Su aguja apenas se ha movido: por cada cinco vueltas del de Umbral, da una.",
-        "Ahora sé lo que estoy mirando: el reloj de un sitio donde el tiempo casi no corre."
+        "Hay un reloj sin nombre de mundo, en la pared del fondo. Su aguja da cinco vueltas mientras la del de Umbral da una.",
+        "Ahora sé lo que estoy mirando: el reloj de un sitio donde el tiempo corre deprisa."
       ],
       "hechos": ["lab.existe_lugar_lento"]
     }
@@ -91,7 +91,7 @@
       "requiere": ["deuda.relojes_se_separan"],
       "texto": [
         "«Faltan cuarenta días que no recuerdo haber archivado. Las fichas están con mi letra. Las fechas, también.»",
-        "«Alguien vive en otro tiempo y me manda cosas, y yo las guardo sin saber cuándo llegaron.»"
+        "«Alguien vive más deprisa que nosotros y me manda fichas con fechas que aquí aún no han pasado. Las guardo igual.»"
       ],
       "hechos": ["lab.existe_lugar_lento"]
     }
@@ -113,7 +113,7 @@
     "profunda": {
       "requiere": ["lab.existe_lugar_lento"],
       "texto": [
-        "Con lo que sé del sitio lento, la tablilla se explica sola: los puntos de trazo roto son dónde está cada estrella y los firmes, dónde se ve. Cerca del círculo oscuro, las dos posiciones se separan mucho.",
+        "Con lo que sé del sitio donde el tiempo corre deprisa, la tablilla se explica sola: los puntos de trazo roto son dónde está cada estrella y los firmes, dónde se ve. Cerca del círculo oscuro, las dos posiciones se separan mucho.",
         "El círculo es algo pesadísimo que dobla la luz. Lo que se ve cerca de él no está donde parece."
       ],
       "hechos": ["lab.imagen_desplazada", "nudo.existe"]

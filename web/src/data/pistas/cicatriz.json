@@ -53,14 +53,14 @@
     "borrador": true,
     "superficial": {
       "texto": [
-        "Una grabadora sobre la mesa del puesto. Al pulsarla, una voz arrastra cada sílaba como si hablara desde el fondo de un pozo."
+        "Una grabadora sobre la mesa del puesto. Al pulsarla, una voz habla tan deprisa que cada sílaba pisa a la siguiente, como si tuviera prisa por acabar."
       ],
       "hechos": []
     },
     "profunda": {
       "requiere": ["contrapeso.medir_desfase"],
       "texto": [
-        "Si me entiendes, es que has girado la rueda lo bastante. Donde grabo, un día vuestro son cinco.",
+        "Si me entiendes, es que has bajado la rueda hasta una quinta parte de su velocidad. A otra velocidad, mi voz no se entiende.",
         "Grabo dentro del Nudo, en la cara de dentro, con la semilla colgando encima.",
         "Desde fuera no nos veréis donde estamos: la luz que sale de aquí se tuerce hacia la Brasa.",
         "Para dar con nosotros, mirad la imagen y apartad la vista de la Brasa unos dieciocho grados.",
@@ -158,7 +158,7 @@
     "profunda": {
       "requiere": ["lab.existe_lugar_lento"],
       "texto": [
-        "Con lo que sé del sitio lento, miro las estrellas torcidas de otro modo: la luz que sale de cerca del Nudo se tuerce igual.",
+        "Con lo que sé del sitio donde el tiempo corre deprisa, miro las estrellas torcidas de otro modo: la luz que sale de cerca del Nudo se tuerce igual.",
         "Lo que se esconda junto al punto oscuro lo veré donde no está."
       ],
       "hechos": ["lab.imagen_desplazada"]

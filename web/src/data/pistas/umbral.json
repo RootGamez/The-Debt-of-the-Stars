@@ -90,8 +90,8 @@
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
       "texto": [
-        "Los acuses de recibo de ese destino llegan con fechas que casi no avanzan: por cada día de aquí, un parpadeo allá.",
-        "Ahora sabes cómo leerlo: es un lugar donde el tiempo casi no corre."
+        "Los acuses de recibo de ese destino llegan con fechas por delante: traen días que aquí todavía no han pasado.",
+        "Ahora sabes cómo leerlo: es un lugar donde el tiempo corre deprisa."
       ],
       "hechos": ["lab.existe_lugar_lento"]
     }
@@ -126,7 +126,7 @@
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
       "texto": [
-        "Al pie, con otra tinta: «Me escribes que para ti ha pasado una semana. Aquí han pasado meses».",
+        "Al pie, con otra tinta: «Para ti han pasado meses. Aquí, ha pasado una semana».",
         "Quien esperaba sabía que el tiempo de quien se fue corría de otra manera."
       ],
       "hechos": ["lab.existe_lugar_lento"]

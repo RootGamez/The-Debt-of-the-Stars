@@ -16,7 +16,7 @@
     "profunda": {
       "requiere": ["lab.existe_lugar_lento"],
       "texto": [
-        "Ahora lo entiendes: la señal no se movía como una estrella porque no era una estrella. Era el Sitio Lento, visto donde no está.",
+        "Ahora lo entiendes: la señal no se movía como una estrella porque no era una estrella. Era el sitio donde el tiempo corre deprisa, visto donde no está.",
         "Lo anotaron cada noche, durante años, y cada noche lo dejaron sin confirmar."
       ],
       "hechos": ["lab.imagen_desplazada"]
