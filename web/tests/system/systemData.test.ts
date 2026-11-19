@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { BLACK_HOLE } from '../../src/data/blackHole';
 import homeData from '../../src/data/sistema-hogar.json';
 import systemData from '../../src/data/sistema.json';
 import { systemOf } from '../../src/game/loadSystem';
+import { HOGAR_HOLE_ANCHOR } from '../../src/worlds/procedural/hogarMotor';
 import { bodyPose } from '../../src/system/orbits';
 import { parseSystem } from '../../src/system/systemData';
 import { WORLD_IDS } from '../../src/worlds/worldSelection';
@@ -208,6 +210,42 @@ describe('parseSystem', () => {
     expect(parseSystem(valid, WORLD_IDS).referenceDistance).toBe(500);
   });
 
+  it('reads where the black hole is born: a source or a named piece of one of its worlds', () => {
+    const atSource = parseSystem(
+      { ...valid, agujero: { mundo: 'umbral', fuente: 'umbral.placa', acceso: 'umbral_Acceso' } },
+      WORLD_IDS,
+    );
+    const atPiece = parseSystem(
+      { ...valid, agujero: { mundo: 'taller', ancla: 'taller_Centro' } },
+      WORLD_IDS,
+    );
+
+    expect(atSource.hole).toEqual({
+      world: 'umbral',
+      source: 'umbral.placa',
+      anchor: undefined,
+      approach: 'umbral_Acceso',
+    });
+    expect(atPiece.hole).toEqual({
+      world: 'taller',
+      source: undefined,
+      anchor: 'taller_Centro',
+      approach: undefined,
+    });
+    expect(parseSystem(valid, WORLD_IDS).hole).toBeUndefined();
+  });
+
+  it.each([
+    ['a hole that is not an object', 'cicatriz'],
+    ['a hole in a world outside the system', { mundo: 'cicatriz', fuente: 'cicatriz.sala_motor' }],
+    ['a hole with neither source nor piece', { mundo: 'umbral' }],
+    ['a hole with both a source and a piece', { mundo: 'umbral', fuente: 'a', ancla: 'b' }],
+    ['a hole whose source is not text', { mundo: 'umbral', fuente: 3 }],
+    ['a hole whose approach is not text', { mundo: 'umbral', fuente: 'a', acceso: 3 }],
+  ])('rejects %s with a Spanish message', (_name, agujero) => {
+    expect(() => parseSystem({ ...valid, agujero }, WORLD_IDS)).toThrow(/^sistema: /);
+  });
+
   it('looks bodies up by world', () => {
     const system = parseSystem(valid, WORLD_IDS);
 
@@ -296,6 +334,15 @@ describe('the real system (sistema.json)', () => {
     expect(system.bodyOf('anclaje_sur')?.fixedPosition).toEqual([0, -middle, 0]);
   });
 
+  it('gives birth to the black hole in the Sala del Motor of Cicatriz, as always (data/blackHole.ts)', () => {
+    expect(system.hole).toEqual({
+      world: BLACK_HOLE.world,
+      source: BLACK_HOLE.source,
+      anchor: undefined,
+      approach: BLACK_HOLE.approach,
+    });
+  });
+
   it('gives Taller a day of three minutes (CONTEXTO_PLANETAS.md)', () => {
     const taller = system.bodyOf('taller');
     if (!taller || typeof taller.spin !== 'number')
@@ -316,6 +363,11 @@ describe('the home system of the prologue (sistema-hogar.json)', () => {
     expect(home.bodies.every((b) => b.period === 0)).toBe(true);
     expect(home.ship).toBe('hogar');
     expect(home.looping).toBe(false);
+  });
+
+  it('gives birth to its black hole in the throat of the Motor of Hogar (the bad ending, F5)', () => {
+    expect(home.hole).toMatchObject({ world: 'hogar', anchor: HOGAR_HOLE_ANCHOR });
+    expect(home.hole?.source).toBeUndefined();
   });
 
   it('puts the Luna a short flight away: clear of Hogar but under a kilometre', async () => {

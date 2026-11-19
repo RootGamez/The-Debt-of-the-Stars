@@ -1,6 +1,7 @@
 // Un sistema: su estrella y la órbita de cada mundo. El ajeno, con la Brasa (src/data/sistema.json, plan de la
-// Fase 5), y el de casa del prólogo, Hogar y su Luna (src/data/sistema-hogar.json, Fase 9). Son datos externos,
-// así que se validan al cargar como la cronología, con mensajes en español.
+// Fase 5), y el de casa del prólogo, Hogar y su Luna (src/data/sistema-hogar.json, Fase 9). Cada uno dice también
+// dónde nace su agujero negro (`"agujero"`: Cicatriz en el ajeno; en casa, el Motor del final malo, F5). Son datos
+// externos, así que se validan al cargar como la cronología, con mensajes en español.
 import { WorldDataError } from '../worlds/markers';
 
 /** Cómo es la estrella: define su aspecto (render/starModel.ts) y su luz. */
@@ -64,8 +65,22 @@ export interface StructureSpec {
   seed: number;
 }
 
+/**
+ * Dónde nace el agujero negro del sistema (`"agujero"`): en una fuente (`"fuente"`, la Sala del Motor de Cicatriz) o
+ * en una pieza con nombre (`"ancla"`, la garganta del Motor de Hogar en el final malo, F5) de uno de sus mundos.
+ */
+export interface HoleSite {
+  world: string;
+  source: string | undefined;
+  anchor: string | undefined;
+  /** La marca por donde se llega a él con la nave, si la hay (`"acceso"`). */
+  approach: string | undefined;
+}
+
 export interface SystemSpec {
   star: StarSpec;
+  /** Dónde nace su agujero negro, si lo tiene. */
+  hole: HoleSite | undefined;
   /** Distancia a la estrella (m) a la que la luz vale `star.intensity`: la del mundo donde espera la nave. */
   referenceDistance: number;
   /** La estructura que rodea la estrella, si la hay. */
@@ -267,6 +282,7 @@ export function parseSystem(raw: unknown, knownWorlds: readonly string[]): Syste
     fail('"bucle" debe ser true o false');
   return {
     star,
+    hole: parseHole(raw.agujero, byWorld),
     referenceDistance: referenceDistance(bodies, raw.nave),
     structure: parseStructure(raw.estructura, radius),
     bodies,
@@ -280,6 +296,24 @@ function referenceDistance(bodies: readonly BodySpec[], ship: unknown): number {
   const home =
     bodies.find((body) => body.world === ship) ?? bodies.find((body) => !body.fixedPosition);
   return home?.orbitRadius ?? 1;
+}
+
+function optionalText(value: unknown, what: string): string | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string' || value.trim() === '') fail(`${what} debe ser un texto`);
+  return value;
+}
+
+function parseHole(raw: unknown, bodies: ReadonlyMap<string, BodySpec>): HoleSite | undefined {
+  if (raw === undefined) return undefined;
+  if (!isRecord(raw)) fail('"agujero" debe ser un objeto');
+  if (typeof raw.mundo !== 'string' || !bodies.has(raw.mundo))
+    fail('agujero.mundo debe ser uno de los mundos del sistema');
+  const source = optionalText(raw.fuente, 'agujero.fuente');
+  const anchor = optionalText(raw.ancla, 'agujero.ancla');
+  if ((source === undefined) === (anchor === undefined))
+    fail('el agujero nace en una "fuente" o en un "ancla" (una de las dos)');
+  return { world: raw.mundo, source, anchor, approach: optionalText(raw.acceso, 'agujero.acceso') };
 }
 
 function parseShip(raw: unknown, bodies: ReadonlyMap<string, BodySpec>): string | undefined {
