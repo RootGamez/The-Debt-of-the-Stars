@@ -1,7 +1,8 @@
 // La vuelta a casa en el juego (Fase 10E): la Directora cierra el viaje malo y la Maestra el bueno. Con el final A, la
 // Maestra lee tu cuaderno (game/endingTalk.ts, F4) y, antes de la tarjeta, un corte a negro a la plaza del Instituto (desde dentro la Luna queda detrás del techo) y, mientras se aclara, la vista sube
-// despacio hacia la Luna, aún sin su fragmento. La tarjeta guarda el final visto (A o tarde) y ofrece volver a jugar y, si
-// se llegó tarde, también volver al Archivo. Lo que no toca la escena está en homecoming.ts (con tests).
+// despacio hacia la Luna, aún sin su fragmento. Después (F3), en negro al Mirador de Umbral: la escena de los dos
+// sentados (game/miradorRig.ts), que acaba en la tarjeta. La tarjeta guarda el final visto (A o tarde) y ofrece volver
+// a jugar y, si se llegó tarde, también volver al Archivo. Lo que no toca la escena está en homecoming.ts (con tests).
 import type { SeenEnding } from '../core/save';
 import { loadEndingCards } from '../data/endings';
 import { showEndingCard } from '../ui/endingCard';
@@ -19,7 +20,7 @@ import { t } from '../i18n';
 export const TURN_SECONDS = 3.5;
 const TURN_RATE = 1.6;
 
-export type HomecomingPhase = 'playing' | 'talking' | 'turning' | 'card';
+export type HomecomingPhase = 'playing' | 'talking' | 'turning' | 'mirador' | 'card';
 
 export interface HomecomingRigOptions {
   ending: Ending;
@@ -39,6 +40,11 @@ export interface HomecomingRigOptions {
   markSeen(ending: SeenEnding): boolean;
   replay: () => void;
   backToArchive: () => void;
+  /**
+   * Final A (F3): tras el giro, en vez de la tarjeta, la escena de los dos en el Mirador de Umbral (otra carga, que
+   * acaba en la tarjeta). Solo si se pudo guardar el final: la escena lo pide. Sin ella, la tarjeta aquí.
+   */
+  toMirador?: () => void;
 }
 
 export interface HomecomingRig {
@@ -103,7 +109,13 @@ export function createHomecomingRig(options: HomecomingRigOptions): HomecomingRi
       if (phase !== 'turning' || !(dt > 0)) return;
       turned += dt;
       options.turnToMoon(options.reducedMotion ? 1 : Math.min(1, TURN_RATE * dt));
-      if (turned >= TURN_SECONDS) show();
+      if (turned < TURN_SECONDS) return;
+      if (options.toMirador && options.markSeen(ending)) {
+        phase = 'mirador';
+        options.toMirador();
+        return;
+      }
+      show();
     },
   };
 }

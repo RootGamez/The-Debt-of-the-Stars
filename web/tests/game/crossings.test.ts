@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { followCrossing, replay, toArchive } from '../../src/game/crossings';
+import { followCrossing, replay, toArchive, toMirador } from '../../src/game/crossings';
 import { ARRIVAL_KEY } from '../../src/ui/arrival';
 
 // Una pestaña falsa: adónde se va y de qué color se nace al llegar.
@@ -68,6 +68,13 @@ describe('where each crossing leads', () => {
       followCrossing('caida', undefined, true);
     }).toThrow(/sin ruta/);
     expect(replaced).toEqual([]);
+  });
+
+  it('goes to the Lookout of Umbral after the good ending, arriving in black', () => {
+    toMirador();
+
+    expect(replaced).toEqual(['http://localhost:5180/?debug=&mundo=umbral&escena=mirador']);
+    expect(session.get(ARRIVAL_KEY)).toBe('negro');
   });
 
   it('plays again without world or ending, and goes back to the Archive from home', () => {

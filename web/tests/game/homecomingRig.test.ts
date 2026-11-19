@@ -13,9 +13,14 @@ interface RigOptions {
   reducedMotion?: boolean;
   canSave?: boolean;
   via?: HomeVia;
+  /** Con la escena del Mirador (F3). */
+  mirador?: boolean;
 }
 
-function rig(ending: Ending, { reducedMotion = false, canSave = true, via }: RigOptions = {}) {
+function rig(
+  ending: Ending,
+  { reducedMotion = false, canSave = true, via, mirador = false }: RigOptions = {},
+) {
   const calls = {
     freeze: 0,
     outside: 0,
@@ -23,6 +28,7 @@ function rig(ending: Ending, { reducedMotion = false, canSave = true, via }: Rig
     seen: [] as string[],
     replay: 0,
     archive: 0,
+    mirador: 0,
   };
   const homecoming = createHomecomingRig({
     ending,
@@ -48,6 +54,11 @@ function rig(ending: Ending, { reducedMotion = false, canSave = true, via }: Rig
     backToArchive: () => {
       calls.archive += 1;
     },
+    toMirador: mirador
+      ? () => {
+          calls.mirador += 1;
+        }
+      : undefined,
   });
   return { homecoming, calls };
 }
@@ -164,6 +175,30 @@ describe('the end of the journey at home', () => {
     talkThrough(homecoming);
     homecoming.update(TURN_SECONDS);
 
+    expect(shown.mock.calls.at(-1)?.[2]).toBe('No se ha podido guardar el final.');
+  });
+
+  it('goes to the scene at the Lookout of Umbral after the turn, saving A first (F3)', () => {
+    const { homecoming, calls } = rig('A', { mirador: true });
+    talkThrough(homecoming);
+    homecoming.update(TURN_SECONDS);
+
+    expect(homecoming.phase).toBe('mirador');
+    expect(homecoming.blocking).toBe(true);
+    expect(calls.seen).toEqual(['A']);
+    expect(calls.mirador).toBe(1);
+    expect(shown).toHaveBeenCalledTimes(1); // solo la Maestra: la tarjeta sale al final de la escena
+    homecoming.update(1);
+    expect(calls.mirador).toBe(1);
+  });
+
+  it('shows the card here when A could not be saved (the scene asks for it)', () => {
+    const { homecoming, calls } = rig('A', { mirador: true, canSave: false });
+    talkThrough(homecoming);
+    homecoming.update(TURN_SECONDS);
+
+    expect(calls.mirador).toBe(0);
+    expect(homecoming.phase).toBe('card');
     expect(shown.mock.calls.at(-1)?.[2]).toBe('No se ha podido guardar el final.');
   });
 });

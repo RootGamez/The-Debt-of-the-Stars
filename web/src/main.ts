@@ -53,7 +53,8 @@ import { composeActions } from './reading/composeActions';
 import type { Ending } from './game/epilogue';
 import { createEpilogueRig } from './game/epilogueRig';
 import { aimToward } from './game/aim';
-import { followCrossing, replay, toArchive } from './game/crossings';
+import { followCrossing, replay, toArchive, toMirador } from './game/crossings';
+import { createMiradorRig } from './game/miradorRig';
 import { endingFromQuery, homeLook } from './game/homecoming';
 import { createHomecomingRig } from './game/homecomingRig';
 import { createFoldedPassage } from './game/foldedPassage';
@@ -861,8 +862,23 @@ async function start(): Promise<void> {
           replay(loadSave(browserStore()).data.prologueDone);
         },
         backToArchive: toArchive,
+        toMirador,
       })
     : undefined;
+  // El final bueno (F3): con `?mundo=umbral&escena=mirador`, los dos en el banco del Mirador; acaba en la tarjeta.
+  const mirador = createMiradorRig({
+    scene,
+    world: runtimes.get('umbral')?.world.scene,
+    system: systemScene,
+    soundtrack,
+    reducedMotion,
+    text: textSettings,
+    hide: [...explorerRoots, shipModel?.object],
+    freeze: () => {
+      game.ui?.setEnabled(false);
+      overlay.setInert(true);
+    },
+  });
   const startSources = sources.get(startWorld);
   if (!startSources) throw new Error(`Faltan las fuentes de ${startWorld}`);
   // El ocular del telescopio del Observatorio (🟡): mira el cielo en vivo desde donde está el jugador.
@@ -1229,6 +1245,17 @@ async function start(): Promise<void> {
       bench?.forceHole(hole);
     };
     window.__juego.depths = () => depths?.play.snapshot() ?? null;
+    // F3 (sin tipo en debugOverlay.ts): la escena del Mirador; fuera de ella, lleva a ella.
+    Object.assign(window.__juego, {
+      mirador: () => {
+        if (mirador) return mirador.snapshot();
+        toMirador();
+        return null;
+      },
+      miradorSeek: (time: number) => {
+        mirador?.seek(time);
+      },
+    });
     // E4 (sin tipo en debugOverlay.ts): el Laboratorio, encender su Puerta y despertarla.
     Object.assign(window.__juego, {
       laboratory: () => laboratory?.snapshot() ?? null,
@@ -1723,6 +1750,7 @@ async function start(): Promise<void> {
       // Al final de la ventana de tu mundo caes con él: el agujero se acerca y la luz se apaga.
       const fallen = session.director.absorption;
       systemScene.update(t);
+      mirador?.apply(camera, dt);
       lightFor(systemScene.referenceWorld, finalLight(fallen));
       const airWorld = systemScene.referenceWorld;
       const air = airWorld === undefined ? undefined : ATMOSPHERES[airWorld];

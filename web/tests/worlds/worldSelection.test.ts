@@ -5,6 +5,7 @@ import {
   epilogueHref,
   EPILOGUE_WORLD,
   homecomingHref,
+  miradorHref,
   PROLOGUE_WORLD,
   replayHref,
   startWorld,
@@ -117,6 +118,20 @@ describe('worldFromQuery', () => {
       'anclaje_norte',
       'anclaje_sur',
     ]);
+  });
+});
+
+describe('the scene of the good ending (F3)', () => {
+  it('goes to the Lookout of Umbral without ending or way', () => {
+    expect(miradorHref('http://localhost:5180/?debug&mundo=hogar&final=A&via=boca#x')).toBe(
+      'http://localhost:5180/?debug=&mundo=umbral&escena=mirador',
+    );
+  });
+
+  it('plays again from the scene without it', () => {
+    expect(replayHref('http://localhost:5180/?mundo=umbral&escena=mirador', true)).toBe(
+      'http://localhost:5180/',
+    );
   });
 });
 

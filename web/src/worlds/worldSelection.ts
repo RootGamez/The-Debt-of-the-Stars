@@ -84,6 +84,10 @@ export function homecomingHref(href: string, ending: string, via?: 'boca'): stri
   return url.toString();
 }
 
+/** Una escena sin juego (`?escena=`, F3): hoy solo la del final bueno en el Mirador del Ocaso de Umbral. */
+export const SCENE_PARAM = 'escena';
+export const MIRADOR_SCENE = 'mirador';
+
 /**
  * "Volver a jugar" tras un final: sin mundo ni final, la partida sigue en Umbral (ya cruzado el gusano). Si el
  * guardado no lo recuerda (`saved` false: sin almacenamiento), se pide Umbral en la dirección, como al cruzar.
@@ -91,6 +95,18 @@ export function homecomingHref(href: string, ending: string, via?: 'boca'): stri
 export function replayHref(href: string, saved: boolean): string {
   const url = new URL(arrivalHref(href, saved));
   url.searchParams.delete(ENDING_PARAM);
+  url.searchParams.delete(SCENE_PARAM);
+  return url.toString();
+}
+
+/** Adónde ir tras la Maestra en el final bueno: al Mirador de Umbral, a ver la escena (sin final ni camino). */
+export function miradorHref(href: string): string {
+  const url = new URL(href);
+  url.hash = '';
+  url.searchParams.set('mundo', DEFAULT_WORLD);
+  url.searchParams.set(SCENE_PARAM, MIRADOR_SCENE);
+  url.searchParams.delete(ENDING_PARAM);
+  url.searchParams.delete(VIA_PARAM);
   return url.toString();
 }
 

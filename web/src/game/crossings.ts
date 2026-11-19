@@ -2,8 +2,20 @@
 // pantalla cubierta, y la próxima carga de la pestaña sabe de qué color nace (ui/arrival.ts).
 import type { DeathCause } from '../core/loopDirector';
 import { markCrossing, sessionStore } from '../ui/arrival';
-import { arrivalHref, epilogueHref, homecomingHref, replayHref } from '../worlds/worldSelection';
+import {
+  arrivalHref,
+  epilogueHref,
+  homecomingHref,
+  miradorHref,
+  replayHref,
+} from '../worlds/worldSelection';
 import type { Ending } from './epilogue';
+
+/** Final bueno (F3): tras la Maestra, en negro al Mirador del Ocaso de Umbral, donde están los dos sentados. */
+export function toMirador(): void {
+  markCrossing(sessionStore(), 'negro');
+  window.location.replace(miradorHref(window.location.href));
+}
 
 /** Al Archivo de las Puertas, con la llegada en negro (por el horizonte, o de vuelta tras llegar tarde a casa). */
 export function toArchive(): void {
