@@ -27,6 +27,12 @@ import { BUBBLE_MESH } from '../../../src/worlds/procedural/laboratorioBubble';
 import { BED_STEP_LIGHTS, SCIENTIST_ANCHOR } from '../../../src/worlds/procedural/laboratorioCold';
 import { LABORATORY_GATE } from '../../../src/game/fallenGate';
 import { createWorldRuntime } from '../../../src/worlds/worldRuntime';
+import {
+  BUILDINGS,
+  ROOF_LIMIT,
+  type BuildingId,
+} from '../../../src/worlds/procedural/laboratorioArchitecture';
+import { FLOOR } from '../../../src/worlds/procedural/laboratorioKit';
 
 const world = buildWorld('laboratorio');
 if (!world) throw new Error('El Laboratorio debería construirse por código');
@@ -190,6 +196,8 @@ describe('Laboratorio world contract', () => {
       const g = o.geometry;
       triangles += (g.index ? g.index.count : g.getAttribute('position').count) / 3;
     });
+    // E7: unos 95.300 con las casas, sus tejados y el templete (antes, 96.500): el suelo ya no lleva losas en los
+    // senderos ni rejilla fría (los dibuja el sombreador), así que el presupuesto de 150.000 sigue holgado.
     expect(triangles).toBeLessThan(150000);
   });
 });
@@ -220,6 +228,49 @@ describe('Laboratorio life', () => {
     for (const s of Object.values(INNER_SITES)) {
       expect(innerGround(direction(s.lat, s.lon))).toBeCloseTo(LAB_INNER_RADIUS, 6);
     }
+  });
+});
+
+describe('Laboratorio houses (E7: every room roofed, real structure)', () => {
+  const towardSeed = (p: Vector3): Vector3 => p.clone().normalize().negate();
+
+  it('closes every room overhead: looking up from inside, the roof is there', () => {
+    for (const b of Object.values(BUILDINGS)) {
+      const eye = siteAt(b.site, 0.4, 0.4, b.facing);
+      const hit = runtime.collision.raycast(eye, towardSeed(eye), 10);
+      expect(hit, b.site).not.toBeNull();
+      expect(hit ?? Infinity, b.site).toBeLessThan(ROOF_LIMIT);
+    }
+    // El templete de la cámara de frío: bajo la cúpula, fuera del óculo.
+    const eye = siteAt('camara', 2.0, 0, 'cruce');
+    expect(runtime.collision.raycast(eye, towardSeed(eye), 10)).not.toBeNull();
+  });
+
+  it.each(Object.keys(BUILDINGS))('walks in through the door of the %s house', (id) => {
+    const b = BUILDINGS[id as BuildingId];
+    const outside = siteAt(b.site, 0, b.depth / 2 + 2.6, b.facing);
+    const inside = siteAt(b.site, 0, b.depth / 2 - 1.1, b.facing);
+    expect(walk(outside, [inside])).toBe(1);
+  });
+
+  it('keeps the debris orbiting the seed above the highest roof', () => {
+    let far = 0;
+    const v = new Vector3();
+    for (const part of world.markers.animated) {
+      if (!part.object.name.startsWith('ANIM_orbita')) continue;
+      part.object.traverse((o) => {
+        if (!isMesh(o)) return;
+        const position = o.geometry.getAttribute('position');
+        for (let i = 0; i < position.count; i++) {
+          far = Math.max(
+            far,
+            v.fromBufferAttribute(position, i).applyMatrix4(o.matrixWorld).length(),
+          );
+        }
+      });
+    }
+    expect(far).toBeGreaterThan(10);
+    expect(far).toBeLessThan(LAB_INNER_RADIUS - FLOOR - ROOF_LIMIT);
   });
 });
 

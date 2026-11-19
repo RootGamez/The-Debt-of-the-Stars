@@ -325,12 +325,13 @@ function orbits(b: LabBuilder): void {
       }
     }
   };
+  // E7: los anillos de fuera pasan por debajo de lo más alto de las casas (ROOF_LIMIT), no a través de sus tejados.
   const planes: readonly [number, [number, number, number], number, number][] = [
     [6, [0.2, 0, 0.1], 0.05, 22],
     [8.5, [1.1, 0.3, 0], -0.035, 26],
-    [11, [0.6, 1.4, 0.2], 0.025, 30],
-    [13.5, [1.9, 0.2, 0.9], -0.02, 32],
-    [15.5, [0.1, 0.8, 1.6], 0.015, 26],
+    [10.5, [0.6, 1.4, 0.2], 0.025, 30],
+    [12.2, [1.9, 0.2, 0.9], -0.02, 32],
+    [13.2, [0.1, 0.8, 1.6], 0.015, 26],
   ];
   planes.forEach(([radius, tilt, spin, count], k) => {
     b.spinning(

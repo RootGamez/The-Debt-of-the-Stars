@@ -1,9 +1,11 @@
 // Las zonas del Laboratorio Oculto en la cara interior del Nudo (CONTEXTO_PLANETAS.md §8; 🟡 el aspecto): el
 // Recibidor con la Puerta gemela, la Sala de Trabajo (pizarra y armario con la orden de silencio), el Banco del
-// Contrapeso (la mesa partida), los escritorios del escéptico y de la investigadora, el Dormitorio sin techo y la
-// cámara de frío donde estaba la Cámara (E4). Pasado de
+// Contrapeso (la mesa partida), los escritorios del escéptico y de la investigadora, el Dormitorio (una casa con su
+// tejado de pizarra, E7) y la cámara de frío donde estaba la Cámara (E4), bajo su templete. Pasado de
 // blender/scripts/arte_laboratorio.py con las mismas marcas (INT_, PASO_Dentro, SPAWN_Laboratorio, ANIM_reloj_mesa).
 import { ball, box, cone, cylinder, pieceMatrix, type Frame, type Triple } from './kit';
+import { BUILDINGS } from './laboratorioArchitecture';
+import { house, pendant } from './laboratorioBuildings';
 import { buildBench } from './laboratorioBench';
 import { buildColdChamber } from './laboratorioCold';
 import { FLOOR, LabBuilder, PALETTE as P } from './laboratorioKit';
@@ -230,27 +232,15 @@ function investigadora(b: LabBuilder): void {
 }
 
 function dormitorio(b: LabBuilder): void {
-  const f = zone('dormitorio', 'cruce');
+  const spec = BUILDINGS.dormitorio;
+  const f = zone(spec.site, spec.facing);
   const s = b.inside;
   const z = FLOOR;
-  b.platform(f, 5.5, 5.0);
-  // Un cuarto sin techo (dentro del Nudo no llueve), con la puerta hacia el sendero (+Y).
-  const height = 1.7;
-  b.solid(s, P.green, box(), f.at([0, -2.3, z + height / 2], undefined, [5.0, 0.2, height]));
-  for (const x of [-2.4, 2.4])
-    b.solid(s, P.green, box(), f.at([x, 0, z + height / 2], undefined, [0.2, 4.6, height]));
-  for (const x of [-1.6, 1.6])
-    b.solid(s, P.green, box(), f.at([x, 2.3, z + height / 2], undefined, [1.8, 0.2, height]));
-  // Un remate claro sobre los muros (no un techo: deja ver la semilla).
-  for (const [x, y, w, d] of [
-    [0, -2.3, 5.1, 0.3],
-    [-2.4, 0, 0.3, 4.9],
-    [2.4, 0, 0.3, 4.9],
-    [-1.6, 2.3, 1.9, 0.3],
-    [1.6, 2.3, 1.9, 0.3],
-  ] as const) {
-    b.view(s, P.greenLight, box(), f.at([x, y, z + height + 0.05], undefined, [w, d, 0.1]));
-  }
+  // Una casa pequeña con tejado de pizarra a cuatro aguas y techo de tablas, la puerta hacia el sendero (+Y).
+  house(b, f, spec);
+  pendant(b, f, 0, -0.4, spec.eaves - 0.08, 0.7);
+  // La alfombra entre las dos camas.
+  b.view(s, P.blanket, box(), f.at([0, -0.6, z + 0.006], undefined, [1.0, 1.8, 0.012]));
   b.bed(f, -1.5, -0.9, true);
   b.bed(f, 1.5, -0.9, false);
   b.solid(s, P.wood, box(), f.at([0, -1.7, z + 0.28], undefined, [0.5, 0.5, 0.55]));
@@ -258,7 +248,6 @@ function dormitorio(b: LabBuilder): void {
   b.lamp(s, ball(0.05, 1), f.at([0, -1.7, z + 0.84]));
   b.view(s, P.grey, box(), f.at([-0.9, 0.5, z + 0.05], [0, 0, 0.5], [0.3, 0.12, 0.1]));
   b.view(s, P.wood, box(), f.at([1.5, 0.7, z + 0.18], undefined, [0.7, 0.45, 0.35]));
-  b.lantern(s, f, 2.9, 2.9);
   b.mark('INT_dormitorio', f, [0, 0.8, z + 1.0], { clue_id: 'lab.dormitorio', kind: 'objeto' });
 }
 

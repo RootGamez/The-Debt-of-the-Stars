@@ -10,6 +10,7 @@ import { Object3D, Quaternion, Vector3, type Matrix4 } from 'three';
 import { ball, box, cone, cylinder, Frame, pieceMatrix, torus, type Triple } from './kit';
 import { DEFAULT_SEAT } from '../../character/absentPoses';
 import { FLOOR, LabBuilder, PALETTE as P } from './laboratorioKit';
+import { rotunda } from './laboratorioRotunda';
 
 export const SCIENTIST_ANCHOR = 'laboratorio_Cientifica';
 export const FROST_MIST = 'laboratorio_Neblina';
@@ -241,16 +242,9 @@ export function buildColdChamber(b: LabBuilder, f: Frame): void {
   bed(b, f);
   heater(b, f);
   scientistAnchor(b, f);
-  // Arcos de anillo alrededor, como un claustro: sigue siendo lo más cuidado del Laboratorio.
-  for (let k = 0; k < 6; k++) {
-    const a = (TAU * k) / 6 + Math.PI / 6;
-    b.view(
-      b.inside,
-      P.sandstoneDark,
-      torus(0.8, 0.1, 32, 8),
-      f.at([Math.cos(a) * 2.9, Math.sin(a) * 2.9, FLOOR + 0.4], [0, 0, a + Math.PI / 2]),
-    );
-  }
+  // El templete que la cubre (E7): columnas en corro, dinteles y una cúpula con óculo que mira a la semilla. Sigue
+  // siendo lo más cuidado del Laboratorio.
+  rotunda(b, f);
   const [cx, cy] = CONSOLE;
   b.mark('INT_lecho', f, [cx - 0.2, cy - 0.15, FLOOR + 1.15], {
     clue_id: 'lab.lecho',
