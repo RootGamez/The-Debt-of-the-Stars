@@ -154,6 +154,18 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
   en la tarjeta del final A. Música: `music.umbral` y, al final, `music.main` (nada generado).
 - Con `?debug`: `__juego.mirador()` (estado, plano, el punto y marcas para encuadrar en cm) y `__juego.miradorSeek(s)`
   (salta en pausa; `miradorSeek(130)` acaba y saca la tarjeta).
+- **El nido** (F4, final A, «tres días después»; 🟡 todo borrador): con `?mundo=hogar&final=A` vuelves al Hogar que
+  dejaste (no hay «Hogar de antes»), con la Luna mordida (`worlds/procedural/lunaBite.ts`, solo en esa variante). Lo
+  puro, con tests: `game/homeEarlier.ts` (sitios del nido en el marco de `PARK_Hangar` y cronología según lo que
+  sabes), `homeEarlierMotion.ts` (nave, escotilla, tu paso, la Maestra, el cuaderno), `endingTalk.ts` (frases según
+  hechos) y `homeEarlierScene.ts` (el guion: planos, subtítulos, viñeta en los insertos). Montaje en
+  `game/homeEarlierRig.ts`: actores propios (otra nave, otro explorador, la Maestra y los Ool que miran, articulados con
+  `character/oolRig.ts` y `oolPoses.ts`); el juego se esconde por capas (el juego repone `visible` cada fotograma) y los
+  Ool necesitan los atributos de planeta (`placeInWorld`) para la luz de cielo. Tu cuaderno de verdad es
+  `render/notebookModel.ts` + `ui/notebookCanvas.ts` (tus páginas del Registro). Tu voz se subtitula a mano
+  (`data-speaker` en `cinematicLayer.ts`). Al acabar, `homecoming.finish()` lleva al Mirador. Con `?debug`:
+  `__juego.homeEarlier()` (plano, fase, cámara en cm) y `__juego.homeEarlierSeek(s)`. La e2e `homecoming.spec.ts`
+  aún espera la fase `talking`: hay que ponerla al día.
 
 ## Soles, el Cerco y la luz (plan: `docs/plan-soles-y-luz-dinamica.md`)
 
