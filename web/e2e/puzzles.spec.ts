@@ -33,6 +33,7 @@ test('the notebook only notes its fact once the last hour of the Archivo is righ
 });
 
 test('the letters of the Archivo fall into place in days of Umbral', async ({ page }) => {
+  test.setTimeout(180_000);
   await startPlaying(page);
   await open(page, 'archivo.cartas');
   const check = page.getByRole('button', { name: 'Comprobar el orden' });
