@@ -54,12 +54,12 @@ export const NEST = {
   maestra: [-2.4, -6.6, 0] as Vec3,
   /** A qué distancia de ella te paras (m). */
   meetGap: 1.15,
-  /** Los Ool que miran al cielo, en el borde este de la plaza (fuera del pasillo de aros del hangar). */
+  /** Los Ool que miran al cielo, al sur del nido, en la hierba abierta del borde de la cima. */
   watchers: [
-    [-11.6, -2.6, 0],
-    [-12.7, -1.3, 0],
-    [-13.3, -3.5, 0],
-    [-11.1, -4.3, 0],
+    [2.2, -10.6, 0],
+    [3.7, -11.3, 0],
+    [1.5, -12.3, 0],
+    [3.1, -12.9, 0],
   ] as readonly Vec3[],
 } as const;
 

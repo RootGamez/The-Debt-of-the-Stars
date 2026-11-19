@@ -51,7 +51,7 @@ export function beaconOn(t: number, beacon = BEACON): boolean {
 }
 
 /** Las tres luces de posición, colgadas de la nave (en su marco: Y arriba). */
-function positionLights(parent: Object3D): Mesh[] {
+export function positionLights(parent: Object3D): Mesh[] {
   const spots: readonly [string, string, readonly [number, number, number]][] = [
     ['babor', '#ff3a2a', [-RIM_RADIUS - 0.05, -0.42, 0]],
     ['estribor', '#3aff6a', [RIM_RADIUS + 0.05, -0.42, 0]],
@@ -98,8 +98,17 @@ function orreryBalls(spec: SystemSpec | undefined, parent: Object3D): Map<string
   return balls;
 }
 
+/** La trampilla y la escalerilla según lo abierta que esté la escotilla (0 a 1); también en las escenas (F4). */
+export function poseHatch(parts: { door: Object3D; ladder: Object3D }, open: number): void {
+  const { door: d, ladder: l } = hatchPose(open);
+  parts.door.rotation.x = d * DOOR_OPEN_ANGLE;
+  parts.ladder.visible = open > 0.4;
+  parts.ladder.rotation.x = l * LADDER_ANGLE;
+  parts.ladder.scale.z = LADDER_STOWED_LENGTH + (1 - LADDER_STOWED_LENGTH) * l;
+}
+
 export function createShipCabin(model: ShipModel, spec: SystemSpec | undefined): ShipCabin {
-  const { door, ladder, clockHands, orrery } = model.parts;
+  const { clockHands, orrery } = model.parts;
   const balls = orreryBalls(spec, orrery);
   const reach = spec ? Math.max(...spec.bodies.map((b) => b.orbitRadius)) : 1;
   const scale = (MAP_TABLE_RADIUS - 0.08) / reach;
@@ -108,11 +117,7 @@ export function createShipCabin(model: ShipModel, spec: SystemSpec | undefined):
   let open = 1;
 
   function placeHatch(): void {
-    const { door: d, ladder: l } = hatchPose(open);
-    door.rotation.x = d * DOOR_OPEN_ANGLE;
-    ladder.visible = open > 0.4;
-    ladder.rotation.x = l * LADDER_ANGLE;
-    ladder.scale.z = LADDER_STOWED_LENGTH + (1 - LADDER_STOWED_LENGTH) * l;
+    poseHatch(model.parts, open);
   }
 
   function placeFlames(burning: boolean, levels: Float32Array): void {

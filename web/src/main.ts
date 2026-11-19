@@ -58,6 +58,7 @@ import { createMiradorRig } from './game/miradorRig';
 import { endingFromQuery, homeLook, viaFromQuery } from './game/homecoming';
 import { createHomecomingRig } from './game/homecomingRig';
 import { createHomeLaterRig } from './game/homeLaterRig';
+import { createHomeEarlierRig, yourNotebook } from './game/homeEarlierRig';
 import { createFoldedPassage } from './game/foldedPassage';
 import { createDiving } from './game/diving';
 import { TELEPORTER } from './game/teleporter';
@@ -930,6 +931,34 @@ async function start(): Promise<void> {
           },
         })
       : undefined;
+  // El final bueno (F4): el Albatros II se posa en el nido, la Maestra lee tu cuaderno y, al acabar, al Mirador.
+  const earlierHome = homecomingEnding === 'A' ? runtimes.get(startWorld) : undefined;
+  const homeEarlier = earlierHome
+    ? createHomeEarlierRig({
+        scene,
+        hogar: earlierHome.world.scene,
+        luna:
+          moonWorld && moonPivot
+            ? {
+                pivot: moonPivot,
+                model: moonWorld.world.scene,
+                radius: moonWorld.world.info.radius,
+              }
+            : undefined,
+        soundtrack,
+        reducedMotion,
+        text: textSettings,
+        pages: () => yourNotebook(clues, reading.known, worldNames, reading.opened),
+        known: () => reading.known,
+        hide: [...explorerRoots, shipModel?.object],
+        begin: () => {
+          homecoming?.begin();
+        },
+        finish: () => {
+          homecoming?.finish();
+        },
+      })
+    : undefined;
   const startSources = sources.get(startWorld);
   if (!startSources) throw new Error(`Faltan las fuentes de ${startWorld}`);
   // El ocular del telescopio del Observatorio (🟡): mira el cielo en vivo desde donde está el jugador.
@@ -1322,6 +1351,13 @@ async function start(): Promise<void> {
         homeLater?.seekScene(time);
       },
     });
+    // F4 (sin tipo en debugOverlay.ts): la escena del nido del final bueno.
+    Object.assign(window.__juego, {
+      homeEarlier: () => homeEarlier?.snapshot() ?? null,
+      homeEarlierSeek: (time: number) => {
+        homeEarlier?.seek(time);
+      },
+    });
     // E4 (sin tipo en debugOverlay.ts): el Laboratorio, encender su Puerta y despertarla.
     Object.assign(window.__juego, {
       laboratory: () => laboratory?.snapshot() ?? null,
@@ -1574,8 +1610,9 @@ async function start(): Promise<void> {
       }
       if (overlay.playing && !awoke && !awakening) {
         awoke = true;
-        // Tras cruzar una boca de casa se aparece en el espacio, sentado en la nave, sobre Hogar (T11).
-        const homeWorld = homecomingEnding ? runtimes.get(startWorld) : undefined;
+        // Tras cruzar una boca de casa se aparece en el espacio, sentado en la nave, sobre Hogar (T11); con A, la
+        // escena del nido lleva su propia nave.
+        const homeWorld = homecomingEnding && !homeEarlier ? runtimes.get(startWorld) : undefined;
         if (homeWorld && flight) {
           const up = homeWorld.spawn.feet.clone().normalize();
           const arrival = up.multiplyScalar(homeWorld.world.info.radius + HOME_ARRIVAL_ALTITUDE);
@@ -1818,6 +1855,7 @@ async function start(): Promise<void> {
       systemScene.update(t);
       mirador?.apply(camera, dt);
       homeLater?.apply(camera, dt, timeRuns);
+      homeEarlier?.apply(camera, dt);
       lightFor(systemScene.referenceWorld, finalLight(fallen));
       const airWorld = systemScene.referenceWorld;
       const air = airWorld === undefined ? undefined : ATMOSPHERES[airWorld];

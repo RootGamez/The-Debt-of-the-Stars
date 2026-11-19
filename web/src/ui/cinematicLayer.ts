@@ -138,6 +138,8 @@ export function createCinematicLayer(options: CinematicLayerOptions): CinematicL
   function setSpeaker(who: string): void {
     if (who === speaker) return;
     speaker = who;
+    // Cada voz puede tener su letra (cinematic.css): la tuya, a mano, como tu cuaderno.
+    subtitle.dataset.speaker = who;
     sign?.remove();
     const path = SIGNS[who];
     sign = path ? icon(path, `cine-sign cine-sign--${who}`) : undefined;
