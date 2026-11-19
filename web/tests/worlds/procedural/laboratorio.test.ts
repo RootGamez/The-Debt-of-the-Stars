@@ -78,10 +78,11 @@ describe('Laboratorio world contract', () => {
       gravity: 0.3,
       // E2: el mundo marca el ritmo del Nudo; el 5 del Laboratorio lo pone la burbuja del Contrapeso (antes 0,20).
       clockRate: 1,
-      ambient: { color: 0xa8b8a8, intensity: 1.4 },
+      // E7: luz cálida de lámpara (antes, un verde clínico: 0xa8b8a8 a 1,4 y 0xf0ddb8 a 1,5).
+      ambient: { color: 0xb4ac9c, intensity: 1.05 },
       innerRadius: 21,
       cavityTide: 'semilla',
-      interiorLight: { color: 0xf0ddb8, intensity: 1.5 },
+      interiorLight: { color: 0xffe2b6, intensity: 1.7 },
     });
   });
 

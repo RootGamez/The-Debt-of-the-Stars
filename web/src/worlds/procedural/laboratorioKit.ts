@@ -1,7 +1,8 @@
-// Lo que comparten las partes del Laboratorio Oculto por código (Fase 11): la paleta (verde grisáceo clínico, blanco
-// roto, madera y latón, luz de lámpara cálida; 🟡), el constructor con sus juegos de piezas (dentro, fuera y lo que
-// brilla frío) y las piezas que se repiten: la plataforma de una zona, el farol, la Puerta plegada, camas, mesas,
-// papeles y muros de estratos. Pasado de blender/scripts/arte_laboratorio.py.
+// Lo que comparten las partes del Laboratorio Oculto por código (Fase 11): la paleta (E7, 🟡: cálida y de taller de
+// ciencia; salvia, marfil y caliza, madera y latón, revoque claro con zócalo oscuro, tejas, pizarra y cobre verdoso, y
+// la luz de lámpara), el constructor con sus juegos de piezas (dentro, fuera, lo que brilla frío y el vidrio) y las
+// piezas que se repiten: la plataforma de una zona, el farol, la Puerta plegada, camas, mesas, papeles y muros de
+// estratos. Pasado de blender/scripts/arte_laboratorio.py.
 import {
   Color,
   Group,
@@ -57,6 +58,19 @@ export const PALETTE = {
   woodPale: '#A78A68',
   woodDark: '#5E4630',
   dust: '#B6A893',
+  // Las casas del Laboratorio (E7, 🟡): revoque, zócalo, dinteles y cubiertas.
+  plaster: '#DACFB4',
+  plasterShade: '#C5B697',
+  plinth: '#4B5C54',
+  lintel: '#B7A078',
+  limestone: '#D4C7A8',
+  roofTile: '#A65F3F',
+  roofTileDark: '#7F4631',
+  slate: '#56616C',
+  verdigris: '#6EA290',
+  iron: '#3B403D',
+  leaf: '#7C8F4A',
+  leafDry: '#A99A5C',
 } as const;
 
 /** Lo que el juego enciende o apaga de un portal caído (render/fallenGateView.ts): su membrana y la luz de su hora. */
@@ -74,6 +88,8 @@ export class LabBuilder {
   readonly outside = new PieceSet(92);
   /** Lo que brilla frío: la membrana de las Puertas y el halo de la semilla. */
   readonly cold: BufferGeometry[] = [];
+  /** El vidrio de ventanas, lucernarios y del invernadero: una sola malla transparente. */
+  readonly glass: BufferGeometry[] = [];
   readonly markers: Object3D[] = [];
   /** Lo que va suelto (lo que gira, lo que el juego enciende): solo se dibuja estando en el Nudo. */
   readonly extras: Object3D[] = [];
@@ -132,6 +148,13 @@ export class LabBuilder {
     this.cold.push(geometry.clone().applyMatrix4(matrix));
   }
 
+  /** Un vidrio (dentro): se ve a través y, como un vidrio de verdad, no se atraviesa. */
+  pane(geometry: BufferGeometry, matrix: Matrix4): void {
+    const g = geometry.clone().applyMatrix4(matrix);
+    this.glass.push(g);
+    this.inside.addCollider(g);
+  }
+
   mark(name: string, f: Frame, at: Triple, props?: MarkerProps): void {
     this.markers.push(marker(name, f.point(at), f.rotation(), props));
   }
@@ -160,23 +183,35 @@ export class LabBuilder {
     this.extras.push(group);
   }
 
-  /** La plataforma de una zona de la cara interior, con marcas de reloj en el borde. */
+  /**
+   * La plataforma de una zona de la cara interior: una losa de caliza con su canto de latón y las doce horas de un
+   * reloj en el borde (la de arriba, más larga).
+   */
   platform(f: Frame, width: number, depth: number): void {
     this.solid(
       this.inside,
-      P.white,
+      P.limestone,
       box(),
       f.at([0, 0, FLOOR - 1.2], undefined, [width, depth, 2.4]),
     );
-    for (let k = 0; k < 6; k++) {
-      const a = (2 * Math.PI * k) / 6;
+    for (const [x, y, w, d] of [
+      [0, depth / 2, width + 0.02, 0.05],
+      [0, -depth / 2, width + 0.02, 0.05],
+      [width / 2, 0, 0.05, depth + 0.02],
+      [-width / 2, 0, 0.05, depth + 0.02],
+    ] as const) {
+      this.view(this.inside, P.brass, box(), f.at([x, y, FLOOR - 0.02], undefined, [w, d, 0.06]));
+    }
+    for (let k = 0; k < 12; k++) {
+      const a = (2 * Math.PI * k) / 12;
       const x = Math.cos(a) * (width / 2 - 0.25);
       const y = Math.sin(a) * (depth / 2 - 0.25);
+      const long = k % 3 === 0 ? 0.36 : 0.2;
       this.view(
         this.inside,
-        k === 0 ? P.brass : P.green,
+        k % 3 === 0 ? P.brass : P.plasterShade,
         box(),
-        f.at([x, y, FLOOR + 0.01], [0, 0, a], [0.35, 0.06, 0.02]),
+        f.at([x, y, FLOOR + 0.006], [0, 0, a], [long, 0.05, 0.012]),
       );
     }
   }

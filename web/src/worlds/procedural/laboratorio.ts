@@ -1,20 +1,26 @@
 // El Nudo y el Laboratorio Oculto por código (Fase 11; CONTEXTO_PLANETAS.md §8): una cáscara negra con su Puerta de
 // anillos y un muelle, y dentro, una cavidad donde la gravedad empuja hacia fuera y se camina por la cara interior.
-// En el centro cuelga la semilla del Nudo con sus anillos; alrededor de ella, muy despacio (aquí el tiempo corre
-// cinco veces más lento), orbita lo que el Laboratorio perdió al soltarse: papeles, libros, sillas, tazas, luces.
-// Sobre la cara interior, una red de líneas frías (los estratos y los meridianos de los Ausentes) que rodea a quien
-// mira por todas partes. Las zonas de trabajo están en laboratorioRooms.ts y las de la vida de cada día, en
-// laboratorioLife.ts. Sustituye a laboratorio.glb con el mismo contrato (raíz con la cavidad y la luz de dentro;
-// COL_laboratorio_Terreno y COL_laboratorio_Lugares; SPAWN_Laboratorio, PASO_Boca y PASO_Dentro, las INT_ y las ANIM_).
+// En el centro cuelga la semilla del Nudo con sus anillos y su corona de luz; alrededor de ella, muy despacio, orbita
+// lo que el Laboratorio perdió al soltarse: papeles, libros, sillas, tazas, luces. La cara interior es una marquetería
+// en espiral (laboratorioFloor.ts) que lleva la vista a las zonas por senderos con faroles, y el aire de la cavidad
+// funde lo lejano en una bruma cálida (E7). Las zonas de trabajo están en laboratorioRooms.ts; las de la vida de cada
+// día, en laboratorioLife.ts, y sus casas, en laboratorioBuildings.ts. Sustituye a laboratorio.glb con el mismo
+// contrato (raíz con la cavidad y la luz de dentro; COL_laboratorio_Terreno y COL_laboratorio_Lugares;
+// SPAWN_Laboratorio, PASO_Boca y PASO_Dentro, las INT_ y las ANIM_).
 import {
+  AdditiveBlending,
+  BackSide,
   Color,
+  DoubleSide,
+  Euler,
   Group,
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
   Object3D,
   Quaternion,
-  Euler,
+  ShaderMaterial,
+  SphereGeometry,
   Vector3,
   type BufferGeometry,
   type Material,
@@ -51,21 +57,34 @@ import {
   OUTER_SITES,
   PATHS,
   along,
-  inStratum,
   innerGround,
   insideFrame,
   insideHeading,
   outerGround,
   outsideFrame,
 } from './laboratorioShape';
-import { applySpiralBoard, boardSeamColor } from './laboratorioFloor';
+import { applyCavityHaze, applyLabFloor, type CavityHaze } from './laboratorioFloor';
 import { seededRandom } from './noise';
 import { sunInWorld } from './sun';
 
 export { LABORATORIO_ID } from './laboratorioShape';
 const OUTER_DETAIL = 16;
 const INNER_DETAIL = 26;
-const DEG = Math.PI / 180;
+/** Cada cuántos metros de sendero, un farol (alternando de lado). */
+const LAMP_SPACING = 8;
+/** El aire de la cavidad (🟡 E7): una bruma cálida que funde la cara de enfrente y deja nítido lo cercano. */
+export const CAVITY_HAZE: CavityHaze = {
+  color: new Color('#C2B392'),
+  density: 0.026,
+  max: 0.3,
+};
+/** La luz de dentro (🟡 E7): cálida, de lámpara, sin el verde clínico de antes. */
+export const LAB_LIGHT = {
+  interior: { color: '#FFE2B6', intensity: 1.7 },
+  ambient: { color: '#B4AC9C', intensity: 1.05 },
+  /** Lo que cada pieza de dentro brilla por sí misma: que nada caiga al negro. */
+  emissive: '#1E1912',
+} as const;
 
 /** Da la vuelta a los triángulos de una geometría sin índice (la cara interior mira hacia el centro). */
 function flipInward(geometry: BufferGeometry): BufferGeometry {
@@ -85,6 +104,31 @@ function flipInward(geometry: BufferGeometry): BufferGeometry {
   return geometry;
 }
 
+/**
+ * Normales suaves para una malla sin índice: cada vértice, la media de las caras que lo comparten. El suelo de dentro
+ * es una marquetería pulida, no roca: sus lomas se ven sin facetas que rompan el dibujo.
+ */
+function smoothNormals(geometry: BufferGeometry): void {
+  const position = geometry.getAttribute('position');
+  const normal = geometry.getAttribute('normal');
+  const key = (i: number): string =>
+    `${String(Math.round(position.getX(i) * 1e3))},${String(Math.round(position.getY(i) * 1e3))},${String(Math.round(position.getZ(i) * 1e3))}`;
+  const sums = new Map<string, Vector3>();
+  for (let i = 0; i < position.count; i++) {
+    const k = key(i);
+    const sum = sums.get(k) ?? new Vector3();
+    sum.x += normal.getX(i);
+    sum.y += normal.getY(i);
+    sum.z += normal.getZ(i);
+    sums.set(k, sum);
+  }
+  for (let i = 0; i < position.count; i++) {
+    const n = (sums.get(key(i)) ?? new Vector3(0, 0, 1)).clone().normalize();
+    normal.setXYZ(i, n.x, n.y, n.z);
+  }
+  normal.needsUpdate = true;
+}
+
 function shells(): { outer: BufferGeometry; inner: BufferGeometry } {
   const outerTones = ['#0B0A10', '#17151E', '#26232F'].map((c) => new Color(c));
   const outer = sphereTerrain(
@@ -99,75 +143,44 @@ function shells(): { outer: BufferGeometry; inner: BufferGeometry } {
     },
     13,
   );
-  const innerTones = ['#56605A', '#7C8A7E', '#A3AE9F'].map((c) => new Color(c));
-  const stratum = new Color('#47514A');
+  // Dentro, el color lo pone el sombreador del suelo: los vértices solo llevan una veta muy suave.
+  const vein = new Color('#FFFFFF');
   const inner = sphereTerrain(
     {
       radius: LAB_INNER_RADIUS,
       detail: INNER_DETAIL,
       height: (x, y, z) => innerGround({ x, y, z }) - LAB_INNER_RADIUS,
-      faceColor: (x, y, z, h, _slope, random) => {
-        if (inStratum({ x, y, z })) return stratum.clone();
-        const tone = innerTones[h > 0.15 ? 0 : h > -0.15 ? 1 : 2] ?? new Color();
-        return tone.clone().offsetHSL(0, 0, (random() - 0.5) * 0.04);
-      },
+      faceColor: (_x, _y, _z, _h, _slope, random) =>
+        vein.clone().multiplyScalar(0.96 + random() * 0.04),
     },
     17,
   );
-  return { outer, inner: flipInward(inner) };
+  const flipped = flipInward(inner);
+  smoothNormals(flipped);
+  return { outer, inner: flipped };
 }
 
-/** Senderos de losas entre las zonas, con farolas cada tanto. */
-function paths(b: LabBuilder): void {
-  const slab = 1.8;
+/** Los faroles de los senderos, entre zona y zona y alternando de lado; devuelve dónde alumbran el suelo. */
+function paths(b: LabBuilder): Vector3[] {
+  const lamps: Vector3[] = [];
   PATHS.forEach(([from, to], n) => {
     const a = INNER_SITES[from];
     const c = INNER_SITES[to];
     const length =
       angleBetween(direction(a.lat, a.lon), direction(c.lat, c.lon)) * LAB_INNER_RADIUS;
-    const steps = Math.max(2, Math.floor(length / slab));
-    for (let k = 1; k < steps; k++) {
-      const point = along(a, c, k / steps);
-      const next = along(a, c, Math.min(1, k / steps + 0.05));
+    const gap = length - a.clear - c.clear - 2;
+    const count = Math.round(gap / LAMP_SPACING);
+    for (let k = 0; k < count; k++) {
+      const t = (a.clear + 1 + (gap * (k + 0.5)) / count) / length;
+      const point = along(a, c, t);
+      const next = along(a, c, Math.min(1, t + 0.05));
       const f = insideFrame(point.lat, point.lon, insideHeading(point, next));
-      b.solid(
-        b.inside,
-        k % 2 ? P.sandstone : P.sandstoneDark,
-        box(),
-        f.at([0, 0, -0.1], undefined, [1.3, slab - 0.12, 0.3]),
-      );
-      if (k % 5 === 0) b.lantern(b.inside, f, (k + n) % 2 ? 1.1 : -1.1, 0, 0.05, 2.0);
+      const side = (k + n) % 2 ? 1 : -1;
+      b.lantern(b.inside, f, side * 1.15, 0, 0, 2.3);
+      lamps.push(f.point([side * 1.15, 0.45, 0]));
     }
   });
-}
-
-/** Lejos de las zonas: ahí van las líneas frías del suelo. */
-function clearOfSites(lat: number, lon: number): boolean {
-  const d = direction(lat, lon);
-  return Object.values(INNER_SITES).every(
-    (s) => angleBetween(d, direction(s.lat, s.lon)) * LAB_INNER_RADIUS > s.clear + 1.5,
-  );
-}
-
-/** La red fría de la cara interior: los paralelos de los estratos (cada 30°) y ocho meridianos. */
-function coldGrid(b: LabBuilder): void {
-  const step = 4;
-  const piece = step * DEG * LAB_INNER_RADIUS * 0.82;
-  for (const lat of [-60, -30, 0, 30, 60]) {
-    const width = piece / Math.cos(lat * DEG);
-    for (let lon = 0; lon < 360; lon += step) {
-      if (!clearOfSites(lat, lon)) continue;
-      const f = insideFrame(lat, lon, 90);
-      b.glowCold(box(), f.at([0, 0, 0.03], undefined, [0.07, Math.min(width, piece), 0.03]));
-    }
-  }
-  for (let lon = 22.5; lon < 360; lon += 45) {
-    for (let lat = -80; lat <= 80; lat += step) {
-      if (!clearOfSites(lat, lon)) continue;
-      const f = insideFrame(lat, lon, 0);
-      b.glowCold(box(), f.at([0, 0, 0.03], undefined, [0.05, piece, 0.03]));
-    }
-  }
+  return lamps;
 }
 
 /** La semilla del Nudo: negra, con un halo frío y tres anillos que giran muy despacio. */
@@ -211,6 +224,52 @@ function seed(b: LabBuilder): void {
       },
     );
   });
+}
+
+const HALO_VERTEX = /* glsl */ `
+varying vec3 vNormal;
+varying vec3 vView;
+void main() {
+  vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  vView = normalize(-mv.xyz);
+  vNormal = normalize(normalMatrix * normal);
+  gl_Position = projectionMatrix * mv;
+}
+`;
+
+const HALO_FRAGMENT = /* glsl */ `
+uniform vec3 inner;
+uniform vec3 outer;
+varying vec3 vNormal;
+varying vec3 vView;
+void main() {
+  float facing = abs(dot(normalize(vNormal), normalize(vView)));
+  float glow = pow(facing, 3.0);
+  gl_FragColor = vec4(mix(outer, inner, pow(facing, 8.0)) * glow, 1.0);
+}
+`;
+
+/**
+ * La corona de la semilla (E7): una esfera de luz que solo pinta su cara de atrás, así la semilla negra la tapa por
+ * el centro y alrededor queda un resplandor, frío junto a ella y cálido hacia fuera. Se ve de dónde sale la luz.
+ */
+function seedHalo(): Mesh {
+  const material = new ShaderMaterial({
+    uniforms: {
+      inner: { value: new Color('#D8F0E6').multiplyScalar(0.55) },
+      outer: { value: new Color('#FFB866').multiplyScalar(0.3) },
+    },
+    vertexShader: HALO_VERTEX,
+    fragmentShader: HALO_FRAGMENT,
+    transparent: true,
+    depthWrite: false,
+    blending: AdditiveBlending,
+    side: BackSide,
+  });
+  const mesh = new Mesh(new SphereGeometry(5.5, 32, 20), material);
+  mesh.name = 'laboratorio_Corona';
+  mesh.renderOrder = 2;
+  return mesh;
 }
 
 /** Lo que orbita la semilla: cinco anillos invisibles de restos, cada uno en su plano y a su paso. */
@@ -322,6 +381,39 @@ function outside(b: LabBuilder): void {
   }
 }
 
+/** Los materiales de dentro: piedra, metal y luz (con el aire de la cavidad salvo en lo que brilla) y el vidrio. */
+function insideMaterials(): { pieces: Record<PieceKind, Material>; glass: Material } {
+  const make = (
+    options: ConstructorParameters<typeof MeshStandardMaterial>[0],
+  ): MeshStandardMaterial => {
+    const material = new MeshStandardMaterial({
+      flatShading: true,
+      emissive: new Color(LAB_LIGHT.emissive),
+      ...options,
+    });
+    applyCavityHaze(material, CAVITY_HAZE);
+    return material;
+  };
+  const glass = new MeshStandardMaterial({
+    color: new Color('#D6EEE4'),
+    transparent: true,
+    opacity: 0.2,
+    roughness: 0.08,
+    metalness: 0.1,
+    depthWrite: false,
+    side: DoubleSide,
+  });
+  applyCavityHaze(glass, CAVITY_HAZE);
+  return {
+    pieces: {
+      stone: make({ vertexColors: true, roughness: 0.86 }),
+      metal: make({ vertexColors: true, roughness: 0.42, metalness: 0.5 }),
+      light: new MeshBasicMaterial({ vertexColors: true }),
+    },
+    glass,
+  };
+}
+
 /** Construye el Nudo y el Laboratorio con la forma de una escena exportada. */
 export function buildLaboratorio(): Group {
   const sun = sunInWorld(LABORATORIO_ID);
@@ -336,29 +428,19 @@ export function buildLaboratorio(): Group {
     });
     return material;
   };
-  // Dentro no llega la Brasa: luce la semilla (la luz de dentro la pone el juego) y un poco de verde propio.
-  const insideMaterial = (
-    options: ConstructorParameters<typeof MeshStandardMaterial>[0],
-  ): MeshStandardMaterial =>
-    new MeshStandardMaterial({ flatShading: true, emissive: new Color('#1a2420'), ...options });
-  const lamps = new MeshBasicMaterial({ vertexColors: true });
+  const inside = insideMaterials();
   const materials: Record<'outside' | 'inside', Record<PieceKind, Material>> = {
     outside: {
       stone: outsideMaterial({ vertexColors: true, roughness: 0.95 }),
       metal: outsideMaterial({ vertexColors: true, roughness: 0.5, metalness: 0.45 }),
-      light: lamps,
+      light: new MeshBasicMaterial({ vertexColors: true }),
     },
-    inside: {
-      stone: insideMaterial({ vertexColors: true, roughness: 0.88 }),
-      metal: insideMaterial({ vertexColors: true, roughness: 0.45, metalness: 0.5 }),
-      light: lamps,
-    },
+    inside: inside.pieces,
   };
   const builder = new LabBuilder(materials.inside);
   buildRooms(builder);
   buildLife(builder);
-  paths(builder);
-  coldGrid(builder);
+  const lamps = paths(builder);
   seed(builder);
   orbits(builder);
   outside(builder);
@@ -372,10 +454,30 @@ export function buildLaboratorio(): Group {
   outerMesh.name = 'laboratorio_Terreno';
   outerMesh.castShadow = true;
   outerMesh.receiveShadow = true;
-  // La cara interior lleva su propio material: el tablero en espiral (laboratorioFloor.ts).
-  const boardMaterial = insideMaterial({ vertexColors: true, roughness: 0.82 });
+  // La cara interior lleva su propio material: la marquetería en espiral (laboratorioFloor.ts), con normales suaves.
+  const boardMaterial = new MeshStandardMaterial({
+    vertexColors: true,
+    roughness: 0.62,
+    metalness: 0.04,
+    emissive: new Color(LAB_LIGHT.emissive),
+  });
   const innerMesh = new Mesh(inner, boardMaterial);
-  applySpiralBoard(innerMesh, boardMaterial, boardSeamColor(P.fold));
+  applyLabFloor(
+    innerMesh,
+    boardMaterial,
+    {
+      sites: Object.values(INNER_SITES).map((s) => ({
+        direction: direction(s.lat, s.lon),
+        clear: s.clear,
+      })),
+      paths: PATHS.map(([a, c]) => ({
+        from: direction(INNER_SITES[a].lat, INNER_SITES[a].lon),
+        to: direction(INNER_SITES[c].lat, INNER_SITES[c].lon),
+      })),
+      lamps,
+    },
+    CAVITY_HAZE,
+  );
   innerMesh.name = 'laboratorio_Cara_Interior';
   innerMesh.receiveShadow = true;
   frame.add(outerMesh, innerMesh, colliderMesh('COL_laboratorio_Terreno', [outer, inner]));
@@ -387,10 +489,18 @@ export function buildLaboratorio(): Group {
     new MeshBasicMaterial({ color: new Color(P.fold).multiplyScalar(1.15) }),
   );
   cold.name = 'laboratorio_Frio';
+  const glass: Mesh[] = [];
+  if (builder.glass.length > 0) {
+    const panes = new Mesh(mergeGeometries(builder.glass), inside.glass);
+    panes.name = 'laboratorio_Vidrio';
+    panes.renderOrder = 1;
+    glass.push(panes);
+  }
+  const halo = seedHalo();
   // Lo de dentro no se ve desde los otros mundos: solo se dibuja estando en el Nudo.
-  for (const mesh of [innerMesh, ...insidePieces, cold, ...builder.extras])
+  for (const mesh of [innerMesh, ...insidePieces, cold, ...glass, halo, ...builder.extras])
     mesh.userData[NEAR_ONLY] = true;
-  frame.add(...insidePieces, ...outsidePieces, cold);
+  frame.add(...insidePieces, ...outsidePieces, cold, ...glass, halo);
   frame.add(
     colliderMesh('COL_laboratorio_Lugares', [
       ...builder.inside.colliders,
@@ -407,10 +517,10 @@ export function buildLaboratorio(): Group {
     gravity: LAB_GRAVITY,
     clock_rate: NUDO_CLOCK,
     inner_radius: LAB_INNER_RADIUS,
-    interior_light: 1.5,
-    interior_light_color: '#F0DDB8',
-    ambient: 1.4,
-    ambient_color: '#A8B8A8',
+    interior_light: LAB_LIGHT.interior.intensity,
+    interior_light_color: LAB_LIGHT.interior.color,
+    ambient: LAB_LIGHT.ambient.intensity,
+    ambient_color: LAB_LIGHT.ambient.color,
   });
   root.add(frame);
   const scene = new Group();

@@ -121,13 +121,6 @@ export function innerGround(d: XYZ): number {
   return rough + (LAB_INNER_RADIUS - rough) * w;
 }
 
-/** ¿Cae la dirección en una de las franjas oscuras (los estratos, cada 30° de latitud)? */
-export function inStratum(d: XYZ): boolean {
-  const lat = Math.asin(clamp(d.z / Math.hypot(d.x, d.y, d.z), -1, 1)) / DEG;
-  const k = Math.round(lat / 30) * 30;
-  return Math.abs(lat - k) < 1.6 && Math.abs(k) < 90;
-}
-
 /** Ejes del sitio: arriba, norte y este (como en Blender: el este es norte × arriba). */
 function axes(up: Vector3): { north: Vector3; east: Vector3 } {
   let north = new Vector3(0, 0, 1).addScaledVector(up, -up.z);
