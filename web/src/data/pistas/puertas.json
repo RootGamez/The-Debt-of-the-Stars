@@ -16,9 +16,9 @@
       "requiere": ["silencio.dos_investigadores"],
       "texto": [
         "Buscas las marcas de los Ausentes entre las filas y las encuentras: los nombres del Consejo, los de quienes cruzaron antes del silencio.",
-        "Los tres del Laboratorio no están. No llegaron a cruzar: se quedaron allí, terminando, mientras fuera pasaban los años."
+        "Los dos del Laboratorio no están: nadie los borró. No cruzaron; siguen vivos, cada uno donde se quedó."
       ],
-      "hechos": ["silencio.no_cruzaron"]
+      "hechos": ["ellos.el_vive"]
     }
   },
   {
@@ -39,9 +39,10 @@
       "requiere": ["bocas.relojes_distintos"],
       "texto": [
         "Lo que se ve al otro lado no es el día al que se llega. Cada boca corre su vista según su desfase.",
-        "Solo una deja en casa antes de la prueba."
+        "Solo una deja en casa antes de la prueba.",
+        "Las que caerían después de la prueba mayor las arrastra la llamada, y caen con ella. Solo la buena sigue en pie."
       ],
-      "hechos": ["bocas.vuelta_antes"]
+      "hechos": ["bocas.vuelta_antes", "bocas.arrastre"]
     }
   },
   {

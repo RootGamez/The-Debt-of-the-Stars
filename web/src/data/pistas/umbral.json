@@ -30,10 +30,10 @@
     "profunda": {
       "requiere": ["bucle.orden_camara"],
       "texto": [
-        "Ahora ves la grieta de otra manera: no se cierra, la cosen.",
-        "Algo, en algún lugar, mantiene abierto este cuarto de hora."
+        "Ahora ves la grieta de otra manera: no se cierra, la cosen. El hilo de luz que la cose sube hacia el Taller, hacia el centro.",
+        "Algo, allí, mantiene abierto este cuarto de hora."
       ],
-      "hechos": []
+      "hechos": ["bucle.camara"]
     }
   },
   {
@@ -121,7 +121,7 @@
         "«Querida: cada tarde vengo al banco de piedra y pongo dos tazas. Dime que has comido, que duermes, que no trabajas hasta tarde…»",
         "No hay firma. La segunda taza está limpia."
       ],
-      "hechos": ["silencio.investigadora"]
+      "hechos": ["silencio.investigadora", "ellos.se_amaban"]
     },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],

@@ -138,9 +138,9 @@
     "superficial": {
       "texto": [
         "Literas en hilera, con las mantas dobladas. Una taza con un resto seco, una flauta de caña, un cuaderno de recetas.",
-        "En el cuaderno, entre una sopa y un pan, el técnico escribió: «Hoy hemos comido los que quedamos. La investigadora y el escéptico ya no vienen: se fueron al sitio lento y no volvieron a escribir. Les dejo su sitio en la mesa, por si acaso.»"
+        "En el cuaderno, entre una sopa y un pan, el técnico escribió: «Hoy hemos comido los que quedamos. La científica sigue en su laboratorio y el escéptico bajó al Centro, a su máquina: discutieron y cada uno se fue por su lado. Les dejo su sitio en la mesa, por si acaso.»"
       ],
-      "hechos": ["silencio.dos_investigadores"]
+      "hechos": ["silencio.dos_investigadores", "ellos.se_separaron"]
     }
   },
   {
@@ -154,9 +154,10 @@
       "texto": [
         "Un reloj enorme junto a la línea de salida de la Pista de Pruebas. Está desajustado: va adelantado un buen rato respecto a la hora de aquí.",
         "Debajo hay dos ruedas, una para los minutos y otra para los segundos, que se giran a mano hasta que marque lo mismo que la hora de este sitio.",
-        "Quien lo ponga en hora aprende a comparar dos relojes de sitios distintos: cada uno ha envejecido a su ritmo."
+        "Quien lo ponga en hora aprende a comparar dos relojes de sitios distintos: cada uno ha envejecido a su ritmo.",
+        "Grabado en el marco, con prisa: «Desfasado por la huida. Solo se enciende desde fuera»."
       ],
-      "hechos": ["contrapeso.medir_desfase"]
+      "hechos": ["contrapeso.medir_desfase", "partida.portales_caidos"]
     }
   },
   {
@@ -169,9 +170,10 @@
       "texto": [
         "Las hojas que faltaban del manual, cosidas con hilo rojo, en la sala del Centro.",
         "«Sincronización. Anota cuánto tiempo pasa el Contrapeso en cada tramo y con qué reloj cuenta cada sitio. Cada tramo se corrige con el ritmo de su sitio: lo que pasa en un lugar lento cuenta menos que lo que pasa en uno rápido. Suma las correcciones: ese es el desfase que hay que quitarle.»",
-        "Un ejemplo, a lápiz: «Diez minutos en el sitio de pruebas, cinco de vuelo y cuatro en el Taller.» Y al pie: «La máquina marcha a su paso. Iguálalo en la cuna.»"
+        "Un ejemplo, a lápiz: «Diez minutos en el sitio de pruebas, cinco de vuelo y cuatro en el Taller.» Y al pie: «La máquina marcha a su paso. Iguálalo en la cuna.»",
+        "Al margen de la última hoja, con otra letra: «Falta energía. Lo que falta lo tiene la Cámara; no hay otra fuente»."
       ],
-      "hechos": ["contrapeso.cuenta_sincronia"]
+      "hechos": ["contrapeso.cuenta_sincronia", "contrapeso.necesita_bucle"]
     }
   },
   {
@@ -231,14 +233,21 @@
     "tipo": "observacion",
     "titulo": "La Cámara",
     "borrador": true,
-    "ambiente": true,
     "superficial": {
       "texto": [
         "En el centro de la casa, sobre un pie de piedra, una esfera de luz encajada en su zócalo. Dos anillos la rodean y giran, cada uno hacia su lado, sin rozarse nunca.",
         "No hace ruido. Si acercas la mano, el aire tira de ella hacia la luz, como el agua hacia un desagüe. Cada vuelta de los anillos cose otra vez el mismo día.",
         "Grabados en el pie, dos triángulos punta con punta. Debajo, rayas."
       ],
-      "hechos": []
+      "hechos": ["bucle.camara", "bucle.fuente_poder"]
+    },
+    "profunda": {
+      "requiere": ["bucle.orden_camara"],
+      "texto": [
+        "Bajo el pie, unas hojas a mano: «Lo construí para ganar tiempo. Para que el último cuarto de hora no acabara nunca y pudiéramos terminar.»",
+        "«Lo dejé encendido. No sé cómo se apaga sin que se pierda lo que sostiene. Perdonad.»"
+      ],
+      "hechos": ["bucle.culpa"]
     }
   },
   {

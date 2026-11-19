@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BUBBLE } from '../../src/data/bubble';
 import { loadClues } from '../../src/data/pistas';
+import { checkLabCloses } from '../../src/registry/graphRules';
 import { MAX_SPEED, MIN_SPEED } from '../../src/reading/recording';
 
 describe('the real clue data', () => {
@@ -65,8 +66,17 @@ describe('the real clue data', () => {
     expect(ambient.map((s) => s.id)).toContain('observatorio.registrador');
   });
 
-  it('contains the 7 threads, the 9 conclusions and the 75 sources of CONTEXTO_PISTAS.md', () => {
-    expect(clues.threads.map((t) => t.id)).toEqual(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7']);
+  it('contains the 8 threads, the 11 conclusions and the 76 sources of CONTEXTO_PISTAS.md (E6)', () => {
+    expect(clues.threads.map((t) => t.id)).toEqual([
+      'H1',
+      'H2',
+      'H3',
+      'H4',
+      'H5',
+      'H6',
+      'H7',
+      'H8',
+    ]);
     expect(clues.conclusions.map((c) => c.id)).toEqual([
       'K1',
       'K2',
@@ -77,8 +87,57 @@ describe('the real clue data', () => {
       'K6',
       'K7',
       'K8',
+      'K9',
+      'K10',
     ]);
-    expect(graph).toHaveLength(75);
+    expect(graph).toHaveLength(76);
+  });
+
+  it('inverts K1: the Laboratory is a place where time runs fast (E6, plan de finales §5)', () => {
+    expect(clues.conclusions.find((c) => c.id === 'K1')?.title).toMatch(/deprisa/);
+    expect(clues.facts.get('lab.existe_lugar_lento')?.line).toMatch(/deprisa/);
+  });
+
+  it('makes the loop essential (K9) and teaches the fallen gates outside the Laboratory (K10, rule 7)', () => {
+    const k9 = clues.conclusions.find((c) => c.id === 'K9');
+    expect(k9?.thread).toBe('H1');
+    expect(k9?.requires).toEqual([['bucle.camara'], ['bucle.fuente_poder']]);
+    expect(clues.conclusions.find((c) => c.id === 'K10')?.thread).toBe('H3');
+    expect(checkLabCloses(clues, 'K10', 'laboratorio')).toEqual([]);
+    expect(checkLabCloses(clues, 'K9', 'laboratorio')).toEqual([]);
+  });
+
+  it('keeps Them two (H8) outside the essential path and retires the facts of the three who stayed', () => {
+    const essential = new Set(clues.conclusions.flatMap((c) => c.requires.flat()));
+    const them = [...clues.facts.values()].filter((f) => f.threads[0] === 'H8');
+
+    expect(them.map((f) => f.id).sort()).toEqual([
+      'ellos.el_vive',
+      'ellos.ella_congelada',
+      'ellos.querian_lo_mismo',
+      'ellos.se_amaban',
+      'ellos.se_separaron',
+    ]);
+    expect(them.some((f) => essential.has(f.id))).toBe(false);
+    for (const gone of ['silencio.uno_se_quedo', 'silencio.no_cruzaron'])
+      expect(clues.facts.has(gone), gone).toBe(false);
+  });
+
+  it('creates the new facts of the plan and gives each one a source', () => {
+    const given = new Set(
+      clues.sources.flatMap((s) => [...s.surface.facts, ...(s.deep?.facts ?? [])]),
+    );
+    for (const id of [
+      'bucle.horizonte_tarde',
+      'bocas.arrastre',
+      'casa.motor_energia',
+      'contrapeso.contra_gravedad',
+      'contrapeso.necesita_bucle',
+      'partida.portales_caidos',
+    ]) {
+      expect(clues.facts.has(id), id).toBe(true);
+      expect(given.has(id), id).toBe(true);
+    }
   });
 
   it('spreads the sources over the places of the document', () => {
@@ -90,7 +149,7 @@ describe('the real clue data', () => {
       luna: 1,
       umbral: 16,
       archivo: 12,
-      taller: 10,
+      taller: 11,
       cicatriz: 16,
       observatorio: 3,
       laboratorio: 7,

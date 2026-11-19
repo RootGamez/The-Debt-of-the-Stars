@@ -136,10 +136,10 @@
     "profunda": {
       "requiere": ["silencio.censura"],
       "texto": [
-        "Entre las actas hay una orden de otra clase, sin nombre de nadie: «Constrúyase un aparato que sostenga el último cuarto de hora de la Boca.»",
+        "Entre las actas hay una orden de otra clase, sin nombre de nadie: «Constrúyase un aparato que sostenga el último cuarto de hora de la Boca, con una fuente de poder propia que no se retirará.»",
         "Nadie anota para qué. El apunte siguiente es una factura de materiales."
       ],
-      "hechos": ["bucle.orden_camara"]
+      "hechos": ["bucle.orden_camara", "bucle.fuente_poder"]
     }
   },
   {

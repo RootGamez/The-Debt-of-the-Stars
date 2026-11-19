@@ -87,9 +87,15 @@
       "texto": [
         "Ya sé de qué evacuación habla: cuarenta minutos, Puertas 2 a 6. En la cinta es un solo pico enorme.",
         "Las últimas entradas son de otra letra, más calmada: «Se ha anotado una llamada nueva. Una boca joven, en un sistema que aún no conocemos, nos busca.»",
-        "Y debajo: «El núcleo solo se abre durante el pulso. Ahí se pondrá el Contrapeso, si llega.»"
+        "Y debajo: «El núcleo solo se abre durante el pulso. Ahí se pondrá el Contrapeso, si llega.»",
+        "Una anotación más, con prisa: «La energía de la huida desajustó los relojes de ciertos portales: se apagaron y solo se encienden desde fuera»."
       ],
-      "hechos": ["casa.prueba_llama", "contrapeso.lugar", "contrapeso.ventana_pulso"]
+      "hechos": [
+        "casa.prueba_llama",
+        "contrapeso.lugar",
+        "contrapeso.ventana_pulso",
+        "partida.portales_caidos"
+      ]
     }
   },
   {
@@ -253,9 +259,10 @@
     "profunda": {
       "requiere": ["nudo.existe"],
       "texto": [
-        "Es lo mismo que el Nudo, pero diminuto y despierto. La máquina lo rodea para que no crezca; con cada pulso, el aro de luz se ensancha un poco."
+        "Es lo mismo que el Nudo, pero diminuto y despierto. La máquina lo rodea para que no crezca; con cada pulso, el aro de luz se ensancha un poco.",
+        "La banda de la máquina lo dice de un modo seco: «Quien baje al horizonte con el bucle sin cortar llegará tarde: fuera corre más deprisa que dentro»."
       ],
-      "hechos": []
+      "hechos": ["bucle.horizonte_tarde"]
     }
   },
   {
@@ -273,9 +280,10 @@
     "profunda": {
       "requiere": ["partida.evacuacion"],
       "texto": [
-        "Las últimas líneas están escritas a mano, cada vez más torcidas. La última no tiene destino: solo una hora, y nadie la tachó."
+        "Las últimas líneas están escritas a mano, cada vez más torcidas. La última no tiene destino: solo una hora, y nadie la tachó.",
+        "Junto a la última línea, otra letra: «Portales caídos. No se vuelven a abrir desde dentro»."
       ],
-      "hechos": ["partida.cascada"]
+      "hechos": ["partida.cascada", "partida.portales_caidos"]
     }
   },
   {

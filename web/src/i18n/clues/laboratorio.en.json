@@ -19,7 +19,8 @@
     ],
     "profunda": [
       "One more page, folded under the others: \"There is a new call. A young system, very far away, has opened a Mouth and is calling ours.\"",
-      "\"They don't know what they are doing. Neither did we.\""
+      "\"They don't know what they are doing. Neither did we.\"",
+      "On the back of the last sheet, underlined: “It has nothing to run on. What it lacks he has, in the Chamber. Each of us keeps one half.”"
     ]
   },
   "lab.notas_esceptico": {
@@ -28,6 +29,10 @@
       "\"I said it out loud three times. There is a limit: every crossing through a Gate pulls the clocks a little further apart, and one day the network cannot hold.\"",
       "\"They asked me for figures. I brought them. They asked me not to repeat them.\"",
       "At the end of the last page, pressed harder: \"It is too late to warn anyone. Whatever leaves this place will arrive late.\""
+    ],
+    "profunda": [
+      "Under the last figure, another hand: “Pay it, yes. But first you need something to pay with.”",
+      "They wanted the same thing, that there be time for everyone; they only argued over the road."
     ]
   },
   "lab.orden_silencio": {
@@ -41,8 +46,8 @@
   "lab.dormitorio": {
     "titulo": "The shared dormitory",
     "superficial": [
-      "A room without a roof, with two beds. One is made, the blanket folded at its foot. The other is rumpled, sunken where someone slept in it many times.",
-      "Beside the used bed, a candle burned down to its dish. Someone stayed here when the others no longer came back."
+      "A room without a roof, with two beds pushed against each other. The blankets were folded together; on one pillow, the hollow of a head; on the other, that of another.",
+      "Between the two, a burned-down candle and two cups, side by side."
     ]
   },
   "lab.contrapeso": {
@@ -50,17 +55,17 @@
     "superficial": [
       "On its stand, between two supports, a device the size of an arm: brass rings nested one inside another, with a small clock at the centre.",
       "It is finished. It has not a single mark of use."
+    ],
+    "profunda": [
+      "You bring your hand close: something pushes outward, as if the air weighed less around it. The clock at the centre runs faster than yours.",
+      "It is not an engine that pulls at the debt: it is something that opposes it, like the opposite of gravity."
     ]
   },
   "lab.camara": {
-    "titulo": "The Chamber",
+    "titulo": "The cold chamber",
     "superficial": [
-      "Two crossed rings around a seat. A dial with twenty-four marks: the last six, lit.",
-      "The last quarter of an hour of the day, held. Over and over."
-    ],
-    "profunda": [
-      "Under the seat, a few handwritten pages: \"I built it to buy time. So that the last quarter of an hour would never end and we could finish.\"",
-      "\"I left it on. I don't know how to switch it off without losing what it holds. Forgive me.\""
+      "Two crossed rings, dark, around a frozen slab. On it, standing under the frost, someone with a diamond and a dot on the chest: they have been there a long time.",
+      "On the edge of the slab, by hand, a single word: “Wait”."
     ]
   },
   "lab.mediciones": {

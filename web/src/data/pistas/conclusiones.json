@@ -1,10 +1,10 @@
 [
   {
     "id": "K1",
-    "titulo": "Existe un sitio lento",
+    "titulo": "Existe un sitio donde el tiempo corre deprisa",
     "hilo": "H5",
     "requiere": ["lab.existe_lugar_lento"],
-    "sabe": "Había un sitio secreto donde el tiempo casi no pasaba.",
+    "sabe": "Había un sitio secreto donde el tiempo corría deprisa: dentro pasaban días mientras fuera pasaban horas.",
     "accion": "Buscar en el cielo algo que no se mueva como una estrella.",
     "pregunta": "¿Hubo algún sitio donde el tiempo corriera distinto?"
   },
@@ -82,5 +82,23 @@
     "sabe": "La prueba mayor del Instituto es el día cuarenta desde que despegué.",
     "accion": "Volver a casa antes del día cuarenta.",
     "pregunta": "¿Cuándo será la prueba mayor?"
+  },
+  {
+    "id": "K9",
+    "titulo": "Dónde está el bucle y cómo se corta",
+    "hilo": "H1",
+    "requiere": [["bucle.camara"], ["bucle.fuente_poder"]],
+    "sabe": "La Cámara está en el centro del Taller y la sostiene una fuente de poder: sacándola, el bucle se corta.",
+    "accion": "Llegar al centro del Taller y sacar la fuente de poder de la Cámara.",
+    "pregunta": "¿Dónde está lo que repite el ciclo y cómo se detiene?"
+  },
+  {
+    "id": "K10",
+    "titulo": "Los portales que apagó la huida",
+    "hilo": "H3",
+    "requiere": [["partida.portales_caidos"], ["contrapeso.medir_desfase"]],
+    "sabe": "La energía de la huida apagó ciertos portales: solo se encienden desde fuera, poniendo en hora su reloj.",
+    "accion": "Poner en hora, desde fuera, el reloj de un portal apagado.",
+    "pregunta": "¿Por qué hay portales que no se abren?"
   }
 ]

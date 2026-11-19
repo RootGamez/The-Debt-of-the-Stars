@@ -69,7 +69,7 @@
     "titulo": "The Dormitories",
     "superficial": [
       "Bunks in a row, with the blankets folded. A cup with a dry residue, a reed flute, a notebook of recipes.",
-      "In the notebook, between a soup and a bread, the technician wrote: “Today those of us who are left ate together. The researcher and the skeptic no longer come: they went to the Slow Site and never wrote again. I leave their place at the table, just in case.”"
+      "In the notebook, between a soup and a bread, the technician wrote: “Today those of us who are left ate together. The scientist is still in her laboratory and the skeptic went down to the Core, to his machine: they argued and each went their own way. I leave their place at the table, just in case.”"
     ]
   },
   "taller.pista": {
@@ -77,7 +77,8 @@
     "superficial": [
       "A huge clock by the starting line of the Test Track. It is out of adjustment: it runs a good while ahead of the time here.",
       "Below it are two wheels, one for the minutes and one for the seconds, turned by hand until it shows the same as the time at this place.",
-      "Whoever sets it right learns to compare two clocks from different places: each has aged at its own pace."
+      "Whoever sets it right learns to compare two clocks from different places: each has aged at its own pace.",
+      "Cut into the frame, in a hurry: “Put out of step by the flight. It only lights from outside.”"
     ]
   },
   "taller.paginas": {
@@ -85,7 +86,8 @@
     "superficial": [
       "The pages missing from the manual, sewn in with red thread, in the Core Room.",
       "“Synchronization. Note how long the Counterweight spends on each leg and the clock each place keeps. Each leg is corrected with the pace of its place: what happens in a slow place counts for less than what happens in a fast one. Add the corrections: that is the drift to take off.”",
-      "An example, in pencil: “Ten minutes at the testing site, five in flight and four at the Workshop.” And at the foot: “The machine keeps its own pace. Match it in the cradle.”"
+      "An example, in pencil: “Ten minutes at the testing site, five in flight and four at the Workshop.” And at the foot: “The machine keeps its own pace. Match it in the cradle.”",
+      "In the margin of the last sheet, in another hand: “Energy is missing. What is missing the Chamber has; there is no other source.”"
     ]
   },
   "taller.pesa_1": {
@@ -113,6 +115,10 @@
       "In the middle of the house, on a stone base, a sphere of light set in its socket. Two rings circle it and turn, each its own way, never touching.",
       "It makes no sound. If you bring your hand close, the air pulls it towards the light, like water towards a drain. Every turn of the rings stitches the same day once more.",
       "Carved into the base, two triangles tip to tip. Below them, tally marks."
+    ],
+    "profunda": [
+      "Under the base, a few handwritten pages: \"I built it to buy time. So that the last quarter of an hour would never end and we could finish.\"",
+      "\"I left it on. I don't know how to switch it off without losing what it holds. Forgive me.\""
     ]
   },
   "taller.rayas": {

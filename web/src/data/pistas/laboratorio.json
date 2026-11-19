@@ -40,9 +40,10 @@
       "requiere": ["contrapeso.que_es"],
       "texto": [
         "Una hoja más, doblada debajo de las otras: «Hay una llamada nueva. Un sistema joven, muy lejos, ha abierto una Boca y está llamando a las nuestras.»",
-        "«No saben lo que hacen. Nosotros tampoco lo sabíamos.»"
+        "«No saben lo que hacen. Nosotros tampoco lo sabíamos.»",
+        "Al dorso de la última hoja, subrayado: «No tiene con qué moverse. Lo que le falta lo tiene él, en la Cámara. Cada uno guarda una mitad»."
       ],
-      "hechos": ["casa.prueba_llama"]
+      "hechos": ["casa.prueba_llama", "contrapeso.necesita_bucle"]
     }
   },
   {
@@ -58,6 +59,14 @@
         "Al final de la última página, con otra presión: «Ya no se puede avisar. Lo que llegue de aquí llegará tarde.»"
       ],
       "hechos": ["silencio.advertencia"]
+    },
+    "profunda": {
+      "requiere": ["silencio.advertencia"],
+      "texto": [
+        "Debajo de la última cifra, otra letra: «Pagarlo, sí. Pero antes hay que tener con qué».",
+        "Querían lo mismo, que a todos les diera tiempo; solo discutían el camino."
+      ],
+      "hechos": ["ellos.querian_lo_mismo"]
     }
   },
   {
@@ -83,10 +92,10 @@
     "borrador": true,
     "superficial": {
       "texto": [
-        "Un cuarto sin techo, con dos camas. Una está hecha, con la manta doblada a los pies. La otra está revuelta, hundida en el sitio de alguien que durmió en ella muchas veces.",
-        "Junto a la cama usada, una vela consumida hasta el plato. Alguien se quedó aquí cuando los demás ya no volvían."
+        "Un cuarto sin techo, con dos camas empujadas una contra otra. Las mantas se doblaron juntas; en una almohada, el hueco de una cabeza; en la otra, el de otra.",
+        "Entre las dos, una vela consumida y dos tazas, una al lado de la otra."
       ],
-      "hechos": ["silencio.uno_se_quedo"]
+      "hechos": ["ellos.se_amaban"]
     }
   },
   {
@@ -101,28 +110,28 @@
         "Está terminado. No tiene ni una marca de uso."
       ],
       "hechos": ["contrapeso.terminado"]
+    },
+    "profunda": {
+      "requiere": ["contrapeso.que_es"],
+      "texto": [
+        "Acercas la mano: algo empuja hacia fuera, como si el aire pesara menos a su alrededor. El reloj del centro corre más deprisa que el tuyo.",
+        "No es un motor que tire de la deuda: es algo que se le opone, como lo contrario de la gravedad."
+      ],
+      "hechos": ["contrapeso.contra_gravedad"]
     }
   },
   {
     "id": "lab.camara",
     "mundo": "laboratorio",
     "tipo": "objeto",
-    "titulo": "La Cámara",
+    "titulo": "La cámara de frío",
     "borrador": true,
     "superficial": {
       "texto": [
-        "Dos anillos cruzados alrededor de un asiento. Un dial de veinticuatro marcas: las seis últimas, encendidas.",
-        "El último cuarto de hora del día, sostenido. Una y otra vez."
+        "Dos anillos cruzados, apagados, alrededor de una losa helada. En ella, de pie bajo la escarcha, alguien con un rombo y un punto en el pecho: lleva ahí mucho tiempo.",
+        "En el borde de la losa, a mano, una sola palabra: «Esperar»."
       ],
-      "hechos": ["bucle.camara"]
-    },
-    "profunda": {
-      "requiere": ["bucle.orden_camara"],
-      "texto": [
-        "Bajo el asiento, unas hojas a mano: «Lo construí para ganar tiempo. Para que el último cuarto de hora no acabara nunca y pudiéramos terminar.»",
-        "«Lo dejé encendido. No sé cómo se apaga sin que se pierda lo que sostiene. Perdonad.»"
-      ],
-      "hechos": ["bucle.culpa"]
+      "hechos": ["ellos.ella_congelada"]
     }
   },
   {

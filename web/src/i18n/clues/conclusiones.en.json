@@ -1,7 +1,7 @@
 {
   "K1": {
-    "titulo": "A slow place exists",
-    "sabe": "There was a secret place where time barely passed.",
+    "titulo": "A place exists where time runs fast",
+    "sabe": "There was a secret place where time ran fast: days went by inside while hours went by outside.",
     "accion": "Look in the sky for something that doesn't move like a star.",
     "pregunta": "Was there somewhere time ran differently?"
   },
@@ -52,5 +52,17 @@
     "sabe": "The Institute’s great test is on day forty since I took off.",
     "accion": "Get home before day forty.",
     "pregunta": "When will the great test be?"
+  },
+  "K9": {
+    "titulo": "Where the loop is and how it is cut",
+    "sabe": "The Chamber is at the heart of the Workshop and a power source holds it up: take it out and the loop is cut.",
+    "accion": "Reach the heart of the Workshop and take the power source out of the Chamber.",
+    "pregunta": "Where is the thing that repeats the cycle, and how is it stopped?"
+  },
+  "K10": {
+    "titulo": "The gates the flight switched off",
+    "sabe": "The energy of the flight switched off certain gates: they can only be lit from outside, by setting their clock right.",
+    "accion": "From outside, set the clock of a switched-off gate right.",
+    "pregunta": "Why are there gates that will not open?"
   }
 }

@@ -77,9 +77,9 @@
       "texto": [
         "Informe del Instituto, sin terminar: la traducción de una placa técnica de los Ausentes.",
         "«Cada paso deja una deuda que…». Lo demás está roto.",
-        "Al margen, con letra de la Directora: «Coste de energía. Se compensa con el generador de la sala de pruebas»."
+        "Al margen, con letra de la Directora: «Coste de energía. Se compensa con el generador de la sala de pruebas: el Motor la sacará de la garganta de la Puerta Mayor»."
       ],
-      "hechos": ["deuda.coste_energia"]
+      "hechos": ["deuda.coste_energia", "casa.motor_energia"]
     },
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],

@@ -32,18 +32,19 @@
     "hilos": ["H1"],
     "frase": "El Consejo ordenó construir un aparato que sostuviera el último cuarto de hora.",
     "rumor": "¿Quién sostiene este ciclo, y por qué?",
-    "enlaces": ["silencio.acta"]
+    "enlaces": ["silencio.acta", "bucle.fuente_poder"]
   },
   {
     "id": "bucle.camara",
     "hilos": ["H1"],
-    "frase": "Un aparato, la Cámara, repite los últimos quince minutos desde que ellos se fueron.",
-    "enlaces": ["bucle.orden_camara", "bucle.culpa"]
+    "frase": "Un aparato, la Cámara, repite los últimos quince minutos desde el centro del Taller; lo sostiene una fuente de poder.",
+    "enlaces": ["bucle.orden_camara", "bucle.culpa", "bucle.fuente_poder"],
+    "pista": "Algo así necesita energía y piezas de sobra; quien lo construyó vivía donde se forjaban las Puertas."
   },
   {
     "id": "bucle.culpa",
     "hilos": ["H1"],
-    "frase": "Quien construyó la Cámara cargaba con la culpa de haberla dejado encendida.",
+    "frase": "El escéptico construyó la Cámara y cargaba con la culpa de haberla dejado encendida.",
     "enlaces": ["bucle.camara"]
   },
   {
@@ -89,7 +90,7 @@
     "id": "deuda.coste_energia",
     "hilos": ["H2"],
     "frase": "El Instituto cree que cada paso por una Puerta cuesta energía.",
-    "enlaces": ["deuda.es_de_tiempo"]
+    "enlaces": ["deuda.es_de_tiempo", "casa.motor_energia"]
   },
   {
     "id": "deuda.filtraciones",
@@ -132,7 +133,7 @@
   {
     "id": "silencio.investigadora",
     "hilos": ["H4"],
-    "frase": "Alguien esperaba a una investigadora que no regresó.",
+    "frase": "Alguien esperaba a la científica, que no regresó.",
     "menciona": ["silencio.advertencia"],
     "enlaces": ["silencio.dos_investigadores"]
   },
@@ -152,7 +153,7 @@
   {
     "id": "silencio.borrado",
     "hilos": ["H4"],
-    "frase": "El informe de la investigadora se archivó tres veces y algo se borró cada vez.",
+    "frase": "El informe de la científica se archivó tres veces y algo se borró cada vez.",
     "enlaces": ["silencio.censura", "silencio.investigadora"]
   },
   {
@@ -177,8 +178,8 @@
   {
     "id": "silencio.dos_investigadores",
     "hilos": ["H4", "H5"],
-    "frase": "La investigadora y el escéptico se fueron al sitio lento y no volvieron a escribir.",
-    "enlaces": ["silencio.investigadora", "lab.existe_lugar_lento"]
+    "frase": "La científica y el escéptico trabajaban en secreto y dejaron de escribir hacia fuera.",
+    "enlaces": ["silencio.investigadora", "lab.existe_lugar_lento", "ellos.se_separaron"]
   },
   {
     "id": "silencio.advertencia",
@@ -201,18 +202,12 @@
     "enlaces": ["silencio.acta"]
   },
   {
-    "id": "silencio.uno_se_quedo",
-    "hilos": ["H3", "H4"],
-    "frase": "Alguien se quedó en el laboratorio.",
-    "enlaces": ["silencio.dos_investigadores"]
-  },
-  {
     "id": "lab.existe_lugar_lento",
     "hilos": ["H5"],
-    "frase": "Hubo un destino secreto donde el tiempo casi no avanzaba.",
+    "frase": "Hubo un destino secreto donde el tiempo corría deprisa.",
     "menciona": ["lab.imagen_desplazada"],
     "enlaces": ["silencio.dos_investigadores", "contrapeso.trasladado"],
-    "pista": "Quien enviaba cargas, o quien esperaba cartas, habría notado un reloj que se quedaba atrás."
+    "pista": "Quien enviaba cargas, o quien esperaba cartas, habría notado un reloj que se adelantaba."
   },
   {
     "id": "lab.imagen_desplazada",
@@ -227,7 +222,7 @@
   {
     "id": "lab.correccion",
     "hilos": ["H5"],
-    "frase": "Para hallar el sitio lento hay que corregir el desplazamiento de su imagen.",
+    "frase": "Para hallar ese sitio hay que corregir el desplazamiento de su imagen.",
     "rumor": "¿Cuánto hay que corregir lo que se ve?",
     "enlaces": ["lab.imagen_desplazada"],
     "pista": "Quien trabajó allí lo dejó dicho, con una voz que hay que saber escuchar; o una consola que sigue las rutas."
@@ -269,7 +264,12 @@
     "id": "contrapeso.que_es",
     "hilos": ["H6"],
     "frase": "El Contrapeso es un motor de reemplazo que «paga» la deuda.",
-    "enlaces": ["contrapeso.sustituye_motor", "deuda.es_de_tiempo"],
+    "enlaces": [
+      "contrapeso.sustituye_motor",
+      "deuda.es_de_tiempo",
+      "contrapeso.contra_gravedad",
+      "contrapeso.necesita_bucle"
+    ],
     "pista": "Donde se fabricaba, alguien escribió cómo se instalaba."
   },
   {
@@ -418,12 +418,6 @@
     "hilos": ["H3"],
     "frase": "Otros llegaron aquí antes que yo, por bocas de épocas distintas. La última fila del muro está en blanco.",
     "enlaces": ["bocas.relojes_distintos"]
-  },
-  {
-    "id": "silencio.no_cruzaron",
-    "hilos": ["H5"],
-    "frase": "Los nombres de los tres del Laboratorio no están en el muro: no llegaron a cruzar.",
-    "enlaces": ["silencio.dos_investigadores"]
   },
   {
     "id": "bocas.vuelta_antes",
@@ -577,5 +571,79 @@
     "rumor": "¿Qué es el símbolo que se repite?",
     "enlaces": ["casa.simbolo_encaja"],
     "dibujo": "placa"
+  },
+  {
+    "id": "bucle.fuente_poder",
+    "hilos": ["H1"],
+    "frase": "La Cámara se sostiene con una fuente de poder: si se la saca de su sitio, el bucle se corta.",
+    "enlaces": ["bucle.camara", "contrapeso.necesita_bucle"],
+    "pista": "Un aparato que repite el tiempo se alimenta de algo que se podría quitar; quien lo ordenó o lo vio lo sabría."
+  },
+  {
+    "id": "bucle.horizonte_tarde",
+    "hilos": ["H1"],
+    "frase": "Si bajo al horizonte sin haber cortado el bucle, las 15:00 llegan antes que yo y despierto de nuevo en Umbral.",
+    "enlaces": ["bucle.camara", "bucle.fuente_poder"]
+  },
+  {
+    "id": "partida.portales_caidos",
+    "hilos": ["H3"],
+    "frase": "La energía de la huida apagó ciertos portales: ya solo se encienden desde fuera.",
+    "enlaces": ["partida.cascada", "contrapeso.medir_desfase"],
+    "pista": "Al huir se gastó mucha energía de golpe; algo se desajustó y nadie pudo arreglarlo desde dentro."
+  },
+  {
+    "id": "contrapeso.contra_gravedad",
+    "hilos": ["H6"],
+    "frase": "El Contrapeso es contrario a la gravedad: por eso evita el desastre y, cerca de él, el tiempo corre deprisa.",
+    "enlaces": ["contrapeso.que_es", "lab.existe_lugar_lento"]
+  },
+  {
+    "id": "contrapeso.necesita_bucle",
+    "hilos": ["H6"],
+    "frase": "El Contrapeso no tiene con qué moverse: le falta la fuente de poder del bucle.",
+    "enlaces": ["bucle.fuente_poder", "contrapeso.que_es"]
+  },
+  {
+    "id": "bocas.arrastre",
+    "hilos": ["H7"],
+    "frase": "La llamada arrastra las bocas que caerían después de la prueba mayor: solo una me deja en casa a salvo.",
+    "enlaces": ["bocas.vuelta_antes", "deuda.puertas_se_buscan"]
+  },
+  {
+    "id": "casa.motor_energia",
+    "hilos": ["H7", "H2"],
+    "frase": "El Motor de casa saca su energía de la garganta de la Puerta Mayor: es la máquina de Cicatriz, reconstruida.",
+    "enlaces": ["deuda.coste_energia", "deuda.garganta_maquina"]
+  },
+  {
+    "id": "ellos.se_amaban",
+    "hilos": ["H8"],
+    "frase": "Compartían cuarto, mesa y pizarra, y se cuidaban con cosas pequeñas.",
+    "enlaces": ["ellos.se_separaron"]
+  },
+  {
+    "id": "ellos.se_separaron",
+    "hilos": ["H8"],
+    "frase": "Discutieron y se separaron: él bajó al centro del Taller y ella se quedó en el Laboratorio.",
+    "enlaces": ["ellos.se_amaban", "ellos.querian_lo_mismo"]
+  },
+  {
+    "id": "ellos.querian_lo_mismo",
+    "hilos": ["H8"],
+    "frase": "Querían lo mismo, tiempo para todos, por caminos distintos: ella, pagar la deuda; él, ganar tiempo.",
+    "enlaces": ["ellos.se_separaron"]
+  },
+  {
+    "id": "ellos.ella_congelada",
+    "hilos": ["H8", "H3"],
+    "frase": "Ella se congeló en el Laboratorio para esperar a que alguien llegara.",
+    "enlaces": ["partida.portales_caidos"]
+  },
+  {
+    "id": "ellos.el_vive",
+    "hilos": ["H8", "H3"],
+    "frase": "Los dos siguen vivos: ninguno cruzó las Puertas.",
+    "enlaces": ["ellos.ella_congelada", "partida.portales_caidos"]
   }
 ]

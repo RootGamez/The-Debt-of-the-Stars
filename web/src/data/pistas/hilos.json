@@ -2,7 +2,7 @@
   {
     "id": "H1",
     "pregunta": "¿Por qué vuelvo a despertar frente a La Boca?",
-    "respuesta": "La Cámara de los Ausentes sostiene los últimos quince minutos usando el instante del colapso; sigue sola desde que ellos se fueron."
+    "respuesta": "La Cámara, en el centro del Taller, sostiene los últimos quince minutos con una fuente de poder; la construyó el escéptico y, sacando la fuente, el bucle se corta."
   },
   {
     "id": "H2",
@@ -12,26 +12,31 @@
   {
     "id": "H3",
     "pregunta": "¿Qué les pasó a los Ausentes?",
-    "respuesta": "Murieron huyendo por las mismas Puertas que los condenaban; la evacuación aceleró la cascada."
+    "respuesta": "Murieron huyendo por las mismas Puertas que los condenaban; la evacuación aceleró la cascada y sus fluctuaciones apagaron portales que dejaron a dos de ellos encerrados."
   },
   {
     "id": "H4",
     "pregunta": "¿Por qué nadie lo detuvo?",
-    "respuesta": "El Consejo ocultó el peligro; la investigadora y el escéptico trabajaron en secreto."
+    "respuesta": "El Consejo ocultó el peligro; la científica y el escéptico trabajaron en secreto."
   },
   {
     "id": "H5",
     "pregunta": "¿Dónde investigaban de verdad?",
-    "respuesta": "En el Sitio Lento, escondido tras la lente del Nudo: lo que se ve en el cielo está desplazado."
+    "respuesta": "En un sitio donde el tiempo corre deprisa, escondido tras la lente del Nudo: lo que se ve en el cielo está desplazado."
   },
   {
     "id": "H6",
     "pregunta": "¿Cómo se detiene?",
-    "respuesta": "Sustituyendo el motor de la máquina de Cicatriz por el Contrapeso, con su reloj sincronizado, durante el pulso."
+    "respuesta": "Sustituyendo el motor de la máquina de Cicatriz por el Contrapeso, con su reloj sincronizado, durante el pulso; y el Contrapeso solo tiene energía con la fuente de poder del bucle."
   },
   {
     "id": "H7",
     "pregunta": "¿Cómo y cuándo vuelvo a casa?",
     "respuesta": "Las bocas tienen relojes distintos: hay que salir por la que llega antes de la prueba mayor del Instituto."
+  },
+  {
+    "id": "H8",
+    "pregunta": "¿Quiénes eran los dos que se quedaron?",
+    "respuesta": "Se querían. Querían lo mismo por caminos distintos y se separaron; cada uno guarda la mitad de lo que hace falta y no pueden juntarlas."
   }
 ]

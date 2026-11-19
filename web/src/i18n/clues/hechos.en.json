@@ -10,10 +10,11 @@
     "rumor": "Who is holding this loop up, and why?"
   },
   "bucle.camara": {
-    "frase": "A device, the Chamber, repeats the last fifteen minutes since they left."
+    "frase": "A device, the Chamber, repeats the last fifteen minutes from the heart of the Workshop; a power source holds it up.",
+    "pista": "Something like that needs energy and spare parts; whoever built it lived where the Gates were forged."
   },
   "bucle.culpa": {
-    "frase": "Whoever built the Chamber carried the guilt of having left it switched on."
+    "frase": "The skeptic built the Chamber and carried the guilt of having left it switched on."
   },
   "deuda.palabra": {
     "frase": "The plaque at the Mouth speaks of \"the count\" that \"begins today\": from the very first day, something was owed."
@@ -57,7 +58,7 @@
     "frase": "A Transit Council authorized the use of the Gates."
   },
   "silencio.investigadora": {
-    "frase": "Someone was waiting for a researcher who never came back."
+    "frase": "Someone was waiting for the scientist, who never came back."
   },
   "silencio.version_oficial": {
     "frase": "The Council declared that the incidents were isolated and posed no risk."
@@ -66,7 +67,7 @@
     "frase": "Three columns of the Index are empty and refer to a \"Sealed Room\"."
   },
   "silencio.borrado": {
-    "frase": "The researcher's report was filed three times and something was erased each time."
+    "frase": "The scientist's report was filed three times and something was erased each time."
   },
   "silencio.acta": {
     "frase": "The Council voted not to report the danger.",
@@ -79,7 +80,7 @@
     "frase": "The Gates were the economy and the pride of the Absent: nobody wanted to stop them."
   },
   "silencio.dos_investigadores": {
-    "frase": "The researcher and the skeptic went to the slow place and never wrote again."
+    "frase": "The scientist and the skeptic worked in secret and stopped writing to the outside."
   },
   "silencio.advertencia": {
     "frase": "The skeptic warned about the Limit and nobody listened.",
@@ -92,12 +93,9 @@
     "frase": "The Council signed the order to stay silent.",
     "rumor": "Who ordered the silence?"
   },
-  "silencio.uno_se_quedo": {
-    "frase": "Someone stayed behind in the laboratory."
-  },
   "lab.existe_lugar_lento": {
-    "frase": "There was a secret destination where time barely advanced.",
-    "pista": "Whoever shipped cargo, or waited for letters, would have noticed a clock falling behind."
+    "frase": "There was a secret destination where time ran fast.",
+    "pista": "Whoever shipped cargo, or waited for letters, would have noticed a clock running ahead."
   },
   "lab.imagen_desplazada": {
     "frase": "Near the Knot the stars appear where they are not: what you see is not where it seems.",
@@ -105,7 +103,7 @@
     "pista": "Someone who watched the sky for a living would have written it down; or a light that only comes in for a while."
   },
   "lab.correccion": {
-    "frase": "To find the slow place you must correct the displacement of its image.",
+    "frase": "To find that place you must correct the displacement of its image.",
     "rumor": "How much must what you see be corrected?",
     "pista": "Someone who worked there left it said, in a voice you must learn to hear; or a console that follows the routes."
   },
@@ -202,9 +200,6 @@
   "puertas.otros_viajeros": {
     "frase": "Others arrived here before me, through mouths from different eras. The last row of the wall is blank."
   },
-  "silencio.no_cruzaron": {
-    "frase": "The names of the three from the Laboratory are not on the wall: they never crossed."
-  },
   "bocas.vuelta_antes": {
     "frase": "Counting the drift, only one of the mouths at home puts me back before the great test."
   },
@@ -293,5 +288,43 @@
   "cicatriz.firma": {
     "frase": "Every Gate sings its own figure: the symbol is the signature of its frequency.",
     "rumor": "What is the symbol that keeps repeating?"
+  },
+  "bucle.fuente_poder": {
+    "frase": "The Chamber is held up by a power source: take it out of its place and the loop is cut.",
+    "pista": "A device that repeats time feeds on something that could be taken away; whoever ordered it or saw it would know."
+  },
+  "bucle.horizonte_tarde": {
+    "frase": "If I go down to the horizon without having cut the loop, 15:00 arrives before I do and I wake up again at Threshold."
+  },
+  "partida.portales_caidos": {
+    "frase": "The energy of the flight switched off certain gates: now they can only be lit from outside.",
+    "pista": "So much energy was spent at once in the flight; something went out of tune and nobody could mend it from inside."
+  },
+  "contrapeso.contra_gravedad": {
+    "frase": "The Counterweight works against gravity: that is why it averts the disaster and why, near it, time runs fast."
+  },
+  "contrapeso.necesita_bucle": {
+    "frase": "The Counterweight has nothing to run on: it lacks the power source of the loop."
+  },
+  "bocas.arrastre": {
+    "frase": "The call drags down the mouths that would land after the great test: only one leaves me safe at home."
+  },
+  "casa.motor_energia": {
+    "frase": "The Motor at home draws its energy from the throat of the Great Gate: it is the machine of Scar, rebuilt."
+  },
+  "ellos.se_amaban": {
+    "frase": "They shared a room, a table and a blackboard, and looked after each other with small things."
+  },
+  "ellos.se_separaron": {
+    "frase": "They argued and parted: he went down to the heart of the Workshop and she stayed in the Laboratory."
+  },
+  "ellos.querian_lo_mismo": {
+    "frase": "They wanted the same thing, time for everyone, by different roads: she to pay the debt, he to gain time."
+  },
+  "ellos.ella_congelada": {
+    "frase": "She froze herself in the Laboratory to wait until someone arrived."
+  },
+  "ellos.el_vive": {
+    "frase": "Both are still alive: neither crossed the Gates."
   }
 }
