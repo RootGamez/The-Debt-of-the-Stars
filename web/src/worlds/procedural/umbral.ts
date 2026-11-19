@@ -13,6 +13,7 @@ import {
   DoubleSide,
   Group,
   InstancedMesh,
+  Matrix4,
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
@@ -38,6 +39,7 @@ import {
   headingTowards,
   latLon,
   marker,
+  pieceMatrix,
   PieceSet,
   piecesToMeshes,
   rampMatrix,
@@ -73,6 +75,15 @@ import { frostAmount } from './umbralFrost';
 import { windDust } from './wind';
 
 export const UMBRAL_ID = 'umbral';
+/**
+ * El ancla del Mirador del Ocaso: en el centro de la cara de arriba del asiento del banco, con el marco del lugar
+ * (Z arriba, +Y hacia la Brasa). Dentro van sueltas las dos tazas (`_Taza0` a la izquierda, `_Taza1`) y la carta.
+ */
+export const MIRADOR_ID = 'umbral_Mirador';
+/** Lo alto de la cara de arriba del asiento sobre la plataforma del Mirador (m). */
+export const MIRADOR_SEAT_TOP = 0.52;
+/** Dónde están las dos tazas a lo largo del banco (m). */
+const MIRADOR_CUPS = [-0.75, 0.75] as const;
 export const UMBRAL_RADIUS = 90;
 /** Subdivisión del terreno: ≈ 48 mil triángulos (presupuesto orientativo, ver CONTEXTO_PLANETAS.md §2). */
 export const UMBRAL_DETAIL = 48;
@@ -328,10 +339,42 @@ interface MarkerSpec {
   props?: Record<string, string | number>;
 }
 
+/** Una pieza suelta del Mirador (taza o carta): su sitio sobre el asiento, su giro y su geometría. */
+interface LookoutItem {
+  name: string;
+  at: Triple;
+  turn: number;
+  pieces: PieceSet;
+}
+
+/** El ancla del Mirador con las tazas y la carta sueltas (cada una, su malla con nombre). */
+function lookoutAnchor(
+  seat: Matrix4,
+  items: readonly LookoutItem[],
+  material: MeshStandardMaterial,
+): Group {
+  const anchor = new Group();
+  anchor.name = MIRADOR_ID;
+  seat.decompose(anchor.position, anchor.quaternion, anchor.scale);
+  for (const item of items) {
+    const mesh = new Mesh(mergeGeometries(item.pieces.parts.stone), material);
+    mesh.name = item.name;
+    mesh.position.set(...item.at);
+    mesh.rotation.z = item.turn;
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    anchor.add(mesh);
+  }
+  return anchor;
+}
+
 class UmbralBuilder {
   readonly pieces = new PieceSet(3);
   readonly flash = new PieceSet(5);
   readonly markers: MarkerSpec[] = [];
+  readonly lookoutItems: LookoutItem[] = [];
+  /** El centro de la cara de arriba del asiento del Mirador (marco del lugar). */
+  lookoutSeat: Matrix4 | undefined;
   readonly site: ReturnType<typeof sites>;
 
   constructor(
@@ -878,15 +921,28 @@ class UmbralBuilder {
     );
     for (const x of [-0.8, 0.8])
       v.add(P.rock, box(), f.at([x, 0.3, top + 0.2], undefined, [0.3, 0.46, 0.4]));
-    for (const x of [-0.75, 0.75]) {
-      v.add(P.porcelain, cylinder(0.06, 10), f.at([x, 0.38, top + 0.58], undefined, [1, 1, 0.12]));
-      v.add(
+    // Las tazas y la carta van sueltas en `umbral_Mirador` (el asiento): la cinemática del final bueno las mueve.
+    const seat = f.at([0, 0.3, top + MIRADOR_SEAT_TOP]);
+    const loose = (name: string, at: Triple, turn: number): PieceSet => {
+      const pieces = new PieceSet(this.lookoutItems.length + 11);
+      this.lookoutItems.push({ name, at, turn, pieces });
+      return pieces;
+    };
+    MIRADOR_CUPS.forEach((x, k) => {
+      const cup = loose(`${MIRADOR_ID}_Taza${k}`, [x, 0.08, 0], 0);
+      cup.add(P.porcelain, cylinder(0.06, 10), pieceMatrix([0, 0, 0.06], undefined, [1, 1, 0.12]));
+      cup.add(
         P.porcelain,
         torus(0.035, 0.012, 8, 4),
-        f.at([x + 0.07, 0.38, top + 0.58], [0, 0, Math.PI / 2]),
+        pieceMatrix([0.07, 0, 0.06], [0, 0, Math.PI / 2]),
       );
-    }
-    v.add(P.paper, box(), f.at([0.05, 0.25, top + 0.53], [0, 0, 0.3], [0.26, 0.18, 0.015]));
+    });
+    loose(`${MIRADOR_ID}_Carta`, [0.05, -0.05, 0], 0.3).add(
+      P.paper,
+      box(),
+      pieceMatrix([0, 0, 0.01], undefined, [0.26, 0.18, 0.015]),
+    );
+    this.lookoutSeat = seat;
     this.lamp(f, -2.6, -1.6, top);
     this.ramp(f, [0, -3.45, top + 0.06], [0, -5.3]);
     this.mark('INT_carta_mirador', f, [0.05, 0.1, top + 0.7], {
@@ -1447,6 +1503,8 @@ export function buildUmbral({ detail = UMBRAL_DETAIL }: UmbralOptions = {}): Gro
   frame.add(groundCollider);
 
   for (const mesh of piecesToMeshes(builder.pieces, materials, 'umbral')) frame.add(mesh);
+  if (builder.lookoutSeat)
+    frame.add(lookoutAnchor(builder.lookoutSeat, builder.lookoutItems, materials.stone));
 
   const random = seededRandom(41);
   const groundRadius = (d: XYZ): number => relief.groundRadius(d);
