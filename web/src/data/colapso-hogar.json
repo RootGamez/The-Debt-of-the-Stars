@@ -1,0 +1,14 @@
+{
+  "_fuente": "docs/plan-finales.md, F5 «Llegas tarde» (🟡 todo: tiempos y tamaños para ajustar jugando). Segundos reales desde que se llega a Hogar diez años después. `llegada`: lo que dura la escena de llegada por cada camino (por La Boca, a pie por la Puerta Mayor; por el Archivo, en el Albatros II sobre Hogar). `paseo`: el rato libre para andar y reconocer la casa antes de las señales. `eventos`: desde el final del paseo, con los mismos ids que la cronología del ciclo (así suenan la música y los efectos del ciclo); `agujero_negro` no va aquí: empieza solo cuando nace el agujero. `escena`: cuándo empieza la escena del colapso (desde el final del paseo) y cuánto dura; al acabar, la tarjeta. `agujero`: cuándo nace (desde el principio de la escena), cuánto tarda en crecer del todo y hasta qué radio (m). `absorcion`: la ventana en que se traga cada mundo (desde el principio de la escena). `fundido`: el negro del final (desde el principio de la escena).",
+  "llegada": { "boca": 16, "archivo": 13 },
+  "paseo": 75,
+  "eventos": [
+    { "id": "senales", "t": 0, "duracion": 46 },
+    { "id": "pulso_cicatriz", "t": 24, "duracion": 6 },
+    { "id": "cielo_rojo", "t": 30, "duracion": 80 }
+  ],
+  "escena": { "inicio": 42, "duracion": 54 },
+  "agujero": { "nace": 4, "crece": 40, "radio": 46 },
+  "absorcion": { "hogar": [17, 44], "luna": [21, 38] },
+  "fundido": [44, 50]
+}

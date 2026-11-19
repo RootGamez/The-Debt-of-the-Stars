@@ -726,4 +726,12 @@ export const EN: Readonly<Record<string, string>> = {
   'Esc otra vez para saltar la escena': 'Esc again to skip the scene',
   'Espacio pausa · Intro plano siguiente · Esc saltar': 'Space pause · Enter next shot · Esc skip',
   'Pulsa una tecla para oír la escena': 'Press a key to hear the scene',
+  // El final malo (F5): Hogar diez años después y el colapso (borrador).
+  'Diez años encendido. Nunca había sonado así.': 'Ten years lit. It never sounded like this.',
+  'Siempre dijimos que volverías por esa Puerta.':
+    "We always said you'd come back through that Gate.",
+  'Mira la Luna. Se está yendo hacia él.': "Look at the Moon. It's falling towards it.",
+  'Una Ool mayor': 'An elder Ool',
+  'Llegada a Hogar': 'Arrival at Home',
+  'El colapso de Hogar': 'The collapse of Home',
 };
