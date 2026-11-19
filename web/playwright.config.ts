@@ -7,6 +7,8 @@ const PORT = 4180;
 export default defineConfig({
   testDir: 'e2e',
   timeout: 60_000,
+  // WebGL por software va lento: las esperas de `expect` (5 s por defecto) se quedaban cortas.
+  expect: { timeout: 15_000 },
   fullyParallel: true,
   // WebGL por software consume mucha CPU: pocos navegadores a la vez para que no se ralentice.
   workers: 2,

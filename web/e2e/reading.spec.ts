@@ -4,6 +4,11 @@
 import { expect, test, type Page } from '@playwright/test';
 import { closeReader, loopValue, snapshot, startPlaying } from './helpers';
 
+// Con WebGL por software el juego va varias veces más lento que el tiempo real: margen amplio.
+test.beforeEach(() => {
+  test.setTimeout(180_000);
+});
+
 async function facts(page: Page): Promise<string[]> {
   return (await snapshot(page))?.registry.facts ?? [];
 }
@@ -86,10 +91,10 @@ test('the Registro lists facts by thread, rumors as questions and unlocked concl
   const registry = page.locator('.registry');
   await expect(registry).toBeVisible();
   await expect(registry).toContainText('Los relojes de dos mundos se separan');
-  await expect(registry).toContainText('Hubo un destino secreto donde el tiempo casi no avanzaba');
+  await expect(registry).toContainText('Hubo un destino secreto donde el tiempo corría deprisa');
   await expect(registry).toContainText('? ¿Dónde está ese sitio'); // rumor
   await expect(registry).toContainText('Lo que sé');
-  await expect(registry).toContainText('Existe un sitio lento'); // K1
+  await expect(registry).toContainText('Existe un sitio donde el tiempo corre deprisa'); // K1
   await page.keyboard.press('Escape');
   await expect(registry).toBeHidden();
 });
@@ -100,15 +105,16 @@ test('witnessing the flash of La Boca at 10:00 notes its fact', async ({ page })
   // Justo antes de las 10:00: no depende de lo que tarde en cargar el mundo.
   await page.evaluate(() => window.__juego?.skipTo?.(598.5));
 
-  await expect.poll(() => facts(page)).toContain('deuda.puertas_se_buscan');
+  await expect.poll(() => facts(page), { timeout: 60_000 }).toContain('deuda.puertas_se_buscan');
   await expect(page.locator('.notice')).toContainText('Anotado en el Registro');
 });
 
 test('what was learned survives dying and reloading', async ({ page }) => {
   await startPlaying(page, '&ciclo=12');
   await solveNotebook(page);
+  await page.evaluate(() => window.__juego?.skipTo?.(10));
 
-  await expect.poll(() => loopValue(page, 'loops'), { timeout: 60_000 }).toBe(1);
+  await expect.poll(() => loopValue(page, 'loops'), { timeout: 120_000 }).toBe(1);
   expect(await facts(page)).toContain('deuda.relojes_se_separan');
 
   await page.reload();
@@ -120,7 +126,8 @@ test('what was learned survives dying and reloading', async ({ page }) => {
 test('"Empezar de cero" also erases the Registro', async ({ page }) => {
   await startPlaying(page, '&ciclo=10');
   await solveNotebook(page);
-  await expect.poll(() => loopValue(page, 'loops'), { timeout: 60_000 }).toBe(1);
+  await page.evaluate(() => window.__juego?.skipTo?.(8));
+  await expect.poll(() => loopValue(page, 'loops'), { timeout: 120_000 }).toBe(1);
 
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Empezar de cero', exact: true }).click();

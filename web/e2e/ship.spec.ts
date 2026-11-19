@@ -158,6 +158,7 @@ test('cannot step out while flying', async ({ page }) => {
 test('diving in free mode crashes the ship and the cycle starts again by La Boca', async ({
   page,
 }) => {
+  test.setTimeout(180_000);
   await startPlaying(page);
   await board(page);
   await shipTo(page, 'umbral', 80);
@@ -165,10 +166,10 @@ test('diving in free mode crashes the ship and the cycle starts again by La Boca
 
   await page.keyboard.down('KeyC');
   await expect
-    .poll(() => snapshot(page).then((s) => s?.loop.phase), { timeout: 20_000 })
+    .poll(() => snapshot(page).then((s) => s?.loop.phase), { timeout: 60_000 })
     .not.toBe('playing');
   await page.keyboard.up('KeyC');
 
-  await expect.poll(() => snapshot(page).then((s) => s?.loop.loops), { timeout: 20_000 }).toBe(1);
+  await expect.poll(() => snapshot(page).then((s) => s?.loop.loops), { timeout: 90_000 }).toBe(1);
   expect(await ship(page)).toMatchObject({ piloting: false, landed: true, frame: 'umbral' });
 });
