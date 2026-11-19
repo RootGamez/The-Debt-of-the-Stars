@@ -20,8 +20,11 @@ export async function intoTheCradle(page: Page): Promise<void> {
   await page.keyboard.press('KeyE');
   await expect(page.locator('.reader-title')).toHaveText('Las notas de la científica');
   await closeReader(page);
-  // Las notas ya dicen que está terminado: el Contrapeso no tiene nada nuevo y se coge sin examinarlo.
+  // Con lo que dicen las notas, el Contrapeso se puede examinar a fondo (su lectura profunda): se examina y se coge.
   await standAt(page, 'lab.contrapeso');
+  await expect(page.locator('.prompt')).toHaveText('E · examinar');
+  await page.keyboard.press('KeyE');
+  await closeReader(page);
   await expect(page.locator('.prompt')).toHaveText('E · coger');
   await page.keyboard.press('KeyE');
   await expect.poll(async () => (await counterweight(page))?.place).toBe('carried');

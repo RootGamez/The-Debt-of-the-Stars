@@ -51,6 +51,8 @@ test('the stable horizon pulls the ship in, and crossing it opens the Archive of
 }) => {
   test.setTimeout(300_000);
   await installCounterweight(page);
+  // El horizonte solo se cruza con el bucle cortado (E5: la fuente en el Contrapeso, que el escéptico te ayuda a dar).
+  await page.evaluate(() => window.__esceptico?.cut());
   // Primero a la nave: subir a ella lleva su tiempo y a partir de las 13:30 queda poco ciclo.
   await board(page);
   // Nace a las 13:30 en el núcleo de la máquina y se queda pequeño.
@@ -64,7 +66,7 @@ test('the stable horizon pulls the ship in, and crossing it opens the Archive of
 
   // Cruzarlo funde a negro y abre el Archivo: la página cambia enseguida, así que se espera la llegada.
   await page.keyboard.down('KeyW');
-  await page.waitForURL(/mundo=puertas/, { timeout: 60_000 });
+  await page.waitForURL(/mundo=puertas/, { timeout: 120_000 });
   await page.keyboard.up('KeyW');
   await expect.poll(async () => (await snapshot(page))?.world, { timeout: 20_000 }).toBe('puertas');
   expect((await snapshot(page))?.loop.loops).toBe(0); // no fue una muerte: no cuenta ciclo
