@@ -130,6 +130,31 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - **Bitácora de mundos**: los mundos ya no se nombran. La primera vez que se llega a uno sale su carta (`ui/worldDiscovery.ts`: dibujo, nombre oficial y la descripción `about` de `WORLD_LOG` en `worlds/worldLog.ts`; E, Intro, Espacio o Esc la pegan en el cuaderno). Los dibujos están en `ui/worldDrawings.ts` (herramientas en `worldDrawingsPaint.ts`; Taller, Cicatriz, Observatorio y la Brasa con el Cerco en `worldDrawingsFar.ts`). Los dos anclajes comparten el dibujo de la Brasa.
 - Los croquis del cuaderno (`dibujo` en los hechos) están en `ui/notebookSketches.ts` (trazos puros, con texto alternativo en los dos idiomas).
 
+## Cinemáticas (F3; plan: `docs/plan-finales.md`)
+
+- **El director** (`web/src/cinematic/`, puro y con tests; lo reutilizan F4 y F5): una `Cinematic` (`timeline.ts`) es una
+  línea de tiempo en segundos con `shots` seguidos (cada uno con claves de cámara `{t, pos, look, fov?, roll?}` desde su
+  principio, `ease` y la clave `rest` para movimiento reducido), `lines` (subtítulos: `speaker` y el texto en español,
+  que es la clave de `t()`), `cues` (señales; `persistent` las aplica aunque se salte por encima: música, luz) y
+  `tracks` (números con claves, suavizados: `bars`, `fade`, `haze` y los que quiera la escena). `validateCinematic` va en
+  el test de cada escena. La cámara es Catmull-Rom con tiempos (`cameraTrack.ts`), el ritmo `easing.ts` y el
+  reproductor `playback.ts` (inmutable: precarga en negro, pausa, plano siguiente, Esc dos veces salta).
+- **En el navegador**: `game/cinematicRunner.ts` (genérico) junta guion, reproductor y la capa DOM
+  `ui/cinematicLayer.ts` + `cinematic.css` (franjas, negro, viñeta, subtítulos con el signo de quien habla y su voz de
+  letras, avisos y tres mandos de 44 px). Las claves están en el marco de un `Object3D` (su Z es «arriba»). Se queda las
+  teclas (Espacio, Intro, Esc; la M sigue silenciando) y llama a `onEnd` una vez. `body.cinematica` esconde el resto de
+  la interfaz. La cámara se pone después de `systemScene.update` (las mareas reponen el fov cada fotograma).
+- **El Mirador** (final A): tras la Maestra, `homecomingRig` (fase `mirador`) llama a `crossings.toMirador()`, que
+  recarga en negro en `?mundo=umbral&escena=mirador` (solo con el final A guardado o `?debug`). Guion en
+  `game/miradorScene.ts` (🟡 planos, frases y ritmo: borrador), montaje en `game/miradorRig.ts`: los dos Ausentes en el
+  ancla `umbral_Mirador` (`MIRADOR_ID`, centro del asiento; las tazas y la carta son mallas sueltas de ella), el
+  sistema fijo en `MIRADOR_SYSTEM_TIME`, dos luces de relleno (en la raíz, tras la estrella) y el punto quieto
+  (`render/stillPoint.ts`) sobre Cicatriz. Los gestos sentados son `character/absentGestures.ts` (mirar, alzar la vista,
+  ladear, la taza); el giro de los brazos para abrazar la taza se mide en el muñeco (`character/absentGrip.ts`). Acaba
+  en la tarjeta del final A. Música: `music.umbral` y, al final, `music.main` (nada generado).
+- Con `?debug`: `__juego.mirador()` (estado, plano, el punto y marcas para encuadrar en cm) y `__juego.miradorSeek(s)`
+  (salta en pausa; `miradorSeek(130)` acaba y saca la tarjeta).
+
 ## Soles, el Cerco y la luz (plan: `docs/plan-soles-y-luz-dinamica.md`)
 
 - Las estrellas son esferas modeladas (`render/starModel.ts`, superficie pura en `starSurface.ts`). Cada sistema declara su `estrella` en `data/sistema*.json`: `tipo` (`solar` en casa, `enana_roja` en el sistema ajeno, `lejana` en las Puertas), colores, `intensidad`, `caida` (cómo cae la luz con la distancia; 0,5 en el sistema ajeno), `manchas`, `giro`. Se validan en `system/systemData.ts`. `system/starLight.ts` da la intensidad de la luz para que a la distancia de referencia (el mundo de la nave) valga lo que dice el archivo.
