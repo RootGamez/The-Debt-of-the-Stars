@@ -8,7 +8,7 @@
     "borrador": true,
     "superficial": {
       "texto": [
-        "Una pizarra llena hasta los bordes. Una ecuación larga que se interrumpe a la mitad; al lado, la tiza partida.",
+        "Una pizarra llena hasta los bordes. Una ecuación larga, de letra redonda, que se interrumpe a la mitad; varias líneas tienen tachaduras en rojo, secas, de otra mano. Al lado, la tiza partida.",
         "En una esquina, en letra pequeña: «Si sale por la Boca, sumar. Si sale por el Pozo, restar. NO olvidar el retraso del camino»."
       ],
       "hechos": []
@@ -26,13 +26,13 @@
     "id": "lab.notas_investigadora",
     "mundo": "laboratorio",
     "tipo": "texto",
-    "titulo": "Las notas de la investigadora",
+    "titulo": "Las notas de la científica",
     "borrador": true,
     "superficial": {
       "texto": [
-        "«Día 61 de aquí. Allí fuera habrán pasado casi diez meses. Está terminado. No lo hemos probado: probarlo es encenderlo, y encenderlo es ponerlo en lugar del motor.»",
+        "«Día 1.300 de aquí. Fuera, 260. Está terminado. No lo hemos probado: probarlo es ponerlo en lugar del motor.»",
         "«Es un motor de reemplazo. No arregla la deuda: la paga, poco a poco, en vez de dejar que se cobre de golpe.»",
-        "«Si alguien lee esto: llévalo a la máquina de Cicatriz. Va donde va el motor viejo.»"
+        "«Si lees esto, no corras: llévalo a la máquina de Cicatriz. Va donde va el motor viejo.»"
       ],
       "hechos": ["contrapeso.terminado", "contrapeso.que_es", "contrapeso.sustituye_motor"]
     },
@@ -63,7 +63,7 @@
     "profunda": {
       "requiere": ["silencio.advertencia"],
       "texto": [
-        "Debajo de la última cifra, otra letra: «Pagarlo, sí. Pero antes hay que tener con qué».",
+        "Debajo de la última cifra, con otra letra, redonda: «Pagarlo, sí. Pero antes hay que tener con qué». Es la letra de la científica.",
         "Querían lo mismo, que a todos les diera tiempo; solo discutían el camino."
       ],
       "hechos": ["ellos.querian_lo_mismo"]
@@ -78,7 +78,7 @@
     "superficial": {
       "texto": [
         "Un sobre con el sello del Consejo, abierto con cuidado y vuelto a cerrar. Dentro, una sola hoja:",
-        "«Por el bien de la red y de quienes dependen de ella, las conclusiones del grupo del Sitio Lento no saldrán de este lugar. No se enviarán mediciones. No se harán advertencias. Cualquier comunicación pasará antes por el Consejo.»",
+        "«Por el bien de la red y de quienes dependen de ella, las conclusiones del grupo de la Ruta 7 no saldrán de este lugar. No se enviarán mediciones. No se harán advertencias. Cualquier comunicación pasará antes por el Consejo.»",
         "La firma está emborronada, como si alguien hubiera pasado el pulgar por encima muchas veces."
       ],
       "hechos": ["silencio.orden"]
@@ -92,7 +92,7 @@
     "borrador": true,
     "superficial": {
       "texto": [
-        "Un cuarto sin techo, con dos camas empujadas una contra otra. Las mantas se doblaron juntas; en una almohada, el hueco de una cabeza; en la otra, el de otra.",
+        "Un cuarto sin techo, con dos camas empujadas una contra otra. En una, las mantas revueltas y el hueco de una cabeza en la almohada. La otra, hecha con cuidado, sin una arruga: nadie ha dormido en ella desde hace mucho.",
         "Entre las dos, una vela consumida y dos tazas, una al lado de la otra."
       ],
       "hechos": ["ellos.se_amaban"]
@@ -107,7 +107,7 @@
     "superficial": {
       "texto": [
         "Sobre su peana, entre dos soportes, un aparato del tamaño de un brazo: anillos de latón encajados unos dentro de otros, con un reloj pequeño en el centro.",
-        "Está terminado. No tiene ni una marca de uso."
+        "En la base, grabado, un rombo con un punto dentro. Está terminado. No tiene ni una marca de uso."
       ],
       "hechos": ["contrapeso.terminado"]
     },
@@ -143,7 +143,7 @@
     "ambiente": true,
     "superficial": {
       "texto": [
-        "Estanterías de cajas de cinta, etiquetadas por ciclos. En la pared, dos relojes: «Dentro» y «Fuera». El de fuera da cinco vueltas por cada una del de dentro.",
+        "Estanterías de cajas de cinta, etiquetadas por ciclos. En la pared, dos relojes: «Dentro» y «Fuera». El de dentro da cinco vueltas por cada una del de fuera.",
         "En la mesa, una columna de cifras que sube y sube: «Lo que tarda en llegar aquí un mensaje de fuera. Lo que tarda en salir uno nuestro». Al final, subrayado: «Siempre tarde»."
       ],
       "hechos": []
@@ -159,7 +159,7 @@
     "superficial": {
       "texto": [
         "Un aparato de pizarra con cinco diales; una luz roja que ya no parpadea. En el muro, tiras de papel clavadas: mensajes recibidos, cada uno con dos fechas, la de fuera y la de aquí.",
-        "El último: «Consejo a Sitio Lento. Mantengan el silencio. Las Puertas siguen abiertas». Debajo, una respuesta escrita y nunca enviada: «Cerradlas»."
+        "El último: «Consejo a Ruta 7. Mantengan el silencio. Las Puertas siguen abiertas». Debajo, escrita a mano y nunca enviada, una respuesta: «Cerradlas»."
       ],
       "hechos": []
     }
@@ -188,7 +188,7 @@
     "ambiente": true,
     "superficial": {
       "texto": [
-        "Una pared entera de rayas, de cinco en cinco. Arriba, «aquí»: unos pocos meses. Abajo, en rojo, «fuera»: la cuenta no cabe y sigue por el borde de la pared.",
+        "Una pared entera de rayas, de cinco en cinco. Arriba, «aquí»: la cuenta no cabe y sigue por el borde de la pared. Abajo, en rojo, «fuera»: unos pocos meses.",
         "Al final de la fila de «aquí», una raya más corta que las demás, como si quien la hacía se hubiera cansado a mitad."
       ],
       "hechos": []

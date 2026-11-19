@@ -2,7 +2,7 @@
   "lab.pizarra": {
     "titulo": "The blackboard",
     "superficial": [
-      "A blackboard full to the edges. A long equation that stops halfway; beside it, the broken chalk.",
+      "A blackboard full to the edges. A long equation in round handwriting that stops halfway; several lines have dry red strokes through them, in another hand. Beside it, the broken chalk.",
       "In a corner, in small letters: \"If it leaves through the Mouth, add. If it leaves through the Well, subtract. DO NOT forget the delay of the journey.\""
     ],
     "profunda": [
@@ -11,11 +11,11 @@
     ]
   },
   "lab.notas_investigadora": {
-    "titulo": "The researcher's notes",
+    "titulo": "The scientist's notes",
     "superficial": [
-      "\"Day 61 in here. Out there, almost ten months must have passed. It is finished. We have not tested it: testing it means switching it on, and switching it on means putting it in place of the engine.\"",
+      "\"Day 1,300 in here. Out there, 260. It is finished. We have not tested it: testing it means putting it in place of the engine.\"",
       "\"It is a replacement engine. It does not fix the debt: it pays it, little by little, instead of letting it be collected all at once.\"",
-      "\"If anyone reads this: take it to the machine on Scar. It goes where the old engine goes.\""
+      "\"If you read this, don't hurry: take it to the machine on Scar. It goes where the old engine goes.\""
     ],
     "profunda": [
       "One more page, folded under the others: \"There is a new call. A young system, very far away, has opened a Mouth and is calling ours.\"",
@@ -31,7 +31,7 @@
       "At the end of the last page, pressed harder: \"It is too late to warn anyone. Whatever leaves this place will arrive late.\""
     ],
     "profunda": [
-      "Under the last figure, another hand: “Pay it, yes. But first you need something to pay with.”",
+      "Under the last figure, in another hand, round: “Pay it, yes. But first you need something to pay with.” It is the scientist's hand.",
       "They wanted the same thing, that there be time for everyone; they only argued over the road."
     ]
   },
@@ -39,14 +39,14 @@
     "titulo": "The order of silence",
     "superficial": [
       "An envelope with the Council's seal, carefully opened and closed again. Inside, a single sheet:",
-      "\"For the good of the network and of all who depend on it, the conclusions of the Slow Site group will not leave this place. No measurements will be sent. No warnings will be given. Any communication will first pass through the Council.\"",
+      "\"For the good of the network and of all who depend on it, the conclusions of the Route 7 group will not leave this place. No measurements will be sent. No warnings will be given. Any communication will first pass through the Council.\"",
       "The signature is smudged, as if someone had run a thumb over it many times."
     ]
   },
   "lab.dormitorio": {
     "titulo": "The shared dormitory",
     "superficial": [
-      "A room without a roof, with two beds pushed against each other. The blankets were folded together; on one pillow, the hollow of a head; on the other, that of another.",
+      "A room without a roof, with two beds pushed against each other. In one, the blankets are rumpled and there is the hollow of a head on the pillow. The other is made up with care, without a crease: nobody has slept in it for a long time.",
       "Between the two, a burned-down candle and two cups, side by side."
     ]
   },
@@ -54,7 +54,7 @@
     "titulo": "The Counterweight",
     "superficial": [
       "On its stand, between two supports, a device the size of an arm: brass rings nested one inside another, with a small clock at the centre.",
-      "It is finished. It has not a single mark of use."
+      "On its base, engraved, a diamond with a dot inside. It is finished. It has not a single mark of use."
     ],
     "profunda": [
       "You bring your hand close: something pushes outward, as if the air weighed less around it. The clock at the centre runs faster than yours.",
@@ -71,7 +71,7 @@
   "lab.mediciones": {
     "titulo": "The Archive of Measurements",
     "superficial": [
-      "Shelves of tape boxes, labelled by cycle. On the wall, two clocks: \"Inside\" and \"Outside\". The outside one turns five times for every turn of the inside one.",
+      "Shelves of tape boxes, labelled by cycle. On the wall, two clocks: \"Inside\" and \"Outside\". The inside one turns five times for every turn of the outside one.",
       "On the table, a column of figures climbing and climbing: \"How long a message from outside takes to arrive here. How long one of ours takes to leave.\" At the bottom, underlined: \"Always late.\""
     ]
   },
@@ -79,7 +79,7 @@
     "titulo": "The Radio Room",
     "superficial": [
       "A slate cabinet with five dials; a red light that no longer blinks. On the wall, strips of paper pinned up: messages received, each with two dates, the one outside and the one in here.",
-      "The last one: \"Council to Slow Site. Keep silent. The Gates remain open.\" Under it, a reply written and never sent: \"Close them.\""
+      "The last one: \"Council to Route 7. Keep silent. The Gates remain open.\" Under it, a reply written by hand and never sent: \"Close them.\""
     ]
   },
   "lab.comedor": {
@@ -92,7 +92,7 @@
   "lab.calendario": {
     "titulo": "The tally calendar",
     "superficial": [
-      "A whole wall of tally marks, in fives. At the top, \"here\": a few months. Below, in red, \"outside\": the count does not fit and runs on along the edge of the wall.",
+      "A whole wall of tally marks, in fives. At the top, \"here\": the count does not fit and runs on along the edge of the wall. Below, in red, \"outside\": a few months.",
       "At the end of the \"here\" row, one mark shorter than the rest, as if whoever made it had tired halfway through."
     ]
   },
