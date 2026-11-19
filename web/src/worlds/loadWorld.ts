@@ -17,16 +17,19 @@ export interface LoadedWorld {
   markers: WorldMarkers;
 }
 
-/** El mundo construido por código, o `undefined` si no hay constructor para ese id. */
-export function buildWorld(worldId: string): LoadedWorld | undefined {
-  const scene = buildProceduralScene(worldId);
+/**
+ * El mundo construido por código, o `undefined` si no hay constructor para ese id. `variant`: otra versión del mismo
+ * mundo (solo Hogar: `despues`, diez años después, F5); un mundo que no la tiene falla.
+ */
+export function buildWorld(worldId: string, variant?: string): LoadedWorld | undefined {
+  const scene = buildProceduralScene(worldId, variant);
   if (!scene) return undefined;
   return { scene, info: readWorldInfo(scene, worldId), markers: collectMarkers(scene) };
 }
 
-/** El mundo `worldId`, construido por código; falla si no existe. */
-export function loadWorld(worldId: string): LoadedWorld {
-  const built = buildWorld(worldId);
+/** El mundo `worldId` (en su variante, si se pide), construido por código; falla si no existe. */
+export function loadWorld(worldId: string, variant?: string): LoadedWorld {
+  const built = buildWorld(worldId, variant);
   if (!built) throw new WorldDataError(`No hay ningún mundo llamado «${worldId}»`);
   return built;
 }

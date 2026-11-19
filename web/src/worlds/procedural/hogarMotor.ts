@@ -3,6 +3,8 @@
 // metros, de pie, con las rayas de reloj del símbolo de las Puertas y un trozo que aún cuelga de la grúa— y, a su lado,
 // el generador de la sala de pruebas, con su volante girando. Se ve desde la plaza del Instituto. La Directora mira la
 // Luna por encima de la colina, desde su tarima, con el informe en la mesa. Marco del lugar: +Y hacia el Instituto.
+// Diez años después (F5, 🟡): la Puerta Mayor está terminada y encendida, sin andamios ni valla, con un andén y una
+// escalinata hacia el Instituto (se sale de su esfera de gusano por ahí), y el calendario está todo tachado.
 import { Matrix4, Quaternion, Vector3 } from 'three';
 import {
   ball,
@@ -18,6 +20,7 @@ import {
   type Triple,
 } from './kit';
 import { HOGAR_PALETTE as P, type HogarBuilder } from './hogarKit';
+import { GATE_EXIT, GATE_LANDING } from './hogarLaterShape';
 import { buildMotorSign } from './hogarMotorSign';
 import { SITES } from './hogarShape';
 
@@ -27,6 +30,11 @@ const DEG = Math.PI / 180;
 export const GREAT_RING = { center: [0, -5, 8.4] as Triple, radius: 7, tube: 0.6 };
 /** El trozo que falta, en grados del aro (desde +X hacia arriba). */
 const GAP: readonly [number, number] = [35, 75];
+/**
+ * El centro del aro (una pieza sin nada, con el marco del lugar): ahí nace el agujero negro del final malo
+ * (`"agujero"` de data/sistema-hogar.json) y ahí cuelga la esfera de la Puerta encendida.
+ */
+export const HOGAR_HOLE_ANCHOR = 'hogar_Motor_Garganta';
 
 /** El rumbo que mira del Motor al Instituto. */
 export function motorHeading(): number {
@@ -36,16 +44,22 @@ export function motorHeading(): number {
 
 function ring(b: HogarBuilder, f: Frame): void {
   const { center, radius, tube } = GREAT_RING;
-  const from = GAP[1] * DEG;
-  const to = (GAP[0] + 360) * DEG;
-  b.pieces.add(P.brass, torusArc(radius, tube, from, to, 56, 8), f.at(center), 'metal', {
-    solid: true,
-  });
+  const done = b.era === 'despues';
+  const from = done ? 0 : GAP[1] * DEG;
+  const to = done ? Math.PI * 2 : (GAP[0] + 360) * DEG;
+  b.pieces.add(
+    P.brass,
+    done ? torus(radius, tube, 56, 8) : torusArc(radius, tube, from, to, 56, 8),
+    f.at(center),
+    'metal',
+    { solid: true },
+  );
+  b.mark(HOGAR_HOLE_ANCHOR, f, center);
   // Las rayas de reloj, en la cara que mira al Instituto.
   for (let k = 0; k < 36; k++) {
     const a = (k / 36) * Math.PI * 2;
     const deg = (a / DEG + 360) % 360;
-    if (deg > GAP[0] - 2 && deg < GAP[1] + 2) continue;
+    if (!done && deg > GAP[0] - 2 && deg < GAP[1] + 2) continue;
     const long = k % 3 === 0;
     b.pieces.add(
       P.brassDark,
@@ -62,6 +76,10 @@ function ring(b: HogarBuilder, f: Frame): void {
       'metal',
       { solid: false },
     );
+  }
+  if (done) {
+    finishedGate(b, f);
+    return;
   }
   // El trozo que falta, colgado de la grúa sobre el hueco.
   const mid = ((GAP[0] + GAP[1]) / 2) * DEG;
@@ -87,7 +105,12 @@ function ring(b: HogarBuilder, f: Frame): void {
     'metal',
     { solid: false },
   );
-  // La cuna de piedra y los calzos.
+  cradle(b, f, from, to);
+}
+
+/** La cuna de piedra, los calzos y la luz pegada al latón por dentro del aro (de `from` a `to`). */
+function cradle(b: HogarBuilder, f: Frame, from: number, to: number): void {
+  const { center, radius, tube } = GREAT_RING;
   for (const x of [-3.6, 3.6]) {
     b.pieces.add(
       P.sandstone,
@@ -104,14 +127,98 @@ function ring(b: HogarBuilder, f: Frame): void {
       { solid: false },
     );
   }
-  // El hueco de dentro brilla un poco: las pruebas dejaron su luz pegada al latón.
+  // El hueco de dentro brilla un poco: las pruebas dejaron su luz pegada al latón (encendida, brilla del todo).
+  const lit = b.era === 'despues';
   b.pieces.add(
     P.glow,
-    torusArc(radius - tube - 0.05, 0.05, from, to, 56, 3),
+    lit
+      ? torus(radius - tube - 0.05, 0.09, 48, 3)
+      : torusArc(radius - tube - 0.05, 0.05, from, to, 56, 3),
     f.at(center),
     'light',
-    { glow: 1.2, vary: 0 },
+    { glow: lit ? 2.2 : 1.2, vary: 0 },
   );
+}
+
+/**
+ * La Puerta Mayor terminada y encendida (F5): cuatro lámparas del Motor en el aro, el andén bajo él (a la altura de su
+ * borde de dentro) y la escalinata hacia el Instituto, por donde se sale de su esfera. La esfera la pone el juego.
+ */
+function finishedGate(b: HogarBuilder, f: Frame): void {
+  const { center, radius, tube } = GREAT_RING;
+  cradle(b, f, 0, Math.PI * 2);
+  for (let k = 0; k < 4; k++) {
+    const a = (k / 4) * Math.PI * 2 + Math.PI / 4;
+    const at: Triple = [
+      center[0] + Math.cos(a) * (radius + tube),
+      center[1],
+      center[2] + Math.sin(a) * (radius + tube),
+    ];
+    b.pieces.add(
+      P.brassDark,
+      cylinder(0.32, 10),
+      f.at(at, [Math.PI / 2, 0, 0], [1, 1, 1.5]),
+      'metal',
+      {
+        solid: false,
+      },
+    );
+    b.pieces.add(P.glow, ball(0.22, 1), f.at([at[0], at[1] + 0.8, at[2]]), 'light', {
+      glow: 2.4,
+      vary: 0,
+    });
+  }
+  landing(b, f);
+  b.mark('SPAWN_Puerta', f, GATE_EXIT);
+}
+
+/** El andén bajo el aro y la escalinata hacia el Instituto, con sus barandas y un bulbo del Motor en cada una. */
+function landing(b: HogarBuilder, f: Frame): void {
+  const L = GATE_LANDING;
+  b.pieces.add(
+    P.sandstone,
+    box(),
+    f.at([0, (L.from + L.to) / 2, L.top / 2], undefined, [L.halfWidth * 2, L.to - L.from, L.top]),
+    'stone',
+    { solid: true },
+  );
+  // Peldaños: cada uno un bloque desde el suelo, más bajo cuanto más cerca del Instituto.
+  for (let k = 0; k < L.steps; k++) {
+    const height = L.top * (1 - (k + 1) / (L.steps + 1));
+    b.pieces.add(
+      k % 2 === 0 ? P.sandstone : P.paving,
+      box(),
+      f.at([0, L.to + (k + 0.5) * L.run, height / 2], undefined, [L.halfWidth * 2, L.run, height]),
+      'stone',
+      { solid: true },
+    );
+  }
+  const run = L.steps * L.run;
+  for (const side of [-1, 1]) {
+    const x = side * (L.halfWidth - 0.1);
+    b.pieces.add(
+      P.brass,
+      cylinder(0.05, 6),
+      f.at(
+        [x, L.to + run / 2, L.top / 2 + 0.9],
+        [Math.atan2(L.top, run) - Math.PI / 2, 0, 0],
+        [1, 1, Math.hypot(L.top, run)],
+      ),
+      'metal',
+      { solid: false },
+    );
+    b.pieces.add(
+      P.brassDark,
+      cylinder(0.08, 6),
+      f.at([x, L.to, L.top + 0.5], undefined, [1, 1, 1]),
+      'metal',
+      { solid: false },
+    );
+    b.pieces.add(P.glow, ball(0.14, 1), f.at([x, L.to, L.top + 1.1]), 'light', {
+      glow: 2,
+      vary: 0,
+    });
+  }
 }
 
 /** Dos torres de andamio a los lados, con plataformas, escaleras y la grúa. */
@@ -369,6 +476,18 @@ function directora(b: HogarBuilder, f: Frame): void {
     'stone',
     { solid: false },
   );
+  // Diez años después, todas tachadas: una raya cruzada sobre cada fila.
+  if (b.era === 'despues') {
+    for (let row = 0; row < 4; row++) {
+      b.pieces.add(
+        P.rust,
+        box(),
+        f.at([board[0], board[1] + 0.04, 1.72 - row * 0.18], [0, 0.12, 0], [1.4, 0.01, 0.02]),
+        'stone',
+        { solid: false },
+      );
+    }
+  }
   for (let k = 0; k < 40; k++) {
     const row = Math.floor(k / 10);
     b.pieces.add(
@@ -398,6 +517,23 @@ function surroundings(b: HogarBuilder, f: Frame): void {
   ] as const) {
     b.bulbLamp(f, [x, y, 0], 2.8);
   }
+  if (b.era === 'antes') fence(b, f);
+  for (const [x, y, s] of [
+    [7, -12, 0.9],
+    [8.2, -11.2, 0.7],
+    [-2, -14, 0.8],
+  ] as const) {
+    b.pieces.add(P.wood, box(), f.at([x, y, s / 2], [0, 0, s], [s, s, s]), 'stone', {
+      solid: true,
+    });
+  }
+  b.pieces.add(P.rock, cone(1.4, 0.4, 7), f.at([13, 3, 0.7], undefined, [1, 1, 1.4]), 'stone', {
+    solid: true,
+  });
+}
+
+/** La valla del aro (mientras se construye). */
+function fence(b: HogarBuilder, f: Frame): void {
   for (let k = 0; k < 9; k++) {
     const x = -6 + k * 1.5;
     b.pieces.add(
@@ -415,24 +551,12 @@ function surroundings(b: HogarBuilder, f: Frame): void {
     'stone',
     { solid: false },
   );
-  for (const [x, y, s] of [
-    [7, -12, 0.9],
-    [8.2, -11.2, 0.7],
-    [-2, -14, 0.8],
-  ] as const) {
-    b.pieces.add(P.wood, box(), f.at([x, y, s / 2], [0, 0, s], [s, s, s]), 'stone', {
-      solid: true,
-    });
-  }
-  b.pieces.add(P.rock, cone(1.4, 0.4, 7), f.at([13, 3, 0.7], undefined, [1, 1, 1.4]), 'stone', {
-    solid: true,
-  });
 }
 
 export function buildMotor(b: HogarBuilder): void {
   const f = b.site('motor', motorHeading());
   ring(b, f);
-  scaffolds(b, f);
+  if (b.era === 'antes') scaffolds(b, f);
   generator(b, f);
   directora(b, f);
   surroundings(b, f);

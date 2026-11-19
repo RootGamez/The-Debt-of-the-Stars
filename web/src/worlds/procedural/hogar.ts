@@ -31,6 +31,8 @@ import { cloudLayer } from './clouds';
 import { buildFields } from './hogarFields';
 import { buildInstituto } from './hogarInstituto';
 import { HOGAR_PALETTE as P, HogarBuilder } from './hogarKit';
+import { buildLater } from './hogarLater';
+import type { HogarEra } from './hogarLaterShape';
 import { buildMotor } from './hogarMotor';
 import { buildSecrets } from './hogarSecrets';
 import {
@@ -178,6 +180,8 @@ function rockGeometry(): BufferGeometry {
 
 export interface HogarOptions {
   detail?: number;
+  /** El de siempre o el de diez años después (F5, el final malo: hogarLater.ts). */
+  era?: HogarEra;
 }
 
 export interface HogarStats {
@@ -397,15 +401,16 @@ function placeSpinners(builder: HogarBuilder, materials: HogarMaterials): Group[
 }
 
 /** Construye Hogar con la forma de una escena exportada: la raíz `hogar`, sus mallas y sus marcas. */
-export function buildHogar({ detail = HOGAR_DETAIL }: HogarOptions = {}): Group {
+export function buildHogar({ detail = HOGAR_DETAIL, era = 'antes' }: HogarOptions = {}): Group {
   const sun = sunInWorld(HOGAR_ID);
   const { materials, lit } = createMaterials(sun);
-  const builder = new HogarBuilder();
+  const builder = new HogarBuilder(era);
   buildInstituto(builder);
   buildTown(builder);
   buildFields(builder);
   buildMotor(builder);
   buildSecrets(builder);
+  if (era === 'despues') buildLater(builder);
 
   // Marco de Blender: el contenido se gira −90° en X (como el exportador glTF).
   const frame = new Group();
@@ -512,6 +517,7 @@ export function buildHogar({ detail = HOGAR_DETAIL }: HogarOptions = {}): Group 
   root.name = HOGAR_ID;
   Object.assign(root.userData, {
     world_id: HOGAR_ID,
+    era,
     radius: HOGAR_RADIUS,
     gravity: 1,
     clock_rate: 1,

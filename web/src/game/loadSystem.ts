@@ -1,6 +1,7 @@
 // Carga lo que hace falta para jugar en un mundo: todos los mundos de su sistema (el ajeno, el de casa del
 // prólogo o el Archivo de las Puertas del epílogo) o, si no está en ninguno, solo ese. Cada mundo se prepara (gravedad, colisiones, aparición) ANTES de
-// colgarlo de la escena, para que sus posiciones sean las del modelo. Sin las piezas `without` (el Hogar de antes).
+// colgarlo de la escena, para que sus posiciones sean las del modelo. Sin las piezas `without` (el Hogar de antes) y
+// con la variante de cada mundo que la pida (`variants`: el Hogar de diez años después, F5).
 import homeData from '../data/sistema-hogar.json';
 import gatesData from '../data/sistema-puertas.json';
 import systemData from '../data/sistema.json';
@@ -29,8 +30,15 @@ function worldsToBuild(spec: SystemSpec | undefined, startWorld: string): string
   return spec ? spec.bodies.map((body) => body.world) : [startWorld];
 }
 
-function buildRuntime(id: string, without: readonly string[]): WorldRuntime {
-  return createWorldRuntime(leaveOut(loadWorld(id), without));
+/** La variante de cada mundo que no es la de siempre (por id de mundo). */
+export type WorldVariants = Readonly<Partial<Record<string, string>>>;
+
+function buildRuntime(
+  id: string,
+  without: readonly string[],
+  variants: WorldVariants = {},
+): WorldRuntime {
+  return createWorldRuntime(leaveOut(loadWorld(id, variants[id]), without));
 }
 
 export function loadSystem(startWorld: string, without: readonly string[] = []): LoadedSystem {
@@ -56,6 +64,7 @@ export async function loadSystemStepwise(
   startWorld: string,
   without: readonly string[] = [],
   progress: LoadProgress = {},
+  variants: WorldVariants = {},
 ): Promise<LoadedSystem> {
   const spec = systemOf(startWorld);
   const ids = worldsToBuild(spec, startWorld);
@@ -63,7 +72,7 @@ export async function loadSystemStepwise(
   progress.onWorld?.(0, ids.length);
   for (const id of ids) {
     await progress.pause?.();
-    const runtime = buildRuntime(id, without);
+    const runtime = buildRuntime(id, without, variants);
     runtimes.set(runtime.world.info.id, runtime);
     progress.onWorld?.(runtimes.size, ids.length);
   }

@@ -17,6 +17,7 @@ import {
   type Triple,
 } from './kit';
 import { seededRandom, type Random } from './noise';
+import { laterOol, type HogarEra } from './hogarLaterShape';
 import { hogarSurface, HOGAR_RADIUS, SITES, type SiteId } from './hogarShape';
 import type { OolSpec } from './ool';
 
@@ -97,7 +98,10 @@ export interface HouseOptions {
   door?: number;
 }
 
-/** Acumula las piezas del mundo (por material), sus marcas y sus Ool. */
+/**
+ * Acumula las piezas del mundo (por material), sus marcas y sus Ool. En el Hogar de diez años después (F5) los Ool
+ * salen envejecidos (o no salen: `laterOol`) y nadie ofrece charla: lo que dirían es de entonces.
+ */
 export class HogarBuilder {
   readonly pieces = new PieceSet(61);
   /** Vidrio (vitrinas, el casco de burbuja, ventanas). */
@@ -110,6 +114,8 @@ export class HogarBuilder {
   readonly showcase = new PieceSet(62);
   readonly spinners: Spinner[] = [];
   readonly random: Random = seededRandom(63);
+
+  constructor(readonly era: HogarEra = 'antes') {}
 
   /** Una pieza que gira (ANIM_<name>) en `at`; `axis` lleva su Y local al eje de giro, en el marco del lugar. */
   spinner(name: string, frame: Frame, at: Triple, axis: Quaternion, spin: number): PieceSet {
@@ -149,13 +155,16 @@ export class HogarBuilder {
 
   /** Una fuente del Registro: la marca INT_ con su pista y su tipo. */
   source(clueId: string, kind: string, frame: Frame, at: Triple): void {
+    if (this.era === 'despues' && kind === 'charla') return;
     const short = clueId.slice(clueId.indexOf('.') + 1);
     this.mark(`INT_${short}`, frame, at, { clue_id: clueId, kind });
   }
 
   /** Un Ool de pie en `at`, mirando hacia `turn`; con una columna de colisión para no atravesarlo. */
   ool(spec: OolSpec, frame: Frame, at: Triple, turn = 0): void {
-    this.ools.push({ spec, frame, at, turn });
+    const now = this.era === 'despues' ? laterOol(spec) : spec;
+    if (!now) return;
+    this.ools.push({ spec: now, frame, at, turn });
     const collider = cylinder(1, 8)
       .clone()
       .applyMatrix4(frame.at([at[0], at[1], at[2] + 0.6], undefined, [0.28, 0.28, 1.2]));
