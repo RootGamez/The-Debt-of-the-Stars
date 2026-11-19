@@ -107,6 +107,18 @@ describe('the end of the journey at home', () => {
     expect(calls.archive).toBe(1);
   });
 
+  it('closes the late journey when the collapse scene ends, without anyone to talk to (F5)', () => {
+    const { homecoming, calls } = rig('tarde', { via: 'boca' });
+    homecoming.finish();
+    homecoming.finish();
+
+    expect(calls.freeze).toBe(1);
+    expect(homecoming.phase).toBe('card');
+    expect(calls.seen).toEqual(['tarde']);
+    expect(shown).toHaveBeenCalledTimes(1);
+    expect(shown.mock.calls[0]?.[0].title).toBe('Llegas tarde');
+  });
+
   it('shows the saved-system card when a wrong mouth of the Archive led here', () => {
     const { homecoming } = rig('tarde');
     homecoming.play.actions.run(DIRECTOR);

@@ -54,6 +54,8 @@ export interface HomecomingRig {
   readonly blocking: boolean;
   /** Una vez por fotograma, con el tiempo real (el giro sigue aunque el juego ya no). */
   update(dt: number): void;
+  /** Cierra el viaje ya, sin hablar con nadie (F5: al acabar la escena del colapso), con la tarjeta del final. */
+  finish(): void;
 }
 
 export function createHomecomingRig(options: HomecomingRigOptions): HomecomingRig {
@@ -115,6 +117,11 @@ export function createHomecomingRig(options: HomecomingRigOptions): HomecomingRi
         options.toMirador();
         return;
       }
+      show();
+    },
+    finish() {
+      if (phase !== 'playing') return;
+      options.freeze();
       show();
     },
   };
