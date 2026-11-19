@@ -1,13 +1,16 @@
 // La vuelta a casa (Fase 10E; plan de los finales): cruzada una boca del Archivo de las Puertas (o La Boca de Umbral),
 // `?mundo=hogar&final=A|tarde`. Con A (el bueno) se llega tres días después de despegar: el Hogar de antes, sin los
 // fragmentos de las vitrinas ni el de la Luna (aún no han llegado) y con los Ool algo más jóvenes. Con "tarde" (el
-// malo), el Hogar de siempre, pasada la prueba; `via=boca` dice que se llegó por La Boca (y no por una boca equivocada
-// del Archivo), y eso cambia la tarjeta. Hablar con la Directora cierra el viaje con la tarjeta del final
-// (ui/endingCard.ts). El aspecto y las escenas son 🟡.
+// malo, F5), el Hogar de diez años después (worlds/procedural/hogarLater*.ts); `via=boca` dice que se llegó por La
+// Boca, a pie por la Puerta Mayor y sin la nave (y no por una boca equivocada del Archivo, con ella), y eso cambia la
+// tarjeta. Con A, hablar con la Maestra cierra el viaje; con "tarde" lo cierra la escena del colapso
+// (game/homeLaterRig.ts): la Directora ya no está y su charla queda solo como respaldo. Aspecto y escenas, 🟡.
 import { SEEN_ENDINGS, type SeenEnding } from '../core/save';
 import type { SourceActions } from '../reading/readingUi';
 import type { EndingCardKey } from '../data/endings';
 import { ENDING_PARAM, PROLOGUE_WORLD, VIA_PARAM } from '../worlds/worldSelection';
+import { LATER_VARIANT } from '../worlds/procedural/hogarLaterShape';
+import type { WorldVariants } from './loadSystem';
 import type { Ending } from './epilogue';
 import { WORMHOLE } from './prologue';
 
@@ -67,13 +70,17 @@ export interface HomeLook {
   without: readonly string[];
   /** La escala de los Ool. */
   oolScale: number;
+  /** Qué mundos se construyen en otra versión (llegando tarde, el Hogar de diez años después). */
+  variants: WorldVariants;
+  /** Si el Albatros II está en casa: por La Boca se llega a pie y la nave se quedó en el sistema ajeno. */
+  ship: boolean;
 }
 
-/** Cómo es Hogar al llegar: el de antes con el final bueno; el de siempre si se llega tarde. */
-export function homeLook(ending: Ending): HomeLook {
+/** Cómo es Hogar al llegar: el de antes con el final bueno; el de diez años después si se llega tarde. */
+export function homeLook(ending: Ending, via: HomeVia = 'archivo'): HomeLook {
   return ending === 'A'
-    ? { without: NOT_YET_ARRIVED, oolScale: YOUNGER_OOL }
-    : { without: [], oolScale: 1 };
+    ? { without: NOT_YET_ARRIVED, oolScale: YOUNGER_OOL, variants: {}, ship: true }
+    : { without: [], oolScale: 1, variants: { hogar: LATER_VARIANT }, ship: via !== 'boca' };
 }
 
 export interface HomecomingPlay {
