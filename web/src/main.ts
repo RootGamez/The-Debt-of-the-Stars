@@ -55,8 +55,9 @@ import { createEpilogueRig } from './game/epilogueRig';
 import { aimToward } from './game/aim';
 import { followCrossing, replay, toArchive, toMirador } from './game/crossings';
 import { createMiradorRig } from './game/miradorRig';
-import { endingFromQuery, homeLook } from './game/homecoming';
+import { endingFromQuery, homeLook, viaFromQuery } from './game/homecoming';
 import { createHomecomingRig } from './game/homecomingRig';
+import { createHomeLaterRig } from './game/homeLaterRig';
 import { createFoldedPassage } from './game/foldedPassage';
 import { createDiving } from './game/diving';
 import { TELEPORTER } from './game/teleporter';
@@ -374,9 +375,11 @@ async function start(): Promise<void> {
   document.documentElement.classList.toggle('calidad-baja', quality === 'baja');
   // Saltar a un mundo con `?mundo=` es para probar: no sale la carta de mundo nuevo al llegar.
   const exploring = !new URLSearchParams(window.location.search).has('mundo');
-  // De vuelta a casa por una boca del Archivo (`?final=`): con A y B, el Hogar de antes, sin lo que aún no ha llegado.
+  // De vuelta a casa (`?final=`): con A, el Hogar de antes, sin lo que aún no ha llegado; llegando tarde, el de diez
+  // años después (F5), por La Boca a pie (`?via=boca`, sin la nave) o por una boca del Archivo, en ella.
   const homecomingEnding = endingFromQuery(window.location.search);
-  const home = homecomingEnding ? homeLook(homecomingEnding) : undefined;
+  const homeVia = viaFromQuery(window.location.search);
+  const home = homecomingEnding ? homeLook(homecomingEnding, homeVia) : undefined;
   // Una partida de una versión más nueva (que no se toca) ya pasó por casa: se empieza en Umbral.
   // Todos los mundos del sistema se construyen ahora, uno a uno y con la barra de carga avanzando: así no hay
   // tirones al llegar a ellos.
@@ -389,9 +392,13 @@ async function start(): Promise<void> {
       },
       pause: nextFrame,
     },
+    home?.variants,
   );
-  // La nave espera donde diga su sistema: junto a La Boca o en el hangar del Instituto.
-  const shipHome = spec?.ship !== undefined && runtimes.has(spec.ship) ? spec.ship : undefined;
+  // La nave espera donde diga su sistema: junto a La Boca o en el hangar del Instituto (por La Boca no hay nave).
+  const shipHome =
+    spec?.ship !== undefined && runtimes.has(spec.ship) && home?.ship !== false
+      ? spec.ship
+      : undefined;
   const shipModel = shipHome ? buildAlbatros() : undefined;
   // En casa no corre el ciclo: ni eventos, ni absorciones, ni reloj doble.
   const looping = spec?.looping ?? true;
@@ -837,6 +844,7 @@ async function start(): Promise<void> {
   const homecoming = homecomingEnding
     ? createHomecomingRig({
         ending: homecomingEnding,
+        via: homeVia,
         freeze: () => {
           game.ui?.closeReading();
           game.ui?.setEnabled(false);
@@ -879,6 +887,58 @@ async function start(): Promise<void> {
       overlay.setInert(true);
     },
   });
+  // El final malo (F5): Hogar diez años después, las señales y el colapso en la garganta de la Puerta Mayor (el
+  // `"agujero"` del sistema de casa); al acabar, la tarjeta del viaje.
+  const holeSite = spec?.hole;
+  const holeWorld = holeSite ? runtimes.get(holeSite.world) : undefined;
+  const throat = holeSite?.anchor
+    ? holeWorld?.world.scene.getObjectByName(holeSite.anchor)
+    : undefined;
+  const holePivot = holeSite ? systemScene.groupOf(holeSite.world) : undefined;
+  const moonWorld = runtimes.get(WORMHOLE.world);
+  const moonPivot = systemScene.groupOf(WORMHOLE.world);
+  const homeLater =
+    homecomingEnding === 'tarde' && holeWorld && throat && holePivot
+      ? createHomeLaterRig({
+          via: homeVia,
+          scene,
+          sun,
+          hogar: {
+            pivot: holePivot,
+            model: holeWorld.world.scene,
+            radius: holeWorld.world.info.radius,
+          },
+          luna:
+            moonWorld && moonPivot
+              ? {
+                  pivot: moonPivot,
+                  model: moonWorld.world.scene,
+                  radius: moonWorld.world.info.radius,
+                }
+              : undefined,
+          anchor: throat,
+          soundtrack,
+          reducedMotion,
+          text: textSettings,
+          hide: explorerRoots,
+          ship: () => shipModel?.object,
+          air: () => atmosphere.coverage,
+          hold: () => {
+            game.ui?.closeReading();
+            game.ui?.setEnabled(false);
+            overlay.releasePointer();
+            overlay.setInert(true);
+          },
+          release: () => {
+            game.ui?.setEnabled(true);
+            overlay.setInert(false);
+            overlay.recapturePointer();
+          },
+          finish: () => {
+            homecoming?.finish();
+          },
+        })
+      : undefined;
   const startSources = sources.get(startWorld);
   if (!startSources) throw new Error(`Faltan las fuentes de ${startWorld}`);
   // El ocular del telescopio del Observatorio (🟡): mira el cielo en vivo desde donde está el jugador.
@@ -1084,7 +1144,8 @@ async function start(): Promise<void> {
     !ui.blocking &&
     !discovery.isOpen &&
     !(shipMap?.isOpen ?? false) &&
-    !(homecoming?.blocking ?? false);
+    !(homecoming?.blocking ?? false) &&
+    !(homeLater?.blocking ?? false);
   // El menú principal cubre la pantalla de pausa hasta que el jugador pulsa Jugar o Continuar.
   // Jugar se activa al quitar la pantalla de carga (antes, la tecla que despierta la música lo pulsaría).
   const menu = activeMenu;
@@ -1254,6 +1315,20 @@ async function start(): Promise<void> {
       },
       miradorSeek: (time: number) => {
         mirador?.seek(time);
+      },
+    });
+    // F5 (sin tipo en debugOverlay.ts): Hogar diez años después; homeCollapse() empieza ya la escena del colapso.
+    Object.assign(window.__juego, {
+      homeLater: () => homeLater?.snapshot() ?? null,
+      homeCollapse: () => {
+        homeLater?.seekScene(0, false);
+        return homeLater?.snapshot() ?? null;
+      },
+      homeLaterSeek: (time: number) => {
+        homeLater?.seek(time);
+      },
+      homeCollapseSeek: (time: number) => {
+        homeLater?.seekScene(time);
       },
     });
     // E4 (sin tipo en debugOverlay.ts): el Laboratorio, encender su Puerta y despertarla.
@@ -1751,6 +1826,7 @@ async function start(): Promise<void> {
       const fallen = session.director.absorption;
       systemScene.update(t);
       mirador?.apply(camera, dt);
+      homeLater?.apply(camera, dt, timeRuns);
       lightFor(systemScene.referenceWorld, finalLight(fallen));
       const airWorld = systemScene.referenceWorld;
       const air = airWorld === undefined ? undefined : ATMOSPHERES[airWorld];
@@ -1787,19 +1863,23 @@ async function start(): Promise<void> {
         doorLit: laboratory?.lit ?? true,
         hole:
           hole ??
+          homeLater?.lens() ??
           wormholeView?.lens() ??
           (gateSample.position && gateSample.proximity > 0.05
             ? { position: gateSample.position, radius: GATE_LENS_RADIUS * gateSample.proximity }
             : undefined),
       });
+      // Llegando tarde (F5), las señales y el agujero de casa suenan como los del ciclo.
+      const cycleEvents = homeLater
+        ? [...session.activeEventIds, ...homeLater.events]
+        : session.activeEventIds;
+      const holeFill = Math.max(blackHole.fill, homeLater?.fill ?? 0);
       soundtrack.update({
         worldId: spec ? systemScene.referenceWorld : currentWorld.id,
         rate: session.director.rate,
-        events: wormholeView?.active
-          ? [...session.activeEventIds, 'gusano']
-          : session.activeEventIds,
+        events: wormholeView?.active ? [...cycleEvents, 'gusano'] : cycleEvents,
         absorption: fallen,
-        hole: blackHole.fill,
+        hole: holeFill,
         phase: session.director.phase,
         fade: session.director.fade.amount,
         running: timeRuns,
@@ -1835,7 +1915,7 @@ async function start(): Promise<void> {
       }
       // Un sonido por cada vez que se enciende o se apaga algo: la luz del cuerpo, una lectura, el Registro, el
       // gusano de la Luna o el agujero negro. (Sin sonido de apagado = cadena vacía.)
-      const holeEvent = session.activeEventIds.includes('agujero_negro');
+      const holeEvent = cycleEvents.includes('agujero_negro');
       const edgeSounds: [string, boolean, string, string][] = [
         ['light', bodyLight.on, 'bodylight.on', 'bodylight.off'],
         ['reading', reading.current !== null, 'read.open', 'read.close'],
@@ -1878,7 +1958,7 @@ async function start(): Promise<void> {
         const music = musicDirector.update({
           dt,
           worldId: spec ? systemScene.referenceWorld : currentWorld.id,
-          events: session.activeEventIds,
+          events: cycleEvents,
           phase: session.director.phase,
           playing: timeRuns,
         });
@@ -1891,7 +1971,7 @@ async function start(): Promise<void> {
       wormholeHum.follow(portalNear * 0.9);
       cabinHum.follow(piloting ? 0.7 : 0);
       underwater.follow(player.state.swimming ? 0.8 : 0);
-      holeRumble.follow(holeEvent ? Math.sqrt(Math.min(1, Math.max(0, blackHole.fill))) : 0);
+      holeRumble.follow(holeEvent ? Math.sqrt(Math.min(1, Math.max(0, holeFill))) : 0);
       ui.update(performance.now() / 1000);
       ool.update(performance.now() / 1000, dt, piloting ? undefined : camera.position);
       filaments.update(reading.current !== null, reading.known.size);
