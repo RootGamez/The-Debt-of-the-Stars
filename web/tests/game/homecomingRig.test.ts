@@ -1,30 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DIRECTOR, MAESTRA, type HomeVia } from '../../src/game/homecoming';
-import { createHomecomingRig, TURN_SECONDS } from '../../src/game/homecomingRig';
+import { createHomecomingRig } from '../../src/game/homecomingRig';
 import type { Ending } from '../../src/game/epilogue';
 import { showEndingCard } from '../../src/ui/endingCard';
 
 // La tarjeta es DOM: aquí solo importa qué se enseña y cuándo.
 vi.mock('../../src/ui/endingCard', () => ({ showEndingCard: vi.fn() }));
 const shown = vi.mocked(showEndingCard);
-let removed = 0;
 
 interface RigOptions {
-  reducedMotion?: boolean;
   canSave?: boolean;
   via?: HomeVia;
   /** Con la escena del Mirador (F3). */
   mirador?: boolean;
 }
 
-function rig(
-  ending: Ending,
-  { reducedMotion = false, canSave = true, via, mirador = false }: RigOptions = {},
-) {
+function rig(ending: Ending, { canSave = true, via, mirador = false }: RigOptions = {}) {
   const calls = {
     freeze: 0,
-    outside: 0,
-    turns: [] as number[],
     seen: [] as string[],
     replay: 0,
     archive: 0,
@@ -33,17 +26,9 @@ function rig(
   const homecoming = createHomecomingRig({
     ending,
     via,
-    known: () => new Set(['deuda.es_de_tiempo']),
     freeze: () => {
       calls.freeze += 1;
     },
-    stepOutside: () => {
-      calls.outside += 1;
-    },
-    turnToMoon: (share) => {
-      calls.turns.push(share);
-    },
-    reducedMotion,
     markSeen: (seen) => {
       calls.seen.push(seen);
       return canSave;
@@ -63,12 +48,6 @@ function rig(
   return { homecoming, calls };
 }
 
-/** El final A: la Maestra lee el cuaderno y se pulsa «Seguir». */
-function talkThrough(homecoming: ReturnType<typeof rig>['homecoming']) {
-  homecoming.play.actions.run(MAESTRA);
-  lastChoices()[0]?.run();
-}
-
 function lastChoices() {
   return shown.mock.calls.at(-1)?.[1] ?? [];
 }
@@ -76,15 +55,7 @@ function lastChoices() {
 describe('the end of the journey at home', () => {
   beforeEach(() => {
     shown.mockClear();
-    removed = 0;
-    shown.mockImplementation(
-      () =>
-        ({
-          remove: () => {
-            removed += 1;
-          },
-        }) as unknown as HTMLElement,
-    );
+    shown.mockImplementation(() => ({ remove: () => undefined }) as unknown as HTMLElement);
   });
 
   it('shows the bad ending at once, saves it as seen and offers to play again or go back', () => {
@@ -97,7 +68,6 @@ describe('the end of the journey at home', () => {
     expect(homecoming.phase).toBe('card');
     expect(homecoming.blocking).toBe(true);
     expect(calls.seen).toEqual(['tarde']);
-    expect(calls.outside).toBe(0);
     expect(shown.mock.calls[0]?.[0].title).toBe('Llegas tarde');
     expect(shown.mock.calls[0]?.[2]).toBeUndefined();
     expect(lastChoices().map((c) => c.label)).toEqual(['Volver a jugar', 'Volver al Archivo']);
@@ -126,91 +96,71 @@ describe('the end of the journey at home', () => {
     expect(shown.mock.calls[0]?.[0].title).toBe('Un sistema que no era el tuyo');
   });
 
-  it('has the Teacher read the notebook first in the good ending, and only then turns toward the Moon', () => {
-    const { homecoming, calls } = rig('A');
-    homecoming.play.actions.run(MAESTRA);
+  it('closes the journey while the scene at the nest plays in the good ending (F4)', () => {
+    const { homecoming, calls } = rig('A', { mirador: true });
 
-    expect(homecoming.phase).toBe('talking');
+    expect(homecoming.blocking).toBe(false);
+    homecoming.begin();
+    homecoming.begin();
+
+    expect(homecoming.phase).toBe('scene');
     expect(homecoming.blocking).toBe(true);
     expect(calls.freeze).toBe(1);
-    expect(calls.outside).toBe(0);
-    expect(shown).toHaveBeenCalledTimes(1);
-    const scene = shown.mock.calls[0]?.[0];
-    expect(scene?.title).toBe('La Maestra');
-    expect(scene?.text.some((line) => line.includes('de tiempo'))).toBe(true);
-    expect(lastChoices().map((c) => c.label)).toEqual(['Seguir']);
-
-    lastChoices()[0]?.run();
-    expect(removed).toBe(1);
-    expect(homecoming.phase).toBe('turning');
-    expect(calls.outside).toBe(1);
+    expect(calls.seen).toEqual([]);
+    expect(shown).not.toHaveBeenCalled();
   });
 
-  it('shows the good ending after turning toward the Moon, offering to play again', () => {
-    const { homecoming } = rig('A');
-    talkThrough(homecoming);
-    homecoming.update(TURN_SECONDS);
-
-    expect(lastChoices().map((c) => c.label)).toEqual(['Volver a jugar']);
-  });
-
-  it('turns the view toward the Moon before ending A', () => {
-    const { homecoming, calls } = rig('A');
-    talkThrough(homecoming);
-
-    expect(homecoming.phase).toBe('turning');
-    expect(calls.outside).toBe(1);
-    expect(shown).toHaveBeenCalledTimes(1); // solo la escena de la Maestra
-    homecoming.update(0); // en pausa no se gira
-    expect(calls.turns).toHaveLength(0);
-    for (let t = 0; t < TURN_SECONDS - 0.5; t += 0.5) homecoming.update(0.5);
-    expect(calls.turns.length).toBeGreaterThan(0);
-    expect(calls.turns.every((share) => share > 0 && share <= 1)).toBe(true);
-    expect(shown).toHaveBeenCalledTimes(1);
-    homecoming.update(0.5);
-
-    expect(homecoming.phase).toBe('card');
-    expect(calls.seen).toEqual(['A']);
-    expect(shown).toHaveBeenCalledTimes(2);
-  });
-
-  it('turns at once with reduced motion', () => {
-    const { homecoming, calls } = rig('A', { reducedMotion: true });
-    talkThrough(homecoming);
-    homecoming.update(0.5);
-
-    expect(calls.turns).toEqual([1]);
-  });
-
-  it('says so on the card when the ending could not be saved', () => {
-    const { homecoming } = rig('A', { canSave: false });
-    talkThrough(homecoming);
-    homecoming.update(TURN_SECONDS);
-
-    expect(shown.mock.calls.at(-1)?.[2]).toBe('No se ha podido guardar el final.');
-  });
-
-  it('goes to the scene at the Lookout of Umbral after the turn, saving A first (F3)', () => {
+  it('goes from the scene to the Lookout of Umbral, saving A first (F3)', () => {
     const { homecoming, calls } = rig('A', { mirador: true });
-    talkThrough(homecoming);
-    homecoming.update(TURN_SECONDS);
+    homecoming.begin();
+    homecoming.finish();
 
     expect(homecoming.phase).toBe('mirador');
     expect(homecoming.blocking).toBe(true);
+    expect(calls.freeze).toBe(1);
     expect(calls.seen).toEqual(['A']);
     expect(calls.mirador).toBe(1);
-    expect(shown).toHaveBeenCalledTimes(1); // solo la Maestra: la tarjeta sale al final de la escena
-    homecoming.update(1);
+    expect(shown).not.toHaveBeenCalled(); // la tarjeta sale al final de la escena del Mirador
+    homecoming.finish();
     expect(calls.mirador).toBe(1);
+  });
+
+  it('shows the good ending here, offering to play again, when there is no Lookout scene', () => {
+    const { homecoming, calls } = rig('A');
+    homecoming.begin();
+    homecoming.finish();
+
+    expect(homecoming.phase).toBe('card');
+    expect(calls.seen).toEqual(['A']);
+    expect(shown.mock.calls[0]?.[0].title).toBe('Tres días después');
+    expect(lastChoices().map((c) => c.label)).toEqual(['Volver a jugar']);
   });
 
   it('shows the card here when A could not be saved (the scene asks for it)', () => {
     const { homecoming, calls } = rig('A', { mirador: true, canSave: false });
-    talkThrough(homecoming);
-    homecoming.update(TURN_SECONDS);
+    homecoming.begin();
+    homecoming.finish();
 
     expect(calls.mirador).toBe(0);
     expect(homecoming.phase).toBe('card');
     expect(shown.mock.calls.at(-1)?.[2]).toBe('No se ha podido guardar el final.');
+  });
+
+  it('lets talking to the Teacher close the good journey too, if the scene could not play', () => {
+    const { homecoming, calls } = rig('A', { mirador: true });
+    expect(homecoming.play.actions.verb(MAESTRA, false)).toBe('hablar');
+    homecoming.play.actions.run(MAESTRA);
+
+    expect(calls.freeze).toBe(1);
+    expect(homecoming.phase).toBe('mirador');
+    expect(calls.mirador).toBe(1);
+  });
+
+  it('does not begin the scene of the nest when arriving late', () => {
+    const { homecoming, calls } = rig('tarde');
+    homecoming.begin();
+
+    expect(homecoming.phase).toBe('playing');
+    expect(calls.freeze).toBe(0);
   });
 });

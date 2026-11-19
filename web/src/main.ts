@@ -375,8 +375,9 @@ async function start(): Promise<void> {
   document.documentElement.classList.toggle('calidad-baja', quality === 'baja');
   // Saltar a un mundo con `?mundo=` es para probar: no sale la carta de mundo nuevo al llegar.
   const exploring = !new URLSearchParams(window.location.search).has('mundo');
-  // De vuelta a casa (`?final=`): con A, el Hogar de antes, sin lo que aún no ha llegado; llegando tarde, el de diez
-  // años después (F5), por La Boca a pie (`?via=boca`, sin la nave) o por una boca del Archivo, en ella.
+  // De vuelta a casa (`?final=`): con A, el Hogar que dejaste, con la Luna mordida (F4, la escena del nido);
+  // llegando tarde, el de diez años después (F5), por La Boca a pie (`?via=boca`, sin la nave) o por una boca del
+  // Archivo, en ella.
   const homecomingEnding = endingFromQuery(window.location.search);
   const homeVia = viaFromQuery(window.location.search);
   const home = homecomingEnding ? homeLook(homecomingEnding, homeVia) : undefined;
@@ -840,7 +841,7 @@ async function start(): Promise<void> {
   if (rotateGuard.active) holdForRotation(); // la página se abrió ya en vertical
   // La luz del explorador: la L enciende los puntos de su cuerpo, que alumbran de azul celeste en todas direcciones.
   const bodyLight = createBodyLightSwitch(() => overlay.playing);
-  // De vuelta en casa: la Directora cierra el viaje con la tarjeta del final.
+  // De vuelta en casa: con A, la escena del nido (F4) y el Mirador; llegando tarde, el colapso y la tarjeta.
   const homecoming = homecomingEnding
     ? createHomecomingRig({
         ending: homecomingEnding,
@@ -852,16 +853,6 @@ async function start(): Promise<void> {
           overlay.setInert(true);
           lockGameKeys();
         },
-        known: () => reading.known,
-        stepOutside: () => {
-          enterWorld(startWorld);
-          createArrivalLayer('negro').clear();
-        },
-        turnToMoon: (share) => {
-          const moon = systemScene.groupOf(WORMHOLE.world)?.getWorldPosition(new Vector3());
-          if (moon) aimToward(player, camera, moon, share);
-        },
-        reducedMotion,
         markSeen: (seen) => {
           const store = browserStore();
           return markEndingSeen(store, loadSave(store), seen);
@@ -1905,7 +1896,6 @@ async function start(): Promise<void> {
         session.activeEventIds.includes('ranura_luz'),
       );
       if (counterweight?.play.place === 'installed' && !stable) session.director.stabilize();
-      homecoming?.update(dt);
       flight?.update({ t, alpha, dt, camera, onFootWorld: currentWorld.id, active: canAct() });
       if (flight) {
         // Con el tiempo parado (pausa, lectura, Registro) los rugidos callan en vez de quedarse con el último empuje.

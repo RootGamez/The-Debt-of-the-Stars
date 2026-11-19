@@ -363,22 +363,32 @@ export const EN: Readonly<Record<string, string>> = {
   observar: 'watch',
   hablar: 'talk',
   'La Maestra': 'The Teacher',
-  '«Aquí dices que la deuda no es de energía, sino de tiempo: cada paso por una Puerta separa un poco más sus dos relojes».':
-    '"Here you say the debt is not one of energy but of time: every step through a Gate pulls its two clocks a little further apart."',
-  '«Y esto: alguien esperaba a la científica que nunca volvió, y un Consejo que prefirió callarlo».':
-    '"And this: someone was waiting for the scientist who never came back, and a Council that preferred to keep quiet."',
-  '«La Gran Partida. Huyeron todos a la vez, y su huida aceleró el colapso».':
-    '"The Great Departure. They all fled at once, and their flight sped up the collapse."',
-  '«Dos de ellos se quedaron atrás. No son dos nombres en una piedra: eran dos personas, y siguen ahí».':
-    '"Two of them stayed behind. They are not two names on a stone: they were two people, and they are still there."',
-  '«Y la energía. Su máquina la sacaba de una garganta, como pensamos sacarla nosotros del Motor».':
-    '"And the energy. Their machine drew it from a throat, just as we plan to draw ours from the Engine."',
-  '«“Vuelve a contármelo todo”, te dije. Anda, dame el cuaderno».':
+  Tú: 'You',
+  // F4, la escena del nido: lo que ella lee en tu cuaderno y lo que os decís.
+  'Aquí dices que la deuda no es de energía, sino de tiempo: cada paso por una Puerta separa un poco más sus dos relojes.':
+    'Here you say the debt is not one of energy but of time: every step through a Gate pulls its two clocks a little further apart.',
+  'Y esto: alguien esperaba a la científica que no volvió, y un Consejo prefirió callarlo.':
+    'And this: someone was waiting for the scientist who never came back, and a Council chose to keep quiet.',
+  'La Gran Partida. Huyeron todos a la vez, y su huida aceleró el colapso.':
+    'The Great Departure. They all fled at once, and their flight sped up the collapse.',
+  'Dos se quedaron atrás. No son dos nombres en una piedra: son dos personas, y siguen allí.':
+    'Two stayed behind. They are not two names on a stone: they are two people, and they are still there.',
+  'Y la energía. Su máquina la sacaba de una garganta… como pensamos sacarla nosotros del Motor.':
+    'And the energy. Their machine drew it from a throat… just as we plan to draw ours from the Engine.',
+  'Tres días mirando al cielo. Toda la colina.': 'Three days watching the sky. The whole hill.',
+  'Para mí han sido muchos más.': 'For me it has been many more.',
+  '«Vuelve a contármelo todo», te dije. Anda, dame el cuaderno.':
     '"Tell me everything again", I said. Come on, give me the notebook.',
-  'Le adviertes: sacar energía de la garganta de una Puerta es pedir tiempo prestado, y esa deuda se paga con intereses.':
-    'You warn her: drawing energy from the throat of a Gate is borrowing time, and that debt is paid with interest.',
-  '«Te creo. Iré contigo a ver a la Directora: la prueba mayor no se hará».':
-    '"I believe you. I will go with you to see the Director: the great test will not be held."',
+  'Sacar energía de la garganta de una Puerta es pedir tiempo prestado.':
+    'Drawing energy from the throat of a Gate is borrowing time.',
+  'Y esa deuda se cobra con intereses. Lo vi allí; no quiero verlo aquí.':
+    'And that debt is collected with interest. I saw it there; I do not want to see it here.',
+  'Te creo.': 'I believe you.',
+  'Iré contigo a ver a la Directora. La prueba mayor no se hará.':
+    'I will go with you to see the Director. The great test will not be held.',
+  'Y luego me lo cuentas otra vez. Despacio.': 'And then you tell me again. Slowly.',
+  // Las páginas de tu cuaderno en la escena (ui/notebookCanvas.ts): una pregunta que sigue de la página anterior.
+  sigue: 'continued',
   'cruzar La Boca': 'cross the Mouth',
   dejar: 'drop',
   coger: 'take',
