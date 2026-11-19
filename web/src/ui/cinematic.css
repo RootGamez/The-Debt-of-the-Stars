@@ -1,0 +1,209 @@
+/* Las cinemáticas (F3; ui/cinematicLayer.ts): franjas de cine, negro, viñeta, subtítulos con el signo de quien habla
+   y unos mandos discretos. Mientras dura una, `body.cinematica` esconde el resto de la interfaz del juego. */
+
+body.cinematica > :not(#game, .cine, .loading, .ending, .llegada) {
+  display: none !important;
+}
+
+.cine {
+  --cine-bar: 12.5vh;
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  color: #f4ead8;
+  font-family: var(--f-body, Georgia, serif);
+}
+
+.cine-veil,
+.cine-vignette {
+  position: absolute;
+  inset: 0;
+}
+
+.cine-veil {
+  background: #000;
+}
+
+/* La viñeta oscurece los bordes; con `--cine-haze` (planos cortos) se cierra un poco más. */
+.cine-vignette {
+  background: radial-gradient(
+    ellipse at 50% 46%,
+    transparent 52%,
+    rgb(8 6 10 / calc(0.32 + var(--cine-haze, 0) * 0.3)) 100%
+  );
+}
+
+/* Profundidad de campo fingida: en los planos cortos los bordes se desenfocan un poco. */
+.cine-focus {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(calc(var(--cine-haze, 0) * 2.5px));
+  mask-image: radial-gradient(ellipse at 50% 48%, transparent 38%, #000 82%);
+}
+
+html.calidad-baja .cine-focus {
+  display: none;
+}
+
+.cine-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--cine-bar);
+  background: #000;
+  transform: scaleY(var(--cine-bars, 1));
+}
+
+.cine-bar--top {
+  top: 0;
+  transform-origin: top;
+}
+
+.cine-bar--bottom {
+  bottom: 0;
+  transform-origin: bottom;
+}
+
+/* Lo que va sobre las franjas (aviso de borrador, mandos, subtítulos): no se escala con ellas. */
+.cine-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--cine-bar);
+}
+
+.cine-band--top {
+  top: 0;
+}
+
+.cine-band--bottom {
+  bottom: 0;
+}
+
+.cine-subtitle {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--cine-bar) * 0.5);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: max-content;
+  max-width: min(900px, calc(100vw - 32px));
+  margin: 0;
+  transform: translate(-50%, 50%);
+  font-size: clamp(17px, 2.1vw, 25px);
+  font-style: italic;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 80%);
+  opacity: 0;
+}
+
+.cine-sign {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  transform: translateY(2px);
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.cine-sign--cientifica {
+  color: #b4f6ff;
+}
+
+.cine-sign--esceptico {
+  color: #ffd9a0;
+}
+
+.cine-unsaid {
+  visibility: hidden;
+}
+
+.cine-tag {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  margin: 0;
+  transform: translateY(-50%);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(244 234 216 / 45%);
+  opacity: var(--cine-bars, 1);
+}
+
+.cine-controls {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  display: flex;
+  gap: 6px;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  opacity: 0.4;
+  transition: opacity 0.4s;
+}
+
+.cine-controls:hover,
+.cine-controls:focus-within {
+  opacity: 1;
+}
+
+.cine-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgb(244 234 216 / 30%);
+  border-radius: 50%;
+  background: rgb(0 0 0 / 35%);
+  color: inherit;
+  cursor: pointer;
+}
+
+.cine-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.cine-button:focus-visible {
+  outline: 2px solid #f4ead8;
+  outline-offset: 2px;
+}
+
+.cine-hint {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--cine-bar) + 14px);
+  margin: 0;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 45%);
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  color: rgb(244 234 216 / 85%);
+  opacity: 0;
+  transition: opacity 0.6s;
+}
+
+.cine-hint--shown {
+  opacity: 1;
+}
+
+.cine--ended .cine-controls,
+.cine--ended .cine-hint,
+.cine--ended .cine-tag {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cine-controls,
+  .cine-hint {
+    transition: none;
+  }
+}

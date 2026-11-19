@@ -41,6 +41,8 @@ export interface Soundtrack {
   /** Pide una pieza de música en bucle (empieza cuando pueda: tras el primer gesto y la carga). */
   playMusic(id: string, options?: { level?: number; fade?: number }): void;
   stopMusic(fade?: number): void;
+  /** Despierta el audio desde un gesto que no llega a la ventana (una cinemática se queda con sus teclas). */
+  unlock(): void;
   dispose(): void;
 }
 
@@ -122,6 +124,9 @@ export function createSoundtrack(engine: AudioEngine = createAudioEngine()): Sou
     },
     stopMusic: (fade) => {
       engine.stopMusic(fade);
+    },
+    unlock: () => {
+      engine.unlock();
     },
     dispose() {
       abort.abort();

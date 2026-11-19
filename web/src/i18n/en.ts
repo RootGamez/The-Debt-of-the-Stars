@@ -707,4 +707,23 @@ export const EN: Readonly<Record<string, string>> = {
   // Lo que queda por leer en cada mundo (plan de la llegada, hito C).
   'Aún queda algo por leer aquí': 'There is still something to read here',
   'Aquí ya lo he leído todo': "I've read everything here",
+  // La escena del final bueno en el Mirador de Umbral (F3): las frases (borrador) y los mandos de la cinemática.
+  'Ya no cuento.': "I don't count anymore.",
+  '¿Y qué haces ahora con las manos, contador?': 'And what do you do with your hands now, counter?',
+  'No crece.': "It isn't growing.",
+  'No. Se queda ahí.': 'No. It stays where it is.',
+  'Entonces hay tiempo.': "Then there's time.",
+  'Se te ha enfriado.': 'Yours has gone cold.',
+  'No hay prisa. Aquí la tarde no se acaba.': 'No hurry. Here the evening never ends.',
+  'La científica': 'The scientist',
+  'El escéptico': 'The skeptic',
+  'Escena del Mirador': 'The Lookout scene',
+  'Pausar escena': 'Pause scene',
+  'Seguir con la escena': 'Resume scene',
+  'Plano siguiente': 'Next shot',
+  'Saltar la escena': 'Skip the scene',
+  'Escena en pausa': 'Scene paused',
+  'Esc otra vez para saltar la escena': 'Esc again to skip the scene',
+  'Espacio pausa · Intro plano siguiente · Esc saltar': 'Space pause · Enter next shot · Esc skip',
+  'Pulsa una tecla para oír la escena': 'Press a key to hear the scene',
 };
