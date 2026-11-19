@@ -236,5 +236,13 @@
       "A lone bench in the middle of the lights. On the backrest there is a sentence carved with a knife point.",
       "\"You cannot see the Moon from here. That is why we came.\""
     ]
+  },
+  "hogar.motor_cartel": {
+    "titulo": "The Engine sign",
+    "superficial": [
+      "A wooden sign nailed to a post beside the control hut, with big hand-painted letters: \"The Engine will bring light to the whole city\".",
+      "Underneath, smaller: \"While the works last, please do not go past the ring. Thank you for your patience\".",
+      "To one side, someone has drawn a light bulb with rays and, below it, a small Ool with its arms in the air."
+    ]
   }
 }

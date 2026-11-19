@@ -144,5 +144,20 @@
       "\"Take it to him. He will know where it fits. And don't tell him what it costs: he knows better than anyone.\"",
       "\"When I feel better, I will go and see if he is all right. Don't you rush: the count is not paid in a hurry.\""
     ]
+  },
+  "lab.mesa_partida": {
+    "titulo": "The split table",
+    "superficial": [
+      "A long table split in two by a gap. One half, tidy: papers in piles by size, a well-sharpened pencil and, on the edge, a diamond with a dot engraved.",
+      "The other, a finger lower and of a different wood, is empty: only the outline of some tools in the dust and, scratched over and over on the top, a triangle pointing down.",
+      "In the gap between the two, a teaspoon. It could be reached from both sides."
+    ]
+  },
+  "lab.escritorio_vacio": {
+    "titulo": "The empty desk",
+    "superficial": [
+      "A desk with nobody at it. The chair lies on the floor, as if someone had got up all at once and never come back for it.",
+      "On the desktop, the clean mark of a recorder that is no longer there. In the drawer, a single sheet in a dry hand, with three small questions and no answer: \"Have you eaten?\", \"Are you sleeping?\", \"What time is it there?\"."
+    ]
   }
 }

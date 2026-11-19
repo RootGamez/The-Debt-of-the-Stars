@@ -111,5 +111,20 @@
       ],
       "hechos": []
     }
+  },
+  {
+    "id": "puertas.boca_cerrada",
+    "mundo": "puertas",
+    "tipo": "observacion",
+    "titulo": "La boca cerrada",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Entre la losa y el arco de la cuarta boca queda un resquicio. Por él se ve una sala con luz de lámpara, cálida, de las que ya no se encienden.",
+        "Una mesa larga partida en dos y dos figuras, una a cada lado, quietas. Si apartas la cara, la losa vuelve a ser solo una losa."
+      ],
+      "hechos": []
+    }
   }
 ]

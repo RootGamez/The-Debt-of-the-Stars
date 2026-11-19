@@ -73,6 +73,7 @@ describe('Puertas world contract', () => {
 
   it('offers the three sources of the epilogue and three that tell the place', () => {
     expect(world.markers.interactions.map((i) => i.clueId).sort()).toEqual([
+      'puertas.boca_cerrada',
       'puertas.bocas',
       'puertas.cielo',
       'puertas.ofrendas',

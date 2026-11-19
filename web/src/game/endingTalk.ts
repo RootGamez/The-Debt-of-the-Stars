@@ -23,7 +23,7 @@ export const TALK_TOPICS: readonly TalkTopic[] = [
     id: 'silencio',
     facts: ['silencio.investigadora', 'silencio.consejo_existe', 'silencio.censura'],
     line: t(
-      '«Y esto: alguien esperaba a una investigadora que nunca volvió, y un Consejo que prefirió callarlo».',
+      '«Y esto: alguien esperaba a la científica que nunca volvió, y un Consejo que prefirió callarlo».',
     ),
   },
   {

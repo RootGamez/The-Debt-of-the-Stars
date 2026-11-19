@@ -133,6 +133,10 @@ function homeMouths(b: PuertasBuilder, f: Frame): void {
         g.at([0, 0, centre], [Math.PI / 2, 0, 0], [1, 1, 0.12]),
       );
       b.view(P.slate, torusArc(0.5, 0.05, 0.4, 2 * Math.PI - 0.4, 14, 4), g.at([0, -0.08, centre]));
+      b.mark('INT_boca_cerrada', g, [0, -0.5, centre], {
+        clue_id: 'puertas.boca_cerrada',
+        kind: 'observacion',
+      });
     }
     stele(b, g, k);
   });

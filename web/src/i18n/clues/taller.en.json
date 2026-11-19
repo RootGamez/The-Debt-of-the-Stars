@@ -198,5 +198,15 @@
       "“Let us go by the Track. Up there I have what I need to open my own way.”",
       "“Later I will go and see her. No hurry: now there is time.”"
     ]
+  },
+  "taller.diario_camara": {
+    "titulo": "The Chamber diary",
+    "superficial": [
+      "A hard-backed notebook, open on the table, in the dry hand of someone who measured the limit. The sentences start and do not finish.",
+      "\"I built it to gain time. To give them time. To give us. To… I no longer know whom.\"",
+      "\"I watch them leave. Every turn, I watch them leave. I could… no.\"",
+      "\"If I switch it off it ends. Everything ends. Not everything: what it holds. What it holds.\"",
+      "The last entry is crossed out and rewritten: \"Today I corrected the figure again. It was the true one. I corrected it anyway.\""
+    ]
   }
 }

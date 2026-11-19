@@ -30,7 +30,8 @@ export const SHOW_VERB = 'enseñar';
 export const HER_FACTS: readonly string[] = Object.freeze([
   'silencio.investigadora',
   'silencio.dos_investigadores',
-  'silencio.uno_se_quedo',
+  'ellos.ella_congelada',
+  'ellos.el_vive',
 ]);
 
 export interface SkepticSituation {

@@ -168,6 +168,12 @@ function sources(markers: CentroMarker[]): void {
     at: [0.2, -0.1, 1.4],
     props: { clue_id: 'taller.cartas_sin_enviar', kind: 'texto' },
   });
+  markers.push({
+    name: 'INT_diario_camara',
+    frame: table,
+    at: [0, 0.35, 1.4],
+    props: { clue_id: 'taller.diario_camara', kind: 'texto' },
+  });
   const wall = frameAt(core, 90 - (WALL_COLATITUDE - 2.5), 95, { heading: 0 });
   markers.push({
     name: 'INT_rayas',

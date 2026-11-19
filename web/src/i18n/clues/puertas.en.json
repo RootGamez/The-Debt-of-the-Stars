@@ -53,5 +53,12 @@
       "Above, there are no stars: there are mouths. Hundreds, turning slowly around you, each with a different sky inside. Beyond them, an enormous ring of light surrounds everything.",
       "Rings of light run across the ground from the mouths of home, one after another, unhurried. Here time does not pass: it shows."
     ]
+  },
+  "puertas.boca_cerrada": {
+    "titulo": "The closed mouth",
+    "superficial": [
+      "Between the slab and the arch of the fourth mouth there is a thin gap. Through it you can see a room lit by lamplight, warm, the kind that is no longer lit.",
+      "A long table split in two and two figures, one on each side, still. If you look away, the slab is just a slab again."
+    ]
   }
 }

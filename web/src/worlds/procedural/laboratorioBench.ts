@@ -271,4 +271,6 @@ export function buildBench(b: LabBuilder, f: Frame): void {
   b.extras.push(bubbleMesh(f.point(centre), BUBBLE_RADIUS));
   // La marca es el propio Contrapeso: su centro, mirando hacia la Sala (por donde se llega).
   b.mark('INT_contrapeso', f, centre, { clue_id: 'lab.contrapeso', kind: 'objeto' });
+  // La mesa partida es la rendija entre sus dos mitades.
+  b.mark('INT_mesa_partida', f, [0, Y, TOP + 0.3], { clue_id: 'lab.mesa_partida', kind: 'objeto' });
 }

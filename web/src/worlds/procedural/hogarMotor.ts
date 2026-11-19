@@ -386,6 +386,8 @@ function directora(b: HogarBuilder, f: Frame): void {
 
 /** La caseta de mando y lo que hay alrededor: farolas, cajas y la valla del aro. */
 function surroundings(b: HogarBuilder, f: Frame): void {
+  // El cartel del Motor, en un poste a la puerta de la caseta.
+  b.source('hogar.motor_cartel', 'texto', f, [-10, 1, 1.3]);
   b.house(f, [-10, 4, 0], { radius: 2.2, height: 2.6, fabrics: [P.ochre, P.cream], door: 90 });
   for (const [x, y] of [
     [-5, 6],

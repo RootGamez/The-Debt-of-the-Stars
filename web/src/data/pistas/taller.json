@@ -393,5 +393,23 @@
       ],
       "hechos": []
     }
+  },
+  {
+    "id": "taller.diario_camara",
+    "mundo": "taller",
+    "tipo": "texto",
+    "titulo": "El diario de la Cámara",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un cuaderno de tapas duras, abierto en la mesa, escrito con la letra seca de quien midió el límite. Las frases empiezan y no acaban.",
+        "«Lo construí para ganar tiempo. Para darles tiempo. Para darnos. Para… ya no sé a quién.»",
+        "«Los veo irse. Cada vuelta, los veo irse. Podría… no.»",
+        "«Si lo apago se acaba. Se acaba todo. Todo no: lo que sostiene. Lo que sostiene.»",
+        "La última entrada está tachada y reescrita: «Hoy he vuelto a corregir la cifra. Era la verdadera. La corregí igual.»"
+      ],
+      "hechos": []
+    }
   }
 ]

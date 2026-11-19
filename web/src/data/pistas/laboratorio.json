@@ -289,5 +289,36 @@
       ],
       "hechos": []
     }
+  },
+  {
+    "id": "lab.mesa_partida",
+    "mundo": "laboratorio",
+    "tipo": "objeto",
+    "titulo": "La mesa partida",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Una mesa larga partida en dos por una rendija. Una mitad, ordenada: papeles en pilas por tamaños, un lápiz bien afilado y, en el canto, un rombo con un punto grabado.",
+        "La otra, un dedo más baja y de otra madera, está vacía: solo el hueco de unas herramientas en el polvo y, rayado una y otra vez sobre el tablero, un triángulo que apunta hacia abajo.",
+        "En la rendija, entre las dos, una cucharilla. Se podía alcanzar desde los dos lados."
+      ],
+      "hechos": []
+    }
+  },
+  {
+    "id": "lab.escritorio_vacio",
+    "mundo": "laboratorio",
+    "tipo": "objeto",
+    "titulo": "El escritorio vacío",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un escritorio sin nadie. La silla está tumbada en el suelo, como si alguien se hubiera levantado de golpe y no hubiera vuelto a por ella.",
+        "En el tablero, la huella limpia de una grabadora que ya no está. En el cajón, una sola hoja en letra seca, con tres preguntas pequeñas y sin respuesta: «¿Has comido?», «¿Duermes?», «¿Qué hora es allí?»."
+      ],
+      "hechos": []
+    }
   }
 ]

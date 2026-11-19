@@ -464,5 +464,21 @@
       ],
       "hechos": []
     }
+  },
+  {
+    "id": "hogar.motor_cartel",
+    "mundo": "hogar",
+    "tipo": "texto",
+    "titulo": "El cartel del Motor",
+    "borrador": true,
+    "ambiente": true,
+    "superficial": {
+      "texto": [
+        "Un cartel de madera clavado en un poste junto a la caseta de mando, con letras grandes pintadas a mano: «El Motor dará luz a toda la ciudad».",
+        "Debajo, más pequeño: «Mientras dure la obra, no pasen del aro. Gracias por la paciencia».",
+        "A un lado, alguien ha dibujado una bombilla con rayos y, debajo, un Ool pequeño con los brazos en alto."
+      ],
+      "hechos": []
+    }
   }
 ]

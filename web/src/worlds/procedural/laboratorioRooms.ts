@@ -142,6 +142,11 @@ function esceptico(b: LabBuilder): void {
   }
   b.view(s, P.seal, box(), f.at([0.2, -1.54, z + 1.45], [0, 0.6, 0], [0.6, 0.01, 0.025]));
   b.lantern(s, f, 1.8, 0.8);
+  // Su escritorio vacío: junto a la silla tumbada.
+  b.mark('INT_escritorio_vacio', f, [-1.1, 0.3, z + 0.7], {
+    clue_id: 'lab.escritorio_vacio',
+    kind: 'objeto',
+  });
   b.mark('INT_notas_esceptico', f, [0, 0.1, z + 1.2], {
     clue_id: 'lab.notas_esceptico',
     kind: 'texto',
