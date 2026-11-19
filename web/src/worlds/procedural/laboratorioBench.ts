@@ -1,9 +1,11 @@
 // El Banco del Contrapeso rehecho para contar a los dos (hito E4 de docs/plan-finales.md §6; 🟡 el aspecto): una mesa
-// partida en dos mitades que no acaban de casar. La de ella, viva: el Contrapeso en su peana, con su burbuja, la
-// lámpara encendida, papeles, una taza en pie y el prototipo en el suelo. La de él, vacía y con polvo: el tablero de
-// sus herramientas con las siluetas de lo que falta, la banqueta recogida, el cerco seco de una taza y su signo (dos
-// triángulos punta con punta, 🟡 D13) rayado en la madera.
-import { ball, box, cone, cylinder, torus, type Frame, type Triple } from './kit';
+// partida en dos mitades que no acaban de casar. La de ella, viva y ordenada: el Contrapeso en su peana, con su
+// burbuja, la lámpara encendida, papeles en pilas por tamaños, un lápiz afilado, una taza en pie, su signo (un rombo
+// con un punto) grabado en el canto y el prototipo en el suelo. La de él, vacía y con polvo: el tablero de sus
+// herramientas con las siluetas de lo que falta, el hueco de otras en el polvo, la banqueta recogida, el cerco seco de
+// una taza y su signo de antes de la Cámara (un triángulo con la punta hacia abajo, 🟡 D13/D19) rayado una y otra vez
+// en la madera. En la rendija, entre las dos, una cucharilla (lab.mesa_partida).
+import { ball, box, cone, cylinder, Frame, torus, type Triple } from './kit';
 import { bubbleMesh } from './laboratorioBubble';
 import { FLOOR, LabBuilder, PALETTE as P } from './laboratorioKit';
 
@@ -16,6 +18,8 @@ const BUBBLE_RADIUS = 0.78;
 const TOP = FLOOR + 0.82;
 const DEPTH = 1.1;
 const Y = -0.4;
+/** Dónde cruza la rendija la cucharilla (y, marco del Banco): cerca del canto de delante, a la vista desde la Sala. */
+const SPOON_Y = -0.05;
 const TAU = Math.PI * 2;
 
 /** Una mitad de la mesa, de `x0` a `x1`: tablero con canto, faldón con cajón, patas con travesaños. */
@@ -85,19 +89,144 @@ function groove(
   );
 }
 
-/** Su signo rayado en la madera: dos triángulos punta con punta, como un reloj de arena. */
+/**
+ * Su signo rayado en la madera, el de antes de la Cámara: un triángulo con la punta hacia abajo (hacia quien mira la
+ * mesa desde la Sala), repasado una y otra vez sin que las pasadas acaben de coincidir.
+ */
 function hisSign(b: LabBuilder, f: Frame, at: [number, number], size: number, z: number): void {
-  const w = size / 2;
-  const h = size * 0.55;
   const [x, y] = at;
-  for (const side of [-1, 1]) {
-    const base = y + side * h;
-    groove(b, f, [x - w, base], [x + w, base], z, P.woodDark);
-    groove(b, f, [x - w, base], [x, y], z, P.woodDark);
-    groove(b, f, [x + w, base], [x, y], z, P.woodDark);
+  const w = size / 2;
+  const h = size * 0.85;
+  // [dx, dy, giro, color]: cada pasada un poco movida; la última, más clara (la madera recién rayada).
+  const passes: readonly [number, number, number, string][] = [
+    [0, 0, 0, P.woodDark],
+    [0.007, -0.005, 0.06, P.woodDark],
+    [-0.006, 0.004, -0.05, P.woodDark],
+    [0.002, 0.008, 0.02, P.greyDark],
+  ];
+  for (const [dx, dy, turn, color] of passes) {
+    const c = Math.cos(turn);
+    const s = Math.sin(turn);
+    const corner = (u: number, v: number): [number, number] => [
+      x + dx + u * c - v * s,
+      y + dy + u * s + v * c,
+    ];
+    const left = corner(-w, -h / 2);
+    const right = corner(w, -h / 2);
+    const tip = corner(0, h / 2);
+    groove(b, f, left, right, z, color);
+    groove(b, f, left, tip, z, color);
+    groove(b, f, right, tip, z, color);
   }
-  // Una raya de más, repasada: alguien pasó la uña muchas veces por el mismo sitio.
-  groove(b, f, [x - w * 0.9, y + h * 1.25], [x + w * 0.6, y + h * 1.3], z, P.grey);
+}
+
+/** Una raya grabada en el canto de delante de la mesa (cara vertical que mira a +Y), de `a` a `c` en (x, z). */
+function carve(
+  b: LabBuilder,
+  f: Frame,
+  a: [number, number],
+  c: [number, number],
+  y: number,
+  color: string,
+): void {
+  const dx = c[0] - a[0];
+  const dz = c[1] - a[1];
+  b.view(
+    b.inside,
+    color,
+    box(),
+    f.at(
+      [(a[0] + c[0]) / 2, y, (a[1] + c[1]) / 2],
+      [0, -Math.atan2(dz, dx), 0],
+      [Math.hypot(dx, dz), 0.004, 0.006],
+    ),
+  );
+}
+
+/** Su signo grabado en el canto de su mitad: un rombo con un punto dentro. */
+function herSign(b: LabBuilder, f: Frame, x: number, z: number): void {
+  const y = Y + DEPTH / 2 + 0.004;
+  const w = 0.026;
+  const h = 0.034;
+  const corners: [number, number][] = [
+    [x, z + h],
+    [x + w, z],
+    [x, z - h],
+    [x - w, z],
+  ];
+  corners.forEach((p, k) => {
+    carve(b, f, p, corners[(k + 1) % corners.length] ?? p, y, P.woodPale);
+  });
+  b.view(
+    b.inside,
+    P.woodPale,
+    cylinder(0.0065, 8),
+    f.at([x, y, z], [Math.PI / 2, 0, 0], [1, 1, 0.005]),
+  );
+}
+
+/** Los papeles de ella, en pilas por tamaños y bien cuadrados, con el lápiz afilado al lado. */
+function herPapers(b: LabBuilder, f: Frame): void {
+  const s = b.inside;
+  // [x, y, ancho, fondo, hojas]: de la pila grande a la pequeña.
+  const piles: readonly [number, number, number, number, number][] = [
+    [-0.23, -0.5, 0.25, 0.33, 7],
+    [-0.23, -0.12, 0.18, 0.24, 5],
+    [-0.23, 0.07, 0.12, 0.15, 4],
+  ];
+  for (const [x, y, w, d, sheets] of piles) {
+    for (let k = 0; k < sheets; k++) {
+      // Apenas movidas: alguien las cuadra cada vez que las deja.
+      const nudge = ((k * 37) % 5) * 0.0012 - 0.0024;
+      b.view(
+        s,
+        k % 3 === 2 ? P.white : P.paper,
+        box(),
+        f.at([x + nudge, y - nudge, TOP + 0.004 + k * 0.004], [0, 0, nudge * 2], [w, d, 0.004]),
+      );
+    }
+  }
+  // El lápiz: cuerpo de seis caras, la madera del corte y la mina, paralelo a las pilas.
+  const px = -0.07;
+  const py = -0.38;
+  const lie = (dy: number, scale: Triple): ReturnType<Frame['at']> =>
+    f.at([px, py + dy, TOP + 0.005], [-Math.PI / 2, 0, 0], scale);
+  b.view(s, P.seal, cylinder(0.005, 6), lie(0, [1, 1, 0.15]));
+  b.view(s, P.woodPale, cone(0.005, 0.0016, 6), lie(0.088, [1, 1, 0.026]));
+  b.view(s, P.greyDark, cone(0.0016, 0, 6), lie(0.105, [1, 1, 0.008]));
+  b.view(s, P.brass, cylinder(0.0052, 6), lie(-0.079, [1, 1, 0.008]));
+}
+
+/**
+ * La cucharilla, cruzada en la rendija y apoyada en los dos cantos (el de él, un dedo más bajo): se alcanzaba desde
+ * los dos lados. La pala cae del lado de él.
+ */
+function spoon(b: LabBuilder, f: Frame): void {
+  const s = b.inside;
+  const yaw = -0.95;
+  // Se apoya en dos cantos a 4 cm (en x): a lo largo de la cucharilla, a 4 cm ÷ cos(yaw).
+  const tilt = Math.atan2(0.012, 0.04 / Math.cos(yaw));
+  const g = new Frame(f.at([0, SPOON_Y, TOP - 0.002], [0, tilt, yaw]));
+  s.add(P.white, box(), g.at([-0.03, 0, 0], undefined, [0.075, 0.008, 0.0025]), 'metal');
+  s.add(P.white, box(), g.at([-0.071, 0, 0], [0, 0, 0], [0.02, 0.013, 0.0025]), 'metal');
+  s.add(P.white, box(), g.at([0.017, 0, -0.0005], undefined, [0.024, 0.005, 0.0025]), 'metal');
+  s.add(P.white, ball(1, 1), g.at([0.046, 0, -0.001], undefined, [0.022, 0.015, 0.0045]), 'metal');
+}
+
+/** El hueco que dejaron en el polvo sus herramientas: la madera limpia con la forma de lo que se llevó. */
+function dustHollows(b: LabBuilder, f: Frame, z: number): void {
+  // [x, y, ancho, fondo, giro]: el mazo (mango y cabeza), una regla larga, una caja y unas tenazas.
+  const hollows: readonly [number, number, number, number, number][] = [
+    [0.42, -0.38, 0.028, 0.26, 0.35],
+    [0.37, -0.25, 0.11, 0.04, 0.35],
+    [1.72, -0.42, 0.032, 0.5, -0.06],
+    [0.95, -0.72, 0.2, 0.13, 0.1],
+    [1.42, -0.78, 0.016, 0.19, 0.3],
+    [1.48, -0.78, 0.016, 0.19, -0.3],
+  ];
+  for (const [x, y, w, d, turn] of hollows) {
+    b.view(b.inside, P.woodPale, box(), f.at([x, y, z], [0, 0, turn], [w, d, 0.002]));
+  }
 }
 
 /** La mitad de ella: el Contrapeso en su peana, con la lámpara, los papeles y una taza en pie. */
@@ -131,8 +260,9 @@ function herSide(b: LabBuilder, f: Frame): void {
     'metal',
   );
   b.lamp(s, ball(0.05, 2), f.at([lamp[0], lamp[1] + 0.08, TOP + 0.4]));
-  b.papers(f, -0.3, -0.25, TOP + 0.005, 4, 0.4);
-  // El cuaderno abierto, la taza en pie y unas piezas de latón en fila.
+  herPapers(b, f);
+  herSign(b, f, -0.3, TOP - 0.045);
+  // El cuaderno abierto, la taza en pie y unas piezas de latón en fila, delante de la peana.
   for (const side of [-1, 1]) {
     b.view(
       s,
@@ -151,7 +281,7 @@ function herSide(b: LabBuilder, f: Frame): void {
     s.add(
       P.brass,
       torus(0.04 + 0.01 * k, 0.01, 16, 4),
-      f.at([-0.55 + k * 0.14, 0.02, TOP + 0.01], [Math.PI / 2, 0, 0]),
+      f.at([-1.35 + k * 0.14, 0.04, TOP + 0.01], [Math.PI / 2, 0, 0]),
       'metal',
     );
   }
@@ -228,7 +358,8 @@ function hisSide(b: LabBuilder, f: Frame): void {
   const s = b.inside;
   const top = TOP - 0.012;
   b.view(s, P.dust, box(), f.at([1.05, Y, top + 0.002], undefined, [1.9, DEPTH - 0.1, 0.003]));
-  hisSign(b, f, [1.25, -0.15], 0.3, top + 0.005);
+  dustHollows(b, f, top + 0.0045);
+  hisSign(b, f, [1.05, -0.15], 0.3, top + 0.005);
   b.view(
     s,
     P.woodDark,
@@ -266,6 +397,7 @@ export function buildBench(b: LabBuilder, f: Frame): void {
   halfTable(b, f, 0.02, 2.05, P.woodPale, 0.012);
   herSide(b, f);
   hisSide(b, f);
+  spoon(b, f);
   b.lantern(b.inside, f, -2.45, 0.9);
   const centre: Triple = [COUNTERWEIGHT_AT.x, COUNTERWEIGHT_AT.y, TOP + 0.02 + COUNTERWEIGHT_BASE];
   b.extras.push(bubbleMesh(f.point(centre), BUBBLE_RADIUS));
