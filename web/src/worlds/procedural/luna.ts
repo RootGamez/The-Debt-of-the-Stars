@@ -14,6 +14,7 @@ import {
 } from 'three';
 import { FAR_HIDDEN } from '../../render/nearDetail';
 import {
+  angleBetween,
   applySkyLight,
   ball,
   colliderMesh,
@@ -25,6 +26,14 @@ import {
   sphereTerrain,
   type XYZ,
 } from './kit';
+import {
+  biteBowl,
+  biteLip,
+  biteSphere,
+  carvedGround,
+  lipOuter,
+  type LunaOptions,
+} from './lunaBite';
 import { buildFragment } from './lunaFragment';
 import {
   FRAGMENT_SITE,
@@ -95,13 +104,19 @@ function createMaterials(sun: Vector3): LunaMaterials {
   };
 }
 
-/** Rocas, losas de polvo claro y cantos sueltos por toda la Luna (lejos del fragmento). */
-function scatterDetails(loose: Material): {
+/** Lo que se deja libre alrededor de la mordida (m más allá de su labio, en ángulo desde su centro). */
+const BITE_CLEAR = 1.5;
+
+/** Rocas, losas de polvo claro y cantos sueltos por toda la Luna (lejos del fragmento y de la mordida, si la hay). */
+function scatterDetails(
+  loose: Material,
+  bite: boolean,
+): {
   meshes: Mesh[];
   colliders: ReturnType<typeof scatter>['colliders'];
 } {
   const random = seededRandom(5);
-  const away = (d: XYZ): boolean => distanceToFragment(d) > CLEAR;
+  const away = (d: XYZ): boolean => distanceToFragment(d) > CLEAR && !(bite && nearBite(d));
   const rocks = scatter(
     {
       name: 'luna_Rocas',
@@ -167,8 +182,30 @@ function scatterDetails(loose: Material): {
   return { meshes, colliders: rocks.colliders };
 }
 
-/** Construye la Luna con la forma de una escena exportada: la raíz `luna`, sus mallas y sus marcas. */
-export function buildLuna(): Group {
+/** ¿Está esa dirección en la mordida o bajo su labio? (allí no se esparce nada) */
+function nearBite(d: XYZ): boolean {
+  return angleBetween(d, biteSphere().up) * LUNA_RADIUS < lipOuter() + BITE_CLEAR;
+}
+
+/** La mordida nueva (F4): el cuenco y su labio, con el material del suelo. */
+function biteMeshes(material: Material): Mesh[] {
+  const bowl = new Mesh(biteBowl(), material);
+  bowl.name = 'luna_Mordida';
+  const lip = new Mesh(biteLip(), material);
+  lip.name = 'luna_Mordida_Labio';
+  for (const mesh of [bowl, lip]) {
+    mesh.receiveShadow = true;
+    mesh.castShadow = true;
+  }
+  return [bowl, lip];
+}
+
+/**
+ * Construye la Luna con la forma de una escena exportada: la raíz `luna`, sus mallas y sus marcas. Con `bite`, la
+ * mordida nueva junto al fragmento (solo en el Hogar del final bueno, lunaBite.ts).
+ */
+export function buildLuna(options: LunaOptions = { bite: false }): Group {
+  const ground = options.bite ? carvedGround : lunaGround;
   const sun = sunInWorld(LUNA_ID);
   const mat = createMaterials(sun);
   // Marco de Blender: el contenido se gira −90° en X (como el exportador glTF).
@@ -180,7 +217,7 @@ export function buildLuna(): Group {
     {
       radius: LUNA_RADIUS,
       detail: LUNA_DETAIL,
-      height: (x, y, z) => lunaGround({ x, y, z }) - LUNA_RADIUS,
+      height: (x, y, z) => ground({ x, y, z }) - LUNA_RADIUS,
       faceColor: (_x, _y, _z, h, _slope, random) =>
         groundColor((h / (LUNA_RADIUS * LUNA_RELIEF) + 1) / 2).offsetHSL(
           0,
@@ -198,8 +235,9 @@ export function buildLuna(): Group {
   groundCollider.name = 'COL_luna_Terreno';
   groundCollider.visible = false;
   frame.add(terrain, groundCollider);
+  if (options.bite) frame.add(...biteMeshes(mat.ground));
 
-  const details = scatterDetails(mat.loose);
+  const details = scatterDetails(mat.loose, options.bite);
   frame.add(...details.meshes);
   if (details.colliders.length > 0) frame.add(colliderMesh('COL_luna_Lugares', details.colliders));
 

@@ -1,15 +1,18 @@
 // La vuelta a casa (Fase 10E; plan de los finales): cruzada una boca del Archivo de las Puertas (o La Boca de Umbral),
-// `?mundo=hogar&final=A|tarde`. Con A (el bueno) se llega tres días después de despegar: el Hogar de antes, sin los
-// fragmentos de las vitrinas ni el de la Luna (aún no han llegado) y con los Ool algo más jóvenes. Con "tarde" (el
-// malo, F5), el Hogar de diez años después (worlds/procedural/hogarLater*.ts); `via=boca` dice que se llegó por La
-// Boca, a pie por la Puerta Mayor y sin la nave (y no por una boca equivocada del Archivo, con ella), y eso cambia la
-// tarjeta. Con A, hablar con la Maestra cierra el viaje; con "tarde" lo cierra la escena del colapso
-// (game/homeLaterRig.ts): la Directora ya no está y su charla queda solo como respaldo. Aspecto y escenas, 🟡.
+// `?mundo=hogar&final=A|tarde`. Con A (el bueno, F4) se llega tres días después de despegar al Hogar que dejaste: la
+// Luna tiene una mordida nueva junto al fragmento (la variante `mordida`, worlds/procedural/lunaBite.ts) y la llegada
+// es una escena (game/homeEarlierRig.ts): el Albatros II se posa en el nido, donde espera la Maestra, que lee tu
+// cuaderno. Con "tarde" (el malo, F5), el Hogar de diez años después (worlds/procedural/hogarLater*.ts); `via=boca`
+// dice que se llegó por La Boca, a pie por la Puerta Mayor y sin la nave (y no por una boca equivocada del Archivo,
+// con ella), y eso cambia la tarjeta. Con "tarde" lo cierra la escena del colapso (game/homeLaterRig.ts): la Directora
+// ya no está y su charla queda solo como respaldo; con A, hablar con la Maestra es el respaldo de la escena. Aspecto y
+// escenas, 🟡.
 import { SEEN_ENDINGS, type SeenEnding } from '../core/save';
 import type { SourceActions } from '../reading/readingUi';
 import type { EndingCardKey } from '../data/endings';
 import { ENDING_PARAM, PROLOGUE_WORLD, VIA_PARAM } from '../worlds/worldSelection';
 import { LATER_VARIANT } from '../worlds/procedural/hogarLaterShape';
+import { BITE_VARIANT } from '../worlds/procedural/lunaBite';
 import type { WorldVariants } from './loadSystem';
 import type { Ending } from './epilogue';
 import { WORMHOLE } from './prologue';
@@ -24,15 +27,6 @@ export const MAESTRA = 'instituto.maestra';
 export function speakerFor(ending: Ending): string {
   return ending === 'A' ? MAESTRA : DIRECTOR;
 }
-/** Lo que en el Hogar de antes aún no ha llegado: las piedras de las vitrinas y el fragmento de la Luna. */
-export const NOT_YET_ARRIVED: readonly string[] = [
-  'hogar_FragmentosVitrinas',
-  'luna_Fragmento',
-  'luna_Fragmento_Luz',
-];
-/** Los Ool de antes, algo más jóvenes (más pequeños). */
-export const YOUNGER_OOL = 0.85;
-
 /** El final de la dirección, solo en Hogar y solo si es uno de los dos (la dirección no es de fiar). */
 export function endingFromQuery(search: string): Ending | undefined {
   const params = new URLSearchParams(search);
@@ -70,16 +64,16 @@ export interface HomeLook {
   without: readonly string[];
   /** La escala de los Ool. */
   oolScale: number;
-  /** Qué mundos se construyen en otra versión (llegando tarde, el Hogar de diez años después). */
+  /** Qué mundos se construyen en otra versión (la Luna mordida del bueno; llegando tarde, el Hogar de diez años después). */
   variants: WorldVariants;
   /** Si el Albatros II está en casa: por La Boca se llega a pie y la nave se quedó en el sistema ajeno. */
   ship: boolean;
 }
 
-/** Cómo es Hogar al llegar: el de antes con el final bueno; el de diez años después si se llega tarde. */
+/** Cómo es Hogar al llegar: el que dejaste, con la Luna mordida, con el final bueno; el de diez años después, tarde. */
 export function homeLook(ending: Ending, via: HomeVia = 'archivo'): HomeLook {
   return ending === 'A'
-    ? { without: NOT_YET_ARRIVED, oolScale: YOUNGER_OOL, variants: {}, ship: true }
+    ? { without: [], oolScale: 1, variants: { luna: BITE_VARIANT }, ship: true }
     : { without: [], oolScale: 1, variants: { hogar: LATER_VARIANT }, ship: via !== 'boca' };
 }
 
@@ -89,7 +83,7 @@ export interface HomecomingPlay {
   readonly actions: SourceActions;
 }
 
-/** Quien cierra el viaje ofrece "hablar" (una vez); en el Hogar de antes, el fragmento no está. */
+/** Quien cierra el viaje ofrece "hablar" (una vez); con el final bueno, el fragmento ya no te lleva a ninguna parte. */
 export function createHomecomingPlay(ending: Ending, onEnd: () => void): HomecomingPlay {
   let ended = false;
   const early = ending === 'A';

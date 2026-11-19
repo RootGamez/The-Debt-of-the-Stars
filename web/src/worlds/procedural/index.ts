@@ -10,11 +10,12 @@ import { hogarEra } from './hogarLaterShape';
 import { buildPuertas } from './puertas';
 import { buildLaboratorio } from './laboratorio';
 import { buildLuna } from './luna';
+import { lunaOptions } from './lunaBite';
 import { buildObservatorio } from './observatorio';
 import { buildTaller } from './taller';
 import { buildUmbral } from './umbral';
 
-/** Un constructor recibe la variante pedida (solo Hogar tiene: la de diez años después, F5). */
+/** Un constructor recibe la variante pedida (Hogar: la de diez años después, F5; la Luna: la mordida nueva, F4). */
 type Builder = (variant: string | undefined) => Group;
 
 /** Un mundo sin variantes: pedirle una es un error. */
@@ -31,7 +32,7 @@ const BUILDERS: ReadonlyMap<string, Builder> = new Map<string, Builder>([
   ['taller', plain(() => buildTaller(), 'taller')],
   ['hogar', (variant) => buildHogar({ era: hogarEra(variant) })],
   ['cicatriz', plain(() => buildCicatriz(), 'cicatriz')],
-  ['luna', plain(() => buildLuna(), 'luna')],
+  ['luna', (variant) => buildLuna(lunaOptions(variant))],
   ['observatorio', plain(() => buildObservatorio(), 'observatorio')],
   ['laboratorio', plain(() => buildLaboratorio(), 'laboratorio')],
   ['puertas', plain(() => buildPuertas(), 'puertas')],

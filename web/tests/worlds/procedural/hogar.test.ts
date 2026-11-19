@@ -28,7 +28,6 @@ import {
 } from '../../../src/worlds/procedural/hogarShape';
 import { direction, frameAt, type Triple } from '../../../src/worlds/procedural/kit';
 import { sunInWorld } from '../../../src/worlds/procedural/sun';
-import { NOT_YET_ARRIVED } from '../../../src/game/homecoming';
 import { createWorldRuntime } from '../../../src/worlds/worldRuntime';
 
 const world = buildWorld('hogar');
@@ -265,11 +264,11 @@ describe('the people of home', () => {
     expect(ageOf('astronoma')).toBeGreaterThan(ageOf('directora'));
   });
 
-  it('can leave out what had not arrived yet in the earlier home', () => {
+  it('can leave out the stones of the cases without touching the sources', () => {
     const fresh = buildWorld('hogar');
     if (!fresh) throw new Error('Hogar debería construirse por código');
     expect(fresh.scene.getObjectByName('hogar_FragmentosVitrinas')).toBeDefined();
-    const earlier = leaveOut(fresh, NOT_YET_ARRIVED);
+    const earlier = leaveOut(fresh, ['hogar_FragmentosVitrinas']);
     expect(earlier.scene.getObjectByName('hogar_FragmentosVitrinas')).toBeUndefined();
     // La vitrina de los bordes curvos es una fuente: se queda.
     expect(world.markers.interactions.some((i) => i.clueId === 'instituto.vitrina_bordes')).toBe(

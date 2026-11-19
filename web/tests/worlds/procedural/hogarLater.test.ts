@@ -44,7 +44,7 @@ const before = buildWorld('hogar');
 if (!before) throw new Error('Hogar debería construirse');
 
 describe('the variant of Hogar ten years later', () => {
-  it('is asked for by name, and no other world has variants', () => {
+  it('is asked for by name, and a world without variants refuses it', () => {
     expect(hogarEra(undefined)).toBe('antes');
     expect(hogarEra(LATER_VARIANT)).toBe('despues');
     expect(() => hogarEra('mañana')).toThrow(/variante/);

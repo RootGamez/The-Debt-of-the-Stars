@@ -15,7 +15,6 @@ import {
   lunaGround,
   lunaSurface,
 } from '../../../src/worlds/procedural/lunaShape';
-import { NOT_YET_ARRIVED } from '../../../src/game/homecoming';
 
 const world = buildWorld('luna');
 if (!world) throw new Error('La Luna debería construirse por código');
@@ -90,11 +89,31 @@ describe('Luna world contract', () => {
   });
 
   it('removes the fragment and its collider without leaving anything behind', () => {
-    const without = leaveOut(buildWorld('luna') ?? world, NOT_YET_ARRIVED);
+    const without = leaveOut(buildWorld('luna') ?? world, ['luna_Fragmento', 'luna_Fragmento_Luz']);
     expect(without.scene.getObjectByName('luna_Fragmento')).toBeUndefined();
     expect(without.scene.getObjectByName('luna_Fragmento_Luz')).toBeUndefined();
     expect(without.markers.colliders.some((m) => m.name === 'COL_luna_Fragmento')).toBe(false);
     expect(without.markers.colliders.some((m) => m.name === 'COL_luna_Terreno')).toBe(true);
+  });
+});
+
+describe('the Moon with the new bite (F4)', () => {
+  const bitten = buildWorld('luna', 'mordida');
+  if (!bitten) throw new Error('La Luna mordida debería construirse');
+
+  it('adds the bowl and its lip only with the variant, and keeps the fragment and its source', () => {
+    expect(world.scene.getObjectByName('luna_Mordida')).toBeUndefined();
+    expect(bitten.scene.getObjectByName('luna_Mordida')).toBeDefined();
+    expect(bitten.scene.getObjectByName('luna_Mordida_Labio')).toBeDefined();
+    expect(bitten.scene.getObjectByName('luna_Fragmento')).toBeDefined();
+    expect(bitten.markers.interactions.map((i) => i.clueId)).toEqual(
+      world.markers.interactions.map((i) => i.clueId),
+    );
+    expect([...bitten.markers.spawns.keys()]).toEqual([...world.markers.spawns.keys()]);
+  });
+
+  it('refuses a variant it does not have', () => {
+    expect(() => buildWorld('luna', 'despues')).toThrow(/variante/);
   });
 });
 

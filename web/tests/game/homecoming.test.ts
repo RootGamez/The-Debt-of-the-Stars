@@ -8,9 +8,7 @@ import {
   homeLook,
   endingCardKey,
   isFinal,
-  NOT_YET_ARRIVED,
   viaFromQuery,
-  YOUNGER_OOL,
 } from '../../src/game/homecoming';
 import { WORMHOLE } from '../../src/game/prologue';
 
@@ -31,14 +29,13 @@ describe('the way home from the Archive of the Gates', () => {
     expect(isFinal('tarde')).toBe(true);
   });
 
-  it('is the earlier home with the good ending: no fragments yet and younger Ool', () => {
+  it('is the home you left with the good ending, with the new bite on the Moon (F4)', () => {
     expect(homeLook('A')).toEqual({
-      without: NOT_YET_ARRIVED,
-      oolScale: YOUNGER_OOL,
-      variants: {},
+      without: [],
+      oolScale: 1,
+      variants: { luna: 'mordida' },
       ship: true,
     });
-    expect(homeLook('A').without).toContain('luna_Fragmento');
     // Llegando tarde (F5): el Hogar de diez años después; por La Boca, a pie y sin la nave.
     expect(homeLook('tarde')).toEqual({
       without: [],
@@ -48,7 +45,6 @@ describe('the way home from the Archive of the Gates', () => {
     });
     expect(homeLook('tarde', 'boca').ship).toBe(false);
     expect(homeLook('A', 'boca').ship).toBe(true);
-    expect(YOUNGER_OOL).toBeLessThan(1);
   });
 });
 
