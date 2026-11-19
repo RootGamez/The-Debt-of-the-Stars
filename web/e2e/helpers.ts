@@ -28,8 +28,8 @@ export async function loopValue<K extends keyof LoopSnapshot>(
 export async function ready(page: Page, query = ''): Promise<void> {
   const world = query.includes('mundo=') ? '' : '&mundo=umbral';
   await page.goto(`/?debug${world}${query}`);
-  await expect(page.locator('.overlay')).toBeVisible({ timeout: 20_000 });
-  await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);
+  await expect(page.locator('.overlay')).toBeVisible({ timeout: 60_000 });
+  await expect.poll(() => value(page, 'grounded'), { timeout: 60_000 }).toBe(true);
 }
 
 /**
@@ -49,4 +49,25 @@ export async function startPlaying(page: Page, query = ''): Promise<void> {
   await page.locator('.overlay').click({ position: { x: 20, y: 20 } });
   await expect(page.locator('.overlay')).toBeHidden();
   await expect.poll(() => value(page, 'playing'), { timeout: 20_000 }).toBe(true);
+}
+
+/**
+ * Llama a una función de `window.__juego` que no tiene tipo en `debugOverlay.ts` (las de las cinemáticas: `mirador`,
+ * `homeEarlier`, `homeLater`…) y devuelve lo que dé (null si no existe).
+ */
+export async function debugCall<T = unknown>(
+  page: Page,
+  name: string,
+  ...args: number[]
+): Promise<T | null> {
+  return page.evaluate(
+    ({ fn, values }) => {
+      const api = window.__juego as unknown as Record<
+        string,
+        ((...a: number[]) => unknown) | undefined
+      >;
+      return (api?.[fn]?.(...values) ?? null) as never;
+    },
+    { fn: name, values: args },
+  );
 }

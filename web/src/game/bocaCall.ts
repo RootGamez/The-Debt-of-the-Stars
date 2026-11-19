@@ -5,8 +5,11 @@
 /** Cuándo se abre (segundos del ciclo; el mismo minuto 10 del destello) y cuánto dura. */
 export const BOCA_CALL_START = 600;
 export const BOCA_CALL_DURATION = 20;
-/** A cuántos metros del centro de la esfera se pregunta si cruzar. */
-export const BOCA_ASK_RADIUS = 3;
+/**
+ * A cuántos metros del centro de la esfera se pregunta si cruzar. El centro está a unos 4,5 m sobre la plataforma,
+ * así que con 3 m solo se alcanzaba subido al ara; a 6 m se pregunta desde los escalones.
+ */
+export const BOCA_ASK_RADIUS = 6;
 
 /** Si La Boca está abierta en este instante del ciclo. */
 export function bocaCallOpen(loopTime: number): boolean {

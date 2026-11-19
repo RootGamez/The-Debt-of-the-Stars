@@ -6,8 +6,11 @@ import { loopValue, ready, snapshot, startPlaying, value } from './helpers';
 test('a short loop ends, fades to white and wakes up at the start with one more loop', async ({
   page,
 }) => {
+  test.setTimeout(180_000);
   await startPlaying(page, '&ciclo=12');
   await expect(page.locator('.clock-hud')).toContainText('tú 00:0');
+  // Con WebGL por software el reloj del juego va mucho más lento que el real: se salta a los últimos segundos.
+  await page.evaluate(() => window.__juego?.skipTo?.(10));
   // Registra en la página la opacidad máxima de cada color de fundido (no depende del sondeo).
   await page.evaluate(() => {
     const fade = document.querySelector<HTMLElement>('.fade');
@@ -22,10 +25,10 @@ test('a short loop ends, fades to white and wakes up at the start with one more 
 
   // La muerte dura 2 s: en vez de sondear esa fase, se espera al ciclo siguiente y se comprueban
   // los fundidos registrados en la página.
-  await expect.poll(() => loopValue(page, 'loops'), { timeout: 60_000 }).toBe(1);
+  await expect.poll(() => loopValue(page, 'loops'), { timeout: 120_000 }).toBe(1);
 
   expect(await loopValue(page, 'umbral')).toBeLessThan(5);
-  await expect.poll(() => loopValue(page, 'phase'), { timeout: 10_000 }).toBe('playing');
+  await expect.poll(() => loopValue(page, 'phase'), { timeout: 30_000 }).toBe('playing');
   const fades = await page.evaluate(
     () => (window as unknown as { __fades: Record<string, number> }).__fades,
   );
@@ -37,8 +40,10 @@ test('a short loop ends, fades to white and wakes up at the start with one more 
 test('the number of loops survives a reload and can be erased after confirming', async ({
   page,
 }) => {
+  test.setTimeout(180_000);
   await startPlaying(page, '&ciclo=10');
-  await expect.poll(() => loopValue(page, 'loops'), { timeout: 40_000 }).toBe(1);
+  await page.evaluate(() => window.__juego?.skipTo?.(8));
+  await expect.poll(() => loopValue(page, 'loops'), { timeout: 120_000 }).toBe(1);
 
   await ready(page);
   await expect(page.locator('.overlay')).toContainText('Ciclos vividos: 1');
@@ -86,8 +91,11 @@ test('with ?debug the ] key skips a minute of the loop', async ({ page }) => {
 });
 
 test('Cancelar keeps the saved game', async ({ page }) => {
+  test.setTimeout(180_000);
+  test.setTimeout(180_000);
   await startPlaying(page, '&ciclo=10');
-  await expect.poll(() => loopValue(page, 'loops'), { timeout: 40_000 }).toBe(1);
+  await page.evaluate(() => window.__juego?.skipTo?.(8));
+  await expect.poll(() => loopValue(page, 'loops'), { timeout: 120_000 }).toBe(1);
   await ready(page);
 
   await page.getByRole('button', { name: 'Empezar de cero', exact: true }).click();
@@ -103,7 +111,7 @@ test('instant events of the world fire at their time (TRIG_LaBoca_Destello at 10
 }) => {
   await startPlaying(page);
 
-  for (let i = 0; i < 10; i++) await page.keyboard.press(']');
+  await page.evaluate(() => window.__juego?.skipTo?.(601));
 
   await expect.poll(async () => (await loopValue(page, 'fired')) ?? []).toContain('boca_destello');
 });

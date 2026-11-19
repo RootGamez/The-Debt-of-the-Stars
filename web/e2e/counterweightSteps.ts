@@ -18,7 +18,7 @@ export async function intoTheCradle(page: Page): Promise<void> {
   await standAt(page, 'lab.notas_investigadora');
   await expect(page.locator('.prompt')).toHaveText('E · leer');
   await page.keyboard.press('KeyE');
-  await expect(page.locator('.reader-title')).toHaveText('Las notas de la investigadora');
+  await expect(page.locator('.reader-title')).toHaveText('Las notas de la científica');
   await closeReader(page);
   // Las notas ya dicen que está terminado: el Contrapeso no tiene nada nuevo y se coge sin examinarlo.
   await standAt(page, 'lab.contrapeso');

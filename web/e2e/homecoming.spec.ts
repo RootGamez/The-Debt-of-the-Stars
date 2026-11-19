@@ -1,10 +1,11 @@
-// Fase 10E: la vuelta a casa. Por una boca del Archivo de las Puertas o de La Boca se llega a
+// Fase 10E y F4/F5: la vuelta a casa. Por una boca del Archivo de las Puertas o de La Boca se llega a
 // `?mundo=hogar&final=A|tarde[&via=boca|archivo]`. Con A, el Hogar de antes (sin los fragmentos que aún no han
-// llegado); hablar con la Maestra (F4, D14) abre la escena del cuaderno y, con «Seguir», el giro a la Luna y la tarjeta
-// del final, que se guarda como visto. Llegar tarde es el final malo (cierra la Directora): su tarjeta (según `via`) también se guarda y ofrece volver al Archivo.
+// llegado) y la cinemática del nido (F4: el Albatros II se posa y la Maestra lee tu cuaderno); al acabar guarda el
+// final y recarga en el Mirador (`escena=mirador`, F3), que acaba en la tarjeta. Llegar tarde es el final malo (F5):
+// la visita al Hogar de diez años después y la escena del colapso; su tarjeta (según `via`) se guarda y ofrece volver
+// al Archivo. Las cinemáticas se saltan con los `...Seek` de `?debug` (a ritmo real durarían minutos).
 import { expect, test, type Page } from '@playwright/test';
-import { standAt } from './counterweightSteps';
-import { ready, snapshot, startPlaying } from './helpers';
+import { debugCall, ready, snapshot, startPlaying } from './helpers';
 
 const SAVE_KEY = 'bucle-tiempo:partida';
 
@@ -33,35 +34,31 @@ async function arriveHome(
       window.localStorage.setItem(
         key,
         JSON.stringify({
-          version: 6,
+          version: 7,
           loopsCompleted: 4,
           facts: ['bocas.vuelta_antes'],
           prologueDone: true,
           endings: seen,
+          worlds: {},
+          tasks: [],
+          opened: [],
+          loop: { source: 'inPlace', left: false },
         }),
       );
     },
     { key: SAVE_KEY, seen: endings },
   );
-  await startPlaying(page, query);
+  // La escena del nido empieza sola y deja la pausa inerte: con A no hay clic que dar.
+  if (ending === 'A') await ready(page, query);
+  else await startPlaying(page, query);
 }
 
-/** Tras cruzar la boca se aparece en el espacio, sentado en la nave (T11); para andar hay que posarse. */
-async function landAtHome(page: Page): Promise<void> {
-  expect((await snapshot(page))?.ship?.piloting).toBe(true);
-  expect(await page.evaluate(() => window.__juego?.landHome?.())).toBe(true);
-  await expect
-    .poll(async () => (await snapshot(page))?.ship?.piloting, { timeout: 60_000 })
-    .toBe(false);
+interface Scene {
+  stage: string;
 }
 
-async function talkTo(page: Page, source: string): Promise<void> {
-  await standAt(page, source);
-  await expect(page.locator('.prompt')).toHaveText('E · hablar');
-  await page.keyboard.press('KeyE');
-}
-
-const talkToTheDirector = (page: Page) => talkTo(page, 'instituto.directora');
+const earlier = (page: Page) => debugCall<Scene>(page, 'homeEarlier');
+const later = (page: Page) => debugCall<Scene>(page, 'homeLater');
 
 test.afterEach(async ({ page }) => {
   await page.evaluate((key) => {
@@ -69,62 +66,39 @@ test.afterEach(async ({ page }) => {
   }, SAVE_KEY);
 });
 
-test('ending A: the Teacher reads the notebook, the view turns to the Moon and the card offers to play again', async ({
+test('ending A: the nest scene plays, saves the ending and reloads into the Mirador', async ({
   page,
 }) => {
   test.setTimeout(240_000);
   await arriveHome(page, 'A');
-  await landAtHome(page);
   const home = await homecoming(page);
-  expect(home).toMatchObject({ ending: 'A', phase: 'playing' });
-  expect(home?.without).toContain('luna_Fragmento');
+  expect(home).toMatchObject({ ending: 'A' });
+  // La Luna llega con su mordida nueva (variante), no con piezas que falten.
+  expect(home?.without).toEqual([]);
   // No es el prólogo: ni tareas ni gusano.
   expect(await page.evaluate(() => window.__juego?.tasks?.() ?? null)).toBeNull();
   expect(await page.evaluate(() => window.__juego?.wormhole?.().active)).toBe(false);
-  // El fragmento de la Luna aún no ha llegado: no hay nada que examinar allí.
-  await standAt(page, 'instituto.fragmento_luna');
-  await expect(page.locator('.prompt')).toBeHidden();
-
-  // La Directora ya no cierra el bueno: no ofrece nada.
-  await standAt(page, 'instituto.directora');
-  await expect(page.locator('.prompt')).toBeHidden();
-
-  await talkTo(page, 'instituto.maestra');
-  await expect.poll(async () => (await homecoming(page))?.phase).toBe('talking');
-  const scene = page.getByRole('dialog', { name: 'La Maestra' });
-  await expect(scene).toBeVisible();
-  await expect(scene).toContainText('Vuelve a contármelo todo');
-  await expect(scene).toContainText('tiempo prestado');
-  await scene.getByRole('button', { name: 'Seguir' }).click();
-  await expect(scene).toBeHidden();
-  await expect
-    .poll(async () => (await homecoming(page))?.phase, { timeout: 60_000 })
-    .toBe('turning');
-  await expect.poll(async () => (await homecoming(page))?.phase, { timeout: 60_000 }).toBe('card');
-  const card = page.getByRole('dialog', { name: 'Tres días después' });
-  await expect(card).toBeVisible();
-  await expect(card).toContainText('Texto provisional');
-  await expect(card.getByRole('button', { name: 'Volver a jugar' })).toBeFocused();
-  expect(await savedEndings(page)).toEqual(['A']);
-
-  await card.getByRole('button', { name: 'Volver a jugar' }).click();
-  await page.waitForURL((url) => !url.search.includes('mundo') && !url.search.includes('final'), {
-    waitUntil: 'commit',
-    timeout: 60_000,
-  });
-  await expect.poll(async () => (await snapshot(page))?.world, { timeout: 120_000 }).toBe('umbral');
+  // La escena del nido empieza sola y cierra el viaje (la Maestra ya no habla en una tarjeta).
+  await expect.poll(async () => (await earlier(page))?.stage, { timeout: 60_000 }).toBe('scene');
+  await expect.poll(async () => (await homecoming(page))?.phase).toBe('scene');
+  await debugCall(page, 'homeEarlierSeek', 1000);
+  await page.waitForURL(/escena=mirador/, { waitUntil: 'commit', timeout: 60_000 });
   expect(await savedEndings(page)).toEqual(['A']);
 });
 
-test('the late ending is saved together with the endings already seen', async ({ page }) => {
+test('the late ending: the visit and the collapse scene end in the card, saved with the endings already seen', async ({
+  page,
+}) => {
   test.setTimeout(240_000);
   await arriveHome(page, 'tarde', ['A'], 'boca');
-  await landAtHome(page);
-
-  await talkToTheDirector(page);
+  expect(await homecoming(page)).toMatchObject({ ending: 'tarde' });
+  await expect.poll(async () => (await later(page))?.stage, { timeout: 60_000 }).toBe('arrival');
+  await debugCall(page, 'homeCollapse');
+  await expect.poll(async () => (await later(page))?.stage).toBe('collapse');
+  await debugCall(page, 'homeCollapseSeek', 1000);
 
   const card = page.getByRole('dialog', { name: 'Llegas tarde' });
-  await expect(card).toBeVisible();
+  await expect(card).toBeVisible({ timeout: 60_000 });
   expect(await savedEndings(page)).toEqual(['A', 'tarde']);
   // Ya no hay vuelta al juego: ni pausa ni Registro.
   await page.keyboard.press('Escape');
@@ -144,12 +118,13 @@ test('arriving late through an Archive mouth is saved and the card leads back to
 }) => {
   test.setTimeout(240_000);
   await arriveHome(page, 'tarde', [], 'archivo');
-  await landAtHome(page);
   expect(await homecoming(page)).toMatchObject({ ending: 'tarde', without: [] });
+  await expect.poll(async () => (await later(page))?.stage, { timeout: 60_000 }).toBe('arrival');
+  await debugCall(page, 'homeCollapse');
+  await debugCall(page, 'homeCollapseSeek', 1000);
 
-  await talkToTheDirector(page);
   const card = page.getByRole('dialog', { name: 'Un sistema que no era el tuyo' });
-  await expect(card).toBeVisible();
+  await expect(card).toBeVisible({ timeout: 60_000 });
   expect(await savedEndings(page)).toEqual(['tarde']);
   await card.getByRole('button', { name: 'Volver al Archivo' }).click();
 
