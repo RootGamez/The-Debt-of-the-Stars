@@ -1002,6 +1002,12 @@ async function start(): Promise<void> {
         )
       : undefined;
   const bocaEye = new Vector3();
+  // El centro de la esfera en el marco del juego (la posición del marcador es local a su plataforma).
+  const bocaCenter = new Vector3();
+  if (bocaTrigger) {
+    bocaTrigger.object.updateWorldMatrix(true, false);
+    bocaTrigger.object.getWorldPosition(bocaCenter);
+  }
   const bocaUp = new Vector3();
   let bocaConfirmed = false;
   /** Qué toca con La Boca ahora: cerrada, visible, preguntar o cruzar (solo a pie, en Umbral). */
@@ -1011,7 +1017,7 @@ async function start(): Promise<void> {
     // Desde los ojos del explorador (en tercera persona la cámara va detrás) hasta el centro del anillo.
     upOf(player.state.body, bocaUp);
     bocaEye.copy(player.state.position).addScaledVector(bocaUp, EYE_HEIGHT);
-    const distance = bocaEye.distanceTo(bocaTrigger.object.position);
+    const distance = bocaEye.distanceTo(bocaCenter);
     return bocaCallStep(session.director.clock.t, distance, bocaConfirmed);
   }
   const bocaActions: SourceActions = {
