@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { Vector3, type Object3D } from 'three';
 import type { MoveIntent } from '../../../src/core/input';
-import { PHYSICS_STEP } from '../../../src/data/movement';
+import { PHYSICS_STEP, PLAYER_RADIUS } from '../../../src/data/movement';
 import {
   createCharacter,
   stepCharacter,
@@ -14,6 +14,7 @@ import { buildWorld } from '../../../src/worlds/loadWorld';
 import { isMesh } from '../../../src/worlds/markers';
 import { direction } from '../../../src/worlds/procedural/kit';
 import { buildPuertas } from '../../../src/worlds/procedural/puertas';
+import { CLOSED_MOUTH, slitOpening } from '../../../src/worlds/procedural/puertasClosedMouth';
 import { ripplePhase } from '../../../src/worlds/procedural/puertasFloor';
 import { PUERTAS_RADIUS, SITES, puertasGround } from '../../../src/worlds/procedural/puertasShape';
 import { createWorldRuntime } from '../../../src/worlds/worldRuntime';
@@ -179,5 +180,34 @@ describe('Puertas on foot (without jumping)', () => {
     const spawn = world.markers.spawns.get('SPAWN_Puertas');
     if (!spawn) throw new Error('sin aparición');
     expect(walk(positionOf(spawn), [source('puertas.primera')])).toBe(1);
+  });
+
+  it('walks from the lectern to the slit of the closed mouth', () => {
+    const spawn = world.markers.spawns.get('SPAWN_Puertas');
+    if (!spawn) throw new Error('sin aparición');
+    const waypoints = [source('puertas.bocas'), source('puertas.boca_cerrada')];
+    expect(walk(positionOf(spawn), waypoints)).toBe(waypoints.length);
+  });
+});
+
+describe('the closed mouth of home (seed of the secret ending)', () => {
+  it('leaves a slit to peek through, too narrow to cross', () => {
+    const middle = slitOpening(0);
+    expect(middle).toBeGreaterThan(0.15);
+    expect(middle).toBeLessThan(2 * PLAYER_RADIUS);
+    expect(slitOpening(0.5)).toBeLessThan(middle);
+    expect(slitOpening(CLOSED_MOUTH.archInner)).toBe(0);
+    expect(slitOpening(-2)).toBe(0);
+  });
+
+  it('keeps the raised slab inside the ring, so it never pokes out', () => {
+    expect(CLOSED_MOUTH.slabLift + CLOSED_MOUTH.slabRadius).toBeLessThan(CLOSED_MOUTH.archOuter);
+  });
+
+  it('cannot be crossed: no folded Gate near it', () => {
+    const at = source('puertas.boca_cerrada');
+    for (const gate of world.markers.gates) {
+      expect(positionOf(gate.object).distanceTo(at), gate.name).toBeGreaterThan(5);
+    }
   });
 });

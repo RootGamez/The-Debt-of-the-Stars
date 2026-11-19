@@ -2,10 +2,12 @@
 // su reloj tallado en una estela y la vista de un día de Hogar (una tapada: "pronto"). Delante, el atril donde se leen
 // sus horas (INT_bocas, lector `bocas`), y a un lado el Banco (INT_planos; los planos sueltos del
 // Contrapeso se quitaron en F1 del plan de los finales, D12). Bajo todo, un mosaico de losas en anillos. 🟡 (plan de la Fase 10D).
+// La cuarta, tapada, deja ver el Laboratorio del pasado por un resquicio (puertasClosedMouth.ts, semilla del secreto).
 import { Color, Mesh, MeshBasicMaterial } from 'three';
-import { box, cylinder, Frame, torus, torusArc } from './kit';
+import { box, cylinder, Frame, torus } from './kit';
+import { closedMouth } from './puertasClosedMouth';
 import { PALETTE as P, groundFrame, siteFrame, type PuertasBuilder } from './puertasKit';
-import { SITES } from './puertasShape';
+import { PUERTAS_RADIUS, SITES } from './puertasShape';
 
 const DEG = Math.PI / 180;
 const HOME_RADIUS = 1.7;
@@ -59,12 +61,13 @@ function mosaic(b: PuertasBuilder, f: Frame): void {
         g.at([0, 0, 0.02], undefined, [1.35, width, 0.06]),
       );
     }
-    // Un hilo de luz entre anillo y anillo: el suelo de la plaza late como un reloj.
-    const seam = groundFrame(f, 0, 0);
+    // Un hilo de luz entre anillo y anillo: el suelo de la plaza late como un reloj. El suelo es una esfera, así que
+    // cada hilo baja con ella (si no, los de fuera flotan y cruzan por delante de las bocas).
+    const reach = Math.atan((r + 0.78) / PUERTAS_RADIUS);
     b.lamp(
       P.thread,
-      torus(r + 0.78, 0.025, 48, 3),
-      seam.at([0, 0, 0.06], [Math.PI / 2, 0, 0]),
+      torus(PUERTAS_RADIUS * Math.sin(reach), 0.025, 48, 3),
+      f.at([0, 0, 0.06 - PUERTAS_RADIUS * (1 - Math.cos(reach))], [Math.PI / 2, 0, 0]),
       0.9,
     );
   }
@@ -126,14 +129,8 @@ function homeMouths(b: PuertasBuilder, f: Frame): void {
     const centre = b.mouth(g, { radius: HOME_RADIUS, material: P.sandstone, base: 0.1 });
     if (view) homeView(b, g, k, centre, view);
     else {
-      // Tapada con una losa; en ella, la marca de "pronto": un aro abierto.
-      b.solid(
-        P.sandstoneShade,
-        cylinder(HOME_RADIUS - 0.05, 18),
-        g.at([0, 0, centre], [Math.PI / 2, 0, 0], [1, 1, 0.12]),
-      );
-      b.view(P.slate, torusArc(0.5, 0.05, 0.4, 2 * Math.PI - 0.4, 14, 4), g.at([0, -0.08, centre]));
-      b.mark('INT_boca_cerrada', g, [0, -0.5, centre], {
+      // Tapada con una losa (marca de "pronto") que no casa del todo: por el resquicio se ve el Laboratorio.
+      b.mark('INT_boca_cerrada', g, closedMouth(b, g, centre), {
         clue_id: 'puertas.boca_cerrada',
         kind: 'observacion',
       });
