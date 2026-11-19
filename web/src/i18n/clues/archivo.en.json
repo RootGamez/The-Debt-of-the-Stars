@@ -29,11 +29,12 @@
   "archivo.cartas": {
     "titulo": "The letters that answer early",
     "superficial": [
-      "Four sheets on the long table, with no envelopes and in no order. Each is dated with the day of a different clock, and the replies seem to arrive before the questions.",
+      "Four sheets on the long table, with no envelopes and in no order. Two are written in a round hand, with a diamond and a dot at the foot; the other two in a dry hand, with two triangles tip to tip.",
+      "Each carries the date of a different clock. The round-hand ones run ahead: they answer questions that have not been asked yet.",
       "They would have to be put in a row by when each was written, not by the date it carries."
     ],
     "profunda": [
-      "Put in their places, the sheets tell something else: the researcher’s report was filed three times, and each time something was erased before it was put away.",
+      "Put in their places, the sheets tell something else: the scientist’s report was filed three times, and each time something was erased before it was put away.",
       "The dates do not lie: each was written on a clock that ran at its own pace. The same happens to anything that crosses from one mouth to another: it arrives from an age that is not its own."
     ]
   },
@@ -158,7 +159,7 @@
     ]
   },
   "archivo.informe_original": {
-    "titulo": "The researcher's report, the original",
+    "titulo": "The scientist's report, the original",
     "superficial": [
       "Three standing sheets of glass, each with a version of the same report. In each version there is a gap where something was erased.",
       "Laid one after another, the gaps fill in: “The debt is one of time.” “The Limit drops with every new Gate.” “Estimated date: within this year.”"
@@ -167,7 +168,7 @@
   "archivo.peticion": {
     "titulo": "The rejected petition",
     "superficial": [
-      "A sheet nailed to the wall, signed with two signs: a diamond with a dot and a downward triangle. The researcher and the skeptic.",
+      "A sheet nailed to the wall, signed with two signs: a diamond with a dot and a downward triangle. The scientist and the skeptic.",
       "“Do not evacuate through the Gates. Every departure adds to the count. Stay and wait for the Counterweight.”",
       "Above it, a red seal of seven diamonds in a row: “File it away.”"
     ]

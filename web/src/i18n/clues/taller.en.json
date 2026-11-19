@@ -15,7 +15,7 @@
     ],
     "profunda": [
       "With what I know about the Counterweight, the hollow of the cradle reads differently: its silhouette is carved there, with five arms of different lengths in a staircase: one, three, two, five, four.",
-      "Below, by hand: “It does not sing with the others like this.”"
+      "Below, by hand, in a dry, cramped hand: “It does not sing like the others. I have checked.”"
     ]
   },
   "taller.nota_cuna": {
@@ -23,7 +23,7 @@
     "superficial": [
       "A note taped to the edge of the cradle, in the technician’s handwriting:",
       "“Do not move it without adjusting the clock. It carries the time from here, and the time here is not the time there. If you move it blind it will arrive with the wrong time, and then it will not fit.”",
-      "Underneath, in another hand: “We know.” And under that, in the first: “It does not look like it.”"
+      "Underneath, in another hand, round, with a diamond and a dot at its foot: “We know.” And under that, in the first: “It does not look like it.”"
     ]
   },
   "taller.manual": {
@@ -32,7 +32,7 @@
       "A manual bound with screws: “Counterweight. Installation.” Pages are missing, torn out with care.",
       "“The Counterweight does not brake the machine: it replaces it. It is a motor that gives each clock back what the Gate took from it. With it, the debt is paid instead of growing.”",
       "“It is fitted in place of the motor of the machine at Scar.”",
-      "Where the chapter on clocks should be, a gap. On the last sheet, in pencil: “Synchronization: see the blackboard at the testing site and the Core Room.”"
+      "Where the chapter on clocks should be, a gap. On the last sheet, in pencil, in a round hand: “Synchronization: see the blackboard at the testing site and the Core Room. The rest you already know, counter.”"
     ]
   },
   "taller.gemelos": {
@@ -62,7 +62,8 @@
     "superficial": [
       "At seven, the factory switches itself on: cranes, arms and lights for two minutes. It makes nothing: it rehearses.",
       "A scale model of a machine’s motor is lowered into a pit. One arm pulls a lever and the core opens for an instant; another lifts out the old motor; a third fits a new piece, the Counterweight, and the light in the core steadies.",
-      "It all happens at the instant of the pulse: the core only opens then. It is a rehearsal of how to change the motor without leaving the machine without a heartbeat: instead of stopping the debt, paying it."
+      "It all happens at the instant of the pulse: the core only opens then. It is a rehearsal of how to change the motor without leaving the machine without a heartbeat: instead of stopping the debt, paying it.",
+      "On the rim of the pit, in pencil, in a dry hand: “It opens only on the pulse. Off it, you only waste strength. I have seen it.”"
     ]
   },
   "taller.dormitorios": {
@@ -85,9 +86,9 @@
     "titulo": "The synchronization pages",
     "superficial": [
       "The pages missing from the manual, sewn in with red thread, in the Core Room.",
-      "“Synchronization. Note how long the Counterweight spends on each leg and the clock each place keeps. Each leg is corrected with the pace of its place: what happens in a slow place counts for less than what happens in a fast one. Add the corrections: that is the drift to take off.”",
+      "“Synchronization. Note how long the Counterweight spends on each leg and the clock each place keeps. Each leg is corrected with the pace of its place: what happens where time goes slowly counts for less than what happens where it goes fast. Add the corrections: that is the drift to take off. If you are reading this, do not skip a leg.”",
       "An example, in pencil: “Ten minutes at the testing site, five in flight and four at the Workshop.” And at the foot: “The machine keeps its own pace. Match it in the cradle.”",
-      "In the margin of the last sheet, in another hand: “Energy is missing. What is missing the Chamber has; there is no other source.”"
+      "In the margin of the last sheet, in a dry hand: “Energy is missing. What is missing, the Chamber has. There is no other source.”"
     ]
   },
   "taller.pesa_1": {
@@ -117,22 +118,22 @@
       "Carved into the base, two triangles tip to tip. Below them, tally marks."
     ],
     "profunda": [
-      "Under the base, a few handwritten pages: \"I built it to buy time. So that the last quarter of an hour would never end and we could finish.\"",
-      "\"I left it on. I don't know how to switch it off without losing what it holds. Forgive me.\""
+      "Under the base, a few handwritten pages, in a cramped, dry hand: “I built it to buy time. So that the last quarter of an hour would not end and we could finish. For them. For us. For…”",
+      "“I left it on. I don’t know how to switch it off without losing what it holds. What it holds. I left it because…”"
     ]
   },
   "taller.rayas": {
     "titulo": "The walls",
     "superficial": [
-      "Tally marks. Groups of four strokes and one across them, row after row, from the top of the wall down to where a long arm reaches.",
-      "Every so often, a long stroke runs through the row. Not one word, not one number: only the count, wall after wall, inside and out.",
+      "Tally marks. Groups of four strokes with one across them, five by five, row after row, from the top of the wall down to where a long arm reaches.",
+      "Every so often a long stroke runs through the row: one for every thousand. There is not a word on the wall, nor a number that is not the count. The rows no longer fit: the count goes on along the edge, inside and out.",
       "The wall behind the cot is half full. The last mark is new: the stone still has dust on it."
     ]
   },
   "taller.catre": {
     "titulo": "The cot",
     "superficial": [
-      "A canvas cot made to his size, longer than any bed at the Institute. The blanket is half folded, as if someone had just got up.",
+      "A canvas cot, longer than any bed at the Institute, made to measure for whoever sleeps in it. The blanket is half folded, as if someone had just got up.",
       "On the crate beside it, two cups. One dark, its handle worn from use. The other, ochre, with a thin gold ring, is clean and dry: nobody has drunk from it here."
     ]
   },
@@ -140,9 +141,10 @@
     "titulo": "The unsent letters",
     "superficial": [
       "A bundle of folded sheets, tied with string. None has an envelope or a signature, and all of them begin the same way.",
-      "“Dear: the clock on the Track still keeps its own time. Are you sleeping? It should be easier for you there.”",
-      "“Dear: nothing to tell today. I am counting it anyway.”",
-      "The top one stops at “Dear:”. Below there is room for a great deal, and there is nothing."
+      "“Dear one: the clock on the Test Track still runs ahead. Are you sleeping? It should be easier for you there.”",
+      "“Dear one: nothing to tell today. I am counting it anyway.”",
+      "“Dear one: I left my cup in the crate, mine. Drink something warm, even if it is only water.”",
+      "The top one stops at “Dear one:”. Below there is room for a great deal, and there is nothing."
     ]
   },
   "taller.saludo.esceptico": {

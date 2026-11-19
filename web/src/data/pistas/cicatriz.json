@@ -8,7 +8,8 @@
     "superficial": {
       "texto": [
         "Un anillo enorme de metal sobre un pozo y, en el centro, un núcleo cerrado y mudo con el motor viejo dentro. Alrededor, una consola y una cuna vacía: todo está listo para recibir algo que no llegó.",
-        "En el anillo, una placa: «Sala del Motor. Aquí se instala el Contrapeso.»"
+        "En el anillo, una placa: «Sala del Motor. Aquí se instala el Contrapeso.»",
+        "En el borde de la consola, a lápiz y en letra seca: «Solo se abre en el pulso. Lo probé fuera de él y no se movió nada.»"
       ],
       "hechos": ["contrapeso.lugar"]
     },

@@ -60,7 +60,8 @@
     "borrador": true,
     "superficial": {
       "texto": [
-        "Cuatro hojas sobre la mesa larga, sin sobres y sin orden. Cada una está fechada con el día de un reloj distinto, y las respuestas parecen llegar antes que las preguntas.",
+        "Cuatro hojas sobre la mesa larga, sin sobres y sin orden. Dos están escritas con letra redonda y un rombo con un punto al pie; las otras dos, con letra seca y dos triángulos punta con punta.",
+        "Cada una lleva la fecha de un reloj distinto. Las de letra redonda van por delante: contestan a preguntas que todavía no se han hecho.",
         "Habría que ponerlas en fila según cuándo se escribió cada una, no según la fecha que lleva."
       ],
       "hechos": []
@@ -68,7 +69,7 @@
     "profunda": {
       "requiere": ["deuda.relojes_se_separan"],
       "texto": [
-        "Puestas en su sitio, las hojas cuentan otra cosa: el informe de la investigadora se archivó tres veces, y cada vez se borró algo antes de guardarlo.",
+        "Puestas en su sitio, las hojas cuentan otra cosa: el informe de la científica se archivó tres veces, y cada vez se borró algo antes de guardarlo.",
         "Las fechas no mienten: cada una está escrita en un reloj que corría a su ritmo. Lo mismo le pasa a cualquier cosa que cruza de una boca a otra: llega de una época que no es la suya."
       ],
       "hechos": ["bocas.relojes_distintos", "silencio.borrado"]
@@ -354,7 +355,7 @@
     "id": "archivo.informe_original",
     "mundo": "archivo",
     "tipo": "texto",
-    "titulo": "El informe de la investigadora, el original",
+    "titulo": "El informe de la científica, el original",
     "borrador": true,
     "superficial": {
       "texto": [
@@ -372,7 +373,7 @@
     "borrador": true,
     "superficial": {
       "texto": [
-        "Una hoja clavada en la pared, firmada con dos signos: un rombo con un punto y un triángulo hacia abajo. La investigadora y el escéptico.",
+        "Una hoja clavada en la pared, firmada con dos signos: un rombo con un punto y un triángulo hacia abajo. La científica y el escéptico.",
         "«No evacuéis por las Puertas. Cada salida suma a la cuenta. Quedaos y esperad al Contrapeso.»",
         "Encima, un sello rojo de siete rombos en fila: «Archívese»."
       ],

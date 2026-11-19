@@ -31,7 +31,7 @@
       "requiere": ["contrapeso.que_es"],
       "texto": [
         "Con lo que sé del Contrapeso, el hueco de la cuna se lee de otra manera: tiene tallada su silueta, con cinco brazos de largos distintos puestos en escalera: uno, tres, dos, cinco, cuatro.",
-        "Debajo, a mano: «Así no canta con las demás.»"
+        "Debajo, a mano, en letra seca y apretada: «Así no canta con las demás. Lo he comprobado.»"
       ],
       "hechos": ["contrapeso.escalera"]
     }
@@ -46,7 +46,7 @@
       "texto": [
         "Una nota pegada con cinta en el borde de la cuna, con la letra del técnico:",
         "«No lo muevan sin ajustar el reloj. Lleva la hora de aquí, y la de aquí no es la de allí. Si lo mueven a ciegas llegará con la hora equivocada, y entonces no encaja.»",
-        "Debajo, con otra letra: «Ya lo sabemos.» Y debajo de eso, con la primera: «Pues no lo parece.»"
+        "Debajo, con otra letra, redonda, y un rombo con un punto al pie: «Ya lo sabemos.» Y debajo de eso, con la primera: «Pues no lo parece.»"
       ],
       "hechos": ["contrapeso.reloj", "contrapeso.equilibrio"]
     }
@@ -62,7 +62,7 @@
         "Un manual encuadernado con tornillos: «Contrapeso. Instalación.» Le faltan páginas, arrancadas con cuidado.",
         "«El Contrapeso no frena la máquina: la sustituye. Es un motor que devuelve a cada reloj lo que la Puerta le quitó. Con él, la deuda se paga en vez de crecer.»",
         "«Se monta en lugar del motor de la máquina de Cicatriz.»",
-        "Donde iría el capítulo de los relojes, un hueco. En la última hoja, a lápiz: «Sincronización: ver la pizarra del sitio de pruebas y la sala del Centro.»"
+        "Donde iría el capítulo de los relojes, un hueco. En la última hoja, a lápiz y en letra redonda: «Sincronización: ver la pizarra del sitio de pruebas y la sala del Centro. Lo demás ya lo sabes, contador.»"
       ],
       "hechos": ["contrapeso.que_es", "contrapeso.sustituye_motor"]
     }
@@ -124,7 +124,8 @@
       "texto": [
         "A las siete, la fábrica se enciende sola: grúas, brazos y luces durante dos minutos. No fabrica nada: ensaya.",
         "Un modelo a escala del motor de una máquina baja a un pozo. Un brazo tira de una palanca y el núcleo se abre un instante; otro saca el motor viejo; un tercero encaja una pieza nueva, el Contrapeso, y la luz del núcleo se estabiliza.",
-        "Todo ocurre en el instante del pulso: el núcleo solo se abre entonces. Es un ensayo de cómo cambiar el motor sin dejar a la máquina sin latido: en vez de frenar la deuda, pagarla."
+        "Todo ocurre en el instante del pulso: el núcleo solo se abre entonces. Es un ensayo de cómo cambiar el motor sin dejar a la máquina sin latido: en vez de frenar la deuda, pagarla.",
+        "En el borde del pozo, a lápiz y en letra seca: «Solo se abre en el pulso. Fuera de él, solo se gasta fuerza. Lo he visto.»"
       ],
       "hechos": ["contrapeso.que_es", "contrapeso.sustituye_motor", "contrapeso.ventana_pulso"]
     }
@@ -169,9 +170,9 @@
     "superficial": {
       "texto": [
         "Las hojas que faltaban del manual, cosidas con hilo rojo, en la sala del Centro.",
-        "«Sincronización. Anota cuánto tiempo pasa el Contrapeso en cada tramo y con qué reloj cuenta cada sitio. Cada tramo se corrige con el ritmo de su sitio: lo que pasa en un lugar lento cuenta menos que lo que pasa en uno rápido. Suma las correcciones: ese es el desfase que hay que quitarle.»",
+        "«Sincronización. Anota cuánto tiempo pasa el Contrapeso en cada tramo y con qué reloj cuenta cada sitio. Cada tramo se corrige con el ritmo de su sitio: lo que pasa donde el tiempo va despacio cuenta menos que lo que pasa donde va deprisa. Suma las correcciones: ese es el desfase que hay que quitarle. Si lees esto, no te saltes ningún tramo.»",
         "Un ejemplo, a lápiz: «Diez minutos en el sitio de pruebas, cinco de vuelo y cuatro en el Taller.» Y al pie: «La máquina marcha a su paso. Iguálalo en la cuna.»",
-        "Al margen de la última hoja, con otra letra: «Falta energía. Lo que falta lo tiene la Cámara; no hay otra fuente»."
+        "Al margen de la última hoja, con letra seca: «Falta energía. Lo que falta lo tiene la Cámara; no hay otra fuente.»"
       ],
       "hechos": ["contrapeso.cuenta_sincronia", "contrapeso.necesita_bucle"]
     }
@@ -244,8 +245,8 @@
     "profunda": {
       "requiere": ["bucle.orden_camara"],
       "texto": [
-        "Bajo el pie, unas hojas a mano: «Lo construí para ganar tiempo. Para que el último cuarto de hora no acabara nunca y pudiéramos terminar.»",
-        "«Lo dejé encendido. No sé cómo se apaga sin que se pierda lo que sostiene. Perdonad.»"
+        "Bajo el pie, unas hojas a mano, en letra seca y apretada: «Lo construí para ganar tiempo. Para que el último cuarto de hora no acabara y pudiéramos terminar. Para ellos. Para nosotros. Para…»",
+        "«Lo dejé encendido. No sé cómo se apaga sin que se pierda lo que sostiene. Lo que sostiene. Lo dejé porque…»"
       ],
       "hechos": ["bucle.culpa"]
     }
@@ -259,8 +260,8 @@
     "ambiente": true,
     "superficial": {
       "texto": [
-        "Rayas. Grupos de cuatro palos y uno que los cruza, fila tras fila, desde lo alto del muro hasta donde llega un brazo largo.",
-        "De vez en cuando, un trazo largo atraviesa la fila. No hay ni una palabra ni un número: solo la cuenta, muro tras muro, por dentro y por fuera.",
+        "Rayas. Grupos de cuatro palos y uno que los cruza, de cinco en cinco, fila tras fila, desde lo alto del muro hasta donde llega un brazo largo.",
+        "De vez en cuando, un trazo largo atraviesa la fila: uno por cada mil. No hay ni una palabra en el muro, ni un número que no sea la cuenta. Ya no caben: la cuenta sigue por el borde, por dentro y por fuera.",
         "El muro de detrás del catre está a medias. La última raya es nueva: la piedra aún tiene polvo."
       ],
       "hechos": []
@@ -275,7 +276,7 @@
     "ambiente": true,
     "superficial": {
       "texto": [
-        "Un catre de lona hecho a su medida, más largo que cualquier cama del Instituto. La manta está doblada a medias, como si alguien se acabara de levantar.",
+        "Un catre de lona, más largo que cualquier cama del Instituto, hecho a medida para quien duerme en él. La manta está doblada a medias, como si alguien se acabara de levantar.",
         "En la caja de al lado, dos tazas. Una oscura, con el asa gastada de tanto cogerla. La otra, ocre, con un aro fino de oro, está limpia y seca: nadie ha bebido de ella aquí."
       ],
       "hechos": []
@@ -291,8 +292,9 @@
     "superficial": {
       "texto": [
         "Un fajo de hojas dobladas, atado con cordel. Ninguna lleva sobre ni firma, y todas empiezan igual.",
-        "«Querida: el reloj de la Pista sigue a su aire. ¿Duermes? Allí debería costarte menos.»",
+        "«Querida: el reloj de la Pista sigue adelantado. ¿Duermes? Allí debería costarte menos.»",
         "«Querida: hoy no hay nada que contar. Lo cuento igual.»",
+        "«Querida: he dejado la taza en la caja, la mía. Bebe algo caliente, aunque sea agua.»",
         "La de arriba se queda en «Querida:». Debajo hay sitio para mucho, y no hay nada."
       ],
       "hechos": []
