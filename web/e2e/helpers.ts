@@ -62,10 +62,8 @@ export async function debugCall<T = unknown>(
 ): Promise<T | null> {
   return page.evaluate(
     ({ fn, values }) => {
-      const api = window.__juego as unknown as Record<
-        string,
-        ((...a: number[]) => unknown) | undefined
-      >;
+      const api = window.__juego as unknown as
+        Record<string, ((...a: number[]) => unknown) | undefined> | undefined;
       return (api?.[fn]?.(...values) ?? null) as never;
     },
     { fn: name, values: args },
