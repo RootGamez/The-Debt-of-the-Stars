@@ -137,30 +137,80 @@ function limb(from: Triple, to: Triple, radius: number): Matrix4 {
   );
 }
 
+/**
+ * Las piezas de un Ool articulado (F4, character/oolRig.ts): los pies y las piernas, el cuerpo (con la ropa), la
+ * cabeza (con lo que lleva puesto en ella) y cada brazo (con su manga y lo que lleve en esa mano).
+ */
+export type OolPart = 'base' | 'body' | 'head' | 'armL' | 'armR';
+
 class OolModel {
   readonly set: PieceSet;
+  /** Articulado: cada parte en su propio juego de piezas (si no, todo va a `set`). */
+  readonly partSets = new Map<OolPart, PieceSet>();
+  private part: OolPart = 'body';
   private readonly random: Random;
 
   constructor(
     readonly spec: OolSpec,
     readonly look: OolLook,
+    private readonly articulated = false,
   ) {
     this.set = new PieceSet(spec.seed ?? 7);
     this.random = seededRandom(spec.seed ?? 7);
   }
 
+  private target(): PieceSet {
+    if (!this.articulated) return this.set;
+    let set = this.partSets.get(this.part);
+    if (!set) {
+      set = new PieceSet(this.spec.seed ?? 7);
+      this.partSets.set(this.part, set);
+    }
+    return set;
+  }
+
+  /** Lo que se dibuja dentro de `draw` va a la parte `part` (solo cuenta en un Ool articulado). */
+  private as(part: OolPart, draw: () => void): void {
+    const previous = this.part;
+    this.part = part;
+    draw();
+    this.part = previous;
+  }
+
   body(color: string | Color, geometry: BufferGeometry, matrix: Matrix4): void {
-    this.set.add(color, geometry, matrix, 'stone', { solid: false });
+    this.target().add(color, geometry, matrix, 'stone', { solid: false });
   }
 
   light(geometry: BufferGeometry, matrix: Matrix4): void {
-    this.set.add(this.look.glow, geometry, matrix, 'light', { solid: false, vary: 0 });
+    this.target().add(this.look.glow, geometry, matrix, 'light', { solid: false, vary: 0 });
   }
 
   build(): void {
-    const { look } = this;
-    const moss = look.body;
-    // Pies de cuatro dedos y piernas cortas.
+    const moss = this.look.body;
+    this.as('base', () => {
+      this.legs();
+    });
+    // El cuerpo y la cabeza, sin cuello: una pera blanda.
+    this.body(moss, ball(1, 1), pieceMatrix([0, 0, 0.56], [0, 0, 0], [0.3, 0.27, 0.36]));
+    this.as('head', () => {
+      this.face();
+    });
+    for (const side of [-1, 1])
+      this.as(side < 0 ? 'armL' : 'armR', () => {
+        this.arm(side);
+      });
+    this.fibers();
+    this.as('head', () => {
+      this.filaments();
+    });
+    this.dots();
+    this.outfit();
+    this.holding();
+  }
+
+  /** Pies de cuatro dedos y piernas cortas. */
+  private legs(): void {
+    const moss = this.look.body;
     for (const x of [-0.12, 0.12]) {
       this.body(moss, ball(1, 0), pieceMatrix([x, 0.04, 0.04], [0, 0, 0], [0.1, 0.15, 0.055]));
       for (let k = 0; k < 4; k++) {
@@ -169,39 +219,36 @@ class OolModel {
       }
       this.body(moss, cylinder(1, 5), limb([x, 0.02, 0.06], [x * 0.9, 0, 0.32], 0.065));
     }
-    // El cuerpo y la cabeza, sin cuello: una pera blanda.
-    this.body(moss, ball(1, 1), pieceMatrix([0, 0, 0.56], [0, 0, 0], [0.3, 0.27, 0.36]));
-    this.body(moss, ball(1, 1), pieceMatrix([0, 0.01, 1.04], [0, 0, 0], [0.31, 0.29, 0.27]));
-    // Los ojos grandes y oscuros, con su brillo.
+  }
+
+  /** La cabeza y los ojos grandes y oscuros, con su brillo. */
+  private face(): void {
+    this.body(
+      this.look.body,
+      ball(1, 1),
+      pieceMatrix([0, 0.01, 1.04], [0, 0, 0], [0.31, 0.29, 0.27]),
+    );
     for (const x of [-0.11, 0.11]) {
       this.body(P.eye, ball(1, 1), pieceMatrix([x, 0.255, 1.07], [0, 0, 0], [0.075, 0.035, 0.095]));
       this.body(P.shine, ball(0.018, 0), pieceMatrix([x - 0.022, 0.288, 1.11]));
     }
-    this.arms();
-    this.fibers();
-    this.filaments();
-    this.dots();
-    this.outfit();
-    this.holding();
   }
 
-  private arms(): void {
+  private arm(side: number): void {
     const moss = this.look.body;
-    for (const side of [-1, 1]) {
-      const shoulder: Triple = [side * 0.27, 0.02, 0.74];
-      const hand: Triple = [side * 0.33, 0.1, 0.46];
-      this.body(moss, cylinder(1, 6), limb(shoulder, hand, 0.055));
-      this.body(moss, ball(0.06, 1), pieceMatrix(hand));
-      // Cuatro dedos.
-      for (let k = 0; k < 4; k++) {
-        const a = (k - 1.5) * 0.4;
-        const tip: Triple = [
-          hand[0] + side * 0.02 + Math.sin(a) * 0.05,
-          hand[1] + 0.05,
-          hand[2] - 0.04 + Math.cos(a) * 0.01,
-        ];
-        this.body(moss, cylinder(1, 4), limb(hand, tip, 0.016));
-      }
+    const shoulder: Triple = [side * 0.27, 0.02, 0.74];
+    const hand: Triple = [side * 0.33, 0.1, 0.46];
+    this.body(moss, cylinder(1, 6), limb(shoulder, hand, 0.055));
+    this.body(moss, ball(0.06, 1), pieceMatrix(hand));
+    // Cuatro dedos.
+    for (let k = 0; k < 4; k++) {
+      const a = (k - 1.5) * 0.4;
+      const tip: Triple = [
+        hand[0] + side * 0.02 + Math.sin(a) * 0.05,
+        hand[1] + 0.05,
+        hand[2] - 0.04 + Math.cos(a) * 0.01,
+      ];
+      this.body(moss, cylinder(1, 4), limb(hand, tip, 0.016));
     }
   }
 
@@ -226,11 +273,14 @@ class OolModel {
         .clone()
         .addScaledVector(n, length)
         .add(new Vector3(0, 0, -length * 0.3));
-      this.body(
-        this.random() < 0.5 ? look.fiber : look.body,
-        cone(1, 0, 3),
-        limb([base.x, base.y, base.z], [tip.x, tip.y, tip.z], 0.03),
-      );
+      const color = this.random() < 0.5 ? look.fiber : look.body;
+      this.as(onHead ? 'head' : 'body', () => {
+        this.body(
+          color,
+          cone(1, 0, 3),
+          limb([base.x, base.y, base.z], [tip.x, tip.y, tip.z], 0.03),
+        );
+      });
     }
   }
 
@@ -264,14 +314,17 @@ class OolModel {
       if (onHead && Math.abs(Math.cos(theta)) < 0.45 && z > -0.3) continue; // sin tapar los ojos
       const radii: Triple = onHead ? [0.315, 0.295, 0.275] : [0.305, 0.275, 0.365];
       const center: Triple = onHead ? [0, 0.01, 1.04] : [0, 0, 0.56];
-      this.light(
-        ball(0.017 + this.random() * 0.01, 0),
-        pieceMatrix([
-          center[0] + ring * Math.cos(theta) * radii[0],
-          center[1] + ring * Math.sin(theta) * radii[1],
-          center[2] + z * radii[2],
-        ]),
-      );
+      const size = 0.017 + this.random() * 0.01;
+      this.as(onHead ? 'head' : 'body', () => {
+        this.light(
+          ball(size, 0),
+          pieceMatrix([
+            center[0] + ring * Math.cos(theta) * radii[0],
+            center[1] + ring * Math.sin(theta) * radii[1],
+            center[2] + z * radii[2],
+          ]),
+        );
+      });
     }
   }
 
@@ -342,7 +395,13 @@ class OolModel {
       );
     }
     for (const x of [-1, 1]) {
-      this.body(color, cylinder(1, 6), limb([x * 0.27, 0.02, 0.76], [x * 0.32, 0.07, 0.52], 0.07));
+      this.as(x < 0 ? 'armL' : 'armR', () => {
+        this.body(
+          color,
+          cylinder(1, 6),
+          limb([x * 0.27, 0.02, 0.76], [x * 0.32, 0.07, 0.52], 0.07),
+        );
+      });
     }
   }
 
@@ -357,6 +416,12 @@ class OolModel {
 
   /** Gafas redondas de latón: en los ojos, o subidas a la frente. */
   private goggles(up: boolean): void {
+    this.as('head', () => {
+      this.gogglesOn(up);
+    });
+  }
+
+  private gogglesOn(up: boolean): void {
     const z = up ? 1.22 : 1.07;
     const y = up ? 0.2 : 0.285;
     for (const x of [-0.11, 0.11]) {
@@ -389,18 +454,30 @@ class OolModel {
   }
 
   private hat(color: string, brim: number): void {
-    this.body(color, cylinder(brim, 14), pieceMatrix([0, 0, 1.27], [0, 0, 0], [1, 1, 0.02]));
-    this.body(color, cone(0.2, 0.05, 10), pieceMatrix([0, 0, 1.36], [0, 0, 0], [1, 1, 0.18]));
+    this.as('head', () => {
+      this.body(color, cylinder(brim, 14), pieceMatrix([0, 0, 1.27], [0, 0, 0], [1, 1, 0.02]));
+      this.body(color, cone(0.2, 0.05, 10), pieceMatrix([0, 0, 1.36], [0, 0, 0], [1, 1, 0.18]));
+    });
   }
 
   private cap(color: string): void {
-    this.body(color, ball(1, 1), pieceMatrix([0, 0, 1.24], [0, 0, 0], [0.26, 0.25, 0.1]));
-    this.body(color, box(), pieceMatrix([0, 0.24, 1.23], [-0.2, 0, 0], [0.22, 0.14, 0.02]));
+    this.as('head', () => {
+      this.body(color, ball(1, 1), pieceMatrix([0, 0, 1.24], [0, 0, 0], [0.26, 0.25, 0.1]));
+      this.body(color, box(), pieceMatrix([0, 0.24, 1.23], [-0.2, 0, 0], [0.22, 0.14, 0.02]));
+    });
   }
 
   private holding(): void {
+    const held = this.spec.holding ?? 'nada';
+    // El libro y el ovillo van delante, con las dos manos (con el cuerpo); lo demás, en la mano derecha.
+    this.as(held === 'libro' || held === 'ovillo' ? 'body' : 'armR', () => {
+      this.held(held);
+    });
+  }
+
+  private held(held: NonNullable<OolSpec['holding']>): void {
     const right: Triple = [0.33, 0.12, 0.46];
-    switch (this.spec.holding ?? 'nada') {
+    switch (held) {
       case 'libro':
         // Abierto delante, con las dos manos.
         for (const side of [-1, 1]) {
@@ -474,19 +551,43 @@ export function buildOol(spec: OolSpec, materials: OolMaterials): Group {
   body.name = `hogar_ool_${spec.id}`;
   body.castShadow = true;
   body.receiveShadow = true;
-  const glow = new Mesh(
-    shape(model.set.parts.light),
-    new MeshStandardMaterial({
-      vertexColors: true,
-      emissive: look.glow,
-      emissiveIntensity: look.glowIntensity,
-      roughness: 0.6,
-    }),
-  );
+  const glow = new Mesh(shape(model.set.parts.light), oolGlowMaterial(look));
   glow.name = `OOL_${spec.id}_Luz`;
   group.add(body, glow);
   group.userData.age = spec.age;
   return group;
+}
+
+/** El material de las luces de un Ool de esa edad (sus motas y las puntas de sus filamentos). */
+export function oolGlowMaterial(look: OolLook): MeshStandardMaterial {
+  return new MeshStandardMaterial({
+    vertexColors: true,
+    emissive: look.glow,
+    emissiveIntensity: look.glowIntensity,
+    roughness: 0.6,
+  });
+}
+
+/** Las piezas de una parte de un Ool articulado, ya en el marco del Ool (Y arriba, frente −Z) y a su tamaño. */
+export interface OolPartShape {
+  body: BufferGeometry | undefined;
+  glow: BufferGeometry | undefined;
+}
+
+/** Un Ool partido por sus articulaciones (character/oolRig.ts cuelga cada parte de su pivote). */
+export function oolParts(spec: OolSpec): { look: OolLook; parts: Map<OolPart, OolPartShape> } {
+  const look = oolLook(spec.age);
+  const model = new OolModel(spec, look, true);
+  model.build();
+  const shape = (pieces: BufferGeometry[]): BufferGeometry | undefined =>
+    pieces.length === 0
+      ? undefined
+      : mergeGeometries(pieces).applyMatrix4(DESIGN_TO_OOL).scale(look.size, look.size, look.size);
+  const parts = new Map<OolPart, OolPartShape>();
+  for (const [part, set] of model.partSets) {
+    parts.set(part, { body: shape(set.parts.stone), glow: shape(set.parts.light) });
+  }
+  return { look, parts };
 }
 
 /**
