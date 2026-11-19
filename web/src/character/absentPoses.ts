@@ -95,7 +95,7 @@ function seatedLegs(
 }
 
 /** Un brazo que apunta a unas direcciones del mundo (de perfil) desde un pecho girado `chest`. */
-function armTowards(
+export function armTowards(
   who: AbsentWho,
   chest: number,
   upper: number,
