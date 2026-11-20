@@ -5,7 +5,8 @@
 // plegadas, la boca del cielo del Archivo de las Puertas y el gusano de la Luna.
 //
 // Para doblar el entorno hace falta tenerlo en una textura: `renderWithWormholes` pinta primero la escena sin las
-// esferas en un lienzo aparte y luego la pinta de verdad; si no hay ninguna esfera a la vista, es un solo pase.
+// esferas en un lienzo aparte (como la pantalla: ver `screenLikeTarget`) y luego la pinta de verdad; si no hay
+// ninguna esfera a la vista, es un solo pase.
 import {
   Color,
   DoubleSide,
@@ -15,6 +16,7 @@ import {
   Matrix4,
   Mesh,
   ShaderMaterial,
+  Sphere,
   SphereGeometry,
   Vector2,
   Vector3,
@@ -25,6 +27,7 @@ import {
   type Texture,
   type WebGLRenderer,
 } from 'three';
+import { SCREEN_TO_SCENE_GLSL } from './screenToScene';
 
 /** El radio de la esfera base (m): se escala hasta el tamaño que haga falta. */
 export const WORMHOLE_RADIUS = 1;
@@ -52,6 +55,7 @@ uniform vec3 uTint;
 uniform float uDark;
 varying vec3 vWorld;
 varying vec2 vCenterUv;
+${SCREEN_TO_SCENE_GLSL}
 
 float hash(vec3 p) {
   p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3));
@@ -89,7 +93,8 @@ void main() {
   float edge = clamp((b - 0.45) / 0.55, 0.0, 1.0);
   float warp = 1.0 + 2.4 * pow(sin(3.14159265 * edge), 1.3);
   vec2 lensed = vCenterUv + (uv - vCenterUv) * warp;
-  vec3 around = texture2D(uBackdrop, clamp(lensed, 0.001, 0.999)).rgb;
+  // El entorno está pintado como la pantalla (tonos y sRGB): vuelve a la luz de la escena para mezclarse como siempre.
+  vec3 around = screenToScene(texture2D(uBackdrop, clamp(lensed, 0.001, 0.999)).rgb);
 
   // Por el centro, el otro lado, ensanchado como un ojo de pez.
   vec3 bent = normalize(rd + offset * 1.7);
@@ -196,6 +201,7 @@ let target: WebGLRenderTarget | undefined;
 const frustum = new Frustum();
 const projection = new Matrix4();
 const buffer = new Vector2();
+const worldBounds = new Sphere();
 const hidden: Object3D[] = [];
 
 /** Las esferas abiertas y a la vista (solo si hay alguna hace falta el pase de fondo). */
@@ -207,13 +213,31 @@ function inView(camera: Camera): Object3D[] {
   for (const sphere of registered) {
     if (!isShown(sphere)) continue;
     const mesh = sphere as Mesh;
-    mesh.geometry.computeBoundingSphere();
+    // La esfera no cambia de forma (se escala con su matriz): su caja se calcula una vez.
+    if (!mesh.geometry.boundingSphere) mesh.geometry.computeBoundingSphere();
     const bounds = mesh.geometry.boundingSphere;
     if (!bounds) continue;
-    const world = bounds.clone().applyMatrix4(mesh.matrixWorld);
-    if (frustum.intersectsSphere(world)) seen.push(sphere);
+    if (frustum.intersectsSphere(worldBounds.copy(bounds).applyMatrix4(mesh.matrixWorld)))
+      seen.push(sphere);
   }
   return seen;
+}
+
+/**
+ * El lienzo del entorno, pintado igual que la pantalla: con los tonos y el sRGB de la salida (three lo hace en los
+ * lienzos de realidad virtual; `isXRRenderTarget` solo cambia eso y el color de fondo). Así cada material usa el mismo
+ * programa en los dos pases. Con un lienzo lineal, cada fotograma con una Puerta a la vista todos los materiales
+ * cambiaban de programa dos veces (y la primera vez compilaban otro): eran los tirones al girar la cámara.
+ */
+function screenLikeTarget(
+  width: number,
+  height: number,
+  renderer: WebGLRenderer,
+): WebGLRenderTarget {
+  const created = new WebGLRenderTarget(width, height, { type: HalfFloatType });
+  created.texture.colorSpace = renderer.outputColorSpace;
+  Object.assign(created, { isXRRenderTarget: true });
+  return created;
 }
 
 /** Qué fracción de la pantalla mide la textura del entorno que doblan las esferas (1 = completa). */
@@ -240,7 +264,7 @@ export function renderWithWormholes(renderer: WebGLRenderer, scene: Scene, camer
   const height = Math.max(1, Math.round(buffer.y * backdropScale));
   if (!target || target.width !== width || target.height !== height) {
     target?.dispose();
-    target = new WebGLRenderTarget(width, height, { type: HalfFloatType });
+    target = screenLikeTarget(width, height, renderer);
   }
   shared.size.value.copy(buffer);
   hidden.length = 0;
