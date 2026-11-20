@@ -84,6 +84,7 @@ import { isSoftwareRenderer, qualityFromQuery, sunShadowSizeFromQuery } from './
 import { createSightScale } from './ui/sightScale';
 import { createFixedStep } from './core/fixedStep';
 import { createFrameJitter } from './core/frameJitter';
+import { createFramePacer, type FramePacer } from './core/framePacer';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
@@ -211,6 +212,13 @@ function watchGraphicsContext(canvas: HTMLCanvasElement, status: HTMLElement): v
 /** Un fotograma largo (móvil flojo, tirón) no avanza el juego más que esto: la física no da pasos enormes. */
 const MAX_FRAME_SECONDS = 0.1;
 
+/** Una línea del panel F3: a qué ritmo dibuja el marcapasos y cuánto tarda el fotograma. */
+function pacerLine(pacer: FramePacer | undefined): string {
+  if (!pacer) return 'ritmo libre';
+  const hz = pacer.intervalMs > 0 ? 1000 / pacer.intervalMs : 0;
+  return `ritmo 1/${pacer.divisor} de ${hz.toFixed(0)} Hz · trabajo p90 ${pacer.workMs.toFixed(1)} ms`;
+}
+
 /** El bucle de fotogramas; el tráiler lo detiene y lo avanza a paso fijo. */
 interface FrameLoop {
   pause(): void;
@@ -224,15 +232,20 @@ function runFrameLoop(
   frame: (dt: number) => void,
   /** Cada fotograma real (segundos): lo usa el modo automático para saber si el dispositivo llega. */
   onFrameTime?: (seconds: number) => void,
+  /** Decide en qué refrescos se dibuja (src/core/framePacer.ts); sin él, en todos. */
+  pacer?: FramePacer,
 ): FrameLoop {
   const timer = new Timer();
   timer.connect(document); // pausa el tiempo cuando la pestaña está oculta
   const tick = (time: number): void => {
+    if (pacer && !pacer.shouldRun(time)) return;
+    const started = performance.now();
     timer.update(time);
     const seconds = timer.getDelta();
     onFrameTime?.(seconds);
     frame(Math.min(seconds, MAX_FRAME_SECONDS));
     render();
+    pacer?.recordWork(performance.now() - started);
   };
   renderer.setAnimationLoop(tick);
   return {
@@ -1593,6 +1606,15 @@ async function start(): Promise<void> {
   const jitter = createFrameJitter();
   const lastCameraPosition = new Vector3();
   let rawSeconds = 0;
+  // En pantallas rápidas, si el fotograma no cabe con holgura se dibuja en uno de cada N refrescos (ritmo regular).
+  // `?ritmo=libre` lo quita (para medir).
+  const pacingQuery = new URLSearchParams(window.location.search).get('ritmo');
+  const pacer =
+    pacingQuery === 'libre'
+      ? undefined
+      : createFramePacer(
+          Number(pacingQuery) >= 1 ? { fixedDivisor: Math.trunc(Number(pacingQuery)) } : {},
+        );
 
   let awoke = false;
   // El modo tráiler (`?debug&trailer`) se crea cuando el bucle ya corre (src/trailer/trailerRig.ts).
@@ -2049,7 +2071,7 @@ async function start(): Promise<void> {
           moved: camera.position.distanceTo(lastCameraPosition),
         });
         lastCameraPosition.copy(camera.position);
-        debug.note(jitter.line());
+        debug.note(`${jitter.line()}\n${pacerLine(pacer)}`);
       }
       orbitMap?.update(dt);
     },
@@ -2059,6 +2081,7 @@ async function start(): Promise<void> {
       if (!overlay.playing || ui.blocking) return;
       if (governor.sample(seconds) && graphics.stepDown()) governor.reset();
     },
+    pacer,
   );
   if (trailerRequested(window.location.search)) {
     trailer = createTrailerRig({
