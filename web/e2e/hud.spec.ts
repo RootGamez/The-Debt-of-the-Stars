@@ -52,6 +52,8 @@ test('the pause has a Configuración with text speed and letter sound, and it is
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Configuración', exact: true }).click();
 
+  // La Configuración se reparte en pestañas: la velocidad del texto está en «Juego».
+  await page.getByRole('tab', { name: 'Juego', exact: true }).click();
   const speed = page.getByRole('group', { name: 'Velocidad del texto' });
   await expect(speed.getByRole('button', { name: 'Normal' })).toHaveAttribute(
     'aria-pressed',
@@ -62,6 +64,8 @@ test('the pause has a Configuración with text speed and letter sound, and it is
     'aria-pressed',
     'true',
   );
+  // …y el sonido de las letras, en «Sonido».
+  await page.getByRole('tab', { name: 'Sonido', exact: true }).click();
   const sound = page.getByRole('group', { name: 'Sonido de letras' });
   await sound.getByRole('button', { name: 'Sí' }).click();
   // Redibujar no le quita el foco al teclado: sigue en la opción elegida.
@@ -124,6 +128,11 @@ test('a new world shows its card on arrival and its drawing is taped into the bi
       }),
     );
   }, SAVE_KEY);
+  // Sin captura del ratón (la que concede el navegador automatizado a medias y suelta sola, y eso pausa): se juega
+  // mirando con arrastre, que es lo que hace el juego cuando no se concede.
+  await page.addInitScript(() => {
+    HTMLElement.prototype.requestPointerLock = () => Promise.reject(new Error('sin captura'));
+  });
   await page.goto('/?debug');
   await expect(page.locator('.overlay')).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => value(page, 'grounded'), { timeout: 20_000 }).toBe(true);

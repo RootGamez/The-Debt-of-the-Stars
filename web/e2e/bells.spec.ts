@@ -61,6 +61,8 @@ test('bells at equal distances ring faster and faster and do not open the lecter
 
   expect((await bells(page))?.solved).toBe(false);
   await page.evaluate(() => window.__juego?.teleportTo?.('umbral.atril'));
+  // Se espera al aviso: con la E pulsada antes de que se muestre la fuente, no se abre nada.
+  await expect(page.locator('.prompt')).toHaveText('E · leer');
   await page.keyboard.press('KeyE');
   await expect(page.locator('.puzzle-hint')).toContainText('no a compás');
 });

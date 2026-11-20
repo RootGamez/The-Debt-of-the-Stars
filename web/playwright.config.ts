@@ -21,7 +21,19 @@ export default defineConfig({
     // El juego elige el idioma del navegador: las pruebas leen los textos en español.
     locale: 'es-ES',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        // E2E_GPU=1 usa la tarjeta gráfica (Direct3D 11) en vez de WebGL por software: las
+        // pruebas van mucho más rápido. Sin ella, Chromium headless dibuja con SwiftShader.
+        launchOptions: process.env.E2E_GPU
+          ? { args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'] }
+          : {},
+      },
+    },
+  ],
   webServer: {
     command: `npx vite build && npx vite preview --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,

@@ -47,6 +47,8 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   expect(
     await page.evaluate(() => window.__juego?.teleportTo?.('instituto.fragmento_luna') ?? false),
   ).toBe(true);
+  // Sin esperar el aviso de la fuente, la E se pierde si el fotograma aún no la ha visto.
+  await expect(page.locator('.prompt')).toContainText('E ·');
   await page.keyboard.press('KeyE');
   await expect(page.locator('.reader')).toBeVisible();
   await closeReader(page);
@@ -92,7 +94,8 @@ test('on the Moon the wormhole opens and the game goes on in Umbral from then on
   expect((await snapshot(page))?.registry.facts).toContain('llegada.gusano');
   const naming = page.getByRole('dialog', { name: 'Un mundo nuevo' });
   await expect(naming).toBeVisible({ timeout: 15_000 });
-  await naming.getByRole('textbox').press('Enter');
+  // Ya no se pone nombre al mundo: la carta se pega con Intro (el foco está en su botón).
+  await page.keyboard.press('Enter');
   await expect(naming).toBeHidden();
   if (await page.locator('.overlay').isVisible()) await play(page);
   await expect(page.locator('.clock-hud')).toBeVisible();
@@ -155,6 +158,8 @@ test('the Directora only gives the mission once you bring the piece from the isl
   expect(
     await page.evaluate(() => window.__juego?.teleportTo?.('hogar.fragmento_isla') ?? false),
   ).toBe(true);
+  // Sin esperar el aviso de la fuente, la E se pierde si el fotograma aún no la ha visto.
+  await expect(page.locator('.prompt')).toContainText('E ·');
   await page.keyboard.press('KeyE');
   await expect(page.locator('.reader')).toBeVisible();
   await closeReader(page);
@@ -235,7 +240,10 @@ test('you wake up on the square and the tasks teach one thing at a time', async 
   expect((await tasks(page))?.done).toEqual(['andar', 'vecina']);
   // El indicador señala a la Maestra, lejos en la colina (a la vista o como flecha en el borde).
   await expect.poll(async () => (await tasks(page))?.waypoint?.label).toBe('Maestra');
-  await expect(page.locator('.tarea-hecha')).toHaveCount(2);
+  // La lista solo enseña la tarea pendiente: las hechas ya no se dibujan (están en `done`, arriba).
+  await expect(page.locator('.tarea-hecha')).toHaveCount(0);
+  await expect(page.locator('.tarea')).toHaveCount(1);
+  await expect(page.locator('.tarea-actual')).toHaveCount(1);
 });
 
 test('O folds the list and brings it back, and T opens the tasks in the notebook', async ({
