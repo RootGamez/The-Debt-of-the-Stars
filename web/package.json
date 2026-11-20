@@ -17,7 +17,8 @@
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run coverage && vite build",
     "e2e": "playwright test",
     "deploy": "npm run build && wrangler deploy",
-    "deploy:dry": "npm run build && wrangler deploy --dry-run"
+    "deploy:dry": "npm run build && wrangler deploy --dry-run",
+    "trailer": "node scripts/grabar-trailer.ts"
   },
   "engines": {
     "node": ">=20.19"

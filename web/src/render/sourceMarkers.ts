@@ -8,6 +8,9 @@ const VISIBLE_DISTANCE = 30;
 const HOVER_METERS = 0.35;
 const BOB_METERS = 0.06;
 
+/** Nombre del grupo de rombos de cada mundo (el modo tráiler lo apaga). */
+export const SOURCE_MARKERS_NAME = 'Rombos de fuentes';
+
 export interface SourceMarkers {
   /** `wanted(id)` dice si esa fuente aún merece un rombo. */
   update(timeSeconds: number, viewer: Vector3, wanted: (id: string) => boolean): void;
@@ -23,7 +26,7 @@ export function createSourceMarkers(
   upAt: (position: Vector3) => Vector3,
 ): SourceMarkers {
   const group = new Group();
-  group.name = 'Rombos de fuentes';
+  group.name = SOURCE_MARKERS_NAME;
   const geometry = new OctahedronGeometry(0.14);
   const material = new MeshBasicMaterial({ color: 0xffe2a0, transparent: true, opacity: 0.9 });
   const entries = sources.map((source) => {

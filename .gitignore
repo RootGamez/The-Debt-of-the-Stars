@@ -33,3 +33,10 @@ npm-debug.log*
 # Playwright
 playwright-report/
 test-results/
+
+# Tráiler: fotogramas y vídeos grabados (se regeneran con npm run trailer)
+web/trailer/salida/
+
+# Montaje del tráiler: tomas copiadas de web/trailer/salida y renders
+trailer/public/tomas/
+trailer/out/

@@ -146,6 +146,7 @@ import { createShipMap } from './ui/shipMap';
 import { createLocator, createStandaloneLocator, type WorldBody } from './system/locator';
 import { bodyPose } from './system/orbits';
 import { createDebugOverlay, type SystemSnapshot } from './ui/debugOverlay';
+import { createTrailerRig, trailerRequested, type TrailerRig } from './trailer/trailerRig';
 import { createOrbitMap } from './ui/orbitMap';
 import { isTouchDevice } from './ui/pauseOverlay';
 import { installLandscapeLock } from './ui/touch/orientationLock';
@@ -453,7 +454,7 @@ async function start(): Promise<void> {
   // El Contrapeso espera en su Banco del Laboratorio; se coge, se lleva (su reloj va al tablero) y se instala en
   // la Sala del Motor de Cicatriz, en el núcleo de la máquina, donde nace el agujero negro.
   const counterweight = createCounterweightRig({
-    scene,
+    hands: explorer.hands,
     runtimes,
     chronology,
     notify: (message) => {
@@ -524,9 +525,9 @@ async function start(): Promise<void> {
   // Por una boca de casa del Archivo, con el final que sale de ella y de los planos.
   let mouthCross: DeathCause | undefined;
   let ending: Ending | undefined;
-  const hiddenWorld = spec?.bodies.find((body) => body.hidden)?.world;
   // La llamada de las 10:00: se llega por La Boca de Umbral (`via=boca`) en vez de por una boca del Archivo.
   let crossVia: 'boca' | undefined;
+  const hiddenWorld = spec?.bodies.find((body) => body.hidden)?.world;
 
   const walking = new Map<string, MotorEnvironment>(
     [...runtimes].map(([id, runtime]) => [
@@ -726,11 +727,11 @@ async function start(): Promise<void> {
     true,
   );
   // El Planetario y el prisma del Archivo (T6): esferas, rieles y soporte.
-  const archivoPuzzles = createArchivoRig({ scene, runtimes });
+  const archivoPuzzles = createArchivoRig({ scene, hands: explorer.hands, runtimes });
   // La cisterna del Fondo y los péndulos de la Sala Cerrada (T7).
-  const depths = createDepthsRig({ scene, runtimes });
+  const depths = createDepthsRig({ scene, hands: explorer.hands, runtimes });
   // La Balanza del Contrapeso del Taller y la placa que canta de Cicatriz (T8).
-  const bench = createBenchRig({ scene, runtimes });
+  const bench = createBenchRig({ scene, hands: explorer.hands, runtimes });
   // E4: el portal caído del Nudo (su reloj en el muelle), la científica en su lecho de escarcha y la burbuja.
   const laboratory = createLaboratoryRig({
     runtimes,
@@ -773,7 +774,7 @@ async function start(): Promise<void> {
   }
   // Las campanas del Anfiteatro de Umbral (P1): coger, poner en el canal y oír a la bola pasar.
   const bells = createBellsRig({
-    scene,
+    hands: explorer.hands,
     runtimes,
     chime: (frequency) => {
       soundtrack.chime(frequency);
@@ -987,7 +988,6 @@ async function start(): Promise<void> {
       (carrier): carrier is LooseCarrier => carrier !== undefined,
     ),
   );
-  const aimUp = new Vector3();
   // La llamada de La Boca a las 10:00: una esfera de gusano en el anillo de Umbral; cruzarla, a pie y con E, es el
   // camino fácil al final malo.
   const umbralWorld = runtimes.get('umbral')?.world;
@@ -1031,6 +1031,7 @@ async function start(): Promise<void> {
       },
     },
   };
+  const aimUp = new Vector3();
   const aimEye = new Vector3();
   const aimDirection = new Vector3();
   /** Adónde mira el jugador: desde sus ojos (también en tercera persona) hacia donde apunta la cámara. */
@@ -1083,8 +1084,8 @@ async function start(): Promise<void> {
         laboratory?.actions,
         skeptic?.play.actions,
         homecoming?.play.actions,
-        looseActions,
         bocaActions,
+        looseActions,
       ],
       (verb) => {
         const sound = carrySoundOf(verb);
@@ -1585,11 +1586,13 @@ async function start(): Promise<void> {
   );
 
   let awoke = false;
+  // El modo tráiler (`?debug&trailer`) se crea cuando el bucle ya corre (src/trailer/trailerRig.ts).
+  let trailer: TrailerRig | undefined;
   const feet = new Vector3();
   const airCenter = new Vector3();
   const diveUp = new Vector3();
   const body = new Quaternion();
-  runFrameLoop(
+  const frameLoop = runFrameLoop(
     renderer,
     () => {
       // Dentro del Nudo la estrella no ilumina (su luz está apagada): sin sombra.
@@ -1626,7 +1629,9 @@ async function start(): Promise<void> {
         }
         arrive(currentWorld.id);
       }
-      if (timeRuns && free()) {
+      if (trailer?.takeLook(look.x, look.y)) {
+        // la cámara libre del tráiler se queda con el ratón
+      } else if (timeRuns && free()) {
         if (flight?.piloting) flight.addLook(look.x, look.y);
         else player.look(-look.x * MOUSE_LOOK_SENSITIVITY, -look.y * MOUSE_LOOK_SENSITIVITY);
       }
@@ -1663,11 +1668,6 @@ async function start(): Promise<void> {
           wormhole = 'gusano';
         }
       }
-      session.update(
-        dt,
-        timeRuns,
-        mouthCross ?? horizonCross ?? wormhole ?? shipDeath ?? tideDeath ?? drowned ?? gassed,
-      );
       // Confirmada la pregunta frente a La Boca abierta, se cruza: sales a Hogar años después (final malo, `via=boca`).
       if (bocaConfirmed) {
         if (bocaStep() === 'cross' && session.acceptsInput) {
@@ -1681,6 +1681,11 @@ async function start(): Promise<void> {
         currentWorld.id === 'umbral' && session.activeEventIds.includes('boca_destello'),
         performance.now() / 1000,
         dt,
+      );
+      session.update(
+        dt,
+        timeRuns,
+        mouthCross ?? horizonCross ?? wormhole ?? shipDeath ?? tideDeath ?? drowned ?? gassed,
       );
       // si el ciclo no corrió, espera; la boca elegida no se olvida (cruzar no tiene vuelta y la página se recarga)
       if (timeRuns) {
@@ -1831,7 +1836,7 @@ async function start(): Promise<void> {
         landingSpeed: player.state.lastLandingSpeed,
         dt,
         visible: !piloting && !(awakening && !awakening.noted),
-        firstPerson: !outside && !(thirdPerson && !awakening),
+        firstPerson: !outside && !(trailer?.driving ?? false) && !(thirdPerson && !awakening),
         reading: reading.current !== null,
         lightOn: bodyLight.on,
       });
@@ -1853,7 +1858,9 @@ async function start(): Promise<void> {
           soundtrack.play(id, options);
         }
       }
-      helmetRim.update(!piloting && !outside && !thirdPerson && overlay.playing);
+      helmetRim.update(
+        !piloting && !outside && !thirdPerson && !(trailer?.driving ?? false) && overlay.playing,
+      );
       camera.position.add(session.shake);
       const t = session.director.clock.t;
       // Al final de la ventana de tu mundo caes con él: el agujero se acerca y la luz se apaga.
@@ -1862,6 +1869,7 @@ async function start(): Promise<void> {
       mirador?.apply(camera, dt);
       homeLater?.apply(camera, dt, timeRuns);
       homeEarlier?.apply(camera, dt);
+      trailer?.apply(camera, dt);
       lightFor(systemScene.referenceWorld, finalLight(fallen));
       const airWorld = systemScene.referenceWorld;
       const air = airWorld === undefined ? undefined : ATMOSPHERES[airWorld];
@@ -1922,11 +1930,7 @@ async function start(): Promise<void> {
         recording: ui.listening,
       });
       camera.updateMatrixWorld();
-      counterweight?.update(
-        camera,
-        { t, carrierRate: session.director.rate, piloting },
-        timeRuns ? dt : 0,
-      );
+      counterweight?.update({ t, carrierRate: session.director.rate, piloting }, timeRuns ? dt : 0);
       bells?.update(camera, t, timeRuns ? dt : 0);
       depths?.update(camera, t);
       bench?.update(camera);
@@ -2029,6 +2033,23 @@ async function start(): Promise<void> {
       if (governor.sample(seconds) && graphics.stepDown()) governor.reset();
     },
   );
+  if (trailerRequested(window.location.search)) {
+    trailer = createTrailerRig({
+      groupOf: (world) => systemScene.groupOf(world),
+      referenceWorld: () => systemScene.referenceWorld,
+      scene,
+      pauseLoop: () => {
+        frameLoop.pause();
+      },
+      resumeLoop: () => {
+        frameLoop.resume();
+      },
+      step: (dt) => {
+        frameLoop.step(dt);
+      },
+      canvas,
+    });
+  }
   // Los primeros fotogramas (sombras, gusanos) también se dibujan aún tapados; luego se quita la pantalla.
   await nextFrame();
   await nextFrame();

@@ -25,6 +25,7 @@
     "vite.config.ts",
     "scripts/postcss-ui-scale.ts",
     "scripts/audio",
+    "scripts/grabar-trailer.ts",
     "playwright.config.ts"
   ]
 }

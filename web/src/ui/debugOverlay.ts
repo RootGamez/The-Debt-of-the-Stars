@@ -86,6 +86,8 @@ declare global {
       toLadder?(): boolean;
       /** Lleva el reloj de Umbral a ese instante del ciclo (s); devuelve dónde quedó. */
       skipTo?(seconds: number): number;
+      /** Solo con `?trailer`: la cámara y el paso fijo del tráiler (`src/trailer/trailerRig.ts`). */
+      trailer?: import('../trailer/trailerRig').TrailerApi;
       /** El anillo de la Pista del Taller: si su reloj está en hora y si deja pasar ahora. */
       teleporter?(): { matched: boolean; open: boolean } | null;
       /**

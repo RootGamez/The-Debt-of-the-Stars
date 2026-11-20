@@ -1374,3 +1374,8 @@ body {
   font-size: 14px;
   opacity: 0.8;
 }
+
+/* Modo tráiler (`?debug&trailer`): solo la imagen del juego, sin HUD ni paneles. */
+body.trailer > *:not(#game, .overlay) {
+  visibility: hidden !important;
+}
