@@ -1,7 +1,13 @@
 // Pasos compartidos del Contrapeso para las pruebas de Playwright (Fases 10C y 10D): cogerlo, sacar el motor viejo,
 // ponerlo en la cuna, igualar las ruedas y dejar que el pulso de las 9:00 lo encaje.
 import { expect, type Page } from '@playwright/test';
-import { closeReader, startPlaying } from './helpers';
+import { closeReader, noticesSeen, startPlaying, watchNotices } from './helpers';
+
+/**
+ * Del 8:58 al pulso de las 9:00 en Cicatriz (reloj 0,6) hay unos 3 s del jugador; con WebGL por software cada
+ * fotograma avanza como mucho 0,1 s y tarda casi uno real, así que se espera de sobra.
+ */
+export const PULSE_WAIT = 120_000;
 
 export async function counterweight(page: Page) {
   return page.evaluate(() => window.__juego?.counterweight?.() ?? null);
@@ -32,10 +38,11 @@ export async function intoTheCradle(page: Page): Promise<void> {
   // También sabes ya que sustituye al motor viejo: la palanca se usa sin examinarla.
   await standAt(page, 'cicatriz.palanca');
   await expect(page.locator('.prompt')).toHaveText('E · tirar');
+  // El aviso dura 4,5 s reales: se apunta en la página para no perderlo con fotogramas lentos.
+  await watchNotices(page);
   await page.keyboard.press('KeyE');
-  // El aviso dura 4,5 s reales: se mira primero (sale en el mismo fotograma que el motor) para no perderlo.
-  await expect(page.locator('.notice')).toContainText('El motor viejo sale');
   await expect.poll(async () => (await counterweight(page))?.motorOut).toBe(true);
+  await expect.poll(() => noticesSeen(page)).toContain('El motor viejo sale');
 
   await standAt(page, 'cicatriz.cuna');
   await expect(page.locator('.prompt')).toHaveText('E · poner');
@@ -87,6 +94,6 @@ export async function installCounterweight(page: Page): Promise<void> {
   await page.keyboard.press('KeyE');
   await page.evaluate(() => window.__juego?.skipTo?.(538));
   await expect
-    .poll(async () => (await counterweight(page))?.place, { timeout: 20_000 })
+    .poll(async () => (await counterweight(page))?.place, { timeout: PULSE_WAIT })
     .toBe('installed');
 }

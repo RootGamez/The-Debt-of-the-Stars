@@ -69,3 +69,29 @@ export async function debugCall<T = unknown>(
     { fn: name, values: args },
   );
 }
+
+/**
+ * Empieza a apuntar en la página cada aviso (`.notice`) que se muestra. El aviso se apaga a los 4,5 s reales y, con
+ * WebGL por software, un fotograma puede tardar segundos: mirándolo desde la prueba se podía perder entero.
+ */
+export async function watchNotices(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const store = window as unknown as { __notices?: string[] };
+    if (store.__notices) return;
+    const seen: string[] = [];
+    store.__notices = seen;
+    const element = document.querySelector('.notice');
+    if (!element) return;
+    new MutationObserver(() => {
+      const text = element.textContent;
+      if (text) seen.push(text);
+    }).observe(element, { childList: true, characterData: true, subtree: true });
+  });
+}
+
+/** Los avisos que se han mostrado desde `watchNotices`, juntos (para `toContain`). */
+export async function noticesSeen(page: Page): Promise<string> {
+  return page.evaluate(
+    () => (window as unknown as { __notices?: string[] }).__notices?.join('\n') ?? '',
+  );
+}
