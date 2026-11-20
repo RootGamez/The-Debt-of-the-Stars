@@ -19,6 +19,7 @@ import {
   NearestFilter,
   PerspectiveCamera,
   RGBAFormat,
+  Scene,
   ShaderChunk,
   ShaderMaterial,
   UnsignedByteType,
@@ -26,7 +27,6 @@ import {
   WebGLRenderTarget,
   type Material,
   type Object3D,
-  type Scene,
   type WebGLRenderer,
 } from 'three';
 import { stableShadowAim, sunShadowFocus } from './sunShadowFocus';
@@ -215,15 +215,16 @@ function aimStable(
   });
 }
 
-function drawCascade(renderer: WebGLRenderer, scene: Scene, cascade: Cascade, clear: Color): void {
+/** `holder` es la escena de los pases de sombra (ver `createSunShadow`): contiene la escena principal. */
+function drawCascade(renderer: WebGLRenderer, holder: Scene, cascade: Cascade, clear: Color): void {
   const previousTarget = renderer.getRenderTarget();
   const previousClear = renderer.getClearColor(clear).getHex();
   const previousAlpha = renderer.getClearAlpha();
-  scene.overrideMaterial = cascade.material;
+  holder.overrideMaterial = cascade.material;
   renderer.setRenderTarget(cascade.target);
   renderer.setClearColor(0xffffff, 1);
   renderer.clear();
-  renderer.render(scene, cascade.camera);
+  renderer.render(holder, cascade.camera);
   renderer.setRenderTarget(previousTarget);
   renderer.setClearColor(previousClear, previousAlpha);
 }
@@ -379,6 +380,14 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
   };
   const toFocus = new Vector3();
   const clearColor = new Color();
+  // Los pases de sombra dibujan la escena desde una escena propia que la contiene. Three guarda el estado de las luces
+  // por escena, y las cámaras de sombra no ven ninguna luz (solo la capa de los proyectores): dibujando la escena
+  // principal desde ellas, su estado de luces cambiaba dos veces por fotograma y cada material con luz volvía a
+  // buscar su programa (getParameters, basura y tirones) en cada pase. Así cada escena guarda el suyo, que no cambia.
+  // Sin fondo ni niebla propios; las matrices no las pone al día ella (lo hace la escena principal, ver `update`).
+  const holder = new Scene();
+  holder.matrixWorldAutoUpdate = false;
+  let held: Scene | undefined;
   let enabled = true;
   /** Elegido en Configuración: sin sombra (los mapas quedan como estaban, sin dibujarse). */
   let userOff = false;
@@ -437,16 +446,18 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
         far.texelMeters.value = (2 * FAR_RADIUS) / far.target.width;
       }
 
-      const previousOverride = scene.overrideMaterial;
-      const previousBackground = scene.background;
-      scene.background = null;
+      if (held !== scene) {
+        if (held) holder.remove(held);
+        holder.add(scene);
+        held = scene;
+      }
+      // Lo que haría `renderer.render(scene)`; si quien llama ya las puso al día (y apagó la puesta automática), nada.
+      if (scene.matrixWorldAutoUpdate) scene.updateMatrixWorld();
       try {
-        drawCascade(renderer, scene, near, clearColor);
-        if (useClose) drawCascade(renderer, scene, close, clearColor);
-        if (useFar) drawCascade(renderer, scene, far, clearColor);
+        drawCascade(renderer, holder, near, clearColor);
+        if (useClose) drawCascade(renderer, holder, close, clearColor);
+        if (useFar) drawCascade(renderer, holder, far, clearColor);
       } finally {
-        scene.overrideMaterial = previousOverride;
-        scene.background = previousBackground;
         renderer.setRenderTarget(null);
       }
     },
@@ -511,6 +522,8 @@ export function createSunShadow(size = DEFAULT_SIZE): SunShadow {
     },
 
     dispose() {
+      if (held) holder.remove(held);
+      held = undefined;
       for (const cascade of cascades) {
         cascade.target.dispose();
         cascade.material.dispose();

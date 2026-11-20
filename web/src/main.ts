@@ -1597,10 +1597,18 @@ async function start(): Promise<void> {
     () => {
       // Dentro del Nudo la estrella no ilumina (su luz está apagada): sin sombra.
       sunShadow?.setEnabled(sun.visible);
-      sunShadow?.update(renderer, scene, sun.position, camera.getWorldPosition(cameraWorld), {
-        starRadius: spec?.star.radius ?? 0,
-      });
-      renderWithWormholes(renderer, scene, camera);
+      // Las matrices de toda la escena (todos los mundos), una vez por fotograma: cada pase (las sombras, el fondo de
+      // los gusanos y el principal) las volvía a recorrer enteras.
+      scene.updateMatrixWorld();
+      scene.matrixWorldAutoUpdate = false;
+      try {
+        sunShadow?.update(renderer, scene, sun.position, camera.getWorldPosition(cameraWorld), {
+          starRadius: spec?.star.radius ?? 0,
+        });
+        renderWithWormholes(renderer, scene, camera);
+      } finally {
+        scene.matrixWorldAutoUpdate = true;
+      }
     },
     (dt) => {
       const look = input.consumeLook();
