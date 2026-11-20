@@ -75,13 +75,16 @@ export function tickCounterweight(
 export function machineTime(t: number, baseRate: number, curve?: RateCurve): number {
   if (!(t > 0)) return 0;
   // Integral exacta de una curva a tramos rectos: la regla del trapecio en cada tramo (y en los extremos fijos).
-  const marks = [0, ...(curve ?? []).map(([at]) => at).filter((at) => at > 0 && at < t), t];
+  // Se recorren las marcas de la curva entre 0 y `t` sin juntarlas en arrays: se llama en cada fotograma.
   let total = 0;
-  for (let i = 1; i < marks.length; i++) {
-    const a = marks[i - 1] ?? 0;
-    const b = marks[i] ?? 0;
+  let a = 0;
+  for (const point of curve ?? []) {
+    const b = point[0];
+    if (!(b > 0 && b < t)) continue;
     total += ((rateAt(baseRate, curve, a) + rateAt(baseRate, curve, b)) / 2) * (b - a);
+    a = b;
   }
+  total += ((rateAt(baseRate, curve, a) + rateAt(baseRate, curve, t)) / 2) * (t - a);
   return total;
 }
 

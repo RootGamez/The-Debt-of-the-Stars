@@ -59,7 +59,7 @@ export interface BenchPlay {
   /** La pesa que llevas (1, 2 o 3), si alguna. */
   readonly held: Weight | undefined;
   /** Lo que hay en cada muesca (su número) y lo que pesa. */
-  placement(): Record<number, number>;
+  placement(): Readonly<Record<number, number>>;
   /** La viga está en equilibrio: la tapa de la Cuna se abre. */
   readonly balanced: boolean;
   /** Cuánto se inclina la viga (−1 hacia la maqueta, 1 hacia las pesas). */
@@ -88,13 +88,20 @@ export function createBenchPlay(options: BenchPlayOptions): BenchPlay {
     const id = heldBy(carry);
     return WEIGHTS.find((w) => weightId(w) === id);
   };
-  const placement = (): Record<number, number> => {
+  // La colocación solo cambia cuando cambia `carry` (inmutable): se calcula una vez por cambio y no varias veces en
+  // cada fotograma (la vista y la inclinación la piden siempre).
+  let placementOf: CarryState | undefined;
+  let placementCache: Readonly<Record<number, number>> = {};
+  const placement = (): Readonly<Record<number, number>> => {
+    if (placementOf === carry) return placementCache;
     const result: Record<number, number> = {};
     for (let notch = 1; notch <= BALANCE.notches; notch++) {
       const id = placedAt(carry, notchSlot(notch));
       const weight = WEIGHTS.find((w) => weightId(w) === id);
       if (weight !== undefined) result[notch] = weight;
     }
+    placementOf = carry;
+    placementCache = result;
     return result;
   };
   const balanced = (): boolean => isBalanced(placement());

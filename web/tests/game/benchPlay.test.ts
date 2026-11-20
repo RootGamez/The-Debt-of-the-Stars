@@ -54,6 +54,21 @@ describe('the balance in play', () => {
     expect(game.play.placement()).toEqual({});
   });
 
+  it('reuses the placement while nothing moves (it is asked for every frame)', () => {
+    const game = setup();
+    const empty = game.play.placement();
+    expect(game.play.placement()).toBe(empty);
+
+    game.play.actions.run(BENCH.weights[3]);
+    game.notch(4);
+    game.play.actions.run(BENCH.balance);
+    const placed = game.play.placement();
+
+    expect(placed).not.toBe(empty);
+    expect(placed).toEqual({ 4: 3 });
+    expect(game.play.placement()).toBe(placed);
+  });
+
   it('leans toward the model until the weights make it level, and then opens the lid of the cradle', () => {
     const game = setup();
 

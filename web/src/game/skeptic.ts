@@ -64,6 +64,11 @@ export function metBefore(opened: Iterable<string>): boolean {
  * ¿Esta fuente no se puede leer ahora? Sus charlas: todas menos la del momento, y todas si ya no está en su casa
  * (`present` falso). La Cámara, en cuanto el bucle se corta. Las demás fuentes no son cosa suya.
  */
+/** ¿Es una fuente de la escéptica (su charla o la cámara)? De las demás no dice nada. */
+export function isSkepticSource(sourceId: string): boolean {
+  return sourceId === CAMARA_SOURCE || SKEPTIC_TALK_IDS.includes(sourceId);
+}
+
 export function skepticGone(sourceId: string, stage: SkepticStage, present: boolean): boolean {
   if (sourceId === CAMARA_SOURCE) return stage === 'adios';
   if (!SKEPTIC_TALK_IDS.includes(sourceId)) return false;

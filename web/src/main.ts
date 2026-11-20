@@ -144,7 +144,7 @@ import { createSystemScene } from './render/systemScene';
 import { buildAlbatros } from './ship/model/albatros';
 import { createShipMap } from './ui/shipMap';
 import { createLocator, createStandaloneLocator, type WorldBody } from './system/locator';
-import { bodyPose } from './system/orbits';
+import { bodyPose, createPose } from './system/orbits';
 import { createDebugOverlay, type SystemSnapshot } from './ui/debugOverlay';
 import { createTrailerRig, trailerRequested, type TrailerRig } from './trailer/trailerRig';
 import { createOrbitMap } from './ui/orbitMap';
@@ -1198,6 +1198,8 @@ async function start(): Promise<void> {
   }
   input.onActionKey = shipAction;
 
+  // Antes que el panel: puede pedir la foto del sistema nada más crearse.
+  const snapshotPose = createPose();
   const debug = createDebugOverlay({
     where: () => ({
       world: currentWorld.id,
@@ -1215,7 +1217,7 @@ async function start(): Promise<void> {
     const t = session.director.clock.t;
     const positions: SystemSnapshot['bodies'] = {};
     for (const body of spec?.bodies ?? []) {
-      const { position } = bodyPose(body, t);
+      const { position } = bodyPose(body, t, snapshotPose);
       positions[body.world] = [position.x, position.y, position.z];
     }
     return { reference: systemScene.referenceWorld ?? null, bodies: positions };

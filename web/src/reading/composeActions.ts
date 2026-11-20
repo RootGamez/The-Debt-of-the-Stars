@@ -25,7 +25,11 @@ export function composeActions(
         },
       },
     }),
-    gone: (id) => list.some((part) => part.gone(id)),
+    gone: (id) => {
+      // Sin cierres: se pregunta por cada fuente a la vista en cada fotograma.
+      for (const part of list) if (part.gone(id)) return true;
+      return false;
+    },
     verb: (id, unread) => {
       for (const part of list) {
         const verb = part.verb(id, unread);

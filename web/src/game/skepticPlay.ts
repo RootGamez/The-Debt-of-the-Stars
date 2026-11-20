@@ -7,6 +7,7 @@ import { isLoopCut } from './loopCore';
 import {
   createSkepticState,
   handOverSource,
+  isSkepticSource,
   knowsHer,
   leaveWithYou,
   metBefore,
@@ -60,7 +61,8 @@ export function createSkepticPlay(options: SkepticPlayOptions): SkepticPlay {
       loopCut: isLoopCut(state.core),
     });
   const actions: SourceActions = {
-    gone: (id) => skepticGone(id, stage(), !state.left),
+    // Se pregunta por cada fuente a la vista en cada fotograma: la etapa solo se calcula para las suyas.
+    gone: (id) => isSkepticSource(id) && skepticGone(id, stage(), !state.left),
     verb: (id) => skepticVerb(id, stage()),
     run: (id) => {
       if (skepticVerb(id, stage()) !== SHOW_VERB) return;

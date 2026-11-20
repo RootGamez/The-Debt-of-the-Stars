@@ -3,6 +3,7 @@ import {
   createSkepticState,
   handOverSource,
   HER_FACTS,
+  isSkepticSource,
   knowsHer,
   leaveWithYou,
   metBefore,
@@ -91,6 +92,12 @@ describe('which sources can be read', () => {
 
   it('leaves other sources alone', () => {
     expect(skepticGone('taller.paginas', 'adios', false)).toBe(false);
+  });
+
+  it('knows which sources are his, so the rest are never hidden by him', () => {
+    for (const id of SKEPTIC_TALK_IDS) expect(isSkepticSource(id)).toBe(true);
+    expect(isSkepticSource(CAMARA_SOURCE)).toBe(true);
+    expect(isSkepticSource('taller.paginas')).toBe(false);
   });
 
   it('offers to show the Counterweight only in the hand-over talks', () => {
