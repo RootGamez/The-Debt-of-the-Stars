@@ -65,6 +65,7 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
 - Pilotando: ratón apuntar · **W/S** avanzar · **A/D** lateral · **Espacio/C** subir/bajar (mantener C para posarse) · **Q/E** alabeo · **X** frenar respecto al objetivo · **T** objetivo · **Z** estabilizador (sin él no hay ayudas) · **V** cámara de cabina o de fuera.
 - Con `?debug`: `__juego.warpTo('archivo')` (a pie), `__juego.toShip()` (dentro, frente al asiento; `toShip('registro'|'mapa')` frente a ese sitio), `__juego.toLadder()` (al pie de la escalerilla), `__juego.shipTo('archivo', 20)` (pilotando, sobre un mundo); `F4` mapa de órbitas.
 - E2E: no dejar el juego abierto en el panel de vista previa mientras corre `npm run e2e`.
+- E2E sin GPU (WebGL por software): cada fotograma tarda casi un segundo y avanza como mucho 0,1 s, así que cargar ya lleva 1–2 min y una spec puede tardar 5–10. Córrelas una a una. `window.__juego.snapshot()` se toma una vez por fotograma (espérala con `expect.poll`) y los avisos se apagan a los 4,5 s reales (`watchNotices`/`noticesSeen` en `e2e/helpers.ts`).
 
 ## El ciclo (Fase 3)
 
@@ -166,7 +167,7 @@ acorta el ciclo (10–3600 s, la cronología se escala) y las teclas `[` `]` sal
   `render/notebookModel.ts` + `ui/notebookCanvas.ts` (tus páginas del Registro). Tu voz se subtitula a mano
   (`data-speaker` en `cinematicLayer.ts`). Al acabar, `homecoming.finish()` lleva al Mirador. Con `?debug`:
   `__juego.homeEarlier()` (plano, fase, cámara en cm) y `__juego.homeEarlierSeek(s)`. La e2e `homecoming.spec.ts`
-  aún espera la fase `talking`: hay que ponerla al día.
+  sigue el nido hasta el Mirador y el final `tarde` guardado, con la tarjeta según su `via`.
 
 ## Soles, el Cerco y la luz (plan: `docs/plan-soles-y-luz-dinamica.md`)
 
