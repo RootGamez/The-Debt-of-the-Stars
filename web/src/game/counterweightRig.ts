@@ -2,7 +2,7 @@
 // (counterweightPlay.ts) con lo que se ve (render/counterweightView.ts) y con la Sala del Motor de Cicatriz (el motor
 // viejo que sale, la cuna y sus ruedas, el núcleo). Solo si el sistema tiene el Laboratorio.
 import { buildCounterweight } from '../worlds/procedural/contrapeso';
-import type { Camera, Object3D, Scene, Vector3 } from 'three';
+import { Quaternion, Vector3, type Camera, type Object3D, type Scene } from 'three';
 import type { Chronology } from '../core/timeline';
 import { createCounterweightView, type CounterweightAnchors } from '../render/counterweightView';
 import { createEngineRoomView, type EngineRoomView } from '../render/engineRoomView';
@@ -53,10 +53,18 @@ export interface CounterweightRig {
   update(camera: Camera, frame: CounterweightFrame, dt: number): void;
 }
 
+/**
+ * Las marcas de los mundos por código llevan la orientación del marco del sitio (Z arriba), pero el modelo del
+ * Contrapeso se diseñó con Y arriba y su pie en -Y: sin este giro de +90° en X queda tumbado y el pie asoma de lado
+ * (en el Banco, colgando bajo la mesa).
+ */
+const MODEL_UP_TO_FRAME_UP = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
+
 function markerOf(runtime: WorldRuntime, clueId: string) {
   const marker = runtime.world.markers.interactions.find((m) => m.clueId === clueId)?.object;
   const anchor = marker ? anchorAt(marker) : undefined;
   if (!anchor) throw new WorldDataError(`${runtime.id}: falta la marca de ${clueId}`);
+  anchor.pose.quaternion.multiply(MODEL_UP_TO_FRAME_UP);
   return anchor;
 }
 
