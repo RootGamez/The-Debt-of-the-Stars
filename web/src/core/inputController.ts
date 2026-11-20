@@ -71,13 +71,26 @@ export class InputController {
     );
     window.addEventListener('blur', reset, { signal });
     document.addEventListener('visibilitychange', reset, { signal });
-    document.addEventListener(
-      'mousemove',
-      (e) => {
-        this.onMouseMove(e);
-      },
-      { signal },
-    );
+    // `mousemove` llega alineado con los fotogramas: con una pantalla de 144 Hz unos fotogramas se quedan sin giro y el
+    // siguiente lleva el doble, y la vista da saltos. `pointerrawupdate` llega según el ratón lo manda, así que lo
+    // acumulado por fotograma sigue el tiempo real. Donde no existe se usa `mousemove`.
+    if ('onpointerrawupdate' in window) {
+      document.addEventListener(
+        'pointerrawupdate',
+        (e: Event) => {
+          if (e instanceof PointerEvent && e.pointerType === 'mouse') this.onMouseMove(e);
+        },
+        { signal },
+      );
+    } else {
+      document.addEventListener(
+        'mousemove',
+        (e) => {
+          this.onMouseMove(e);
+        },
+        { signal },
+      );
+    }
   }
 
   get pointerLocked(): boolean {
