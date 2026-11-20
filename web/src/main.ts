@@ -2071,7 +2071,9 @@ async function start(): Promise<void> {
           moved: camera.position.distanceTo(lastCameraPosition),
         });
         lastCameraPosition.copy(camera.position);
-        debug.note(`${jitter.line()}\n${pacerLine(pacer)}`);
+        debug.note(
+          `${jitter.line()}\n${pacerLine(pacer)}\nsaltos del ratón descartados ${input.lookSpikes}`,
+        );
       }
       orbitMap?.update(dt);
     },

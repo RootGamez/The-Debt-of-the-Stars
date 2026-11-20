@@ -14,6 +14,7 @@ import {
 } from '../core/graphics';
 import { LANGUAGE_NAMES, LANGUAGES, t, type Language } from '../i18n';
 import { TEXT_SPEED_LABELS, TEXT_SPEEDS, type TextSettings } from '../typewriter/textPreferences';
+import { lockPointer } from './pointerLock';
 
 export interface PauseOverlay {
   readonly playing: boolean;
@@ -564,14 +565,7 @@ export function createPauseOverlay(
       setPlaying(true);
       return;
     }
-    try {
-      // Navegadores antiguos devuelven undefined en vez de una promesa y avisan con
-      // "pointerlockerror"; Promise.resolve cubre ambos casos.
-      const request: unknown = canvas.requestPointerLock();
-      Promise.resolve(request).catch(playWithDragLook);
-    } catch {
-      playWithDragLook();
-    }
+    lockPointer(canvas).catch(playWithDragLook);
   };
 
   const pause = (): void => {
@@ -640,12 +634,7 @@ export function createPauseOverlay(
     },
     recapturePointer() {
       if (!playing || !dragLook || document.pointerLockElement === canvas) return;
-      try {
-        const request: unknown = canvas.requestPointerLock();
-        Promise.resolve(request).catch(() => undefined); // si no se concede, se sigue mirando arrastrando
-      } catch {
-        // sin captura: se sigue mirando arrastrando
-      }
+      lockPointer(canvas).catch(() => undefined); // si no se concede, se sigue mirando arrastrando
     },
     setInert(inert) {
       overlay.inert = inert;

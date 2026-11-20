@@ -10,6 +10,7 @@ import {
   type MoveIntent,
 } from './input';
 
+import { filterLookEvent } from './lookFilter';
 import { EMPTY_FLIGHT_KEYS, type FlightKeys } from '../ship/shipInput';
 import type { ShipAction } from '../game/shipFlight';
 
@@ -44,6 +45,8 @@ export class InputController {
   private touchFlight: FlightKeys = EMPTY_FLIGHT_KEYS;
   private lookX = 0;
   private lookY = 0;
+  /** Saltos del cursor descartados (src/core/lookFilter.ts); el panel F3 los cuenta. */
+  lookSpikes = 0;
   private readonly abort = new AbortController();
   /** Si devuelve true, arrastrar con el botón izquierdo también mira (juego sin pointer lock). */
   dragLookEnabled: () => boolean = () => false;
@@ -184,6 +187,9 @@ export class InputController {
 
   private onMouseMove(event: MouseEvent): void {
     const dragging = this.dragLookEnabled() && (event.buttons & 1) === 1;
-    if (this.pointerLocked || dragging) this.addLook(event.movementX, event.movementY);
+    if (!this.pointerLocked && !dragging) return;
+    const move = filterLookEvent(event.movementX, event.movementY);
+    if (move) this.addLook(move.x, move.y);
+    else this.lookSpikes++;
   }
 }
