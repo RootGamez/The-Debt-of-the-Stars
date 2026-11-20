@@ -51,7 +51,9 @@ async function watchTheEnd(page: Page): Promise<void> {
 test('from the palco the horizon fills the sky, all goes quiet and the loop starts again', async ({
   page,
 }) => {
-  test.setTimeout(180_000);
+  // Con WebGL por software cada fotograma tope (MAX_FRAME_SECONDS) tarda casi un segundo real: los 7 s que faltan del
+  // ciclo y el fundido pueden llevar minutos.
+  test.setTimeout(420_000);
   await startPlaying(page);
   expect(await page.evaluate(() => window.__juego?.warpTo?.('observatorio') ?? false)).toBe(true);
   await expect.poll(async () => (await snapshot(page))?.grounded, { timeout: 15_000 }).toBe(true);
@@ -64,7 +66,7 @@ test('from the palco the horizon fills the sky, all goes quiet and the loop star
   await page.evaluate(() => window.__juego?.skipTo?.(893));
   await watchTheEnd(page);
 
-  await expect.poll(() => loopValue(page, 'loops'), { timeout: 120_000 }).toBe(1);
+  await expect.poll(() => loopValue(page, 'loops'), { timeout: 300_000 }).toBe(1);
   const seen = await page.evaluate(() => (window as unknown as { __final: Seen }).__final);
   expect(seen.span).toBeGreaterThan(1); // más de 57° de radio: el horizonte llena el cielo
   expect(seen.tide).toBeGreaterThan(0.3); // la marea se nota…
@@ -74,6 +76,6 @@ test('from the palco the horizon fills the sky, all goes quiet and the loop star
   expect(seen.silentWhileDying).toBe(true);
 
   // Despierta en el ciclo siguiente: sin agujero y con la luz de vuelta.
-  await expect.poll(() => loopValue(page, 'phase'), { timeout: 10_000 }).toBe('playing');
+  await expect.poll(() => loopValue(page, 'phase'), { timeout: 60_000 }).toBe('playing');
   expect(await page.evaluate(() => window.__juego?.blackHole?.().visible)).toBe(false);
 });

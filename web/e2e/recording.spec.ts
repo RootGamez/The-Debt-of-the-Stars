@@ -8,6 +8,12 @@ import { snapshot, startPlaying } from './helpers';
 const SOURCE = 'cicatriz.grabacion_esceptico';
 /** Pulsaciones de flecha de la rueda de ×1,0 a ×0,2 (cada una divide la velocidad entre ~1,09). */
 const STEPS_TO_A_FIFTH = 19;
+/** Cada palabra sin vocales o, si solo era una vocal, esa letra sola (reading/recording.ts, `smear`). */
+const SWALLOWED =
+  /^(?:[^aeiouáéíóúü\s]+|[aeiouáéíóúü])(?:\s+(?:[^aeiouáéíóúü\s]+|[aeiouáéíóúü]))*$/i;
+
+// Con WebGL por software la carga sola se come casi un minuto, y el salto a Cicatriz otro tanto.
+test.describe.configure({ timeout: 300_000 });
 
 async function openRecording(page: Page): Promise<void> {
   expect(await page.evaluate(() => window.__juego?.warpTo?.('cicatriz') ?? false)).toBe(true);
@@ -24,17 +30,15 @@ async function recording(page: Page) {
 test('a recording made with a fast clock is gibberish as is and clear at the right speed', async ({
   page,
 }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(720_000);
   await startPlaying(page);
   await openRecording(page);
 
   await expect(page.locator('.recorder-title')).toHaveText('La grabación del escéptico');
   await expect(page.locator('.recorder-speed')).toHaveText('×1,0');
   await expect(page.locator('.recorder-status')).toHaveText('No se entiende nada.');
-  // A ×1 suena acelerada: las vocales se tragan.
-  await expect(page.locator('.recorder-line').first()).toHaveText(/^[^aeiouáéíóúü]+$/i, {
-    timeout: 15_000,
-  });
+  // A ×1 suena acelerada: las vocales se tragan (una palabra que solo es vocal, como «A», se queda en su letra).
+  await expect(page.locator('.recorder-line').first()).toHaveText(SWALLOWED, { timeout: 15_000 });
   // El sonido de la voz suena mientras la grabación está abierta.
   await expect
     .poll(async () => (await page.evaluate(() => window.__juego?.audio?.()))?.voices)
@@ -47,9 +51,11 @@ test('a recording made with a fast clock is gibberish as is and clear at the rig
   await expect(page.locator('.recorder-status')).toHaveText('Se entiende. Escúchala entera.');
   await expect.poll(() => recording(page)).toMatchObject({ understood: false });
 
-  // Oída entera a la velocidad buena, se entiende y se anota (vuelve a empezar sola).
+  // Oída entera a la velocidad buena, se entiende y se anota (vuelve a empezar sola). Son unos 37 s de voz, pero
+  // cada fotograma avanza como mucho 0,1 s (readingUi.ts): con WebGL por software, a uno o dos fotogramas por
+  // segundo, puede llevar varios minutos.
   await expect(page.locator('.recorder-noted-title')).toHaveText('Anotado en el Registro', {
-    timeout: 150_000,
+    timeout: 480_000,
   });
   await expect(page.locator('.recorder-status')).toHaveText('Entendida entera.');
   const facts = (await snapshot(page))?.registry.facts ?? [];
