@@ -1590,12 +1590,7 @@ body {
   pointer-events: none;
 }
 
-/* ---------- Vuelo, final y controles táctiles: el mismo lenguaje ---------- */
-.ship-panel {
-  border-radius: 0;
-  background: var(--night) var(--fiber-noise);
-  box-shadow: inset 0 0 14px rgb(var(--glow-rgb) / 12%);
-}
+/* ---------- Vuelo, final y controles táctiles: el mismo lenguaje (el panel de la nave va sin caja: style.css) ---------- */
 .ending-card {
   padding: 34px 34px 26px;
 }

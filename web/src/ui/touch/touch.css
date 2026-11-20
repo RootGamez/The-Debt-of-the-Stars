@@ -2,12 +2,20 @@
    Las medidas siguen en px: scripts/postcss-ui-scale.ts las multiplica por --ui-scale. */
 
 :root {
-  /* Zona de toque mínima: 48 (iOS 44 pt, Android 48 dp) y 8 de aire entre botones. */
-  --tc-size-sm: 48px;
-  --tc-size-md: 64px;
-  --tc-size-lg: 84px;
-  --tc-gap: 12px;
-  --tc-edge: 16px;
+  /* Zona de toque mínima de 44 (iOS 44 pt; Android pide 48): nunca baja de ahí, ni al encoger por la pantalla.
+     Las fichas `--ui-…` no las escala el plugin de accesibilidad, así que el suelo vale lo mismo a cualquier escala. */
+  --ui-min-touch: 44px;
+  --ui-min-touch-md: 52px;
+  --ui-min-touch-lg: 64px;
+  --ui-min-gap: 8px;
+  --ui-min-edge: 10px;
+  /* Los tamaños de diseño se multiplican por `--touch-fit` (ui/touch/touchFit.ts): sale del alto y el ancho reales
+     de la ventana, así que los botones encogen en un teléfono bajo y crecen un poco en una tableta. */
+  --tc-size-sm: max(var(--ui-min-touch), calc(48px * var(--touch-fit, 1)));
+  --tc-size-md: max(var(--ui-min-touch-md), calc(64px * var(--touch-fit, 1)));
+  --tc-size-lg: max(var(--ui-min-touch-lg), calc(84px * var(--touch-fit, 1)));
+  --tc-gap: max(var(--ui-min-gap), calc(12px * var(--touch-fit, 1)));
+  --tc-edge: max(var(--ui-min-edge), calc(16px * var(--touch-fit, 1)));
 }
 
 /* ---------- Guardas: nada se selecciona ni abre menús al mantener pulsado ---------- */
@@ -311,7 +319,7 @@ html.is-touch [role='dialog'] {
 /* «Más»: debajo de la pausa; su hoja se abre hacia la izquierda. */
 .touch-more {
   position: absolute;
-  top: calc(max(var(--tc-edge), env(safe-area-inset-top)) + 56px);
+  top: calc(max(var(--tc-edge), env(safe-area-inset-top)) + var(--tc-size-sm) + 8px);
   right: max(var(--tc-edge), env(safe-area-inset-right));
   pointer-events: none;
 }
@@ -380,7 +388,7 @@ html.is-touch [role='dialog'] {
 .touch-more-sheet {
   flex-wrap: wrap;
   align-content: flex-end;
-  max-height: calc(100dvh - 2 * var(--tc-edge) - 56px);
+  max-height: calc(100dvh - 2 * var(--tc-edge) - var(--tc-size-sm) - 8px);
 }
 
 /* ---------- Mano zurda: el dock a la izquierda (el joystick pasa a la mitad derecha en touchControls.ts) ---------- */
@@ -397,6 +405,31 @@ html.is-touch [role='dialog'] {
 
 .touch.is-left .touch-context {
   flex-wrap: wrap-reverse;
+}
+
+/* ---------- El reloj doble no se mete bajo el dock ---------- */
+/* En el centro de abajo, en un teléfono de lado, chocaba con los botones del pulgar: se pega al borde contrario
+   (a la izquierda con la mano derecha; a la derecha con la zurda). */
+html.is-touch .clock-hud {
+  left: max(var(--tc-edge), env(safe-area-inset-left));
+  bottom: max(var(--tc-edge), env(safe-area-inset-bottom));
+  transform: none;
+}
+
+/* …y encoge con la pantalla, igual que los botones (los anillos y la letra del reloj). */
+html.is-touch .clock-rings {
+  width: calc(72px * var(--touch-fit, 1));
+  height: calc(72px * var(--touch-fit, 1));
+}
+
+html.is-touch .clock-hud {
+  gap: calc(10px * var(--touch-fit, 1));
+  font-size: calc(21px * var(--touch-fit, 1));
+}
+
+html.is-touch body:has(.touch.is-left) .clock-hud {
+  right: max(var(--tc-edge), env(safe-area-inset-right));
+  left: auto;
 }
 
 /* ---------- Interfaz muy ampliada: solo iconos en los contextuales ---------- */

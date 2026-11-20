@@ -141,12 +141,12 @@ body {
 
 .touch-pause {
   position: absolute;
-  top: max(16px, env(safe-area-inset-top));
-  right: max(16px, env(safe-area-inset-right));
-  min-width: 64px;
-  height: 48px;
+  top: max(var(--tc-edge), env(safe-area-inset-top));
+  right: max(var(--tc-edge), env(safe-area-inset-right));
+  min-width: calc(var(--tc-size-sm) * 4 / 3);
+  height: var(--tc-size-sm);
   border: 2px solid rgb(var(--ink-rgb) / 50%);
-  border-radius: 24px;
+  border-radius: calc(var(--tc-size-sm) / 2);
   background: rgb(var(--night-rgb) / 35%);
   color: var(--text);
   font: inherit;
@@ -1189,14 +1189,17 @@ body {
   left: 18px;
   bottom: 18px;
   display: grid;
-  gap: 2px;
-  padding: 8px 14px;
-  border-radius: 14px;
-  background: rgb(var(--night-rgb) / 65%);
+  gap: 0;
+  max-width: min(46vw, 320px);
+  /* Escrito a mano en el cuaderno: sin caja ni borde; un halo oscuro lo deja legible sobre cualquier cielo. */
   font:
-    13px/1.3 ui-monospace,
-    monospace;
-  letter-spacing: 0.04em;
+    700 22px/1.15 var(--f-hand),
+    cursive;
+  letter-spacing: 0.02em;
+  text-shadow:
+    0 1px 2px rgb(var(--night-rgb) / 90%),
+    0 0 10px rgb(var(--night-rgb) / 75%);
+  font-variant-numeric: tabular-nums;
 }
 
 .ship-panel p {
@@ -1204,27 +1207,21 @@ body {
 }
 
 .ship-assist {
+  font-size: 18px;
   color: var(--muted);
+}
+
+.ship-altitude {
+  font-size: 18px;
 }
 
 .ship-assist-off {
   color: #e0a060;
 }
 
-.ship-target {
-  position: fixed;
-  top: 16px;
-  left: 50%;
-  margin: 0;
-  padding: 6px 14px;
-  border-radius: 14px;
-  background: rgb(var(--night-rgb) / 65%);
-  font:
-    14px/1.2 ui-monospace,
-    monospace;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  transform: translateX(-50%);
+.ship-target-motion {
+  font-size: 18px;
+  color: var(--muted);
 }
 
 /* Marca sobre el objetivo; en el borde se vuelve una flecha que apunta hacia él. */
@@ -1263,15 +1260,17 @@ body {
 .ship-hint {
   position: fixed;
   left: 50%;
-  top: 56px;
+  top: 16px;
   margin: 0;
-  padding: 6px 14px;
-  border-radius: 14px;
-  background: rgb(var(--night-rgb) / 65%);
   color: var(--text);
-  font-size: 14px;
-  letter-spacing: 0.03em;
+  font:
+    700 20px/1.2 var(--f-hand),
+    cursive;
+  letter-spacing: 0.02em;
   white-space: nowrap;
+  text-shadow:
+    0 1px 2px rgb(var(--night-rgb) / 90%),
+    0 0 10px rgb(var(--night-rgb) / 75%);
   transform: translateX(-50%);
 }
 
@@ -1296,12 +1295,26 @@ body {
 }
 
 @media (max-width: 600px) {
-  .ship-target,
   .ship-hint {
     max-width: calc(100vw - 32px);
     white-space: normal;
     text-align: center;
   }
+}
+
+/* En un móvil la nave solo dice la velocidad y la distancia al objetivo: nada más, para no tapar los botones.
+   El bloque va bajo la fila de botones de arriba a la izquierda (objetivo, estabilizador, cámara). */
+html.is-touch .ship-altitude,
+html.is-touch .ship-assist,
+html.is-touch .ship-hint,
+html.is-touch .ship-target-motion {
+  display: none;
+}
+
+html.is-touch .ship-panel {
+  top: calc(max(var(--tc-edge), env(safe-area-inset-top)) + var(--tc-size-sm) + var(--tc-gap));
+  bottom: auto;
+  left: max(var(--tc-edge), env(safe-area-inset-left));
 }
 
 /* El borde del casco de burbuja (primera persona): latón que asoma solo en las esquinas y un reflejo del cristal. */

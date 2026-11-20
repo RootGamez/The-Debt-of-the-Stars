@@ -13,6 +13,7 @@ import { t } from '../i18n';
 import { canFullscreen, toggleFullscreen } from './fullscreen';
 import { loadLeftHanded, saveLeftHanded, stickSideIsLeft } from './touch/handedness';
 import { createTouchButton, type TouchButton } from './touch/touchButton';
+import { applyTouchFit, needsIconsOnly } from './touch/touchFit';
 import type { IconName } from './touch/touchIcons';
 import {
   resolveTouchActions,
@@ -469,6 +470,20 @@ export function createTouchControls(
 
   const abort = new AbortController();
   const { signal } = abort;
+
+  // Los botones se ajustan a la pantalla (alto y ancho reales) y, si no caben los rótulos de los contextuales
+  // (interfaz muy ampliada o pantalla pequeña), quedan solo los iconos. Se repite al girar o cambiar el tamaño.
+  const fitToScreen = (): void => {
+    applyTouchFit(document.documentElement.style, window.innerWidth, window.innerHeight);
+    const scale = Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--ui-scale'),
+    );
+    const iconsOnly =
+      scale >= COMPACT_SCALE || needsIconsOnly(window.innerWidth, window.innerHeight);
+    layer.classList.toggle('is-compact', iconsOnly);
+  };
+  window.addEventListener('resize', fitToScreen, { signal });
+  window.addEventListener('orientationchange', fitToScreen, { signal });
   canvas.addEventListener('pointerdown', onDown, { signal });
   // Una pulsación larga no debe abrir el menú contextual del navegador.
   canvas.addEventListener(
@@ -523,11 +538,7 @@ export function createTouchControls(
     setVisible(visible) {
       layer.hidden = !visible;
       shown = undefined;
-      // Con la interfaz muy ampliada no caben los rótulos de los contextuales: quedan solo los iconos.
-      const scale = Number.parseFloat(
-        getComputedStyle(document.documentElement).getPropertyValue('--ui-scale'),
-      );
-      layer.classList.toggle('is-compact', scale >= COMPACT_SCALE);
+      fitToScreen();
       if (!visible) reset();
       else syncActions();
     },

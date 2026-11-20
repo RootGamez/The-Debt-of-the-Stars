@@ -1,6 +1,8 @@
-// Interfaz de vuelo, con el mismo aire discreto que el reloj doble: velocidad y altura abajo a la
-// izquierda, el objetivo arriba con una marca sobre el mundo (o en el borde, apuntando hacia él), una
-// sola sugerencia a la vez y, a pie dentro de la nave, el aviso de lo que se tiene delante (sentarse, el Registro, el mapa). Todo entra como texto.
+// Interfaz de vuelo, con el mismo aire discreto que el reloj doble y escrita a mano, sin caja ni borde, como una
+// nota del cuaderno: la velocidad y la distancia al objetivo (que además lleva una marca sobre el mundo, o en el
+// borde, apuntando hacia él). Con teclado se suman la altura, el estabilizador, cuánto te acercas y una sugerencia
+// a la vez; en un móvil (html.is-touch) todo eso se esconde para no tapar los botones. A pie dentro de la nave, el
+// aviso de lo que se tiene delante (sentarse, el Registro, el mapa). Todo entra como texto.
 import { formatDistance, formatSpeed, type MarkerPlacement } from '../ship/hudMath';
 import { t } from '../i18n';
 
@@ -54,7 +56,9 @@ export function createShipHud(): ShipHud {
   const speed = element('p', 'ship-speed', panel);
   const altitude = element('p', 'ship-altitude', panel);
   const assist = element('p', 'ship-assist', panel);
-  const target = element('p', 'ship-target', root);
+  const target = element('p', 'ship-target', panel);
+  const targetName = element('span', 'ship-target-name', target);
+  const targetMotion = element('span', 'ship-target-motion', target);
   const marker = element('div', 'ship-marker', root);
   marker.setAttribute('aria-hidden', 'true');
   const markerLabel = element('span', 'ship-marker-label', marker);
@@ -100,7 +104,8 @@ export function createShipHud(): ShipHud {
           Math.abs(closing) < 0.5
             ? ''
             : ` · ${closing > 0 ? 'te acercas a' : 'te alejas a'} ${formatSpeed(closing)}`;
-        setText(target, `${name} · ${formatDistance(distance)}${motion}`);
+        setText(targetName, `${name} · ${formatDistance(distance)}`);
+        setText(targetMotion, motion);
       }
       placeMarker(state.target?.marker, state.target?.name ?? '');
 

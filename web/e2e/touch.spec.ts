@@ -54,10 +54,19 @@ test('marks the page as touch and shows the shared buttons', async () => {
     ),
   );
   expect(scale).toBe(1.25);
+  // Los controles se ajustan a la pantalla (`--touch-fit`, del alto y el ancho): el margen es 16 × escala × ajuste.
+  const fit = Number(
+    await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--touch-fit'),
+    ),
+  );
+  expect(fit).toBeGreaterThan(0.7);
+  expect(fit).toBeLessThanOrEqual(1.15);
   const pause = await page.locator('[data-touch-id="pause"]').boundingBox();
   expect(pause).not.toBeNull();
-  expect(Math.round(844 - ((pause?.x ?? 0) + (pause?.width ?? 0)))).toBe(16 * scale);
-  expect(Math.round(pause?.y ?? 0)).toBe(16 * scale);
+  const edge = Math.max(10, 16 * scale * fit);
+  expect(Math.abs(844 - ((pause?.x ?? 0) + (pause?.width ?? 0)) - edge)).toBeLessThan(1);
+  expect(Math.abs((pause?.y ?? 0) - edge)).toBeLessThan(1);
 });
 
 test('long press does not select text or open the browser menu', async () => {
@@ -221,6 +230,10 @@ test('More opens the extra options inside the screen and Esc closes it', async (
 
 test('left-handed mode mirrors the dock and is remembered', async () => {
   const width = page.viewportSize()?.width ?? 0;
+  // Los tests anteriores dejan la nave en vuelo y su dock tapa la hoja de «Más»: se empieza de nuevo, a pie.
+  await page.reload();
+  await startByTouch(page);
+  await expect(visible('lower')).toBeHidden();
   // Esc también pausa el juego (es la tecla de siempre): se sigue jugando antes de probar el dock.
   const overlay = await page.locator('.overlay').boundingBox();
   if (overlay) await page.touchscreen.tap(overlay.x + 20, overlay.y + 20);
