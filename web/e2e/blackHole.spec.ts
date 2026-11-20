@@ -2,6 +2,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { startPlaying } from './helpers';
 
+// Con WebGL por software la carga sola se come casi el minuto que da la configuración.
+test.describe.configure({ timeout: 300_000 });
+
 function hole(page: Page) {
   return page.evaluate(() => window.__juego?.blackHole?.() ?? null);
 }

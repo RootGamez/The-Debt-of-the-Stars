@@ -116,7 +116,8 @@ test('the late ending: the visit and the collapse scene end in the card, saved w
 test('arriving late through an Archive mouth is saved and the card leads back to the Archive', async ({
   page,
 }) => {
-  test.setTimeout(240_000);
+  // Recarga el Archivo de las Puertas entero tras la tarjeta: con WebGL por software, junto a otra prueba, pasó de 4 min.
+  test.setTimeout(420_000);
   await arriveHome(page, 'tarde', [], 'archivo');
   expect(await homecoming(page)).toMatchObject({ ending: 'tarde', without: [] });
   await expect.poll(async () => (await later(page))?.stage, { timeout: 60_000 }).toBe('arrival');

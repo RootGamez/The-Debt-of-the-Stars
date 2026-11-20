@@ -4,6 +4,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { closeReader, loopValue, startPlaying } from './helpers';
 
+// Con WebGL por software la carga sola se come casi un minuto, y cada salto de mundo otro tanto.
+test.describe.configure({ timeout: 420_000 });
+
 async function counterweight(page: Page) {
   return page.evaluate(() => window.__juego?.counterweight?.() ?? null);
 }
@@ -39,7 +42,6 @@ test('the Counterweight is examined, then picked up, and its clock joins the boa
 test('its bubble makes the Laboratorio run fast, and carrying it slows the loop anywhere', async ({
   page,
 }) => {
-  test.setTimeout(120_000);
   await startPlaying(page);
   expect(await page.evaluate(() => window.__juego?.teleportTo?.('lab.contrapeso') ?? false)).toBe(
     true,
@@ -61,7 +63,6 @@ test('its bubble makes the Laboratorio run fast, and carrying it slows the loop 
 test('it travels in the ship and goes back to its bench when the loop starts again', async ({
   page,
 }) => {
-  test.setTimeout(120_000);
   await startPlaying(page);
   await pickUp(page);
 
