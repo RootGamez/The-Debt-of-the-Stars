@@ -9,6 +9,7 @@ import {
   SRGBColorSpace,
   WebGLRenderer,
 } from 'three';
+import { keepUniformCachesNumeric } from './uniformCaches';
 
 /** La Brasa: enana naranja vieja, luz cálida y débil (CONTEXTO_PLANETAS.md). */
 const BRASA_COLOR = 0xffb070;
@@ -52,6 +53,8 @@ export function createStage(canvas: HTMLCanvasElement, options: StageOptions = {
   );
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.toneMapping = ACESFilmicToneMapping;
+  // Antes de compilar nada: que los uniformes no guarden cada número en una caja (render/uniformCaches.ts).
+  keepUniformCachesNumeric(renderer.info.programs);
 
   const scene = new Scene();
   scene.background = new Color(SKY_COLOR);
