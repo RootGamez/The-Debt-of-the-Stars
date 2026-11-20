@@ -3,21 +3,23 @@
 import { describe, expect, it } from 'vitest';
 import {
   Box3,
+  BoxGeometry,
   Group,
+  Mesh,
   MeshStandardMaterial,
   PointLight,
   Quaternion,
   Vector3,
-  type Mesh,
 } from 'three';
 import {
+  CARRY_FIRST_PERSON_BACK,
   createExplorerView,
   FIRST_PERSON_BACK,
   FIRST_PERSON_DOWN,
   type ExplorerFrame,
 } from '../../src/render/explorerView';
 import { chasePose } from '../../src/render/firstPersonCamera';
-import { WALK_SPEED } from '../../src/data/movement';
+import { EYE_HEIGHT, WALK_SPEED } from '../../src/data/movement';
 
 function frame(overrides: Partial<ExplorerFrame> = {}): ExplorerFrame {
   return {
@@ -156,5 +158,72 @@ describe('the debug camera outside', () => {
     expect(light.visible).toBe(true);
     for (let i = 0; i < 120; i++) view.update(frame({ lightOn: false }));
     expect(light.intensity).toBeLessThan(0.1);
+  });
+
+  it('carries a held thing between its hands, at its real size, raising it with the arms', () => {
+    const scene = new Group();
+    const view = createExplorerView(scene);
+    // Una caja de 20 × 30 × 20 cm con Z arriba (como los modelos de los puzles).
+    const thing = new Mesh(new BoxGeometry(0.2, 0.2, 0.3));
+    thing.name = 'caja';
+    view.update(frame());
+    view.hands.hold(thing);
+    view.update(frame());
+    expect(view.snapshot().carry).toBeLessThan(0.2);
+    const low = new Box3().setFromObject(thing).getCenter(new Vector3()).y;
+    for (let i = 0; i < 60; i++) {
+      view.hands.hold(thing);
+      view.update(frame());
+    }
+    expect(view.snapshot().carry).toBe(1);
+    expect(view.snapshot().holding).toBe('caja');
+    expect(thing.scale.x).toBe(1);
+    const box = new Box3().setFromObject(thing);
+    const size = box.getSize(new Vector3());
+    // De pie: su Z de modelo va arriba (Y de la escena), y no se encoge.
+    expect(size.y).toBeCloseTo(0.3, 1);
+    expect(size.x).toBeCloseTo(0.2, 1);
+    const center = box.getCenter(new Vector3());
+    // Subió al cogerlo; queda delante del pecho (frente −Z) y por debajo de los ojos.
+    expect(center.y).toBeGreaterThan(low);
+    expect(center.z).toBeLessThan(-0.25);
+    expect(box.max.y).toBeLessThan(10 + EYE_HEIGHT);
+    // Las dos manos lo tocan por los costados.
+    for (const name of ['EXPLORADOR_handL', 'EXPLORADOR_handR']) {
+      const hand = new Box3().setFromObject(scene.getObjectByName(name) ?? scene);
+      expect(hand.distanceToPoint(center)).toBeLessThan(0.2);
+    }
+  });
+
+  it('in first person, carrying brings the body under the eyes so the thing is seen ahead', () => {
+    const scene = new Group();
+    const view = createExplorerView(scene);
+    const thing = new Mesh(new BoxGeometry(0.2, 0.2, 0.2));
+    for (let i = 0; i < 60; i++) {
+      view.hands.hold(thing);
+      view.update(frame({ firstPerson: true }));
+    }
+    const root = scene.getObjectByName('EXPLORADOR');
+    expect(root?.position.z).toBeCloseTo(CARRY_FIRST_PERSON_BACK);
+    // Visto desde los ojos (cámara con fov 50, mirando al frente) cae dentro de la vista, abajo.
+    const center = new Box3().setFromObject(thing).getCenter(new Vector3());
+    const below = 10 + EYE_HEIGHT - center.y;
+    const ahead = -center.z;
+    expect(ahead).toBeGreaterThan(0.2);
+    expect(Math.atan2(below, ahead)).toBeLessThan((25 * Math.PI) / 180);
+  });
+
+  it('lowers the arms when the thing goes somewhere else', () => {
+    const scene = new Group();
+    const view = createExplorerView(scene);
+    const thing = new Mesh(new BoxGeometry(0.2, 0.2, 0.2));
+    for (let i = 0; i < 60; i++) {
+      view.hands.hold(thing);
+      view.update(frame());
+    }
+    scene.add(thing);
+    for (let i = 0; i < 60; i++) view.update(frame());
+    expect(view.snapshot().carry).toBe(0);
+    expect(view.snapshot().holding).toBeUndefined();
   });
 });

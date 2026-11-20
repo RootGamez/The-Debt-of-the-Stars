@@ -8,6 +8,7 @@ import type { CustomReaders } from '../ui/puzzlePanel';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 import { ARCHIVO_PLAY, createArchivoPlay, sphereSource, type ArchivoPlay } from './archivoPlay';
 import type { LooseCarrier } from './looseCarry';
+import type { Hands } from '../render/explorerView';
 
 const WORLD = 'archivo';
 /** A cuánto de un riel se considera «delante de él» (m). */
@@ -26,6 +27,8 @@ export interface ArchivoRig {
 
 export function createArchivoRig(options: {
   scene: Scene;
+  /** Las manos del explorador: lo que se lleva va entre ellas. */
+  hands: Hands;
   runtimes: ReadonlyMap<string, WorldRuntime>;
 }): ArchivoRig | undefined {
   const runtime = options.runtimes.get(WORLD);
@@ -46,13 +49,17 @@ export function createArchivoRig(options: {
   }
   const prism = byClue(ARCHIVO_PLAY.prism);
   if (prism) homes['prisma'] = prism;
-  const view = createArchivoPuzzlesView(options.scene, {
-    homes,
-    rails,
-    stand,
-    tablet: byClue(ARCHIVO_PLAY.slotTablet),
-    world: runtime.world.scene,
-  });
+  const view = createArchivoPuzzlesView(
+    options.scene,
+    {
+      homes,
+      rails,
+      stand,
+      tablet: byClue(ARCHIVO_PLAY.slotTablet),
+      world: runtime.world.scene,
+    },
+    options.hands,
+  );
 
   const eye = new Vector3();
   const where = new Vector3();
@@ -82,15 +89,12 @@ export function createArchivoRig(options: {
     update(camera, dt, slotEvent) {
       eye.copy(camera.position);
       play.update(dt);
-      view.update(
-        {
-          pieces: play.pieces(),
-          crank: play.crank,
-          slotEvent,
-          prismFitted: play.prismFitted,
-        },
-        camera,
-      );
+      view.update({
+        pieces: play.pieces(),
+        crank: play.crank,
+        slotEvent,
+        prismFitted: play.prismFitted,
+      });
     },
   };
 }

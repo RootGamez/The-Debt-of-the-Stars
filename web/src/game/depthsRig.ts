@@ -8,6 +8,7 @@ import { pendulumsBody } from '../ui/pendulumsBody';
 import type { CustomReaders } from '../ui/puzzlePanel';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 import { DEPTHS, createDepthsPlay, type DepthsPlay } from './depthsPlay';
+import type { Hands } from '../render/explorerView';
 
 const WORLD = 'archivo';
 /** A cuánto de un péndulo se considera «delante de él» (m). */
@@ -25,6 +26,8 @@ export interface DepthsRig {
 
 export function createDepthsRig(options: {
   scene: Scene;
+  /** Las manos del explorador: lo que se lleva va entre ellas. */
+  hands: Hands;
   runtimes: ReadonlyMap<string, WorldRuntime>;
 }): DepthsRig | undefined {
   const runtime = options.runtimes.get(WORLD);
@@ -45,11 +48,15 @@ export function createDepthsRig(options: {
   if (!cistern || pendulums.length !== PENDULUMS.count || CARGOS.some((c) => !piles[c])) {
     return undefined;
   }
-  const view = createDepthsView(options.scene, {
-    cistern,
-    piles: piles as Record<Cargo, Object3D>,
-    pendulums,
-  });
+  const view = createDepthsView(
+    options.scene,
+    {
+      cistern,
+      piles: piles as Record<Cargo, Object3D>,
+      pendulums,
+    },
+    options.hands,
+  );
 
   const eye = new Vector3();
   const where = new Vector3();
@@ -77,21 +84,18 @@ export function createDepthsRig(options: {
     },
     update(camera, t) {
       eye.copy(camera.position);
-      view.update(
-        {
-          held: play.held,
-          level: play.level,
-          remaining: {
-            b1: play.remaining('b1'),
-            b2: play.remaining('b2'),
-            b3: play.remaining('b3'),
-            wood: play.remaining('wood'),
-          },
-          lengths: play.lengths(),
-          swings: Array.from({ length: PENDULUMS.count }, (_, index) => play.swing(index, t)),
+      view.update({
+        held: play.held,
+        level: play.level,
+        remaining: {
+          b1: play.remaining('b1'),
+          b2: play.remaining('b2'),
+          b3: play.remaining('b3'),
+          wood: play.remaining('wood'),
         },
-        camera,
-      );
+        lengths: play.lengths(),
+        swings: Array.from({ length: PENDULUMS.count }, (_, index) => play.swing(index, t)),
+      });
     },
   };
 }

@@ -1,6 +1,6 @@
 // Monta las campanas del Anfiteatro (P1): une su juego (bellsPlay.ts) con lo que se ve (render/bellsView.ts) y con el
 // sonido, a partir de las marcas del Anfiteatro de Umbral. Solo si el sistema tiene a Umbral.
-import { Vector3, type Camera, type Scene } from 'three';
+import { Vector3, type Camera } from 'three';
 import { createBellsView } from '../render/bellsView';
 import type { CustomReaders } from '../ui/puzzlePanel';
 import { bellsBody } from '../ui/bellsBody';
@@ -14,6 +14,7 @@ import type { Triple } from '../worlds/procedural/kit';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 import { BELL_IDS, BELLS_CHANNEL, createBellsPlay, type BellsPlay } from './bellsPlay';
 import type { LooseCarrier } from './looseCarry';
+import type { Hands } from '../render/explorerView';
 
 const WORLD = 'umbral';
 /** A qué distancia se oyen las campanas (m). */
@@ -24,7 +25,8 @@ const VERTICAL_REACH = 3;
 const PITCHES: readonly number[] = [523.25, 587.33, 659.25, 783.99];
 
 export interface BellsRigOptions {
-  scene: Scene;
+  /** Las manos del explorador: lo que se lleva va entre ellas. */
+  hands: Hands;
   runtimes: ReadonlyMap<string, WorldRuntime>;
   /** Suena una campana (Hz). */
   chime: (frequency: number) => void;
@@ -43,7 +45,7 @@ export interface BellsRig {
 }
 
 export function createBellsRig(options: BellsRigOptions): BellsRig | undefined {
-  const { scene, runtimes, chime } = options;
+  const { runtimes, chime } = options;
   const runtime = runtimes.get(WORLD);
   const anchor = runtime?.world.markers.interactions.find(
     (m) => m.clueId === BELLS_CHANNEL,
@@ -51,7 +53,7 @@ export function createBellsRig(options: BellsRigOptions): BellsRig | undefined {
   if (!anchor) return undefined;
   const first = CHANNEL_INTERACT[0] ?? 0;
   const anchorAt: Triple = channelPoint(first, INTERACT_LIFT);
-  const view = createBellsView(scene, anchor, anchorAt, BELL_IDS, runtime.world.scene);
+  const view = createBellsView(anchor, anchorAt, BELL_IDS, runtime.world.scene, options.hands);
   const eye = new Vector3();
   const where = new Vector3();
 
@@ -96,7 +98,6 @@ export function createBellsRig(options: BellsRigOptions): BellsRig | undefined {
           }),
           lecternOpen: play.solved,
         },
-        camera,
         dt,
       );
     },

@@ -6,14 +6,10 @@ import {
   BoxGeometry,
   Color,
   CylinderGeometry,
-  Euler,
   Group,
   Mesh,
   MeshStandardMaterial,
-  Quaternion,
   TorusGeometry,
-  Vector3,
-  type Camera,
   type Object3D,
   type Scene,
 } from 'three';
@@ -32,11 +28,10 @@ import {
   WEIGHT_SIZE,
   holeOffset,
 } from '../worlds/procedural/benchShape';
+import type { Hands } from './explorerView';
 
 type Weight = 1 | 2 | 3;
 const WEIGHTS: readonly Weight[] = [1, 2, 3];
-const HELD_OFFSET = new Vector3(0.18, -0.3, -0.7);
-const HELD_TILT = new Quaternion().setFromEuler(new Euler(0.1, 0, 0));
 /** Lo máximo que se inclina la viga (rad). */
 const MAX_TILT = 0.28;
 /** Los radios de los tres aros de arena (m). */
@@ -71,11 +66,16 @@ export interface BalanceShown {
 }
 
 export interface BalanceView {
-  update(shown: BalanceShown, camera: Camera): void;
+  update(shown: BalanceShown): void;
   dispose(): void;
 }
 
-export function createBalanceView(scene: Scene, anchors: BalanceAnchors): BalanceView {
+export function createBalanceView(
+  scene: Scene,
+  anchors: BalanceAnchors,
+  /** Las manos del explorador: lo que se lleva va entre ellas, a su tamaño real. */
+  hands: Hands,
+): BalanceView {
   const first = anchors.notches[0];
   if (!first) throw new Error('La balanza necesita sus muescas');
   // La viga gira sobre el eje: el origen del grupo está en el eje, a la altura de la viga (relativo a la muesca 1).
@@ -113,7 +113,7 @@ export function createBalanceView(scene: Scene, anchors: BalanceAnchors): Balanc
   const onNotch = new Map<Weight, number>();
 
   return {
-    update(shown, camera) {
+    update(shown) {
       beam.rotation.y = shown.lean * MAX_TILT;
       onNotch.clear();
       for (const [notch, weight] of Object.entries(shown.placement)) {
@@ -126,10 +126,7 @@ export function createBalanceView(scene: Scene, anchors: BalanceAnchors): Balanc
         const notch = onNotch.get(w);
         const loosePose = shown.loose[w];
         if (shown.held === w) {
-          // La cámara no cuelga de la escena: se copia su pose (coordenadas de la escena).
-          if (mesh.parent !== scene) scene.add(mesh);
-          mesh.position.copy(HELD_OFFSET).applyQuaternion(camera.quaternion).add(camera.position);
-          mesh.quaternion.copy(camera.quaternion).multiply(HELD_TILT);
+          hands.hold(mesh);
         } else if (loosePose) {
           placeLoose(mesh, anchors.world, loosePose, size / 2);
         } else if (notch !== undefined) {

@@ -15,6 +15,7 @@ import type { CustomReaders } from '../ui/puzzlePanel';
 import type { WorldRuntime } from '../worlds/worldRuntime';
 import { BENCH, createBenchPlay, type BenchPlay } from './benchPlay';
 import type { LooseCarrier } from './looseCarry';
+import type { Hands } from '../render/explorerView';
 
 /** A cuánto de una muesca o un agujero se considera «delante de él» (m). */
 const REACH = 1.2;
@@ -34,6 +35,8 @@ type Weight = 1 | 2 | 3;
 
 export function createBenchRig(options: {
   scene: Scene;
+  /** Las manos del explorador: lo que se lleva va entre ellas. */
+  hands: Hands;
   runtimes: ReadonlyMap<string, WorldRuntime>;
 }): BenchRig | undefined {
   const find = (world: string, clue: string, key: string): Object3D[] =>
@@ -82,7 +85,7 @@ export function createBenchRig(options: {
   const tallerWorld = options.runtimes.get('taller')?.world.scene;
   const balance: BalanceView | undefined =
     hasBalance && tallerWorld
-      ? createBalanceView(options.scene, { notches, homes, world: tallerWorld })
+      ? createBalanceView(options.scene, { notches, homes, world: tallerWorld }, options.hands)
       : undefined;
   const plate: PlateView | undefined = hasPlate ? createPlateView(holes) : undefined;
 
@@ -98,15 +101,12 @@ export function createBenchRig(options: {
     },
     update(camera) {
       eye.copy(camera.position);
-      balance?.update(
-        {
-          placement: play.placement(),
-          held: play.held,
-          loose: play.looseWeights(),
-          lean: play.lean,
-        },
-        camera,
-      );
+      balance?.update({
+        placement: play.placement(),
+        held: play.held,
+        loose: play.looseWeights(),
+        lean: play.lean,
+      });
       plate?.update({ clamps: play.clamps(), figure: play.figure() });
     },
   };

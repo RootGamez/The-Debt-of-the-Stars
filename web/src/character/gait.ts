@@ -318,7 +318,8 @@ function mixLeg(a: LegPose, b: LegPose, t: number): LegPose {
   };
 }
 
-function mixArm(a: ArmPose, b: ArmPose, t: number): ArmPose {
+/** Una pose de brazo entre dos (t de 0 a 1). */
+export function mixArm(a: ArmPose, b: ArmPose, t: number): ArmPose {
   return {
     shoulder: mix(a.shoulder, b.shoulder, t),
     shoulderRoll: mix(a.shoulderRoll, b.shoulderRoll, t),

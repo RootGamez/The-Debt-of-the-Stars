@@ -2,9 +2,10 @@
 // (counterweightPlay.ts) con lo que se ve (render/counterweightView.ts) y con la Sala del Motor de Cicatriz (el motor
 // viejo que sale, la cuna y sus ruedas, el núcleo). Solo si el sistema tiene el Laboratorio.
 import { buildCounterweight } from '../worlds/procedural/contrapeso';
-import { Quaternion, Vector3, type Camera, type Object3D, type Scene } from 'three';
+import { Quaternion, Vector3, type Object3D } from 'three';
 import type { Chronology } from '../core/timeline';
 import { createCounterweightView, type CounterweightAnchors } from '../render/counterweightView';
+import type { Hands } from '../render/explorerView';
 import { createEngineRoomView, type EngineRoomView } from '../render/engineRoomView';
 import { anchorAt } from '../render/poseTween';
 import type { CustomReaders } from '../ui/puzzlePanel';
@@ -34,7 +35,8 @@ const MOTOR_OUT_NOTICE = t(
 );
 
 export interface CounterweightRigOptions {
-  scene: Scene;
+  /** Las manos del explorador: ahí va cuando lo llevas. */
+  hands: Hands;
   runtimes: ReadonlyMap<string, WorldRuntime>;
   chronology: Chronology;
   /** Un aviso breve (el motor sale, el pulso encaja o rechaza). */
@@ -49,8 +51,8 @@ export interface CounterweightRig {
   readonly readers: CustomReaders;
   /** El centro del núcleo de la máquina, en el marco de Cicatriz (si está): ahí nace el agujero negro. */
   readonly core: Vector3 | undefined;
-  /** Una vez por fotograma, con la cámara ya colocada; `dt` 0 si el tiempo no corre. */
-  update(camera: Camera, frame: CounterweightFrame, dt: number): void;
+  /** Una vez por fotograma; `dt` 0 si el tiempo no corre. */
+  update(frame: CounterweightFrame, dt: number): void;
 }
 
 /**
@@ -71,7 +73,7 @@ function markerOf(runtime: WorldRuntime, clueId: string) {
 export function createCounterweightRig(
   options: CounterweightRigOptions,
 ): CounterweightRig | undefined {
-  const { scene, runtimes, chronology, notify } = options;
+  const { hands, runtimes, chronology, notify } = options;
   const lab = runtimes.get(COUNTERWEIGHT.world);
   if (!lab) return undefined;
   const machineWorld = runtimes.get(COUNTERWEIGHT.installWorld);
@@ -83,7 +85,7 @@ export function createCounterweightRig(
     anchors.cradle = markerOf(machineWorld, CRADLE);
     anchors.core = { ...engineRoom.core, pose: { ...engineRoom.core.pose, scale: CORE_SCALE } };
   }
-  const view = createCounterweightView(buildCounterweight(), scene, anchors, options.stowage);
+  const view = createCounterweightView(buildCounterweight(), hands, anchors, options.stowage);
   const pulse = chronology.events.find((e) => e.id === COUNTERWEIGHT.pulseEvent);
   const play = createCounterweightPlay({
     worldClock: (world, t) =>
@@ -96,8 +98,8 @@ export function createCounterweightRig(
     play,
     readers: { ruedas: (status, _solved, solve) => wheelsBody(play.wheels, status, solve) },
     core: engineRoom?.coreCenter,
-    update(camera, frame, dt) {
-      view.update(play.update(frame), camera, dt);
+    update(frame, dt) {
+      view.update(play.update(frame), dt);
       engineRoom?.update(play.motorOut, dt);
       if (play.motorOut && !motorOut) notify(MOTOR_OUT_NOTICE);
       const notice = play.place === place ? undefined : NOTICES[play.place];

@@ -6,8 +6,10 @@
 // cambia, que obligaría a recompilar todos los materiales); los puntos del cuerpo y el cristal del casco se tiñen.
 import {
   AdditiveBlending,
+  Box3,
   Color,
   DataTexture,
+  Group,
   PointLight,
   Quaternion,
   Sprite,
@@ -15,6 +17,7 @@ import {
   Vector3,
   type Object3D,
 } from 'three';
+import { carryGrip, PICKUP_DROP, type CarryGrip } from '../character/carryPose';
 import {
   BODY_LIGHT,
   bodyLightGlow,
@@ -25,7 +28,7 @@ import {
   type BodyLightState,
 } from '../character/bodyLight';
 import { buildExplorer } from '../character/explorerModel';
-import { createGait, gaitPose, stepGait } from '../character/gait';
+import { createGait, gaitPose, mixArm, stepGait, type BodyPose } from '../character/gait';
 import { forwardOf, upOf } from '../physics/surfaceFrame';
 
 /**
@@ -48,6 +51,72 @@ const HALO_SIZE = 1.3;
 const HALO_OPACITY = 0.9;
 /** Cuánto se tiñe el cristal del casco por dentro con la luz encendida. */
 const GLASS_TINT = 0.35;
+/**
+ * Llevando algo en brazos, en primera persona el cuerpo va así respecto a los ojos (m; negativo: algo por delante,
+ * la cabeza no se dibuja) y con los brazos tendidos: con el retraso de siempre el objeto quedaría bajo los ojos.
+ */
+export const CARRY_FIRST_PERSON_BACK = -0.12;
+/** Lo deprisa que suben los brazos con el objeto al cogerlo y bajan al soltarlo (1/s): un tercio de segundo. */
+const CARRY_RATE = 3;
+
+/** Qué eje del modelo es «arriba»: Z en los puzles (marco de diseño), Y en el Contrapeso. */
+export type ModelUp = 'y' | 'z';
+
+/** Las manos del explorador: lo que se lleva se cuelga de su torso, a su tamaño real, entre las palmas. */
+export interface Hands {
+  /**
+   * Lleva `object` en brazos (llámalo cada fotograma mientras se lleve). Lo cuelga del torso; para soltarlo, basta con
+   * colgarlo de otro sitio (o esconderlo) y los brazos bajan solos.
+   */
+  hold(object: Object3D, up?: ModelUp): void;
+}
+
+/** Cómo va un objeto en brazos: el agarre de su tamaño, su giro para ir de pie y el centro de su caja en su marco. */
+interface Carried {
+  /** Abrazado al pecho (tercera persona) y con los brazos tendidos (primera persona). */
+  hug: CarryGrip;
+  out: CarryGrip;
+  turn: Quaternion;
+  center: Vector3;
+}
+
+const Z_UP_TO_Y_UP = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), -Math.PI / 2);
+const NO_TURN = new Quaternion();
+
+/** Mide el objeto en su propio marco (sin su posición, giro ni escala). */
+function measure(object: Object3D, up: ModelUp): Carried {
+  const parent = object.parent;
+  const position = object.position.clone();
+  const quaternion = object.quaternion.clone();
+  const scale = object.scale.clone();
+  object.removeFromParent();
+  object.position.set(0, 0, 0);
+  object.quaternion.identity();
+  object.scale.setScalar(1);
+  object.updateMatrixWorld(true);
+  const box = new Box3().setFromObject(object, true);
+  object.position.copy(position);
+  object.quaternion.copy(quaternion);
+  object.scale.copy(scale);
+  parent?.add(object);
+  const size = box.isEmpty() ? new Vector3(0.2, 0.2, 0.2) : box.getSize(new Vector3());
+  const center = box.isEmpty() ? new Vector3() : box.getCenter(new Vector3());
+  const zUp = up === 'z';
+  const measures = {
+    width: size.x,
+    height: zUp ? size.z : size.y,
+    depth: zUp ? size.y : size.z,
+  };
+  return {
+    hug: carryGrip(measures),
+    out: carryGrip(measures, true),
+    turn: (zUp ? Z_UP_TO_Y_UP : NO_TURN).clone(),
+    center,
+  };
+}
+
+/** Arranca y frena despacio (0 → 0, 1 → 1). */
+const smooth = (k: number): number => k * k * (3 - 2 * k);
 
 export interface ExplorerFrame {
   feet: Vector3;
@@ -70,6 +139,8 @@ export interface ExplorerFrame {
 
 export interface ExplorerView {
   update(frame: ExplorerFrame): void;
+  /** Sus manos: los puzles le dan aquí lo que se lleva. */
+  readonly hands: Hands;
   /** Velocidad sobre el suelo (m/s) y hacia arriba (m/s) del último fotograma: de aquí salen los pasos. */
   readonly speed: number;
   readonly verticalSpeed: number;
@@ -87,6 +158,9 @@ export interface ExplorerView {
     light: number;
     /** Si se ve el halo de las antenas (solo desde fuera, con la luz encendida). */
     halo: boolean;
+    /** Lo que tiene subido los brazos con algo (0 nada, 1 en brazos) y el nombre de lo que lleva. */
+    carry: number;
+    holding: string | undefined;
   };
   dispose(): void;
 }
@@ -96,6 +170,7 @@ const forward = new Vector3();
 const planar = new Vector3();
 const lastForward = new Vector3();
 const antennaAt = new Vector3();
+const heldAt = new Vector3();
 
 /** Un brillo redondo que se apaga hacia el borde (sin lienzo: vale también en las pruebas). */
 function haloTexture(size = 64): DataTexture {
@@ -151,8 +226,65 @@ export function createExplorerView(parent: Object3D): ExplorerView {
   let verticalSpeed = 0;
   let hasForward = false;
   let firstPerson = false;
+  // Lo que se lleva cuelga de este punto del torso (sigue su vaivén al andar).
+  const handsAnchor = new Group();
+  handsAnchor.name = 'EXPLORADOR_manos';
+  rig.bones.torso.add(handsAnchor);
+  const carriedInfo = new WeakMap<Object3D, Carried>();
+  let held: Object3D | undefined;
+  let heldInfo: Carried | undefined;
+  let carry = 0;
+  /** De abrazado al pecho (0) a brazos tendidos (1): sigue a la primera persona, sin saltos al cambiar de cámara. */
+  let reachOut = 0;
+
+  const carrying = (): boolean => held !== undefined && held.parent === handsAnchor && held.visible;
+
+  /** El objeto entre las palmas: sube desde abajo mientras los brazos se cierran (`k` de 0 a 1). */
+  function placeHeld(k: number): void {
+    if (!held || !heldInfo || !carrying()) return;
+    const { hug, out } = heldInfo;
+    const at = (i: 0 | 1 | 2): number => hug.center[i] + (out.center[i] - hug.center[i]) * reachOut;
+    const [x, y, z] = [at(0), at(1), at(2)];
+    held.quaternion.copy(heldInfo.turn);
+    held.scale.setScalar(1);
+    // El centro de su caja (no su origen) va al centro del agarre.
+    held.position
+      .copy(heldInfo.center)
+      .applyQuaternion(heldInfo.turn)
+      .negate()
+      .add(heldAt.set(x, y - PICKUP_DROP * (1 - k), z));
+  }
+
+  /** Los brazos, de la pose de andar a la de llevar el objeto. */
+  function withCarry(pose: BodyPose): BodyPose {
+    if (carry <= 0 || !heldInfo) return pose;
+    const k = smooth(carry);
+    const { hug, out } = heldInfo;
+    const left = mixArm(hug.arms[0], out.arms[0], reachOut);
+    const right = mixArm(hug.arms[1], out.arms[1], reachOut);
+    return { ...pose, arms: [mixArm(pose.arms[0], left, k), mixArm(pose.arms[1], right, k)] };
+  }
+
+  const hands: Hands = {
+    hold(object, up = 'z') {
+      if (object !== held) {
+        // Otro objeto: los brazos vuelven a subir desde abajo con él.
+        carry = held !== undefined && carrying() ? carry : 0;
+        held = object;
+      }
+      let info = carriedInfo.get(object);
+      if (!info) {
+        info = measure(object, up);
+        carriedInfo.set(object, info);
+      }
+      heldInfo = info;
+      if (object.parent !== handsAnchor) handsAnchor.add(object);
+      placeHeld(smooth(carry));
+    },
+  };
 
   return {
+    hands,
     get speed() {
       return speed;
     },
@@ -192,16 +324,20 @@ export function createExplorerView(parent: Object3D): ExplorerView {
       });
       plant +=
         ((frame.grounded && !frame.swimming ? 1 : 0) - plant) * Math.min(1, PLANT_RATE * frame.dt);
-      rig.setPose(gaitPose(gait, frame.pitch), plant);
+      const step = CARRY_RATE * frame.dt;
+      carry = Math.min(1, Math.max(0, carry + (carrying() ? step : -step)));
+      reachOut = Math.min(1, Math.max(0, reachOut + (frame.firstPerson ? step : -step)));
+      const carried = smooth(carry);
+      rig.setPose(withCarry(gaitPose(gait, frame.pitch)), plant);
+      placeHeld(carried);
       if (frame.firstPerson !== firstPerson) {
         firstPerson = frame.firstPerson;
         rig.setFirstPerson(firstPerson);
       }
       rig.root.position.copy(frame.feet);
       if (firstPerson) {
-        rig.root.position
-          .addScaledVector(forward, -FIRST_PERSON_BACK)
-          .addScaledVector(up, -FIRST_PERSON_DOWN);
+        const back = FIRST_PERSON_BACK + (CARRY_FIRST_PERSON_BACK - FIRST_PERSON_BACK) * carried;
+        rig.root.position.addScaledVector(forward, -back).addScaledVector(up, -FIRST_PERSON_DOWN);
       }
       rig.root.quaternion.copy(frame.body);
       glow += ((frame.reading ? READING_GLOW : 1) - glow) * Math.min(1, GLOW_RATE * frame.dt);
@@ -235,6 +371,8 @@ export function createExplorerView(parent: Object3D): ExplorerView {
         triangles: rig.triangles,
         light: light.intensity,
         halo: halo.visible,
+        carry,
+        holding: carrying() ? held?.name || 'objeto' : undefined,
       };
     },
     dispose() {

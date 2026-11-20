@@ -6,14 +6,10 @@ import {
   BoxGeometry,
   Color,
   CylinderGeometry,
-  Euler,
   Group,
   Mesh,
   MeshStandardMaterial,
-  Quaternion,
   SphereGeometry,
-  Vector3,
-  type Camera,
   type Object3D,
   type Scene,
 } from 'three';
@@ -27,10 +23,9 @@ import {
   ROD_PER_NOTCH,
   waterHeight,
 } from '../worlds/procedural/archivoDepthsShape';
+import type { Hands } from './explorerView';
 
 const CARGOS: readonly Cargo[] = ['b1', 'b2', 'b3', 'wood'];
-const HELD_OFFSET = new Vector3(0.18, -0.3, -0.7);
-const HELD_TILT = new Quaternion().setFromEuler(new Euler(0.1, 0, 0));
 /** Cuánto se inclina un péndulo en lo más alto de su vaivén (rad). */
 const SWING_AMPLITUDE = 0.5;
 /** Lo que se hunde el montón bajo su marca (m) y la altura de la base de piedra. */
@@ -76,11 +71,16 @@ export interface DepthsShown {
 }
 
 export interface DepthsView {
-  update(shown: DepthsShown, camera: Camera): void;
+  update(shown: DepthsShown): void;
   dispose(): void;
 }
 
-export function createDepthsView(scene: Scene, anchors: DepthsAnchors): DepthsView {
+export function createDepthsView(
+  scene: Scene,
+  anchors: DepthsAnchors,
+  /** Las manos del explorador: lo que se lleva va entre ellas, a su tamaño real. */
+  hands: Hands,
+): DepthsView {
   // El agua y la barcaza dentro de la pila.
   const water = new Mesh(
     new CylinderGeometry(BASIN.radius - 0.05, BASIN.radius - 0.05, 1, 20).rotateX(Math.PI / 2),
@@ -147,7 +147,7 @@ export function createDepthsView(scene: Scene, anchors: DepthsAnchors): DepthsVi
   });
 
   return {
-    update(shown, camera) {
+    update(shown) {
       const top = waterHeight(shown.level);
       water.scale.z = top;
       water.position.z = placeInBasin(0.16 + top / 2);
@@ -163,11 +163,8 @@ export function createDepthsView(scene: Scene, anchors: DepthsAnchors): DepthsVi
         const held = heldMeshes.get(cargo);
         if (!held) continue;
         held.visible = shown.held === cargo;
-        if (held.visible) {
-          // La cámara no cuelga de la escena: se copia su pose (coordenadas de la escena).
-          held.position.copy(HELD_OFFSET).applyQuaternion(camera.quaternion).add(camera.position);
-          held.quaternion.copy(camera.quaternion).multiply(HELD_TILT);
-        }
+        if (held.visible) hands.hold(held);
+        else if (held.parent !== scene) scene.add(held);
       }
 
       pendulums.forEach(({ pivot, rod, bob }, index) => {

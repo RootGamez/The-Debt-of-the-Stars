@@ -1,16 +1,9 @@
 // El Contrapeso a la vista (Fase 10): el modelo por código (worlds/procedural/contrapeso.ts), sobre su Banco del
-// Laboratorio, en tus brazos (abajo en la vista), sobre la mesa de carga de la nave mientras pilotas, en la cuna de la
+// Laboratorio, en tus brazos (entre las manos del explorador, a su tamaño), sobre la mesa de carga de la nave mientras pilotas, en la cuna de la
 // Sala del Motor y, con el pulso, subiendo al núcleo. Sus tres anillos giran siempre: es un reloj. La lógica de dónde
 // está vive en game/counterweight.ts.
-import {
-  Euler,
-  Quaternion,
-  Vector3,
-  type Camera,
-  type Group,
-  type Object3D,
-  type Scene,
-} from 'three';
+import type { Group, Object3D } from 'three';
+import type { Hands } from './explorerView';
 import { blendPose, ease, placeAt, type Anchor } from './poseTween';
 
 export interface CounterweightModel {
@@ -27,25 +20,19 @@ type Place = 'bench' | 'cradle' | 'core';
 export type CounterweightAnchors = { bench: Anchor } & Partial<Record<'cradle' | 'core', Anchor>>;
 
 export interface CounterweightView {
-  update(shown: CounterweightShown, camera: Camera, dt: number): void;
+  update(shown: CounterweightShown, dt: number): void;
   dispose(): void;
 }
 
-/**
- * En brazos: abajo y delante de los ojos (ejes de la cámara), más pequeño y algo inclinado hacia ti; por encima
- * del reloj del tablero y sin tapar el centro de la vista.
- */
-const HELD_OFFSET = new Vector3(0, -0.3, -0.95);
-const HELD_SCALE = 0.6;
-const HELD_TILT = new Quaternion().setFromEuler(new Euler(0.12, 0, 0));
-/** Sobre la mesa de carga de la nave, del mismo tamaño que en brazos. */
-const STOWED_SCALE = HELD_SCALE;
+/** Sobre la mesa de carga de la nave, más pequeño (cabe en la mesa). En brazos va a su tamaño real. */
+const STOWED_SCALE = 0.6;
 /** Lo que tarda en subir de la cuna al núcleo: lo que dura el pulso (cronologia.json). */
 export const RISE_SECONDS = 6;
 
 export function createCounterweightView(
   model: CounterweightModel,
-  scene: Scene,
+  /** Las manos del explorador: en brazos va entre ellas, a su tamaño real (modelo con Y arriba). */
+  hands: Hands,
   anchors: CounterweightAnchors,
   /** La mesa de carga de la nave (Fase 11): ahí se ve mientras pilotas. Sin ella, guardado no se ve. */
   stowage?: Object3D,
@@ -55,12 +42,8 @@ export function createCounterweightView(
   /** De la cuna al núcleo: cuánto lleva subido (0–1), o undefined si no sube. */
   let rising: number | undefined;
 
-  function hold(camera: Camera): void {
-    // La cámara no cuelga de la escena: se copia su pose (coordenadas de la escena).
-    if (object.parent !== scene) scene.add(object);
-    object.position.copy(HELD_OFFSET).applyQuaternion(camera.quaternion).add(camera.position);
-    object.quaternion.copy(camera.quaternion).multiply(HELD_TILT);
-    object.scale.setScalar(HELD_SCALE);
+  function hold(): void {
+    hands.hold(object, 'y');
     placed = undefined;
   }
 
@@ -93,10 +76,10 @@ export function createCounterweightView(
   }
 
   return {
-    update(shown, camera, dt) {
+    update(shown, dt) {
       object.visible = shown !== 'stowed' || stowage !== undefined;
       for (const ring of rings) ring.object.rotateY(ring.spin * dt);
-      if (shown === 'held') hold(camera);
+      if (shown === 'held') hold();
       else if (shown === 'stowed') stow();
       else rest(shown, dt);
     },

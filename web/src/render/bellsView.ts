@@ -5,20 +5,16 @@
 import {
   Color,
   DoubleSide,
-  Euler,
   Group,
   LatheGeometry,
   Mesh,
   MeshStandardMaterial,
   PlaneGeometry,
-  Quaternion,
   SphereGeometry,
   BoxGeometry,
   Vector2,
   Vector3,
-  type Camera,
   type Object3D,
-  type Scene,
 } from 'three';
 import { BELLS } from '../puzzles/bells';
 import {
@@ -32,13 +28,11 @@ import {
 import type { Triple } from '../worlds/procedural/kit';
 import type { LoosePose } from '../game/carry';
 import { placeLoose } from './looseObjects';
+import type { Hands } from './explorerView';
 
 /** Altura de una campana (m) y radio de su boca. */
 const BELL_HEIGHT = 0.24;
 const BELL_RADIUS = 0.15;
-/** En manos: abajo y delante de los ojos, como el Contrapeso pero más pequeña. */
-const HELD_OFFSET = new Vector3(0.18, -0.3, -0.7);
-const HELD_TILT = new Quaternion().setFromEuler(new Euler(0.1, 0, 0));
 /** Lo que se desliza la tapa del atril al abrirse (m, en Y) y lo que tarda (s). */
 const LID_TRAVEL = 0.95;
 const LID_SECONDS = 1.2;
@@ -77,18 +71,19 @@ export interface BellsShown {
 }
 
 export interface BellsView {
-  update(shown: BellsShown, camera: Camera, dt: number): void;
+  update(shown: BellsShown, dt: number): void;
   dispose(): void;
 }
 
 export function createBellsView(
-  scene: Scene,
   anchor: Object3D,
   /** Dónde está `anchor` en el marco del Anfiteatro: las posiciones del marco se pasan a las suyas restándolo. */
   anchorAt: Triple,
   ids: readonly string[],
   /** El marco del mundo: de él cuelgan las campanas que se dejan sueltas por ahí. */
   looseParent: Object3D,
+  /** Las manos del explorador: lo que se lleva va entre ellas, a su tamaño real. */
+  hands: Hands,
 ): BellsView {
   const toAnchor = (p: Triple): Vector3 =>
     new Vector3(p[0] - anchorAt[0], p[1] - anchorAt[1], p[2] - anchorAt[2]);
@@ -161,19 +156,14 @@ export function createBellsView(
   }
 
   return {
-    update(shown, camera, dt) {
+    update(shown, dt) {
       let rackIndex = 0;
       for (const { id, where } of shown.bells) {
         const entry = bells.get(id);
         if (!entry) continue;
         const { object } = entry;
         if (where === 'hands') {
-          // La cámara no cuelga de la escena: se copia su pose (coordenadas de la escena).
-          if (object.parent !== scene) scene.add(object);
-          object.position.copy(HELD_OFFSET).applyQuaternion(camera.quaternion).add(camera.position);
-          object.quaternion.copy(camera.quaternion).multiply(HELD_TILT);
-          object.rotateX(-Math.PI / 2);
-          object.scale.setScalar(0.8);
+          hands.hold(object);
           continue;
         }
         if (typeof where === 'object' && 'loose' in where) {

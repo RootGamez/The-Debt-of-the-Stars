@@ -8,16 +8,13 @@ import {
   ConeGeometry,
   CylinderGeometry,
   DoubleSide,
-  Euler,
   Group,
   Mesh,
   MeshStandardMaterial,
   OctahedronGeometry,
-  Quaternion,
   SphereGeometry,
   TorusGeometry,
   Vector3,
-  type Camera,
   type Object3D,
   type Scene,
 } from 'three';
@@ -30,9 +27,8 @@ import {
   SPHERE_LIFT,
   railAngle,
 } from '../worlds/procedural/archivoPuzzlesShape';
+import type { Hands } from './explorerView';
 
-const HELD_OFFSET = new Vector3(0.18, -0.3, -0.7);
-const HELD_TILT = new Quaternion().setFromEuler(new Euler(0.1, 0, 0));
 /** Del centro de una esfera (unos 0,28 m de ancho) y del prisma a su base, para apoyarlos (m). */
 const SPHERE_REST = 0.14;
 const PRISM_LIFT = 0.2;
@@ -134,13 +130,15 @@ export interface ArchivoShown {
 }
 
 export interface ArchivoPuzzlesView {
-  update(shown: ArchivoShown, camera: Camera): void;
+  update(shown: ArchivoShown): void;
   dispose(): void;
 }
 
 export function createArchivoPuzzlesView(
   scene: Scene,
   anchors: ArchivoAnchors,
+  /** Las manos del explorador: lo que se lleva va entre ellas, a su tamaño real. */
+  hands: Hands,
 ): ArchivoPuzzlesView {
   const objects = new Map<string, Group>();
   for (const id of ORRERY.spheres) objects.set(id, sphereModel(id));
@@ -179,17 +177,13 @@ export function createArchivoPuzzlesView(
   }
 
   return {
-    update(shown, camera) {
+    update(shown) {
       const angles = alignedAngles(shown.crank, startAngles);
       for (const { id, where } of shown.pieces) {
         const object = objects.get(id);
         if (!object) continue;
         if (where === 'hands') {
-          if (object.parent !== scene) scene.add(object);
-          object.position.copy(HELD_OFFSET).applyQuaternion(camera.quaternion).add(camera.position);
-          object.quaternion.copy(camera.quaternion).multiply(HELD_TILT);
-          object.rotateX(-Math.PI / 2);
-          object.scale.setScalar(0.9);
+          hands.hold(object);
         } else if (where === 'home') {
           const home = anchors.homes[id];
           if (home) place(object, home, new Vector3(0, 0, -HOME_DROP));
