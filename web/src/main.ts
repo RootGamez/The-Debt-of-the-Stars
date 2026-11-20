@@ -9,6 +9,7 @@ import './style.css';
 import './ui/theme.css';
 import './ui/touch/touch.css';
 import {
+  Camera,
   InstancedMesh,
   Mesh,
   MeshStandardMaterial,
@@ -134,7 +135,7 @@ import { forwardOf, upOf } from './physics/surfaceFrame';
 import { ReadingSession } from './reading/readingSession';
 import { createReadingUi, type ReadingUi } from './reading/readingUi';
 import { createWorldSources, type WorldSources } from './reading/worldSources';
-import { cameraPose, chasePose } from './render/firstPersonCamera';
+import { cameraPose, chasePose, eyePoint } from './render/firstPersonCamera';
 import { createExplorerView } from './render/explorerView';
 import { THIRD_PERSON_DISTANCE, easeDistance, thirdPersonPose } from './render/thirdPersonCamera';
 import { createBodyLightSwitch } from './game/bodyLightSwitch';
@@ -461,6 +462,9 @@ async function start(): Promise<void> {
   // V a pie alterna la tercera persona (cámara detrás del hombro, que no atraviesa paredes).
   let thirdPerson = false;
   let thirdDistance = THIRD_PERSON_DISTANCE;
+  // Los ojos del explorador: desde ahí se alcanzan fuentes, objetos y puzles. A pie en primera persona son la cámara; en
+  // tercera la cámara va unos metros detrás y quedaría fuera de alcance (sin botón de leer ni de coger).
+  const eyes = new Camera();
   // El agujero negro: nace a las 13:30 en la Sala del Motor de Cicatriz y viaja con ella.
   const chronology = looping ? loadChronology(window.location.search) : quietChronology();
   // A pie, la nave posada es un obstáculo más del mundo donde está; `ui` llega después (avisos del Contrapeso).
@@ -978,7 +982,7 @@ async function start(): Promise<void> {
   if (!startSources) throw new Error(`Faltan las fuentes de ${startWorld}`);
   // El ocular del telescopio del Observatorio (🟡): mira el cielo en vivo desde donde está el jugador.
   const ocularSource = createOcularSource({
-    eye: camera,
+    eye: eyes,
     star: sun,
     groupOf: (world) => systemScene.groupOf(world),
     radiusOf: (world) => runtimes.get(world)?.world.info.radius,
@@ -1080,6 +1084,7 @@ async function start(): Promise<void> {
   };
   const ui = createReadingUi({
     camera,
+    eye: eyes.position,
     sources: startSources,
     clues,
     reading,
@@ -1969,16 +1974,18 @@ async function start(): Promise<void> {
         recording: ui.listening,
       });
       camera.updateMatrixWorld();
+      if (thirdPerson && !awakening && !outside && !piloting) eyePoint(body, feet, eyes.position);
+      else eyes.position.copy(camera.position);
       counterweight?.update({ t, carrierRate: session.director.rate, piloting }, timeRuns ? dt : 0);
-      bells?.update(camera, t, timeRuns ? dt : 0);
-      depths?.update(camera, t);
-      bench?.update(camera);
+      bells?.update(eyes, t, timeRuns ? dt : 0);
+      depths?.update(eyes, t);
+      bench?.update(eyes);
       laboratory?.update(dt, performance.now() / 1000, session.activeEventIds);
       track?.update(dt, performance.now() / 1000, session.activeEventIds);
       skeptic?.update(dt, currentWorld.id, player.state.position);
       syncLoopSave();
       archivoPuzzles?.update(
-        camera,
+        eyes,
         timeRuns ? dt : 0,
         session.activeEventIds.includes('ranura_luz'),
       );

@@ -40,6 +40,11 @@ import { t } from '../i18n';
 
 export interface ReadingUiOptions {
   camera: PerspectiveCamera;
+  /**
+   * Los ojos del explorador, desde donde se alcanza una fuente (por defecto, la cámara). En tercera persona la cámara
+   * va unos metros detrás y quedaría fuera del alcance: la dirección sí es la de la cámara.
+   */
+  eye?: Vector3;
   /** Fuentes del mundo donde empieza el jugador. */
   sources: WorldSources;
   clues: Clues;
@@ -144,6 +149,7 @@ const TELEPORT_REACH = 0.9;
 
 export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   const { camera, clues, reading, loop, overlay, player, touch, actions } = options;
+  const eye = options.eye ?? camera.position;
   let current = options.sources;
 
   /**
@@ -398,7 +404,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
   function witnessEvents(): void {
     for (const event of current.eventSources) {
       if (!canGive(event.sourceId)) continue;
-      if (!insideRadius(camera.position, event.position, event.radius)) continue;
+      if (!insideRadius(eye, event.position, event.radius)) continue;
       const learned = reading.witness(event.sourceId, loop.activeEventIds);
       if (learned.length > 0)
         notice.show(
@@ -415,7 +421,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
       }
     }
     camera.getWorldDirection(forward);
-    return canInteract() ? nearestInteractable(camera.position, forward, available) : undefined;
+    return canInteract() ? nearestInteractable(eye, forward, available) : undefined;
   }
 
   function wantsMarker(id: string): boolean {
@@ -451,7 +457,7 @@ export function createReadingUi(options: ReadingUiOptions): ReadingUi {
         if (ambient !== undefined) prompt.show(verbLabel(ambient, touch));
         else prompt.hide();
       }
-      current.markers.update(timeSeconds, camera.position, wantsMarker);
+      current.markers.update(timeSeconds, eye, wantsMarker);
     },
     setWorld(sources) {
       if (sources === current) return;

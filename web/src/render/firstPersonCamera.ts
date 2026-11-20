@@ -13,6 +13,14 @@ export function clampPitch(pitch: number): number {
   return Math.min(MAX_PITCH, Math.max(-MAX_PITCH, pitch));
 }
 
+/**
+ * Dónde tiene los ojos el explorador: sobre los pies, a lo largo de su vertical. Es la cámara de primera persona y,
+ * en tercera, el punto desde el que se alcanzan las fuentes y los objetos (la cámara va unos metros detrás).
+ */
+export function eyePoint(body: Quaternion, feet: Vector3, out: Vector3): Vector3 {
+  return out.copy(feet).addScaledVector(upOf(body, up), EYE_HEIGHT);
+}
+
 /** Calcula posición y orientación de la cámara y las escribe en los objetivos. */
 export function cameraPose(
   body: Quaternion,
@@ -21,7 +29,7 @@ export function cameraPose(
   targetPosition: Vector3,
   targetQuaternion: Quaternion,
 ): void {
-  targetPosition.copy(feet).addScaledVector(upOf(body, up), EYE_HEIGHT);
+  eyePoint(body, feet, targetPosition);
   pitchRotation.setFromAxisAngle(PITCH_AXIS, pitch);
   targetQuaternion.copy(body).multiply(pitchRotation);
 }
