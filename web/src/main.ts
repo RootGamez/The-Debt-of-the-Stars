@@ -83,6 +83,7 @@ import { BLACK_HOLE } from './data/blackHole';
 import { isSoftwareRenderer, qualityFromQuery, sunShadowSizeFromQuery } from './core/quality';
 import { createSightScale } from './ui/sightScale';
 import { createFixedStep } from './core/fixedStep';
+import { createFrameJitter } from './core/frameJitter';
 import { IDLE_INTENT } from './core/inputController';
 import type { DeathCause } from './core/loopDirector';
 import { createLoopSession } from './core/loopSession';
@@ -1587,6 +1588,12 @@ async function start(): Promise<void> {
     new URLSearchParams(window.location.search).has('debug') ? { minFps: 0 } : {},
   );
 
+  // Con `?debug`, el panel F3 resume los tirones de cámara (ritmo de fotogramas, mirada y avance).
+  const jitterOn = new URLSearchParams(window.location.search).has('debug');
+  const jitter = createFrameJitter();
+  const lastCameraPosition = new Vector3();
+  let rawSeconds = 0;
+
   let awoke = false;
   // El modo tráiler (`?debug&trailer`) se crea cuando el bucle ya corre (src/trailer/trailerRig.ts).
   let trailer: TrailerRig | undefined;
@@ -2035,9 +2042,19 @@ async function start(): Promise<void> {
       sight.update();
       touch?.update();
       debug.update(dt, overlay.playing);
+      if (jitterOn) {
+        jitter.record({
+          seconds: rawSeconds,
+          lookPixels: Math.hypot(look.x, look.y),
+          moved: camera.position.distanceTo(lastCameraPosition),
+        });
+        lastCameraPosition.copy(camera.position);
+        debug.note(jitter.line());
+      }
       orbitMap?.update(dt);
     },
     (seconds) => {
+      rawSeconds = seconds;
       // Solo se mide jugando (la pausa y los paneles no cuentan) y nunca con `?debug` (las pruebas no deben cambiar).
       if (!overlay.playing || ui.blocking) return;
       if (governor.sample(seconds) && graphics.stepDown()) governor.reset();

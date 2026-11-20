@@ -211,6 +211,8 @@ const REFRESH_SECONDS = 0.25;
 
 export interface DebugOverlay {
   update(dt: number, playing: boolean): void;
+  /** Líneas extra para el panel (el registrador de tirones). */
+  note(text: string): void;
   dispose(): void;
 }
 
@@ -239,6 +241,7 @@ export function createDebugOverlay(sources: DebugSources): DebugOverlay {
   let elapsed = 0;
   let frames = 0;
   let fps = 0;
+  let extra = '';
 
   const onKey = (event: KeyboardEvent): void => {
     if (event.code !== 'F3') return;
@@ -286,6 +289,7 @@ export function createDebugOverlay(sources: DebugSources): DebugOverlay {
       `ritmo ${s.loop.rate.toFixed(2)} · eventos ${s.loop.events.join(', ') || '—'}`,
       `marco     ${s.system.reference ?? 'espacio abierto'}`,
       `registro ${s.registry.facts.length} hechos · ${s.registry.conclusions.join(' ') || '—'}`,
+      extra,
     ].join('\n');
   };
 
@@ -302,6 +306,9 @@ export function createDebugOverlay(sources: DebugSources): DebugOverlay {
       if (!exposed && panel.hidden) return;
       snapshot = takeSnapshot(playing);
       if (refresh && !panel.hidden) render(snapshot);
+    },
+    note(text) {
+      extra = text;
     },
     dispose() {
       window.removeEventListener('keydown', onKey);
