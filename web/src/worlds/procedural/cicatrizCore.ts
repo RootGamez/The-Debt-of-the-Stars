@@ -685,6 +685,9 @@ export function gate(
       opacity: 0.35,
       depthWrite: false,
       side: 2,
+      // Sus dos caras son del mismo color: mezcladas en cualquier orden dan lo mismo, así que basta una pasada
+      // (y three no busca programa dos veces cada fotograma).
+      forceSinglePass: true,
     }),
   );
   veil.name = `cicatriz_Velo_${name}`;

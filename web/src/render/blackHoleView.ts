@@ -87,6 +87,8 @@ export function createBlackHoleView(
   // alrededor con su anillo de Einstein y por el centro no deja ver nada.
   const hole = createWormholeSphere(RING_COLOR, { dark: true });
   const horizon = hole.root;
+  // El anillo y el disco son planos (cada píxel ve una sola cara): una pasada da lo mismo que dos y ahorra a three
+  // buscar programa dos veces por objeto en cada fotograma.
   const ring = new Mesh(
     new RingGeometry(0.985, 1.015, 96),
     new MeshBasicMaterial({
@@ -96,6 +98,7 @@ export function createBlackHoleView(
       blending: AdditiveBlending,
       depthWrite: false,
       side: DoubleSide,
+      forceSinglePass: true,
     }),
   );
   const disk = new Mesh(
@@ -105,6 +108,7 @@ export function createBlackHoleView(
       transparent: true,
       depthWrite: false,
       side: DoubleSide,
+      forceSinglePass: true,
     }),
   );
   disk.rotation.x = DISK_TILT;

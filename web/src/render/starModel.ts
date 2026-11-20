@@ -183,6 +183,8 @@ export function createStarView(spec: StarSpec, seed = 11): StarView {
   for (const shell of shells) object.add(shell);
 
   // Protuberancias: arcos de luz que se levantan del borde y laten (en las enanas rojas, más y más grandes).
+  // Una sola pasada por las dos caras: al sumar luz sin escribir profundidad el orden no cambia nada, y three
+  // no tiene que buscar programa dos veces por arco en cada fotograma (era la mitad de esas búsquedas).
   const arcMaterial = new MeshBasicMaterial({
     color: glow,
     transparent: true,
@@ -190,6 +192,7 @@ export function createStarView(spec: StarSpec, seed = 11): StarView {
     blending: AdditiveBlending,
     depthWrite: false,
     side: DoubleSide,
+    forceSinglePass: true,
     toneMapped: false,
   });
   const arcs = prominenceSites(PROMINENCE_COUNT[spec.kind], seed + 3).map((site, i) => {

@@ -123,12 +123,14 @@ export function createWaterEffects(random: () => number = Math.random): WaterEff
   const ripples: Ripple[] = Array.from({ length: MAX_RIPPLES }, () => {
     const mesh = new Mesh(
       ringGeometry,
+      // Anillo plano: una pasada da lo mismo que dos y three no busca programa dos veces por onda.
       new MeshBasicMaterial({
         color: 0xf2fbff,
         transparent: true,
         opacity: 0,
         depthWrite: false,
         side: DoubleSide,
+        forceSinglePass: true,
       }),
     );
     mesh.visible = false;

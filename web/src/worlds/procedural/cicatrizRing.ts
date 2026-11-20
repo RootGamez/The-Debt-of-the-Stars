@@ -130,6 +130,8 @@ export function ringDust(sun: Vector3, light: SkyLightColors): Group {
       blending: AdditiveBlending,
       transparent: true,
       side: DoubleSide,
+      // Plano: una pasada da lo mismo que dos y three no busca programa dos veces cada fotograma.
+      forceSinglePass: true,
       depthWrite: false,
     }),
   );
