@@ -27,17 +27,16 @@ function fakeRenderer() {
 }
 
 describe('warmUpShaders', () => {
-  it('compila también la variante para dibujar en una textura (el pase de fondo de los gusanos)', async () => {
+  it('compila solo para la pantalla (el fondo de los gusanos se pinta como ella)', async () => {
     const scene = new Scene();
     scene.add(new Group());
     const { renderer, compiledInto } = fakeRenderer();
 
     await warmUpShaders(renderer, scene, new PerspectiveCamera());
 
-    // Una pasada por cada parte, la escena entera en pantalla y, al final, la escena entera en una textura.
-    expect(compiledInto.length).toBeGreaterThanOrEqual(3);
-    expect(compiledInto.slice(0, -1).every((target) => target === null)).toBe(true);
-    expect(compiledInto.at(-1)).not.toBeNull();
+    // Una pasada por cada parte y la escena entera, siempre con la pantalla como destino.
+    expect(compiledInto.length).toBeGreaterThanOrEqual(2);
+    expect(compiledInto.every((target) => target === null)).toBe(true);
   });
 
   it('devuelve el destino de dibujo a como estaba y avisa del progreso hasta el final', async () => {
