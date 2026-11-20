@@ -49,7 +49,8 @@ test.afterEach(async ({ page }) => {
 test('the stable horizon pulls the ship in, and crossing it opens the Archive of the Gates', async ({
   page,
 }) => {
-  test.setTimeout(300_000);
+  // Instalar el Contrapeso (Laboratorio, Cicatriz y el pulso) y volar al horizonte: con WebGL por software, pasó de 5 min.
+  test.setTimeout(900_000);
   await installCounterweight(page);
   // El horizonte solo se cruza con el bucle cortado (E5: la fuente en el Contrapeso, que el escéptico te ayuda a dar).
   await page.evaluate(() => window.__esceptico?.cut());
@@ -68,9 +69,11 @@ test('the stable horizon pulls the ship in, and crossing it opens the Archive of
   await page.keyboard.down('KeyW');
   await page.waitForURL(/mundo=puertas/, { timeout: 120_000 });
   await page.keyboard.up('KeyW');
-  await expect.poll(async () => (await snapshot(page))?.world, { timeout: 20_000 }).toBe('puertas');
+  await expect
+    .poll(async () => (await snapshot(page))?.world, { timeout: 120_000 })
+    .toBe('puertas');
   expect((await snapshot(page))?.loop.loops).toBe(0); // no fue una muerte: no cuenta ciclo
-  await expect.poll(async () => (await snapshot(page))?.grounded, { timeout: 20_000 }).toBe(true);
+  await expect.poll(async () => (await snapshot(page))?.grounded, { timeout: 60_000 }).toBe(true);
   await expect(page.locator('.llegada')).toHaveCount(0);
 });
 
