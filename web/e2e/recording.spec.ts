@@ -58,8 +58,10 @@ test('a recording made with a fast clock is gibberish as is and clear at the rig
     timeout: 480_000,
   });
   await expect(page.locator('.recorder-status')).toHaveText('Entendida entera.');
-  const facts = (await snapshot(page))?.registry.facts ?? [];
-  expect(facts).toEqual(expect.arrayContaining(['lab.correccion', 'lab.existe_lugar_lento']));
+  // La foto de depuración se toma una vez por fotograma: se espera a la siguiente.
+  await expect
+    .poll(async () => (await snapshot(page))?.registry.facts ?? [])
+    .toEqual(expect.arrayContaining(['lab.correccion', 'lab.existe_lugar_lento']));
   await expect(page.locator('.recorder-line').first()).toHaveText(/^Si me entiendes/);
 });
 

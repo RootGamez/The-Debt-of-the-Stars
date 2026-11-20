@@ -4,6 +4,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { snapshot, startPlaying } from './helpers';
 
+// Con WebGL por software la carga sola se come casi el minuto que da la configuración.
+test.describe.configure({ timeout: 300_000 });
+
 async function open(page: Page, source: string): Promise<void> {
   expect(await page.evaluate((id) => window.__juego?.teleportTo?.(id) ?? false, source)).toBe(true);
   await expect(page.locator('.prompt')).toBeVisible();
@@ -11,6 +14,7 @@ async function open(page: Page, source: string): Promise<void> {
   await expect(page.locator('.puzzle')).toBeVisible();
 }
 
+/** El panel de depuración toma su foto una vez por fotograma: tras anotar algo, hay que esperarla (`expect.poll`). */
 async function facts(page: Page): Promise<string[]> {
   return (await snapshot(page))?.registry.facts ?? [];
 }
@@ -29,11 +33,12 @@ test('the notebook only notes its fact once the last hour of the Archivo is righ
   await page.locator('.puzzle-choice', { hasText: '10:00' }).click();
 
   await expect(page.locator('.puzzle-noted-title')).toHaveText('Anotado en el Registro');
-  expect(await facts(page)).toContain('deuda.relojes_se_separan');
+  await expect.poll(() => facts(page)).toContain('deuda.relojes_se_separan');
 });
 
 test('the letters of the Archivo fall into place in days of Umbral', async ({ page }) => {
-  test.setTimeout(180_000);
+  // Se teletransporta al Archivo, el mundo más pesado de dibujar: cada clic espera a un fotograma lento.
+  test.setTimeout(420_000);
   await startPlaying(page);
   await open(page, 'archivo.cartas');
   const check = page.getByRole('button', { name: 'Comprobar el orden' });
@@ -47,9 +52,9 @@ test('the letters of the Archivo fall into place in days of Umbral', async ({ pa
   await check.click();
 
   await expect(page.locator('.puzzle-noted-title')).toHaveText('Anotado en el Registro');
-  expect(await facts(page)).toEqual(
-    expect.arrayContaining(['bocas.relojes_distintos', 'silencio.borrado']),
-  );
+  await expect
+    .poll(() => facts(page))
+    .toEqual(expect.arrayContaining(['bocas.relojes_distintos', 'silencio.borrado']));
 });
 
 function choice(page: Page, name: string) {
@@ -71,7 +76,7 @@ test('the twins diaries teach that the lag grows with the days', async ({ page }
   await choice(page, 'Día 85').click();
 
   await expect(page.locator('.puzzle-noted-title')).toHaveText('Anotado en el Registro');
-  expect(await facts(page)).toContain('contrapeso.metodo_sincronia');
+  await expect.poll(() => facts(page)).toContain('contrapeso.metodo_sincronia');
 });
 
 /** "1:30" → 1,5 minutos. */
@@ -98,9 +103,9 @@ test('the console of the cabin runs the clocks live, and one races ahead', async
   await choice(page, 'Ruta 7 (sin nombre)').click();
 
   await expect(page.locator('.puzzle-noted-title')).toHaveText('Anotado en el Registro');
-  expect(await facts(page)).toEqual(
-    expect.arrayContaining(['lab.existe_lugar_lento', 'lab.correccion']),
-  );
+  await expect
+    .poll(() => facts(page))
+    .toEqual(expect.arrayContaining(['lab.existe_lugar_lento', 'lab.correccion']));
 });
 
 test('the blackboard of the Laboratorio adds up the route of the Counterweight', async ({
@@ -115,5 +120,5 @@ test('the blackboard of the Laboratorio adds up the route of the Counterweight',
   await choice(page, '59:36 adelantado').click();
 
   await expect(page.locator('.puzzle-noted-title')).toHaveText('Anotado en el Registro');
-  expect(await facts(page)).toContain('contrapeso.cuenta_sincronia');
+  await expect.poll(() => facts(page)).toContain('contrapeso.cuenta_sincronia');
 });
